@@ -22,9 +22,11 @@ Output ONLY the reference content below. Do NOT add:
 ## Quick Start
 
 1. `/gsd:new-project` - Initialize project with brief
-2. `/gsd:create-roadmap` - Create roadmap and phases
-3. `/gsd:plan-phase <number>` - Create detailed plan for first phase
-4. `/gsd:execute-plan <path>` - Execute the plan
+2. `/gsd:research-project` - (optional) Research domain ecosystem
+3. `/gsd:define-requirements` - Scope v1/v2/out of scope
+4. `/gsd:create-roadmap` - Create roadmap and phases
+5. `/gsd:plan-phase 1` - Create detailed plan for first phase
+6. `/gsd:execute-phase 1` - Execute with parallel agents
 
 ## Staying Updated
 
@@ -57,6 +59,24 @@ Initialize new project with brief and configuration.
 - Commits initialization files to git
 
 Usage: `/gsd:new-project`
+
+**`/gsd:research-project`**
+Research domain ecosystem before creating roadmap.
+
+- Spawns parallel agents to investigate stack, features, architecture, pitfalls
+- Creates `.planning/research/` with ecosystem knowledge
+- Recommended for best results; skip only if you need speed over thoroughness
+
+Usage: `/gsd:research-project`
+
+**`/gsd:define-requirements`**
+Define what "done" looks like with checkable requirements.
+
+- Scopes features as v1, v2, or out of scope
+- Works with or without prior research
+- Creates `.planning/REQUIREMENTS.md` with traceability
+
+Usage: `/gsd:define-requirements`
 
 **`/gsd:create-roadmap`**
 Create roadmap and state tracking for initialized project.
@@ -144,6 +164,35 @@ Options (via `.planning/config.json` parallelization section):
 - `skip_checkpoints`: Skip human checkpoints in background (default: true)
 - `min_plans_for_parallel`: Minimum plans to trigger parallelization (default: 2)
 
+### Verification
+
+**`/gsd:check-phase <number>`**
+Verify phase plans before execution (optional quality gate).
+
+- Spawns plan checker agent to analyze PLAN.md files
+- Checks requirement coverage, task completeness, dependencies
+- Use for complex phases before committing to execution
+
+Usage: `/gsd:check-phase 5`
+
+**`/gsd:verify-work [number]`**
+User acceptance testing of phase or plan.
+
+- Conversational UAT with persistent state
+- Verifies features work as expected from user perspective
+- Use after execution to validate before continuing
+
+Usage: `/gsd:verify-work 5`
+
+**`/gsd:audit-milestone [version]`**
+Audit milestone completion against original intent.
+
+- Reads phase VERIFICATION.md files and aggregates results
+- Spawns integration checker for cross-phase wiring
+- Creates MILESTONE-AUDIT.md with gaps and tech debt
+
+Usage: `/gsd:audit-milestone 1.0.0`
+
 ### Roadmap Management
 
 **`/gsd:add-phase <description>`**
@@ -205,6 +254,15 @@ Archive completed milestone and prepare for next version.
 - Prepares workspace for next version
 
 Usage: `/gsd:complete-milestone 1.0.0`
+
+**`/gsd:plan-milestone-gaps`**
+Create phases to close gaps identified by milestone audit.
+
+- Reads MILESTONE-AUDIT.md and groups gaps into logical phases
+- Prioritizes by requirement importance (must/should/nice)
+- Creates phase entries in ROADMAP.md automatically
+
+Usage: `/gsd:plan-milestone-gaps`
 
 ### Progress Tracking
 
@@ -295,6 +353,16 @@ See what's changed since your installed version.
 
 Usage: `/gsd:whats-new`
 
+**`/gsd:update`**
+Update GSD to latest version with changelog display.
+
+- Checks npm for latest version
+- Runs update if behind
+- Shows what changed between versions
+- Better UX than raw `npx get-shit-done-cc`
+
+Usage: `/gsd:update`
+
 ## Files & Structure
 
 ```
@@ -348,10 +416,12 @@ Change anytime by editing `.planning/config.json`
 **Starting a new project:**
 
 ```
-/gsd:new-project
-/gsd:create-roadmap
-/gsd:plan-phase 1
-/gsd:execute-plan .planning/phases/01-foundation/01-01-PLAN.md
+/gsd:new-project                 # Extract your idea through questions
+/gsd:research-project            # (recommended) Research domain ecosystem
+/gsd:define-requirements         # Scope v1/v2/out of scope
+/gsd:create-roadmap              # Create phases mapped to requirements
+/gsd:plan-phase 1                # Create detailed plan
+/gsd:execute-phase 1             # Execute with parallel agents
 ```
 
 **Resuming work after a break:**
@@ -360,19 +430,39 @@ Change anytime by editing `.planning/config.json`
 /gsd:progress  # See where you left off and continue
 ```
 
+**Verifying before execution (optional):**
+
+```
+/gsd:plan-phase 5
+/gsd:check-phase 5    # Verify plans before committing
+/gsd:execute-phase 5
+```
+
 **Adding urgent mid-milestone work:**
 
 ```
 /gsd:insert-phase 5 "Critical security fix"
 /gsd:plan-phase 5.1
-/gsd:execute-plan .planning/phases/05.1-critical-security-fix/05.1-01-PLAN.md
+/gsd:execute-phase 5.1
 ```
 
 **Completing a milestone:**
 
 ```
-/gsd:complete-milestone 1.0.0
-/gsd:new-project  # Start next milestone
+/gsd:audit-milestone 1.0.0       # Verify before completing
+/gsd:complete-milestone 1.0.0    # Archive and tag
+/gsd:discuss-milestone           # Gather context for next
+/gsd:new-milestone "v1.1 Features"
+```
+
+**Closing gaps from audit:**
+
+```
+/gsd:audit-milestone 1.0.0       # Finds gaps
+/gsd:plan-milestone-gaps         # Creates phases to fix them
+/gsd:plan-phase 6                # Plan first gap closure phase
+/gsd:execute-phase 6
+/gsd:audit-milestone 1.0.0       # Re-audit when done
 ```
 
 **Capturing ideas during work:**

@@ -9,7 +9,7 @@
 [![npm version](https://img.shields.io/npm/v/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
 [![npm downloads](https://img.shields.io/npm/dm/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/glittercowboy/get-shit-done?style=for-the-badge&logo=github&color=181717)](https://github.com/glittercowboy/get-shit-done)
+[![GitHub stars](https://img.shields.io/github/stars/rolandtolnay/gsd?style=for-the-badge&logo=github&color=181717)](https://github.com/rolandtolnay/gsd)
 
 <br>
 
@@ -82,10 +82,11 @@ That's it. Verify with `/gsd:help` inside your Claude Code interface.
 GSD evolves fast. Check for updates periodically:
 
 ```
-/gsd:whats-new
+/gsd:whats-new       # See what changed since your version
+/gsd:update          # Update and show changelog
 ```
 
-Update with:
+Or update directly via npm:
 
 ```bash
 npx get-shit-done-cc@latest
@@ -109,7 +110,7 @@ Use `--global` (`-g`) or `--local` (`-l`) to skip the interactive prompt.
 Clone the repository and run the installer locally:
 
 ```bash
-git clone https://github.com/glittercowboy/get-shit-done.git
+git clone https://github.com/rolandtolnay/gsd.git
 cd get-shit-done
 node bin/install.js --local
 ```
@@ -359,7 +360,7 @@ You're never locked in. The system adapts.
 |---------|--------------|
 | `/gsd:new-project` | Extract your idea through questions, create PROJECT.md |
 | `/gsd:research-project` | Research domain ecosystem (stacks, features, pitfalls) |
-| `/gsd:define-requirements` | Scope v1/v2/out-of-scope requirements |
+| `/gsd:define-requirements` | Scope v1/v2/out-of-scope with checkable requirements |
 | `/gsd:create-roadmap` | Create roadmap with phases mapped to requirements |
 | `/gsd:map-codebase` | Map existing codebase for brownfield projects |
 
@@ -376,7 +377,9 @@ You're never locked in. The system adapts.
 
 | Command | What it does |
 |---------|--------------|
+| `/gsd:check-phase [N]` | Verify phase plans before execution (optional) |
 | `/gsd:verify-work [N]` | User acceptance test of phase or plan ¹ |
+| `/gsd:audit-milestone [version]` | Audit milestone completion before archiving |
 
 ### Milestones
 
@@ -385,6 +388,7 @@ You're never locked in. The system adapts.
 | `/gsd:complete-milestone` | Ship it, prep next version |
 | `/gsd:discuss-milestone` | Gather context for next milestone |
 | `/gsd:new-milestone [name]` | Create new milestone with phases |
+| `/gsd:plan-milestone-gaps` | Create phases to close gaps from audit |
 
 ### Phase Management
 
@@ -412,6 +416,8 @@ You're never locked in. The system adapts.
 | `/gsd:check-todos [area]` | List pending todos, select one to work on |
 | `/gsd:debug [desc]` | Systematic debugging with persistent state |
 | `/gsd:help` | Show all commands and usage guide |
+| `/gsd:update` | Update GSD with changelog display |
+| `/gsd:whats-new` | See what changed since installed version |
 
 <sup>¹ Contributed by reddit user OracleGreyBeard</sup>
 
@@ -444,11 +450,11 @@ This ensures absolute paths are used instead of `~` which may not expand correct
 
 ## Star History
 
-<a href="https://star-history.com/#glittercowboy/get-shit-done&Date">
+<a href="https://star-history.com/#rolandtolnay/gsd&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=glittercowboy/get-shit-done&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=glittercowboy/get-shit-done&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=glittercowboy/get-shit-done&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/gsd&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/gsd&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=rolandtolnay/gsd&type=Date" />
  </picture>
 </a>
 

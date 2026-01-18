@@ -91,7 +91,7 @@ Capture output. If install fails, show error and STOP.
 Fetch changelog from GitHub:
 
 Use WebFetch tool with:
-- URL: `https://raw.githubusercontent.com/glittercowboy/get-shit-done/main/CHANGELOG.md`
+- URL: `https://raw.githubusercontent.com/rolandtolnay/gsd/main/CHANGELOG.md`
 - Prompt: "Extract all version entries with their dates and changes. Return the raw markdown for each version section."
 
 **If fetch fails:**
@@ -135,7 +135,7 @@ Format beautiful output:
 
 ⚠️  Restart Claude Code to pick up the new commands.
 
-[View full changelog](https://github.com/glittercowboy/get-shit-done/blob/main/CHANGELOG.md)
+[View full changelog](https://github.com/rolandtolnay/gsd/blob/main/CHANGELOG.md)
 ```
 
 **Key elements:**
