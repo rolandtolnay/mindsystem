@@ -70,10 +70,15 @@ Phase: $ARGUMENTS
      - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/gsd:plan-phase {X} --gaps`
 
-7. **Update roadmap and state**
+7. **Generate phase patch**
+   - Run: `~/.claude/get-shit-done/scripts/generate-phase-patch.sh ${PHASE_NUMBER}`
+   - Outputs to `.planning/phases/{phase_dir}/{phase}-changes.patch`
+   - Verify: patch file exists OR skip message logged
+
+8. **Update roadmap and state**
    - Update ROADMAP.md, STATE.md
 
-8. **Update requirements**
+9. **Update requirements**
    Mark phase requirements as Complete:
    - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
    - Read REQUIREMENTS.md traceability table
@@ -81,13 +86,13 @@ Phase: $ARGUMENTS
    - Write updated REQUIREMENTS.md
    - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-9. **Commit phase completion**
-   Bundle all phase metadata updates in one commit:
-   - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
-   - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
-   - Commit: `docs({phase}): complete {phase-name} phase`
+10. **Commit phase completion**
+    Bundle all phase metadata updates in one commit:
+    - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
+    - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
+    - Commit: `docs({phase}): complete {phase-name} phase`
 
-10. **Offer next steps**
+11. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 </process>
 
@@ -276,6 +281,7 @@ After all plans in phase complete (step 7):
 - [ ] Each plan has SUMMARY.md
 - [ ] Phase goal verified (must_haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
+- [ ] Patch file generated OR explicitly skipped with message
 - [ ] STATE.md reflects phase completion
 - [ ] ROADMAP.md updated
 - [ ] REQUIREMENTS.md updated (phase requirements marked Complete)

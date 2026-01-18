@@ -440,39 +440,33 @@ User stays in control at each decision point.
 </step>
 
 <step name="generate_phase_patch">
-Generate a patch file with all implementation changes from this phase, excluding `.planning/` documentation.
+Generate a patch file with all implementation changes from this phase.
 
-**Find phase commits:**
+**Run the patch generation script:**
 ```bash
-# Get commits matching ({phase}- pattern, e.g., "(01-"
-PHASE_COMMITS=$(git log --oneline | grep -E "\(${PHASE_NUMBER}-" | cut -d' ' -f1)
+~/.claude/get-shit-done/scripts/generate-phase-patch.sh ${PHASE_NUMBER}
 ```
 
-**Generate combined diff excluding .planning:**
+The script will:
+- Find all commits matching `({PHASE_NUMBER}-` pattern
+- Generate diff from base commit to HEAD
+- Exclude: `.planning`, generated files (Flutter, Next.js, TypeScript), build artifacts
+- Output to `.planning/phases/{phase_dir}/{PHASE_NUMBER}-changes.patch`
+- Skip with message if no phase commits or no implementation changes
+
+**Verify patch generation completed:**
 ```bash
-if [ -n "$PHASE_COMMITS" ]; then
-  # Get the parent of the earliest phase commit as the base
-  EARLIEST_COMMIT=$(echo "$PHASE_COMMITS" | tail -1)
-  BASE_COMMIT=$(git rev-parse "${EARLIEST_COMMIT}^" 2>/dev/null || git rev-list --max-parents=0 HEAD)
-
-  # Generate diff excluding .planning
-  git diff "$BASE_COMMIT" HEAD -- . ':!.planning' > "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch"
-
-  # Check if patch has content
-  if [ ! -s "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch" ]; then
-    rm "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch"
-    echo "No implementation changes outside .planning/ — patch skipped"
-  else
-    PATCH_LINES=$(wc -l < "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch")
-    echo "Generated ${PHASE_NUMBER}-${PHASE_NAME}-changes.patch ($PATCH_LINES lines)"
-  fi
+# Check for either: patch file exists OR skip was logged
+PATCH_FILE=$(ls "$PHASE_DIR"/${PHASE_NUMBER}-changes.patch 2>/dev/null)
+if [ -n "$PATCH_FILE" ]; then
+  echo "✓ Patch generated: $PATCH_FILE"
 else
-  echo "No phase commits found — patch skipped"
+  echo "✓ Patch skipped (no implementation changes)"
 fi
 ```
 
 **Note:** Patch is NOT committed — left for manual review. User can:
-- Review: `cat .planning/phases/{phase_dir}/{phase}-{name}-changes.patch`
+- Review: `cat .planning/phases/{phase_dir}/{phase}-changes.patch`
 - Apply elsewhere: `git apply {patch_file}`
 - Discard: `rm {patch_file}`
 </step>

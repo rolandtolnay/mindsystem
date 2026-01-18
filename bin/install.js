@@ -171,6 +171,18 @@ function install(isGlobal) {
     console.log(`  ${green}✓${reset} Installed agents`);
   }
 
+  // Copy scripts to ~/.claude/get-shit-done/scripts/
+  const scriptsSrc = path.join(src, 'scripts');
+  if (fs.existsSync(scriptsSrc)) {
+    const scriptsDest = path.join(claudeDir, 'get-shit-done', 'scripts');
+    fs.mkdirSync(scriptsDest, { recursive: true });
+    const scriptFiles = fs.readdirSync(scriptsSrc);
+    for (const file of scriptFiles) {
+      fs.copyFileSync(path.join(scriptsSrc, file), path.join(scriptsDest, file));
+    }
+    console.log(`  ${green}✓${reset} Installed scripts`);
+  }
+
   // Copy CHANGELOG.md
   const changelogSrc = path.join(src, 'CHANGELOG.md');
   const changelogDest = path.join(claudeDir, 'get-shit-done', 'CHANGELOG.md');

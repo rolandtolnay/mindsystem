@@ -25,8 +25,11 @@ GSD is distributed via `npx get-shit-done-cc`. During development, the user runs
 | `agents/` | Subagent definitions (copied to `~/.claude/agents/` on install) |
 | `commands/gsd/` | Slash commands (copied to `~/.claude/commands/gsd/` on install) |
 | `get-shit-done/` | Workflows, templates, references (copied to `~/.claude/get-shit-done/` on install) |
+| `scripts/` | Shell scripts (copied to `~/.claude/get-shit-done/scripts/` on install) |
 
 **Never write to `~/.claude/` directly.** Always modify files in this repository.
+
+**WARNING:** The `.claude/` directory in the repo root contains tracked project-specific files (settings, custom commands). Do NOT delete it when testing local installations with `npx . --local`. Use a different test directory or restore with `git restore .claude/` if accidentally deleted.
 
 ---
 
@@ -51,6 +54,8 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 5. `<success_criteria>` — Measurable completion checklist
 
 **Commands are thin wrappers.** Delegate detailed logic to workflows.
+
+**Keep command and workflow in sync.** When adding/removing steps in a workflow, update the corresponding command's `<process>` section to match. The command lists steps at a high level; the workflow contains the detailed implementation. Both must reflect the same steps.
 
 ### Workflows (`get-shit-done/workflows/*.md`)
 
