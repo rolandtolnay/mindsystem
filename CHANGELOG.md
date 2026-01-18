@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-01-18
+
+### Added
+- New `gsd-roadmapper` agent for roadmap creation with goal-backward success criteria
+- Roadmap approval gate — user reviews roadmap before commit
+- "What shipped" presentation in `/gsd:new-milestone` — shows previous accomplishments before asking what's next
+- Migration guide (MIGRATE-PROJECT-WORKFLOW.md)
+
+### Changed
+- `/gsd:create-roadmap` now spawns roadmapper agent instead of using workflow file
+
+### Removed
+- `workflows/create-roadmap.md` — logic moved to gsd-roadmapper agent
+
 ## [2.1.0] - 2026-01-18
 
 ### Added
@@ -769,7 +783,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.2.0
 [2.1.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.1.0
 [2.0.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.0.0
 [1.5.17]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.17
