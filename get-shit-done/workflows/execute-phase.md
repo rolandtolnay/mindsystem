@@ -495,21 +495,80 @@ git commit -m "docs(phase-{X}): complete phase execution"
 </step>
 
 <step name="offer_next">
-Present next steps based on milestone status:
+Present next steps based on milestone status and smart routing.
 
 **If more phases remain:**
-```
-## Next Up
 
-**Phase {X+1}: {Name}** — {Goal}
+1. **Parse next phase from ROADMAP.md:**
+   ```bash
+   # Get next phase details
+   grep -A 20 "### Phase ${NEXT_PHASE}:" .planning/ROADMAP.md
+   ```
 
-`/gsd:plan-phase {X+1}`
+   Extract: phase name, goal, `**Research**: Likely/Unlikely`, `**Plans**: N plans`
 
-<sub>`/clear` first for fresh context</sub>
-```
+2. **Check for existing context files:**
+   ```bash
+   CONTEXT_EXISTS=$(ls "$NEXT_PHASE_DIR"/*-CONTEXT.md 2>/dev/null | head -1)
+   RESEARCH_EXISTS=$(ls "$NEXT_PHASE_DIR"/*-RESEARCH.md 2>/dev/null | head -1)
+   ```
+
+3. **Determine primary suggestion (priority: Discussion > Research > Plan):**
+
+   **Discussion triggers** (only if no CONTEXT.md exists):
+   - User-facing keywords in goal/success criteria: UI, UX, dashboard, form, page, screen, modal, component, layout, design
+   - High complexity signals:
+     - Plans count >= 3 (from `**Plans**: X plans`)
+     - Architecture terms: algorithm, system, architecture, framework
+
+   **Research triggers** (only if no RESEARCH.md exists):
+   - `**Research**: Likely` in roadmap phase section
+
+   **Routing logic:**
+   ```
+   IF (user-facing keywords OR high-complexity) AND no CONTEXT.md:
+     PRIMARY = discuss-phase
+     REASON = "{detected signal} — clarify vision first"
+   ELSE IF Research: Likely AND no RESEARCH.md:
+     PRIMARY = research-phase
+     REASON = "Research: Likely — investigate approach"
+   ELSE:
+     PRIMARY = plan-phase
+     REASON = "Standard patterns — ready to plan"
+   ```
+
+4. **Output with reasoning:**
+
+   ```markdown
+   ---
+
+   ## ▶ Next Up
+
+   **Phase {X+1}: {Name}** — {Goal}
+   *Suggested: {reason}*
+
+   `/gsd:{primary} {X+1}`
+
+   <sub>`/clear` first → fresh context window</sub>
+
+   ---
+
+   **Also available:**
+   - `/gsd:{alt1} {X+1}` — {alt1_description}
+   - `/gsd:{alt2} {X+1}` — {alt2_description}
+
+   ---
+   ```
+
+   **Alternative descriptions:**
+   - discuss-phase: "clarify vision and scope"
+   - research-phase: "investigate implementation approach"
+   - plan-phase: "create execution plans directly"
+
+   Only list commands that are NOT the primary suggestion.
 
 **If milestone complete:**
-```
+```markdown
 MILESTONE COMPLETE!
 
 All {N} phases executed.
