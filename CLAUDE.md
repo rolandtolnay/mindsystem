@@ -1,4 +1,4 @@
-# GSD-STYLE.md
+# CLAUDE.md
 
 > **Comprehensive reference.** Core rules auto-load from `.claude/rules/`. This document provides deep explanations and examples for when you need the full picture.
 
@@ -11,6 +11,22 @@ GSD is a **meta-prompting system** where every file is both implementation and s
 - **Solo developer + Claude workflow** (no enterprise patterns)
 - **Context engineering** (manage Claude's context window deliberately)
 - **Plans as prompts** (PLAN.md files are executable, not documents to transform)
+
+---
+
+## Development Context
+
+**All changes happen in this repository.** Never modify user-scope files (`~/.claude/`).
+
+GSD is distributed via `npx get-shit-done-cc`. During development, the user runs `npx` which symlinks to this repository. Changes made here are immediately available for testing.
+
+| Location | Purpose |
+|----------|---------|
+| `agents/` | Subagent definitions (copied to `~/.claude/agents/` on install) |
+| `commands/gsd/` | Slash commands (copied to `~/.claude/commands/gsd/` on install) |
+| `get-shit-done/` | Workflows, templates, references (copied to `~/.claude/get-shit-done/` on install) |
+
+**Never write to `~/.claude/` directly.** Always modify files in this repository.
 
 ---
 
