@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-01-18
+
+### Added
+- Phase number continuation — new milestones continue phase numbering from existing phases
+- Thread-following questioning in `/gsd:discuss-milestone` — dig deeper before switching topics
+- Probe-for-edges questions — MVP vs complete, simplest version, constraints
+- Starting phase number in MILESTONE-CONTEXT.md output
+- Automatic git tagging and push in `/release` command
+
+### Changed
+- `/gsd:create-roadmap` calculates and passes `$START_PHASE` to gsd-roadmapper agent
+- `/gsd:new-milestone` shows next phase number in routing message
+- All 4 research prompts in `/gsd:research-project` have stronger subsequent milestone guidance
+
 ## [2.2.0] - 2026-01-18
 
 ### Added
@@ -783,7 +797,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.3.0
 [2.2.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.2.0
 [2.1.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.1.0
 [2.0.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.0.0
