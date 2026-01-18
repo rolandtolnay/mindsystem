@@ -4,6 +4,10 @@ Validate built features through conversational testing with persistent state. Cr
 User tests, Claude records. One test at a time. Plain text responses.
 </purpose>
 
+<execution_context>
+@~/.claude/get-shit-done/workflows/diagnose-issues.md
+</execution_context>
+
 <philosophy>
 **Show expected, ask if reality matches.**
 
@@ -312,43 +316,83 @@ All tests passed. Ready to continue.
 </step>
 
 <step name="diagnose_issues">
-**Diagnose root causes before planning fixes:**
+**Auto-diagnose root causes:**
 
 ```
----
-
 {N} issues found. Diagnosing root causes...
 
 Spawning parallel debug agents to investigate each issue.
 ```
 
-- Load diagnose-issues workflow
-- Follow @~/.claude/get-shit-done/workflows/diagnose-issues.md
-- Spawn parallel debug agents for each issue
-- Collect root causes
-- Update UAT.md with root causes
-- Proceed to `offer_gap_closure`
+Follow the diagnose-issues.md workflow:
+1. Parse gaps from UAT.md
+2. Spawn parallel gsd-debugger agents (one per gap)
+3. Collect root causes
+4. Update UAT.md gaps with diagnosis:
+   - root_cause: The diagnosed cause
+   - artifacts: Files involved
+   - missing: What needs to be added/fixed
+   - debug_session: Path to debug file
 
-Diagnosis runs automatically - no user prompt. Parallel agents investigate simultaneously, so overhead is minimal and fixes are more accurate.
+Commit updated UAT.md:
+```bash
+git add ".planning/phases/${PHASE_DIR}/${PHASE}-UAT.md"
+git commit -m "docs(${PHASE}): diagnose UAT gaps"
+```
+
+Proceed to update_state.
+</step>
+
+<step name="update_state">
+**Update STATE.md with blockers:**
+
+Add phase blockers to STATE.md:
+```markdown
+### Blockers
+
+| Phase | Issue | Root Cause | Severity |
+|-------|-------|------------|----------|
+| {phase} | {truth} | {root_cause} | {severity} |
+```
+
+Proceed to offer_gap_closure.
 </step>
 
 <step name="offer_gap_closure">
-**Offer next steps after diagnosis:**
+**Present diagnosis and next steps:**
 
 ```
----
-
 ## Diagnosis Complete
 
-| Gap | Root Cause |
-|-----|------------|
-| {truth 1} | {root_cause} |
-| {truth 2} | {root_cause} |
-...
+**Phase {X}: {Name}**
 
-Next steps:
-- `/gsd:plan-phase {phase} --gaps` — Create fix plans from diagnosed gaps
-- `/gsd:verify-work {phase}` — Re-test after fixes
+{N}/{M} tests passed
+{X} issues diagnosed
+
+### Diagnosed Gaps
+
+| Gap | Root Cause | Files |
+|-----|------------|-------|
+| {truth 1} | {root_cause} | {files} |
+| {truth 2} | {root_cause} | {files} |
+
+Debug sessions: .planning/debug/
+
+---
+
+## Next Up
+
+**Plan fixes** — create fix plans from diagnosed gaps
+
+`/gsd:plan-phase {phase} --gaps`
+
+`/clear` first for fresh context window
+
+---
+
+**Also available:**
+- `cat .planning/phases/{phase_dir}/{phase}-UAT.md` — review full diagnosis
+- `/gsd:debug {issue}` — investigate specific issue further
 ```
 </step>
 
@@ -396,5 +440,8 @@ Default to **major** if unclear. User can correct if needed.
 - [ ] Severity inferred from description (never asked)
 - [ ] Batched writes: on issue, every 5 passes, or completion
 - [ ] Committed on completion
-- [ ] Clear next steps based on results (plan-phase --gaps if issues)
+- [ ] If issues: parallel debug agents diagnose root causes
+- [ ] If issues: UAT.md updated with root_cause, artifacts, missing
+- [ ] If issues: STATE.md updated with phase blockers
+- [ ] Clear next steps: /gsd:plan-phase --gaps with diagnostic context
 </success_criteria>

@@ -175,25 +175,23 @@ git commit -m "docs({phase}): add root causes from diagnosis"
 | Reply button positioned correctly | CSS flex order incorrect | ReplyButton.tsx |
 | Delete removes comment | API missing auth header | api/comments.ts |
 
-Debug sessions saved to ${DEBUG_DIR}/
+Debug sessions: ${DEBUG_DIR}/
 
 ---
 
-Next steps:
-- `/gsd:plan-phase {phase} --gaps` — Create fix plans from diagnosed gaps
-- Review debug sessions for details
-```
-</step>
+## Next Up
 
-<step name="offer_next">
-**Offer gap closure:**
-
-```
-Root causes identified. Ready to plan fixes?
+**Plan fixes** — create fix plans from diagnosed gaps
 
 `/gsd:plan-phase {phase} --gaps`
 
-The fix plans will use diagnosed root causes for targeted fixes.
+`/clear` first for fresh context window
+
+---
+
+**Also available:**
+- Review debug sessions for detailed investigation
+- `/gsd:debug {issue}` — investigate specific issue further
 ```
 </step>
 

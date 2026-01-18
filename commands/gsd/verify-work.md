@@ -9,6 +9,7 @@ allowed-tools:
   - Grep
   - Edit
   - Write
+  - Task
 ---
 
 <objective>
@@ -16,12 +17,13 @@ Validate built features through conversational testing with persistent state.
 
 Purpose: Confirm what Claude built actually works from user's perspective. One test at a time, plain text responses, no interrogation.
 
-Output: {phase}-UAT.md tracking all test results, gaps logged for /gsd:plan-phase --gaps
+Output: {phase}-UAT.md tracking all test results. If issues found: diagnosed gaps with root causes ready for /gsd:plan-phase --gaps
 </objective>
 
 <execution_context>
 @~/.claude/get-shit-done/workflows/verify-work.md
 @~/.claude/get-shit-done/templates/UAT.md
+@~/.claude/get-shit-done/workflows/diagnose-issues.md
 </execution_context>
 
 <context>
@@ -43,7 +45,12 @@ Phase: $ARGUMENTS (optional)
    - Wait for plain text response
    - "yes/y/next" = pass, anything else = issue (severity inferred)
 6. Update UAT.md after each response
-7. On completion: commit, present summary, offer next steps
+7. On completion: commit, present summary
+8. If issues found:
+   - Spawn parallel debug agents to diagnose root causes
+   - Update UAT.md with diagnoses
+   - Update STATE.md with blockers
+   - Present next steps with `/gsd:plan-phase --gaps`
 </process>
 
 <anti_patterns>
@@ -51,7 +58,7 @@ Phase: $ARGUMENTS (optional)
 - Don't ask severity — infer from description
 - Don't present full checklist upfront — one test at a time
 - Don't run automated tests — this is manual user validation
-- Don't fix issues during testing — log as gaps for /gsd:plan-phase --gaps
+- Don't fix issues during testing — log as gaps, diagnose after all tests complete
 </anti_patterns>
 
 <success_criteria>
@@ -61,5 +68,8 @@ Phase: $ARGUMENTS (optional)
 - [ ] Severity inferred, never asked
 - [ ] Batched writes: on issue, every 5 passes, or completion
 - [ ] Committed on completion
-- [ ] Clear next steps based on results
+- [ ] If issues: parallel debug agents diagnose root causes
+- [ ] If issues: UAT.md updated with root_cause, artifacts, missing
+- [ ] If issues: STATE.md updated with phase blockers
+- [ ] Clear next steps: /gsd:plan-phase --gaps with diagnostic context
 </success_criteria>

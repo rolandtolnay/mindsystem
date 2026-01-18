@@ -329,6 +329,18 @@ Use subagents for autonomous work. Reserve main context for user interaction.
 
 ## UX Patterns
 
+### Simple, Conversational Style
+
+Prefer simple markdown formatting over decorative banners. Avoid:
+- Box-drawing characters (`━`, `═`, `╔`, `╚`)
+- ASCII art headers
+- Heavy visual separators
+
+Use instead:
+- Standard markdown headers (`##`, `###`)
+- Simple `---` dividers
+- Plain text with clear structure
+
 ### "Next Up" Format
 
 ```markdown
