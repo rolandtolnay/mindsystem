@@ -1,6 +1,6 @@
 ---
 name: release
-description: Auto-version based on commits, update changelog, and release
+description: Auto-version based on commits, update changelog, tag, and push release
 arguments: "[major|minor|patch|X.Y.Z]"
 allowed-tools:
   - Read
@@ -12,7 +12,7 @@ allowed-tools:
 ---
 
 <objective>
-Analyze changes since last release, determine version bump (or use explicit version), update CHANGELOG.md, and create release commits.
+Analyze changes since last release, determine version bump (or use explicit version), update CHANGELOG.md, create release commits, tag the version, and push to remote.
 
 **SemVer rules applied:**
 - `major` — Breaking changes (BREAKING CHANGE in commit, or explicit)
@@ -168,16 +168,32 @@ git commit -m "$VERSION"
 ```
 </step>
 
+<step name="create_tag">
+Create annotated git tag for the release:
+
+```bash
+git tag -a "v$VERSION" -m "Release v$VERSION"
+```
+</step>
+
+<step name="push_to_remote">
+Push commits and tag to remote:
+
+```bash
+git push origin HEAD
+git push origin "v$VERSION"
+```
+</step>
+
 <step name="show_summary">
 Display release summary:
 
 ```bash
 echo "=== Release $VERSION complete ==="
 echo ""
-git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo "$CURRENT")..HEAD
+git log --oneline $(git describe --tags --abbrev=0~1 2>/dev/null || echo "HEAD~5")..HEAD
 echo ""
-echo "To push: git push origin HEAD"
-echo "To tag: git tag v$VERSION && git push origin v$VERSION"
+echo "Tag: v$VERSION"
 echo "To publish: npm publish"
 ```
 </step>
