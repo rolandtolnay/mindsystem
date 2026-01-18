@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-01-18
+
+### Added
+- Phase patch file generation — after phase verification, a `{phase}-{name}-changes.patch` file is created with all implementation changes (excluding `.planning/` docs), left uncommitted for manual review
+
 ## [2.4.0] - 2026-01-18
 
 ### Added
@@ -810,7 +815,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.0
 [2.4.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.4.0
 [2.3.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.3.0
 [2.2.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.2.0
