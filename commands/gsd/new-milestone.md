@@ -43,7 +43,38 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Read STATE.md (pending todos, blockers)
    - Check for MILESTONE-CONTEXT.md (from /gsd:discuss-milestone)
 
-2. **Gather milestone goals:**
+2. **Present what shipped (if MILESTONES.md exists):**
+
+   ```bash
+   cat .planning/MILESTONES.md 2>/dev/null
+   ```
+
+   Format the presentation:
+
+   ```
+   ---
+
+   ## Previous Milestone
+
+   **Last milestone:** v[X.Y] [Name] (shipped [DATE])
+
+   **Key accomplishments:**
+   - [From MILESTONES.md accomplishments]
+   - [From MILESTONES.md accomplishments]
+   - [From MILESTONES.md accomplishments]
+
+   **Validated requirements:**
+   - [From PROJECT.md Validated section]
+
+   **Pending todos (if any):**
+   - [From STATE.md accumulated context]
+
+   ---
+   ```
+
+   This gives users context before asking what they want to build next.
+
+3. **Gather milestone goals:**
 
    **If MILESTONE-CONTEXT.md exists:**
    - Use features and scope from discuss-milestone
@@ -55,12 +86,12 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Use AskUserQuestion to explore features
    - Probe for priorities, constraints, scope
 
-3. **Determine milestone version:**
+4. **Determine milestone version:**
    - Parse last version from MILESTONES.md
    - Suggest next version (v1.0 → v1.1, or v2.0 for major)
    - Confirm with user
 
-4. **Update PROJECT.md:**
+5. **Update PROJECT.md:**
 
    Add/update these sections:
 
@@ -79,7 +110,7 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
    Update "Last updated" footer.
 
-5. **Update STATE.md:**
+6. **Update STATE.md:**
 
    ```markdown
    ## Current Position
@@ -90,16 +121,16 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    Last activity: [today] — Milestone v[X.Y] started
    ```
 
-6. **Cleanup:**
+7. **Cleanup:**
    - Delete MILESTONE-CONTEXT.md if exists (consumed)
 
-7. **Git commit:**
+8. **Git commit:**
    ```bash
    git add .planning/PROJECT.md .planning/STATE.md
    git commit -m "docs: start milestone v[X.Y] [Name]"
    ```
 
-8. **Route to next step:**
+9. **Route to next step:**
 
    ```
    Milestone v[X.Y] [Name] initialized.
