@@ -6,6 +6,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-01-18
+
+### Added
+- Auto-diagnosis in `/gsd:verify-work` — when UAT finds issues, parallel debug agents now investigate root causes automatically
+- STATE.md blockers — diagnosed issues are tracked as phase blockers
+- Migration documentation (MIGRATE-VERIFY-WORK-DIAGNOSIS.md, MIGRATE-PROJECT-CLEANUP.md, MIGRATE-SESSION-MANAGEMENT.md)
+- UX guidance in CLAUDE.md — prefer simple markdown formatting over decorative banners
+
+### Changed
+- `/gsd:verify-work` now spawns `gsd-debugger` agents to diagnose each gap before presenting `/gsd:plan-phase --gaps`
+- UAT.md gap format now includes `root_cause`, `artifacts`, `missing`, and `debug_session` fields
+- Updated help.md and README.md with all 30 commands and corrected GitHub URLs (rolandtolnay/gsd)
+
 ## [2.3.0] - 2026-01-18
 
 ### Added
@@ -797,7 +810,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.4.0
 [2.3.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.3.0
 [2.2.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.2.0
 [2.1.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.1.0
