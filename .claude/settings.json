@@ -1,0 +1,61 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(date:*)",
+      "Bash(echo:*)",
+      "Bash(eza:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(rg:*)",
+      "Bash(sort:*)",
+      "Bash(source:*)",
+      "Bash(tail:*)",
+      "Bash(tr:*)",
+      "Bash(wc:*)",
+
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git diff:*)",
+      "Bash(git diff-tree:*)",
+      "Bash(git log:*)",
+      "Bash(git push:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git status:*)",
+      "Bash(git tag:*)",
+      "Bash(gh pr:*)",
+
+      "Bash(fvm dart:*)",
+      "Bash(fvm dart fix:*)",
+      "Bash(fvm dart format:*)",
+      "Bash(fvm dart run easy_localization:generate:*)",
+      "Bash(fvm flutter:*)",
+      "Bash(fvm flutter analyze:*)",
+      "Bash(fvm flutter pub run:*)",
+      "Bash(fvm flutter pub run build_runner build:*)",
+
+      "Bash(./gradlew:*)",
+      "Bash(adb shell:*)",
+      "Bash(claude mcp)",
+      "Bash(claude mcp:*)",
+      "Bash(cursor:*)",
+
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pub.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+
+      "mcp__ide__getDiagnostics",
+      "mcp__plugin_perplexity_perplexity__perplexity_ask",
+      "mcp__plugin_perplexity_perplexity__perplexity_search"
+    ],
+    "deny": []
+  }
+}
