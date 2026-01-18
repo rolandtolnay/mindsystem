@@ -769,9 +769,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/glittercowboy/get-shit-done/compare/v2.1.0...HEAD
-[2.1.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v2.1.0
-[2.0.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v2.0.0
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.1.0
+[2.0.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.0.0
 [1.5.17]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.17
 [1.5.16]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.16
 [1.5.15]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.15

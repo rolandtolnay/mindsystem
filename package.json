@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/glittercowboy/get-shit-done.git"
+    "url": "git+https://github.com/rolandtolnay/gsd.git"
   },
   "engines": {
     "node": ">=16.7.0"
