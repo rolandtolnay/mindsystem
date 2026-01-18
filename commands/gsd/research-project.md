@@ -230,53 +230,48 @@ Use template: ~/.claude/get-shit-done/templates/research-project/PITFALLS.md
 
 **Announce:** "Spawning 4 research agents... may take 2-3 minutes."
 
-## 6. Synthesize Results
+## 6. Wait for Completion and Synthesize
 
-After all agents complete, read their outputs and write `.planning/research/SUMMARY.md`:
-- Read template: `~/.claude/get-shit-done/templates/research-project/SUMMARY.md`
-- Synthesize executive summary from all 4 files
-- Add confidence assessment
-
-**Critical: Include "Implications for Roadmap" section:**
-
-```markdown
-## Implications for Roadmap
-
-Based on research, suggested phase structure:
-
-1. **[Phase name]** — [rationale from research]
-   - Addresses: [features from FEATURES.md]
-   - Avoids: [pitfall from PITFALLS.md]
-   - Uses: [stack element from STACK.md]
-
-2. **[Phase name]** — [rationale from research]
-   - Implements: [architecture component from ARCHITECTURE.md]
-   ...
-
-**Phase ordering rationale:**
-- [Why this order based on dependencies discovered in ARCHITECTURE.md]
-- [Why this grouping based on PITFALLS.md prevention strategies]
-
-**Research flags for phases:**
-- Phase [X]: Likely needs deeper research (reason)
-- Phase [Y]: Standard patterns, unlikely to need research
-```
-
-This section directly feeds into `/gsd:create-roadmap`.
-
-## 7. Commit Research
+After all 4 agents return:
 
 ```bash
-git add .planning/research/
-git commit -m "docs: research [domain] ecosystem
-
-Key findings:
-- Stack: [one-liner]
-- Architecture: [one-liner]
-- Critical pitfall: [one-liner]"
+# Verify all research files exist
+ls .planning/research/STACK.md .planning/research/FEATURES.md \
+   .planning/research/ARCHITECTURE.md .planning/research/PITFALLS.md
 ```
 
-## 8. Present Results
+**If any missing:** Report which agent failed, offer to retry.
+
+**If all present:** Spawn synthesizer:
+
+```
+Task(
+  prompt="
+Synthesize research outputs into SUMMARY.md.
+
+Read all 4 files in .planning/research/:
+- STACK.md
+- FEATURES.md
+- ARCHITECTURE.md
+- PITFALLS.md
+
+Create SUMMARY.md with:
+- Executive summary (2-3 paragraphs)
+- Key findings from each file
+- Roadmap implications (suggested phase structure)
+- Confidence assessment
+- Gaps to address
+
+Then commit ALL research files together:
+git add .planning/research/
+git commit -m 'docs: complete [domain] project research'
+",
+  subagent_type="gsd-research-synthesizer",
+  description="Synthesize research"
+)
+```
+
+## 7. Present Results
 
 ```
 Research complete:
@@ -301,7 +296,7 @@ Key findings:
 - [ ] PROJECT.md validated
 - [ ] Domain identified and approved
 - [ ] 4 gsd-researcher agents spawned in parallel
-- [ ] All research files created
-- [ ] SUMMARY.md synthesized with roadmap implications
-- [ ] Research committed
+- [ ] All 4 research files created (STACK, FEATURES, ARCHITECTURE, PITFALLS)
+- [ ] gsd-research-synthesizer spawned to create SUMMARY.md
+- [ ] All research files committed atomically by synthesizer
 </success_criteria>

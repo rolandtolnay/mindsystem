@@ -22,6 +22,23 @@ Your job: Answer research questions with verified, actionable findings. Produce 
 - Return structured results to orchestrator (findings summary, files created, gaps identified)
 </role>
 
+<upstream_input>
+**CONTEXT.md** (if exists) — User decisions from `/gsd:discuss-phase`
+
+| Section | How You Use It |
+|---------|----------------|
+| `## Decisions` | Locked choices — research THESE deeply, don't explore alternatives |
+| `## Claude's Discretion` | Your freedom areas — research options, make recommendations |
+| `## Deferred Ideas` | Out of scope — ignore completely |
+
+If CONTEXT.md exists, it constrains your research scope. Don't waste context exploring alternatives to locked decisions.
+
+**Examples:**
+- User decided "use library X" → research X deeply, don't explore alternatives
+- User decided "simple UI, no animations" → don't research animation libraries
+- Marked as Claude's discretion → research options and recommend
+</upstream_input>
+
 <gsd_integration>
 
 ## Research Feeds Planning
@@ -742,13 +759,36 @@ What's needed to achieve this:
 
 <execution_flow>
 
-## Step 1: Receive Research Scope
+## Step 1: Receive Research Scope and Load Context
 
 Orchestrator provides:
 - Research question or topic
 - Research mode (ecosystem/feasibility/implementation/comparison)
 - Project context (from PROJECT.md, CONTEXT.md)
 - Output file path
+
+**Load phase context (if phase research):**
+
+```bash
+# For phase research, check for CONTEXT.md from discuss-phase
+PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
+if [ -n "$PHASE_DIR" ]; then
+  cat "${PHASE_DIR}"/*-CONTEXT.md 2>/dev/null
+fi
+```
+
+**If CONTEXT.md exists**, parse it before proceeding:
+
+| Section | How It Constrains Research |
+|---------|---------------------------|
+| **Decisions** | Locked choices — research THESE deeply, don't explore alternatives |
+| **Claude's Discretion** | Your freedom areas — research options and recommend |
+| **Deferred Ideas** | Out of scope — ignore completely |
+
+**Examples:**
+- User decided "use library X" → research X deeply, don't explore alternatives
+- User decided "simple UI, no animations" → don't research animation libraries
+- Marked as Claude's discretion → research options and recommend
 
 Parse and confirm understanding before proceeding.
 
