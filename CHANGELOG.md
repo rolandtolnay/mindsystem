@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-01-18
+
+### Changed
+- Phase patch generation externalized to shell script — execute-phase now calls `scripts/generate-phase-patch.sh` instead of inline bash, improving maintainability and making the patch generation logic reusable
+
 ## [2.5.1] - 2026-01-18
 
 ### Added
@@ -820,7 +825,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.5.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.6.0...HEAD
+[2.6.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.6.0
 [2.5.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.1
 [2.5.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.0
 [2.4.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.4.0
