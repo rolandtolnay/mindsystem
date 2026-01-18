@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-01-18
+
+### Added
+- Smart routing for "Next Up" suggestion — after phase execution, suggests discuss/research/plan based on roadmap analysis (user-facing keywords, complexity signals, Research: Likely flag)
+
 ## [2.5.0] - 2026-01-18
 
 ### Added
@@ -815,7 +820,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.5.1...HEAD
+[2.5.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.1
 [2.5.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.0
 [2.4.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.4.0
 [2.3.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.3.0
