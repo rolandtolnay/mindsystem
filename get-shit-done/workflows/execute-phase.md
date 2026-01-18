@@ -439,6 +439,44 @@ User runs `/gsd:plan-phase {X} --gaps` which:
 User stays in control at each decision point.
 </step>
 
+<step name="generate_phase_patch">
+Generate a patch file with all implementation changes from this phase, excluding `.planning/` documentation.
+
+**Find phase commits:**
+```bash
+# Get commits matching ({phase}- pattern, e.g., "(01-"
+PHASE_COMMITS=$(git log --oneline | grep -E "\(${PHASE_NUMBER}-" | cut -d' ' -f1)
+```
+
+**Generate combined diff excluding .planning:**
+```bash
+if [ -n "$PHASE_COMMITS" ]; then
+  # Get the parent of the earliest phase commit as the base
+  EARLIEST_COMMIT=$(echo "$PHASE_COMMITS" | tail -1)
+  BASE_COMMIT=$(git rev-parse "${EARLIEST_COMMIT}^" 2>/dev/null || git rev-list --max-parents=0 HEAD)
+
+  # Generate diff excluding .planning
+  git diff "$BASE_COMMIT" HEAD -- . ':!.planning' > "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch"
+
+  # Check if patch has content
+  if [ ! -s "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch" ]; then
+    rm "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch"
+    echo "No implementation changes outside .planning/ — patch skipped"
+  else
+    PATCH_LINES=$(wc -l < "$PHASE_DIR/${PHASE_NUMBER}-${PHASE_NAME}-changes.patch")
+    echo "Generated ${PHASE_NUMBER}-${PHASE_NAME}-changes.patch ($PATCH_LINES lines)"
+  fi
+else
+  echo "No phase commits found — patch skipped"
+fi
+```
+
+**Note:** Patch is NOT committed — left for manual review. User can:
+- Review: `cat .planning/phases/{phase_dir}/{phase}-{name}-changes.patch`
+- Apply elsewhere: `git apply {patch_file}`
+- Discard: `rm {patch_file}`
+</step>
+
 <step name="update_roadmap">
 Update ROADMAP.md to reflect phase completion:
 
