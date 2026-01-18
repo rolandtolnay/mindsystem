@@ -6,6 +6,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-01-18
+
+### Added
+- New `gsd-research-synthesizer` agent for atomic commits and unified summaries in project research
+- CONTEXT.md integration in `gsd-researcher` — researchers now respect locked decisions from discuss-phase
+- Migration guides (HYBRID-SETUP.md, MIGRATE-RESEARCH-FEATURES.md)
+- Project-level Claude settings (.claude/settings.json)
+
+### Changed
+- `/gsd:research-project` now spawns synthesizer agent instead of orchestrator synthesis
+
+## [2.0.0] - 2026-01-18
+
+### Added
+- Fork initialization with project-scoped `/release` command
+- `/gsd:check-phase` command for on-demand plan verification
+- `gsd-plan-checker` agent for goal-backward plan verification
+
+### Changed
+- Consolidated GSD-STYLE.md into CLAUDE.md
+
 ## [1.5.17] - 2026-01-15
 
 ### Added
@@ -748,7 +769,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/glittercowboy/get-shit-done/compare/v1.5.17...HEAD
+[Unreleased]: https://github.com/glittercowboy/get-shit-done/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v2.1.0
+[2.0.0]: https://github.com/glittercowboy/get-shit-done/releases/tag/v2.0.0
 [1.5.17]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.17
 [1.5.16]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.16
 [1.5.15]: https://github.com/glittercowboy/get-shit-done/releases/tag/v1.5.15
