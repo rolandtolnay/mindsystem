@@ -68,6 +68,23 @@ If "Replace": Continue
 </step>
 
 <step name="spawn_roadmapper">
+**Calculate starting phase number:**
+
+```bash
+# Find highest existing phase number
+LAST_PHASE=$(ls -d .planning/phases/[0-9]*-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+' | head -1)
+
+if [ -n "$LAST_PHASE" ]; then
+  # Remove leading zeros for arithmetic
+  LAST_NUM=$((10#$LAST_PHASE))
+  START_PHASE=$((LAST_NUM + 1))
+  echo "Existing phases found. New phases will start at: $START_PHASE"
+else
+  START_PHASE=1
+  echo "No existing phases. Starting at Phase 1"
+fi
+```
+
 Spawn gsd-roadmapper agent with full context:
 
 ```
@@ -82,6 +99,8 @@ Task(
 **Requirements:**
 @.planning/REQUIREMENTS.md
 
+**Starting phase number:** $START_PHASE
+
 **Research (if exists):**
 @.planning/research/SUMMARY.md
 
@@ -93,11 +112,12 @@ Task(
 <instructions>
 Create roadmap:
 1. Derive phases from requirements (don't impose structure)
-2. Map every v1 requirement to exactly one phase
-3. Derive 2-5 success criteria per phase (observable user behaviors)
-4. Validate 100% coverage
-5. Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)
-6. Return ROADMAP CREATED with summary
+2. **Start phase numbering at $START_PHASE** (not 1, unless this is the first milestone)
+3. Map every v1 requirement to exactly one phase
+4. Derive 2-5 success criteria per phase (observable user behaviors)
+5. Validate 100% coverage
+6. Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)
+7. Return ROADMAP CREATED with summary
 
 Write files first, then return. This ensures artifacts persist even if context is lost.
 </instructions>

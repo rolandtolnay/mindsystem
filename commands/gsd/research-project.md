@@ -79,8 +79,18 @@ Project Research — Stack dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-Greenfield: Research the standard stack for building [domain] from scratch.
-Subsequent: Research what's needed to add [target features] to an existing [domain] app. Don't re-research the existing system.
+**Greenfield (v1.0):**
+Research the standard stack for building [domain] from scratch. Full ecosystem investigation.
+
+**Subsequent (v1.1+):**
+Research what's needed to add [target features] to an existing [domain] app.
+
+IMPORTANT for subsequent milestones:
+- DON'T re-research the existing system (validated requirements already work)
+- DON'T question established stack choices (they're proven)
+- DO research new libraries/patterns needed for [target features] specifically
+- DO investigate how [target features] integrate with the existing architecture
+- DO surface any compatibility concerns with current stack
 </milestone_context>
 
 <question>
@@ -118,8 +128,17 @@ Project Research — Features dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-Greenfield: What features do [domain] products have? What's table stakes vs differentiating?
-Subsequent: How do [target features] typically work? What's expected behavior?
+**Greenfield (v1.0):**
+What features do [domain] products have? What's table stakes vs differentiating?
+
+**Subsequent (v1.1+):**
+How do [target features] typically work? What's expected behavior?
+
+IMPORTANT for subsequent milestones:
+- Focus ONLY on [target features] - the new capabilities being added
+- DON'T list features the system already has (see Validated requirements)
+- DO research user expectations for [target features] specifically
+- DO identify table stakes vs differentiators within [target features] scope
 </milestone_context>
 
 <question>
@@ -157,8 +176,17 @@ Project Research — Architecture dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-Greenfield: How are [domain] systems typically structured? What are major components?
-Subsequent: How do [target features] integrate with existing [domain] architecture?
+**Greenfield (v1.0):**
+How are [domain] systems typically structured? What are major components?
+
+**Subsequent (v1.1+):**
+How do [target features] integrate with existing [domain] architecture?
+
+IMPORTANT for subsequent milestones:
+- The existing architecture is KNOWN (from previous milestones)
+- Research how [target features] should connect to existing components
+- Identify which existing components need modification vs new components needed
+- Surface any architectural concerns (scaling, coupling, migration)
 </milestone_context>
 
 <question>
@@ -196,8 +224,17 @@ Project Research — Pitfalls dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-Greenfield: What do [domain] projects commonly get wrong? Critical mistakes?
-Subsequent: What are common mistakes when adding [target features] to [domain]?
+**Greenfield (v1.0):**
+What do [domain] projects commonly get wrong? Critical mistakes?
+
+**Subsequent (v1.1+):**
+What are common mistakes when adding [target features] to [domain]?
+
+IMPORTANT for subsequent milestones:
+- Focus on integration pitfalls, not greenfield mistakes
+- Research upgrade/migration pitfalls (existing users, data migration)
+- Identify feature interaction bugs (new features breaking existing ones)
+- Surface performance concerns when [target features] are added to existing load
 </milestone_context>
 
 <question>

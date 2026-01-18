@@ -60,14 +60,32 @@ Check for inputs:
 - Known gaps or pain points from usage
 - User's ideas for what's next
 
-**1. Open:**
+**1. Open with context-aware options:**
 
 Use AskUserQuestion:
 - header: "Next"
 - question: "What do you want to add, improve, or fix in this milestone?"
 - options: [Pending todos from STATE.md if any] + ["New features", "Improvements to existing", "Bug fixes", "Let me describe"]
 
-**2. Explore features:**
+**2. Follow the thread (don't switch topics):**
+
+Based on their response, dig deeper into THAT topic before moving on:
+
+| They said | Follow-up |
+|-----------|-----------|
+| Named a feature | "What should [feature] do? What's the core behavior?" |
+| "New features" | "What capability is missing? What would users do with it?" |
+| "Improvements" | "Which existing feature needs improvement? What's the friction?" |
+| "Bug fixes" | "What's broken? How does it manifest?" |
+
+**3. Probe for edges:**
+
+Once you understand the feature, probe:
+- "What's the simplest version of this that would be useful?"
+- "What would make this feel complete vs MVP?"
+- "Any constraints I should know about?"
+
+**4. Explore features:**
 
 Based on their response, use AskUserQuestion:
 
@@ -86,7 +104,7 @@ If they're not sure:
 - question: "What's been frustrating or missing?"
 - options: [Pending todos from STATE.md + pain point categories + "Let me think about it"]
 
-**3. Prioritize:**
+**5. Prioritize:**
 
 Use AskUserQuestion:
 - header: "Priority"
@@ -107,7 +125,7 @@ Based on what you described:
 **Theme suggestion:** v[X.Y] [Name]
 ```
 
-**4. Decision gate:**
+**6. Decision gate:**
 
 Use AskUserQuestion:
 - header: "Ready?"
@@ -129,12 +147,27 @@ Write milestone context to file for handoff.
 
 Use template from ~/.claude/get-shit-done/templates/milestone-context.md
 
+**Calculate next phase number:**
+
+```bash
+# Find highest existing phase number
+LAST_PHASE=$(ls -d .planning/phases/[0-9]*-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+' | head -1)
+
+if [ -n "$LAST_PHASE" ]; then
+  NEXT_PHASE=$((10#$LAST_PHASE + 1))
+else
+  NEXT_PHASE=1
+fi
+echo "Next phase number: $NEXT_PHASE"
+```
+
 Populate with:
 - Features identified during discussion
 - Suggested milestone name and theme
 - Estimated phase count
 - How features map to phases
 - Any constraints or scope boundaries mentioned
+- **Starting phase number** (calculated above)
 
 ```bash
 # Write the context file
@@ -162,6 +195,12 @@ cat > .planning/MILESTONE-CONTEXT.md << 'EOF'
 
 </scope>
 
+<starting_phase>
+## Starting Phase
+
+Next phase number: $NEXT_PHASE (calculated from existing phases)
+
+</starting_phase>
 
 <constraints>
 ## Constraints

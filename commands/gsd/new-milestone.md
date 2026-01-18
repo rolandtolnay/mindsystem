@@ -130,12 +130,25 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    git commit -m "docs: start milestone v[X.Y] [Name]"
    ```
 
-9. **Route to next step:**
+9. **Calculate next phase for context:**
+
+   ```bash
+   LAST_PHASE=$(ls -d .planning/phases/[0-9]*-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+' | head -1)
+   if [ -n "$LAST_PHASE" ]; then
+     NEXT_PHASE=$((10#$LAST_PHASE + 1))
+   else
+     NEXT_PHASE=1
+   fi
+   echo "Next milestone phases will start at: Phase $NEXT_PHASE"
+   ```
+
+10. **Route to next step:**
 
    ```
    Milestone v[X.Y] [Name] initialized.
 
    PROJECT.md updated with new goals.
+   Phases will start at: Phase $NEXT_PHASE
 
    ---
 
