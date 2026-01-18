@@ -2,9 +2,11 @@ node_modules/
 package-lock.json
 .DS_Store
 TO-DOS.md
-CLAUDE.md
-.planning
+.planning/
 /research.claude/
 
-# Local test installs
-.claude/
+# Local Claude settings (not commands)
+.claude/settings.local.json
+
+# Personal notes
+HYBRID-SETUP.md
