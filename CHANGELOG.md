@@ -6,6 +6,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-01-19
+
+### Added
+- Batched UAT testing — `/gsd:verify-work` now presents tests in groups of 4 using AskUserQuestion instead of one-at-a-time plain text, optimized for the common case where most tests pass
+- Distinct test result types: `pass`, `issue`, `blocked` (re-tested on next run), `skipped` (assumption logged)
+- Assumptions tracking — skipped tests logged to UAT.md Assumptions section, aggregated by `/gsd:audit-milestone`, surfaced during `/gsd:new-milestone` discovery
+- "Address untested assumptions" option in `/gsd:discuss-milestone` for planning test infrastructure work
+
+### Changed
+- UAT file writes batched after each group of 4 tests instead of per-test, reducing file I/O
+- Resume behavior distinguishes blocked tests (re-present) from skipped tests (assumption stands)
+
 ## [2.6.0] - 2026-01-18
 
 ### Changed
@@ -825,7 +837,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.6.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.7.0
 [2.6.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.6.0
 [2.5.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.1
 [2.5.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.0
