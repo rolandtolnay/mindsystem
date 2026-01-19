@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-01-19
+
+### Removed
+- `/gsd:execute-plan` command — use `/gsd:execute-phase` instead (handles all use cases including single plans)
+
+### Changed
+- Progress, help, README, and resume-project now route to `/gsd:execute-phase`
+- Plan-phase workflow removes execute-plan as an option
+- gsd-executor agent description updated
+
 ## [2.7.0] - 2026-01-19
 
 ### Added
@@ -837,7 +847,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.7.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.0
 [2.7.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.7.0
 [2.6.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.6.0
 [2.5.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.5.1
