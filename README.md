@@ -77,6 +77,12 @@ npx get-shit-done-cc
 
 That's it. Verify with `/gsd:help` inside your Claude Code interface.
 
+### Start Here
+
+- If you already have `.planning/` in this repo: run `/gsd:progress`.
+- If you’re starting in an existing codebase (brownfield): run `/gsd:map-codebase`, then `/gsd:new-project`.
+- Otherwise: run `/gsd:new-project`.
+
 ### Staying Updated
 
 GSD evolves fast. Check for updates periodically:
@@ -111,7 +117,7 @@ Clone the repository and run the installer locally:
 
 ```bash
 git clone https://github.com/rolandtolnay/gsd.git
-cd get-shit-done
+cd gsd
 node bin/install.js --local
 ```
 
@@ -207,19 +213,27 @@ Produces:
 
 ```
 /gsd:plan-phase 1      # System creates atomic task plans
-/gsd:execute-phase 1   # Parallel agents execute all plans
+/gsd:execute-phase 1   # Parallel agents execute all plans (includes verification)
 ```
 
 Each phase breaks into 2-3 task plans. Each plan runs in a fresh subagent context — 200k tokens purely for implementation, zero degradation. Plans without dependencies run in parallel.
 
-Checkpoints and resumption are handled automatically — if interrupted, run `/gsd:execute-phase` again and it picks up where it left off.
+Checkpoints and resumption are handled automatically — if interrupted, run `/gsd:execute-phase 1` again and it picks up where it left off.
+
+If a phase verifies with gaps, close them with:
+
+```
+/gsd:plan-phase 1 --gaps
+/gsd:execute-phase 1
+```
 
 ### 5. Ship and iterate
 
 ```
-/gsd:complete-milestone   # Archive v1, prep for v2
-/gsd:add-phase            # Append new work
-/gsd:insert-phase 2       # Slip urgent work between phases
+/gsd:audit-milestone 1.0.0        # (recommended) verify milestone before archiving
+/gsd:complete-milestone 1.0.0     # Archive v1, prep for v2
+/gsd:add-phase "Add admin dashboard"
+/gsd:insert-phase 2 "Fix critical auth bug"
 ```
 
 Ship your MVP in a day. Add features. Insert hotfixes. The system stays modular — you're never stuck.
@@ -259,7 +273,7 @@ Same as greenfield, but the system knows your codebase. Questions focus on what 
 ### 3. Continue as normal
 
 From here, it's the same flow:
-- `/gsd:research-project` (optional) → `/gsd:define-requirements` → `/gsd:create-roadmap` → `/gsd:plan-phase` → `/gsd:execute-phase`
+- `/gsd:research-project` (optional) → `/gsd:define-requirements` → `/gsd:create-roadmap` → `/gsd:plan-phase` → `/gsd:execute-phase <phase>`
 
 The codebase docs load automatically during planning. Claude knows your patterns, conventions, and where to put things.
 
@@ -349,6 +363,8 @@ You're never locked in. The system adapts.
 
 ## Commands
 
+For full details and up-to-date usage, run `/gsd:help` inside Claude Code (or read `commands/gsd/help.md`).
+
 ### Setup
 
 | Command | What it does |
@@ -363,7 +379,7 @@ You're never locked in. The system adapts.
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:plan-phase [N]` | Generate task plans for phase |
+| `/gsd:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close verification gaps) |
 | `/gsd:execute-phase <N>` | Execute all plans in phase (parallel, handles checkpoints) |
 | `/gsd:progress` | Where am I? What's next? |
 
@@ -371,7 +387,7 @@ You're never locked in. The system adapts.
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:check-phase [N]` | Verify phase plans before execution (optional) |
+| `/gsd:check-phase <N>` | Verify phase plans before execution (optional) |
 | `/gsd:verify-work [N]` | User acceptance test of phase or plan ¹ |
 | `/gsd:audit-milestone [version]` | Audit milestone completion before archiving |
 
@@ -379,7 +395,7 @@ You're never locked in. The system adapts.
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:complete-milestone` | Ship it, prep next version |
+| `/gsd:complete-milestone <version>` | Ship it, prep next version |
 | `/gsd:discuss-milestone` | Gather context for next milestone |
 | `/gsd:new-milestone [name]` | Create new milestone with phases |
 | `/gsd:plan-milestone-gaps` | Create phases to close gaps from audit |
@@ -388,12 +404,12 @@ You're never locked in. The system adapts.
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:add-phase` | Append phase to roadmap |
-| `/gsd:insert-phase [N]` | Insert urgent work between phases |
-| `/gsd:remove-phase [N]` | Remove future phase, renumber subsequent |
-| `/gsd:discuss-phase [N]` | Gather context before planning |
-| `/gsd:research-phase [N]` | Deep research for unfamiliar domains |
-| `/gsd:list-phase-assumptions [N]` | See what Claude assumes before correcting |
+| `/gsd:add-phase <desc>` | Append phase to roadmap |
+| `/gsd:insert-phase <after> <desc>` | Insert urgent work between phases |
+| `/gsd:remove-phase <N>` | Remove future phase, renumber subsequent |
+| `/gsd:discuss-phase <N>` | Gather context before planning |
+| `/gsd:research-phase <N>` | Deep research for unfamiliar domains |
+| `/gsd:list-phase-assumptions <N>` | See what Claude assumes before correcting |
 
 ### Session
 
