@@ -1,7 +1,7 @@
 <purpose>
-Validate built features through conversational testing with persistent state. Creates UAT.md that tracks test progress, survives /clear, and feeds gaps into /gsd:plan-phase --gaps.
+Validate built features through batched testing with persistent state. Creates UAT.md that tracks test progress, survives /clear, and feeds gaps into /gsd:plan-phase --gaps.
 
-User tests, Claude records. One test at a time. Plain text responses.
+User tests in batches of 4 using AskUserQuestion. Optimized for the common case: most tests pass.
 </purpose>
 
 <execution_context>
@@ -9,13 +9,17 @@ User tests, Claude records. One test at a time. Plain text responses.
 </execution_context>
 
 <philosophy>
-**Show expected, ask if reality matches.**
+**Batch verification for efficiency.**
 
-Claude presents what SHOULD happen. User confirms or describes what's different.
-- "yes" / "y" / "next" / empty → pass
-- Anything else → logged as issue, severity inferred
+Present up to 4 tests per AskUserQuestion call. Users respond to all at once.
 
-No Pass/Fail buttons. No severity questions. Just: "Here's what should happen. Does it?"
+Options for each test:
+- "Pass" → verified working
+- "Can't test" → blocked by prior failure (will re-test later)
+- "Skip" → assumption, can't mock required state
+- "Other" (custom text) → issue, severity inferred
+
+Optimize for the common case: most tests pass. No severity questions — infer from description.
 </philosophy>
 
 <template>
@@ -129,13 +133,8 @@ updated: [ISO timestamp]
 ---
 
 ## Current Test
-<!-- OVERWRITE each test - shows where we are -->
 
-number: 1
-name: [first test name]
-expected: |
-  [what user should observe]
-awaiting: user response
+[awaiting first batch]
 
 ## Tests
 
@@ -154,97 +153,130 @@ result: [pending]
 total: [N]
 passed: 0
 issues: 0
-pending: [N]
+blocked: 0
 skipped: 0
+pending: [N]
 
 ## Gaps
+
+[none yet]
+
+## Assumptions
 
 [none yet]
 ```
 
 Write to `.planning/phases/XX-name/{phase}-UAT.md`
 
-Proceed to `present_test`.
+Proceed to `present_test_batch`.
 </step>
 
-<step name="present_test">
-**Present current test to user:**
+<step name="present_test_batch">
+**Present batch of tests using AskUserQuestion:**
 
-Read Current Test section from UAT file.
+Collect all tests that need response:
+- Tests with `result: [pending]`
+- Tests with `result: blocked` (re-testing after previous run)
 
-Display:
+Group into batches of 4 (or fewer for last batch).
+
+For each batch, build AskUserQuestion with up to 4 questions:
 
 ```
-## Test {number}: {name}
-
-**Expected:** {expected}
-
-Does this match what you see?
+questions:
+  - question: "Test {N}: {name} — {expected}"
+    header: "Test {N}"
+    options:
+      - label: "Pass"
+        description: "Works as expected"
+      - label: "Can't test"
+        description: "Blocked by a previous test failure"
+      - label: "Skip"
+        description: "Assume it works (can't mock required state)"
+    multiSelect: false
+  - question: "Test {N+1}: {name} — {expected}"
+    header: "Test {N+1}"
+    ...
 ```
 
-Wait for user response (plain text, no AskUserQuestion).
+The "Other" option is auto-added by AskUserQuestion for issue descriptions.
+
+**Tip:** To skip with a custom reason, select "Other" and start with `Skip:` — e.g., `Skip: Requires paid API key`. This logs as assumption (not issue) with your reason.
+
+Update Current Test section to show batch range:
+```
+## Current Test
+
+batch: {batch_number} of {total_batches}
+tests: {start_N} - {end_N}
+awaiting: user response
+```
+
+Wait for user to respond to all questions in batch.
+Proceed to `process_batch_responses`.
 </step>
 
-<step name="process_response">
-**Process user response and update file:**
+<step name="process_batch_responses">
+**Process batch responses:**
 
-**If response indicates pass:**
-- Empty response, "yes", "y", "ok", "pass", "next", "approved", "✓"
+For each question in the batch, parse the user's answer:
 
-Update Tests section:
-```
-### {N}. {name}
-expected: {expected}
-result: pass
-```
+| User Selected | Result | Action |
+|---------------|--------|--------|
+| "Pass" | `pass` | Update test result |
+| "Can't test" | `blocked` | Update test result (will re-test on next run) |
+| "Skip" | `skipped` | Update test result, append to Assumptions |
+| "Other: {text}" | Check prefix | See below |
 
-**If response indicates skip:**
-- "skip", "can't test", "n/a"
+**If user selected "Other":**
 
-Update Tests section:
-```
-### {N}. {name}
-expected: {expected}
-result: skipped
-reason: [user's reason if provided]
-```
+Check if response starts with "Skip:" (case-insensitive):
+- "Skip: {reason}" → `skipped` with custom reason, append to Assumptions
+- Otherwise → `issue`, infer severity, append to Gaps
 
-**If response is anything else:**
-- Treat as issue description
-
-Infer severity from description:
+**Severity inference** (for issues):
 - Contains: crash, error, exception, fails, broken, unusable → blocker
 - Contains: doesn't work, wrong, missing, can't → major
 - Contains: slow, weird, off, minor, small → minor
 - Contains: color, font, spacing, alignment, visual → cosmetic
 - Default if unclear: major
 
-Update Tests section:
+**Update file after batch:**
+
+Update Tests section with all results:
 ```
 ### {N}. {name}
 expected: {expected}
-result: issue
-reported: "{verbatim user response}"
-severity: {inferred}
+result: {pass | issue | blocked | skipped}
+[If issue: reported: "{text}", severity: {inferred}]
+[If skipped: reason: "{reason}"]
 ```
 
-Append to Gaps section (structured YAML for plan-phase --gaps):
+If any issues in batch, append to Gaps section:
 ```yaml
 - truth: "{expected behavior from test}"
   status: failed
-  reason: "User reported: {verbatim user response}"
+  reason: "User reported: {verbatim response}"
   severity: {inferred}
   test: {N}
   artifacts: []  # Filled by diagnosis
   missing: []    # Filled by diagnosis
 ```
 
-**After any response:**
+If any skipped in batch, append to Assumptions section:
+```yaml
+- test: {N}
+  name: "{test name}"
+  expected: "{expected behavior}"
+  reason: "{reason or 'Can't mock required state'}"
+```
 
-Update Summary counts.
+Update Summary counts (total, passed, issues, blocked, skipped, pending).
 Update frontmatter.updated timestamp.
 
-If more tests remain → Update Current Test, go to `present_test`
+**Write file** (batch checkpoint).
+
+If more tests remain → Go to `present_test_batch`
 If no more tests → Go to `complete_session`
 </step>
 
@@ -253,19 +285,22 @@ If no more tests → Go to `complete_session`
 
 Read the full UAT file.
 
-Find first test with `result: [pending]`.
+Find all tests that need response:
+- Tests with `result: [pending]`
+- Tests with `result: blocked` (re-testing after previous run)
+
+Calculate remaining count.
 
 Announce:
 ```
 Resuming: Phase {phase} UAT
 Progress: {passed + issues + skipped}/{total}
+Remaining: {pending_count} pending, {blocked_count} blocked (re-testing)
 Issues found so far: {issues count}
-
-Continuing from Test {N}...
+Assumptions made: {skipped count}
 ```
 
-Update Current Test section with the pending test.
-Proceed to `present_test`.
+Proceed to `present_test_batch`.
 </step>
 
 <step name="complete_session">
@@ -285,7 +320,7 @@ Clear Current Test section:
 Commit the UAT file:
 ```bash
 git add ".planning/phases/XX-name/{phase}-UAT.md"
-git commit -m "test({phase}): complete UAT - {passed} passed, {issues} issues"
+git commit -m "test({phase}): complete UAT - {passed} passed, {issues} issues, {skipped} assumptions"
 ```
 
 Present summary:
@@ -296,7 +331,20 @@ Present summary:
 |--------|-------|
 | Passed | {N}   |
 | Issues | {N}   |
-| Skipped| {N}   |
+| Blocked | {N}  |
+| Assumptions | {N} |
+
+[If blocked > 0:]
+### Blocked Tests
+
+{N} tests couldn't be verified due to prior failures.
+Run `/gsd:verify-work {phase}` again after fixing issues to re-test.
+
+[If skipped > 0:]
+### Assumptions Made
+
+{N} tests were skipped — these are assumptions that couldn't be verified.
+See Assumptions section in UAT file.
 
 [If issues > 0:]
 ### Issues Found
@@ -306,12 +354,18 @@ Present summary:
 
 **If issues > 0:** Proceed to `diagnose_issues`
 
-**If issues == 0:**
+**If issues == 0 AND blocked == 0:**
 ```
 All tests passed. Ready to continue.
 
 - `/gsd:plan-phase {next}` — Plan next phase
 - `/gsd:execute-phase {next}` — Execute next phase
+```
+
+**If issues == 0 AND blocked > 0:**
+```
+No new issues, but {blocked} tests still blocked.
+Fix prior issues first, then run `/gsd:verify-work {phase}` to re-test.
 ```
 </step>
 
@@ -399,23 +453,26 @@ Debug sessions: .planning/debug/
 </process>
 
 <update_rules>
-**Batched writes for efficiency:**
+**Write after each batch:**
 
-Keep results in memory. Write to file only when:
-1. **Issue found** — Preserve the problem immediately
-2. **Session complete** — Final write before commit
-3. **Checkpoint** — Every 5 passed tests (safety net)
+Keep results in memory during batch. Write to file after user responds to full batch.
+
+| Trigger | Action |
+|---------|--------|
+| Batch complete | Write all batch results |
+| Session complete | Final write + commit |
 
 | Section | Rule | When Written |
 |---------|------|--------------|
 | Frontmatter.status | OVERWRITE | Start, complete |
-| Frontmatter.updated | OVERWRITE | On any file write |
-| Current Test | OVERWRITE | On any file write |
-| Tests.{N}.result | OVERWRITE | On any file write |
-| Summary | OVERWRITE | On any file write |
+| Frontmatter.updated | OVERWRITE | After each batch |
+| Current Test | OVERWRITE | After each batch |
+| Tests.{N}.result | OVERWRITE | After each batch |
+| Summary | OVERWRITE | After each batch |
 | Gaps | APPEND | When issue found |
+| Assumptions | APPEND | When test skipped |
 
-On context reset: File shows last checkpoint. Resume from there.
+On context reset: Resume from last written batch. Worst case: re-answer up to 3 questions.
 </update_rules>
 
 <severity_inference>
@@ -435,10 +492,12 @@ Default to **major** if unclear. User can correct if needed.
 
 <success_criteria>
 - [ ] UAT file created with all tests from SUMMARY.md
-- [ ] Tests presented one at a time with expected behavior
-- [ ] User responses processed as pass/issue/skip
+- [ ] Tests presented in batches of 4 using AskUserQuestion
+- [ ] User responses processed as pass/issue/blocked/skipped
 - [ ] Severity inferred from description (never asked)
-- [ ] Batched writes: on issue, every 5 passes, or completion
+- [ ] File written after each batch (checkpoint)
+- [ ] Blocked tests re-presented on subsequent runs
+- [ ] Skipped tests logged to Assumptions section
 - [ ] Committed on completion
 - [ ] If issues: parallel debug agents diagnose root causes
 - [ ] If issues: UAT.md updated with root_cause, artifacts, missing

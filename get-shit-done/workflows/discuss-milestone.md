@@ -57,15 +57,59 @@ Everything else (scope, priority, constraints) is secondary and derived from fea
 
 Check for inputs:
 - Pending todos from STATE.md (potential features)
+- Untested assumptions from MILESTONE-AUDIT.md (potential infrastructure work)
 - Known gaps or pain points from usage
 - User's ideas for what's next
+
+```bash
+# Check for assumptions from previous milestone audit
+ASSUMPTIONS=$(cat .planning/v*-MILESTONE-AUDIT.md 2>/dev/null | grep -c "assumptions:" || echo 0)
+```
 
 **1. Open with context-aware options:**
 
 Use AskUserQuestion:
 - header: "Next"
 - question: "What do you want to add, improve, or fix in this milestone?"
-- options: [Pending todos from STATE.md if any] + ["New features", "Improvements to existing", "Bug fixes", "Let me describe"]
+- options:
+  - [Pending todos from STATE.md if any]
+  - [If ASSUMPTIONS > 0: "Address untested assumptions ({N} items)"]
+  - "New features"
+  - "Improvements to existing"
+  - "Bug fixes"
+  - "Let me describe"
+
+**If user selects "Address untested assumptions":**
+
+Present the assumptions list from MILESTONE-AUDIT.md:
+
+```
+## Untested Assumptions from v{X.Y}
+
+These tests were skipped because required states couldn't be mocked:
+
+| Phase | Test | Expected Behavior | Reason |
+|-------|------|-------------------|--------|
+| 04-comments | Error state display | Shows error message when API fails | Can't mock API errors |
+| 04-comments | Empty state | Shows placeholder when no comments | Can't clear test data |
+| 05-auth | Session timeout | Redirects to login after 30min | Can't manipulate time |
+
+To verify these, you'd need:
+- Error response mocking (API interceptor or mock server)
+- State reset capabilities (clear data for empty states)
+- Time manipulation (for timeout testing)
+```
+
+Then use AskUserQuestion:
+- header: "Assumptions"
+- question: "Which assumptions do you want to address?"
+- options:
+  - "All of them — plan test infrastructure"
+  - "Just error states"
+  - "Just empty states"
+  - "None for now — they're low risk"
+
+Continue to feature gathering based on selection.
 
 **2. Follow the thread (don't switch topics):**
 

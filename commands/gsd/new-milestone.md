@@ -47,6 +47,8 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
    ```bash
    cat .planning/MILESTONES.md 2>/dev/null
+   # Also check for assumptions from last audit
+   cat .planning/v*-MILESTONE-AUDIT.md 2>/dev/null | grep -A 100 "assumptions:" | head -50
    ```
 
    Format the presentation:
@@ -68,6 +70,14 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
    **Pending todos (if any):**
    - [From STATE.md accumulated context]
+
+   **Untested assumptions (if any):**
+   - [From MILESTONE-AUDIT.md assumptions section]
+   - Error state displays (04-comments, 05-auth)
+   - Empty state handling (04-comments)
+   - Session timeout behavior (05-auth)
+
+   *These were skipped during UAT because required states couldn't be mocked.*
 
    ---
    ```

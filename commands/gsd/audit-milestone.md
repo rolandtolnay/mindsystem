@@ -70,6 +70,33 @@ From each VERIFICATION.md, extract:
 
 If a phase is missing VERIFICATION.md, flag it as "unverified phase" — this is a blocker.
 
+## 2.5. Read UAT Files and Aggregate Assumptions
+
+```bash
+# Find all UAT files
+find .planning/phases -name "*-UAT.md" -type f 2>/dev/null
+```
+
+For each UAT file, extract:
+- **Assumptions section:** Tests skipped because required state couldn't be mocked
+
+Aggregate assumptions by phase:
+```yaml
+assumptions:
+  count: [N]
+  by_phase:
+    - phase: 04-comments
+      items:
+        - name: "Error state display"
+          expected: "Shows error message when API fails"
+          reason: "Can't mock API error responses"
+    - phase: 05-auth
+      items:
+        - name: "Session timeout"
+          expected: "User redirected to login after 30min"
+          reason: "Can't manipulate time in tests"
+```
+
 ## 3. Spawn Integration Checker
 
 With phase context collected:
@@ -126,10 +153,33 @@ tech_debt:  # Non-critical, deferred
   - phase: 03-dashboard
     items:
       - "Deferred: mobile responsive layout"
+assumptions:  # Tests skipped during UAT
+  count: [N]
+  by_phase:
+    - phase: 04-comments
+      items:
+        - name: "Error state display"
+          expected: "Shows error message when API fails"
 ---
 ```
 
-Plus full markdown report with tables for requirements, phases, integration, tech debt.
+Plus full markdown report with tables for requirements, phases, integration, tech debt, and assumptions.
+
+**Assumptions section in markdown report:**
+
+```markdown
+## Untested Assumptions
+
+{N} tests were skipped because required states couldn't be mocked:
+
+| Phase | Test | Expected Behavior | Reason |
+|-------|------|-------------------|--------|
+| 04-comments | Error state display | Shows error message when API fails | Can't mock API errors |
+| 04-comments | Empty state | Shows placeholder when no comments | Can't clear test data |
+| 05-auth | Session timeout | Redirects to login after 30min | Can't manipulate time |
+
+**Consider:** Plan test infrastructure work in next milestone to verify these assumptions.
+```
 
 **Status values:**
 - `passed` — all requirements met, no critical gaps, minimal tech debt
@@ -152,6 +202,12 @@ Route by status (see `<offer_next>`).
 **Report:** .planning/v{version}-MILESTONE-AUDIT.md
 
 All requirements covered. Cross-phase integration verified. E2E flows complete.
+
+[If assumptions > 0:]
+### Untested Assumptions: {N} items
+
+These tests were skipped because required states couldn't be mocked.
+See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ---
 
@@ -228,6 +284,12 @@ All requirements met. No critical blockers. Accumulated tech debt needs review.
 
 ### Total: {N} items across {M} phases
 
+[If assumptions > 0:]
+### Untested Assumptions: {N} items
+
+These tests were skipped because required states couldn't be mocked.
+See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
+
 ---
 
 ## ▶ Options
@@ -247,8 +309,10 @@ All requirements met. No critical blockers. Accumulated tech debt needs review.
 <success_criteria>
 - [ ] Milestone scope identified
 - [ ] All phase VERIFICATION.md files read
+- [ ] All phase UAT.md files read for assumptions
 - [ ] Tech debt and deferred gaps aggregated
+- [ ] Assumptions aggregated by phase
 - [ ] Integration checker spawned for cross-phase wiring
-- [ ] v{version}-MILESTONE-AUDIT.md created
+- [ ] v{version}-MILESTONE-AUDIT.md created with assumptions section
 - [ ] Results presented with actionable next steps
 </success_criteria>

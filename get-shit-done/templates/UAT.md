@@ -42,8 +42,12 @@ severity: major
 
 ### 4. [Test Name]
 expected: [observable behavior]
+result: blocked
+
+### 5. [Test Name]
+expected: [observable behavior]
 result: skipped
-reason: [why skipped]
+reason: [why couldn't be tested]
 
 ...
 
@@ -52,8 +56,9 @@ reason: [why skipped]
 total: [N]
 passed: [N]
 issues: [N]
-pending: [N]
+blocked: [N]
 skipped: [N]
+pending: [N]
 
 ## Gaps
 
@@ -67,6 +72,14 @@ skipped: [N]
   artifacts: []      # Filled by diagnosis
   missing: []        # Filled by diagnosis
   debug_session: ""  # Filled by diagnosis
+
+## Assumptions
+
+<!-- Tests skipped because required state couldn't be mocked -->
+- test: [N]
+  name: "[Test Name]"
+  expected: "[what should happen]"
+  reason: "[why it couldn't be tested]"
 ```
 
 ---
@@ -87,18 +100,24 @@ skipped: [N]
 
 **Tests:**
 - Each test: OVERWRITE result field when user responds
-- `result` values: [pending], pass, issue, skipped
+- `result` values: [pending], pass, issue, blocked, skipped
 - If issue: add `reported` (verbatim) and `severity` (inferred)
-- If skipped: add `reason` if provided
+- If blocked: no additional fields (will be re-tested)
+- If skipped: add `reason` (assumption - can't mock required state, or custom via "Other: Skip: {reason}")
 
 **Summary:**
-- OVERWRITE counts after each response
-- Tracks: total, passed, issues, pending, skipped
+- OVERWRITE counts after each batch
+- Tracks: total, passed, issues, blocked, skipped, pending
 
 **Gaps:**
 - APPEND only when issue found (YAML format)
 - After diagnosis: fill `root_cause`, `artifacts`, `missing`, `debug_session`
 - This section feeds directly into /gsd:plan-phase --gaps
+
+**Assumptions:**
+- APPEND when test is skipped (can't mock required state)
+- Aggregated by /gsd:audit-milestone into MILESTONE-AUDIT.md
+- Surfaced during /gsd:new-milestone discovery
 
 </section_rules>
 
@@ -139,16 +158,16 @@ skipped: [N]
 **Creation:** When /gsd:verify-work starts new session
 - Extract tests from SUMMARY.md files
 - Set status to "testing"
-- Current Test points to test 1
 - All tests have result: [pending]
 
 **During testing:**
-- Present test from Current Test section
-- User responds with pass confirmation or issue description
-- Update test result (pass/issue/skipped)
+- Present tests in batches of 4 using AskUserQuestion
+- User responds to all tests in batch at once
+- Update test results (pass/issue/blocked/skipped)
 - Update Summary counts
-- If issue: append to Gaps section (YAML format), infer severity
-- Move Current Test to next pending test
+- If issue: append to Gaps section, infer severity
+- If skipped: append to Assumptions section
+- Write to file after each batch (checkpoint)
 
 **On completion:**
 - status → "complete"
@@ -156,11 +175,11 @@ skipped: [N]
 - Commit file
 - Present summary with next steps
 
-**Resume after /clear:**
-1. Read frontmatter → know phase and status
-2. Read Current Test → know where we are
-3. Find first [pending] result → continue from there
-4. Summary shows progress so far
+**Resume behavior:**
+- Tests with result: [pending] → presented in next batch
+- Tests with result: blocked → ALSO presented in next batch (re-test after fixes)
+- Tests with result: skipped → NOT re-presented (assumption stands)
+- Tests with result: pass/issue → NOT re-presented (already processed)
 
 </lifecycle>
 
@@ -207,7 +226,7 @@ severity: major
 
 ### 3. Reply to a Comment
 expected: Click Reply, inline composer appears, submit shows nested reply
-result: pass
+result: blocked
 
 ### 4. Visual Nesting
 expected: 3+ level thread shows indentation, left borders, caps at reasonable depth
@@ -221,13 +240,24 @@ result: pass
 expected: Post shows accurate count, increments when adding comment
 result: pass
 
+### 7. Error State Display
+expected: Shows error message when comment submission fails
+result: skipped
+reason: "Can't mock API error responses"
+
+### 8. Empty State
+expected: Shows 'No comments yet' placeholder when no comments exist
+result: skipped
+reason: "Can't clear existing comments to test empty state"
+
 ## Summary
 
-total: 6
-passed: 5
+total: 8
+passed: 4
 issues: 1
+blocked: 1
+skipped: 2
 pending: 0
-skipped: 0
 
 ## Gaps
 
@@ -243,5 +273,17 @@ skipped: 0
   missing:
     - "Add commentCount to useEffect dependency array"
   debug_session: ".planning/debug/comment-not-refreshing.md"
+
+## Assumptions
+
+- test: 7
+  name: "Error State Display"
+  expected: "Shows error message when comment submission fails"
+  reason: "Can't mock API error responses"
+
+- test: 8
+  name: "Empty State"
+  expected: "Shows 'No comments yet' placeholder when no comments exist"
+  reason: "Can't clear existing comments to test empty state"
 ```
 </good_example>
