@@ -59,6 +59,54 @@ Ready to move on, or should we explore further?"
 When in doubt, ASK. Thoroughness beats speed.
 </collaboration_approach>
 
+<context_management>
+## Critical: Preserve Context Window with Subagents
+
+**Do NOT read files directly in the main conversation for exploratory research.** This wastes precious context that should be reserved for user collaboration and synthesis.
+
+### Use Parallel Explore Agents for Research
+
+Use the **Task tool with `subagent_type: "Explore"`** to offload codebase research to subagents. This:
+- Preserves main context for collaboration and decision-making
+- Allows parallel research across multiple areas simultaneously
+- Returns concise summaries instead of raw file contents
+
+### When to Use Explore Agents vs Direct Read
+
+**Use Explore agents (Task tool) for:**
+- Exploring multiple files in a directory (commands, workflows, agents, templates)
+- Understanding patterns across the codebase
+- Answering open-ended questions ("how does X work?")
+- Any research that might require reading 3+ files
+
+**Use direct Read tool only for:**
+- Single, specific files you need to quote precisely
+- Files the user explicitly references (like @ai-driven-ui-design-system.md)
+- Quick targeted lookups after you know exactly what you need
+
+### Parallel Agent Patterns
+
+**Phase 1 Example - Launch 4 agents in parallel:**
+```
+Task 1: "Explore commands/gsd/*.md - summarize each command's purpose and how they chain together"
+Task 2: "Explore get-shit-done/workflows/*.md - identify the execution flow and context passing"
+Task 3: "Explore agents/*.md - catalog agent types, their tools, and when they're spawned"
+Task 4: "Explore get-shit-done/templates/*.md - understand output formats and file structures"
+```
+
+**Key principle:** Launch independent research tasks in a SINGLE message with multiple Task tool calls. Wait for all to complete, then synthesize findings before the checkpoint.
+
+### Synthesis Pattern
+
+After parallel agents return:
+1. Review all agent summaries
+2. Synthesize into a coherent understanding
+3. Present synthesis to user at checkpoint
+4. Only deep-dive (direct Read) on specific files if user asks or clarification needed
+
+This approach keeps your main context clean for the collaborative dialogue that matters.
+</context_management>
+
 <context>
 ## The Problem
 GSD executes plans through subagents that write code directly from requirements. There is no design step, so UI features often look "ugly" - functional but not beautiful or engaging. The code works, but the visual output doesn't respect UI/UX best practices.
@@ -226,22 +274,34 @@ Structure the proposal with these sections:
 </output_specification>
 
 <research_approach>
-## How to Conduct This Research (With Collaboration Checkpoints)
+## How to Conduct This Research (With Parallel Agents + Collaboration Checkpoints)
 
 ### Phase 1: GSD Architecture Analysis
-1. Use Glob to find all relevant files
-2. Read commands, workflows, agents, templates systematically
-3. Build understanding of how context flows through the system
+
+**Step 1: Launch parallel Explore agents (single message, 4 Task calls):**
+```
+Agent 1: "Explore commands/gsd/*.md - summarize each command's purpose, arguments, and how they chain together"
+Agent 2: "Explore get-shit-done/workflows/*.md - identify execution flow, context passing, and key decision points"
+Agent 3: "Explore agents/*.md - catalog agent types, their tools, spawning conditions, and context they receive"
+Agent 4: "Explore get-shit-done/templates/*.md - understand output formats, file naming, and structure patterns"
+```
+
+**Step 2: Synthesize agent findings** into a coherent architecture understanding
 
 **→ CHECKPOINT: Use AskUserQuestion**
-- Share your understanding of GSD's architecture
+- Share your synthesized understanding of GSD's architecture
 - Ask: "Does this match how you use GSD? Any workflows I'm missing?"
 - Clarify any misunderstandings before proceeding
 
 ### Phase 2: Design Document Deep Dive
-1. Read @ai-driven-ui-design-system.md thoroughly
-2. Extract patterns that apply to GSD integration
-3. Note what would need adaptation
+
+**Step 1: Read @ai-driven-ui-design-system.md directly** (user-referenced file, needs precise understanding)
+
+**Step 2: Extract and organize:**
+- Quality-forcing patterns
+- Three-tier orchestration model
+- 12-section aesthetic template structure
+- Platform-specific considerations
 
 **→ CHECKPOINT: Use AskUserQuestion**
 - Share key patterns you identified
@@ -249,9 +309,14 @@ Structure the proposal with these sections:
 - Discuss how strictly to follow the three-tier model
 
 ### Phase 3: Explore Integration Options
-1. Identify possible integration points (before planning, during planning, before execution)
-2. Consider context window implications
-3. Map out trade-offs for each approach
+
+**Step 1: Based on Phase 1+2 findings, identify integration points:**
+- Before planning (during `/gsd:discuss-phase` or new command)
+- During planning (embedded in `/gsd:plan-phase`)
+- Before execution (new `/gsd:design-phase` command)
+- During execution (design as first executor task)
+
+**Step 2: Map trade-offs for each** (context window, user workflow, iteration support)
 
 **→ CHECKPOINT: Use AskUserQuestion**
 - Present integration options with trade-offs
@@ -259,9 +324,17 @@ Structure the proposal with these sections:
 - Get user preference before designing architecture
 
 ### Phase 4: Design Agent Architecture
-1. Based on user's chosen integration point, design agent structure
-2. Define output format and how executors consume it
-3. Plan iteration/feedback workflow
+
+**Step 1: If needed, launch targeted Explore agents for specific questions:**
+```
+Agent: "How do existing GSD agents receive and use context? Look at executor agent patterns."
+Agent: "What output formats do plans use that executors consume? Find the handoff pattern."
+```
+
+**Step 2: Design based on user's chosen integration point:**
+- Agent structure (subagent vs skill vs command)
+- Output format and how executors consume it
+- Iteration/feedback workflow
 
 **→ CHECKPOINT: Use AskUserQuestion**
 - Present proposed agent architecture
@@ -269,12 +342,15 @@ Structure the proposal with these sections:
 - Confirm output format meets user's needs
 
 ### Phase 5: Finalize and Write Proposal
+
 **Only proceed to this phase when:**
 - All previous checkpoints passed
 - User has confirmed direction at each decision point
 - You have 95%+ confidence in the approach
 
 Then synthesize everything into the proposal document.
+
+**Note:** By this phase, your main context should be clean - filled with user decisions and synthesized findings, not raw file contents.
 </research_approach>
 
 <quality_requirements>
@@ -284,7 +360,7 @@ Then synthesize everything into the proposal document.
 - **Actionable recommendations**: Each section should lead to clear next steps
 - **Trade-offs explicit**: Don't hide complexity - acknowledge where decisions are hard
 - **Platform-aware**: Web (React/Tailwind) and Mobile (Flutter) need different treatment
-- **Context-conscious**: Remember Claude's context window limitations
+- **Context-efficient**: Use Explore agents for research; reserve main context for collaboration
 - **Iteration-friendly**: The design workflow should support refinement, not just one-shot generation
 - **Quality-forcing**: Incorporate patterns from the design document that prevent generic output
 </quality_requirements>
