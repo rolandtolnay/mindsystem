@@ -212,12 +212,7 @@ Produces:
 
 Each phase breaks into 2-3 task plans. Each plan runs in a fresh subagent context — 200k tokens purely for implementation, zero degradation. Plans without dependencies run in parallel.
 
-**For single-plan or interactive execution:**
-```
-/gsd:execute-plan      # Run one plan at a time with checkpoints
-```
-
-Use `/gsd:execute-phase` for parallel "walk away" automation (recommended). Use `/gsd:execute-plan` when you need interactive single-plan execution with manual checkpoints.
+Checkpoints and resumption are handled automatically — if interrupted, run `/gsd:execute-phase` again and it picks up where it left off.
 
 ### 5. Ship and iterate
 
@@ -369,8 +364,7 @@ You're never locked in. The system adapts.
 | Command | What it does |
 |---------|--------------|
 | `/gsd:plan-phase [N]` | Generate task plans for phase |
-| `/gsd:execute-phase <N>` | Execute all plans in phase with parallel agents |
-| `/gsd:execute-plan` | Run single plan via subagent |
+| `/gsd:execute-phase <N>` | Execute all plans in phase (parallel, handles checkpoints) |
 | `/gsd:progress` | Where am I? What's next? |
 
 ### Verification

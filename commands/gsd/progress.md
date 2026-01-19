@@ -152,9 +152,9 @@ Read its `<objective>` section.
 
 ## ▶ Next Up
 
-**{phase}-{plan}: [Plan Name]** — [objective summary from PLAN.md]
+**Phase {N}: [Phase Name]** — [objective from ROADMAP.md]
 
-`/gsd:execute-plan [full-path-to-PLAN.md]`
+`/gsd:execute-phase {N}`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -227,7 +227,6 @@ UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
 ---
 
 **Also available:**
-- `/gsd:execute-plan [path]` — continue with other work first
 - `/gsd:verify-work {phase}` — run more UAT testing
 
 ---
@@ -361,7 +360,7 @@ Ready to plan the next milestone.
 - [ ] Rich context provided (recent work, decisions, issues)
 - [ ] Current position clear with visual progress
 - [ ] What's next clearly explained
-- [ ] Smart routing: /gsd:execute-plan if plan exists, /gsd:plan-phase if not
+- [ ] Smart routing: /gsd:execute-phase if plan exists, /gsd:plan-phase if not
 - [ ] User confirms before any action
 - [ ] Seamless handoff to appropriate gsd command
       </success_criteria>

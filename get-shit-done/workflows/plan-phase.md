@@ -806,7 +806,6 @@ Wave 2: {plan-03}
 
 **Also available:**
 - Review/adjust plans before executing
-- `/gsd:execute-plan {phase}-01-PLAN.md` - run plans one at a time
 - View all plans: `ls .planning/phases/XX-name/*-PLAN.md`
 
 ---

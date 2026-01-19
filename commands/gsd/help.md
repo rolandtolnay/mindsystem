@@ -140,21 +140,13 @@ Result: Creates `.planning/phases/01-foundation/01-01-PLAN.md`
 
 ### Execution
 
-**`/gsd:execute-plan <path>`**
-Execute a single PLAN.md file.
-
-- Runs plan tasks sequentially
-- Creates SUMMARY.md after completion
-- Updates STATE.md with accumulated context
-- Use for interactive execution with checkpoints
-
-Usage: `/gsd:execute-plan .planning/phases/01-foundation/01-01-PLAN.md`
-
 **`/gsd:execute-phase <phase-number>`**
-Execute all unexecuted plans in a phase with parallel background agents.
+Execute all unexecuted plans in a phase with wave-based parallelization.
 
-- Analyzes plan dependencies and spawns independent plans concurrently
-- Use when phase has 2+ plans and you want "walk away" execution
+- Spawns parallel agents for independent plans
+- Handles checkpoints with user interaction
+- Resumes automatically from interrupted execution
+- Creates SUMMARY.md for each completed plan
 - Respects max_concurrent_agents from config.json
 
 Usage: `/gsd:execute-phase 5`

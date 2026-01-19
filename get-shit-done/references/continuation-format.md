@@ -35,49 +35,49 @@ Standard format for presenting next steps after completing a command or workflow
 
 ## Variants
 
-### Execute Next Plan
+### Execute Next Phase
 
 ```
 ---
 
 ## ▶ Next Up
 
-**02-03: Refresh Token Rotation** — Add /api/auth/refresh with sliding expiry
+**Phase 2: Authentication** — JWT login with refresh tokens
 
-`/gsd:execute-plan .planning/phases/02-auth/02-03-PLAN.md`
+`/gsd:execute-phase 2`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- Review plan before executing
+- Review plans before executing
 - `/gsd:list-phase-assumptions 2` — check assumptions
 
 ---
 ```
 
-### Execute Final Plan in Phase
+### Execute Final Phase in Milestone
 
-Add note that this is the last plan and what comes after:
+Add note that this is the last phase and what comes after:
 
 ```
 ---
 
 ## ▶ Next Up
 
-**02-03: Refresh Token Rotation** — Add /api/auth/refresh with sliding expiry
-<sub>Final plan in Phase 2</sub>
+**Phase 3: Core Features** — User dashboard, settings, and data export
+<sub>Final phase in milestone</sub>
 
-`/gsd:execute-plan .planning/phases/02-auth/02-03-PLAN.md`
+`/gsd:execute-phase 3`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **After this completes:**
-- Phase 2 → Phase 3 transition
-- Next: **Phase 3: Core Features** — User dashboard and settings
+- Milestone complete
+- Next: `/gsd:complete-milestone` — archive and tag
 
 ---
 ```
@@ -220,10 +220,10 @@ Extract: `**02-03: Refresh Token Rotation** — Add /api/auth/refresh with slidi
 ## To Continue
 
 Run `/clear`, then paste:
-/gsd:execute-plan .planning/phases/02-auth/02-03-PLAN.md
+/gsd:execute-phase 2
 ```
 
-User has no idea what 02-03 is about.
+User has no idea what Phase 2 is about.
 
 ### Don't: Missing /clear explanation
 

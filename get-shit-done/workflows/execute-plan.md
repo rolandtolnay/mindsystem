@@ -1196,11 +1196,7 @@ You will NOT be resumed. A new agent continues from where you stopped, using you
 
 **How to know if you were spawned:**
 
-If you're reading this workflow because an orchestrator spawned you (vs running directly from /gsd:execute-plan), the orchestrator's prompt will include checkpoint return instructions. Follow those instructions when you hit a checkpoint.
-
-**If running in main context (not spawned):**
-
-Use the standard checkpoint_protocol - display checkpoint and wait for direct user response.
+If you're reading this workflow because an orchestrator spawned you, the orchestrator's prompt will include checkpoint return instructions. Follow those instructions when you hit a checkpoint.
 </step>
 
 <step name="verification_failure_gate">
@@ -1699,16 +1695,16 @@ Summary: .planning/phases/{phase-dir}/{phase}-{plan}-SUMMARY.md
 
 ## ▶ Next Up
 
-**{phase}-{next-plan}: [Plan Name]** — [objective from next PLAN.md]
+**Phase {X}: [Phase Name]** — [goal from ROADMAP.md]
 
-`/gsd:execute-plan .planning/phases/{phase-dir}/{phase}-{next-plan}-PLAN.md`
+`/gsd:execute-phase {phase-number}`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work {phase}-{plan}` — manual acceptance testing before continuing
+- `/gsd:verify-work {phase}` — manual acceptance testing before continuing
 - Review what was built before continuing
 
 ---

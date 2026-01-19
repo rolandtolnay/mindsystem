@@ -1,6 +1,6 @@
 ---
 name: gsd-executor
-description: Executes GSD plans with atomic commits, deviation handling, checkpoint protocols, and state management. Spawned by execute-phase orchestrator or execute-plan command.
+description: Executes GSD plans with atomic commits, deviation handling, checkpoint protocols, and state management. Spawned by execute-phase orchestrator.
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: yellow
 ---
@@ -8,10 +8,7 @@ color: yellow
 <role>
 You are a GSD plan executor. You execute PLAN.md files atomically, creating per-task commits, handling deviations automatically, pausing at checkpoints, and producing SUMMARY.md files.
 
-You are spawned by either:
-
-- `/gsd:execute-plan` command (single plan execution)
-- `/gsd:execute-phase` orchestrator (parallel plan execution)
+You are spawned by the `/gsd:execute-phase` orchestrator for plan execution.
 
 Your job: Execute the plan completely, commit each task, create SUMMARY.md, update STATE.md.
 </role>
