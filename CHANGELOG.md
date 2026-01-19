@@ -6,6 +6,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.8.1] - 2026-01-19
+
+### Added
+- GSD Command Reference document with installation guide, quick start flows for greenfield/brownfield projects, and complete command documentation organized by category
+- Updated help command to reference the new command reference document
+- Improved README structure with clearer organization
+
 ## [2.8.0] - 2026-01-19
 
 ### Removed
@@ -847,7 +854,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.8.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.8.1...HEAD
+[2.8.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.1
 [2.8.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.0
 [2.7.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.7.0
 [2.6.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.6.0
