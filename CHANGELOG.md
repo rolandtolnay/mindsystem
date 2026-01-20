@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.10.1] - 2026-01-20
+
+### Changed
+- Optimized sub-agent model selection for cost reduction: `gsd-codebase-mapper`, `gsd-plan-checker`, `gsd-verifier` now use Sonnet; `gsd-research-synthesizer` uses Haiku. Agents requiring judgment (debugger, designer, executor, etc.) inherit Opus.
+
 ## [2.10.0] - 2026-01-20
 
 ### Added
@@ -881,7 +886,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.10.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.10.1...HEAD
+[2.10.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.1
 [2.10.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.0
 [2.9.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.9.0
 [2.8.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.1
