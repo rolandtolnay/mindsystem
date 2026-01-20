@@ -51,10 +51,17 @@ ls .planning/phases/${PHASE}-*/RESEARCH.md 2>/dev/null
 grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
 cat .planning/REQUIREMENTS.md 2>/dev/null
 cat .planning/phases/${PHASE}-*/${PHASE}-CONTEXT.md 2>/dev/null
+cat .planning/phases/${PHASE}-*/${PHASE}-DESIGN.md 2>/dev/null
 grep -A30 "### Decisions Made" .planning/STATE.md 2>/dev/null
 ```
 
 Present summary with phase description, requirements, prior decisions.
+
+**If DESIGN.md exists:** Research should address:
+- Libraries needed for specified interactions (animations, gestures, charts)
+- Technical feasibility of design requirements
+- Platform-specific implementation approaches
+- Component libraries that match the design system
 
 ## 4. Spawn gsd-researcher Agent
 
@@ -88,6 +95,7 @@ Mode: ecosystem
 **Requirements:** {requirements_list}
 **Prior decisions:** {decisions_if_any}
 **Phase context:** {context_md_content}
+**Design specs:** {design_md_content_if_exists}
 </context>
 
 <downstream_consumer>

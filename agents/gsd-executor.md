@@ -55,6 +55,13 @@ Parse:
 - Output specification
 
 **If plan references CONTEXT.md:** The CONTEXT.md file provides the user's vision for this phase — how they imagine it working, what's essential, and what's out of scope. Honor this context throughout execution.
+
+**If plan references DESIGN.md:** The DESIGN.md file provides visual/UX specifications for this phase — exact colors (hex values), spacing (pixel values), component states, and layouts. When implementing UI:
+- Use exact color values from the design spec, not approximations
+- Follow the specified spacing scale (e.g., 4/8/12/16/24/32)
+- Implement all component states (default, hover, active, disabled, loading)
+- Match ASCII wireframe layouts for component placement
+- Include verification criteria from DESIGN.md in your task verification
 </step>
 
 <step name="record_start_time">

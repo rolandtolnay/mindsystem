@@ -504,16 +504,21 @@ Present next steps based on milestone status and smart routing.
 2. **Check for existing context files:**
    ```bash
    CONTEXT_EXISTS=$(ls "$NEXT_PHASE_DIR"/*-CONTEXT.md 2>/dev/null | head -1)
+   DESIGN_EXISTS=$(ls "$NEXT_PHASE_DIR"/*-DESIGN.md 2>/dev/null | head -1)
    RESEARCH_EXISTS=$(ls "$NEXT_PHASE_DIR"/*-RESEARCH.md 2>/dev/null | head -1)
    ```
 
-3. **Determine primary suggestion (priority: Discussion > Research > Plan):**
+3. **Determine primary suggestion (priority: Discussion > Design > Research > Plan):**
 
    **Discussion triggers** (only if no CONTEXT.md exists):
    - User-facing keywords in goal/success criteria: UI, UX, dashboard, form, page, screen, modal, component, layout, design
    - High complexity signals:
      - Plans count >= 3 (from `**Plans**: X plans`)
      - Architecture terms: algorithm, system, architecture, framework
+
+   **Design triggers** (only if no DESIGN.md exists):
+   - UI-heavy keywords: UI, UX, dashboard, form, page, screen, modal, component, layout, design, interface, visual
+   - Novel UI work (not just tweaking existing patterns)
 
    **Research triggers** (only if no RESEARCH.md exists):
    - `**Research**: Likely` in roadmap phase section
@@ -523,6 +528,9 @@ Present next steps based on milestone status and smart routing.
    IF (user-facing keywords OR high-complexity) AND no CONTEXT.md:
      PRIMARY = discuss-phase
      REASON = "{detected signal} — clarify vision first"
+   ELSE IF (UI-heavy keywords) AND no DESIGN.md AND CONTEXT.md exists:
+     PRIMARY = design-phase
+     REASON = "UI-heavy phase — create design specs"
    ELSE IF Research: Likely AND no RESEARCH.md:
      PRIMARY = research-phase
      REASON = "Research: Likely — investigate approach"
@@ -556,6 +564,7 @@ Present next steps based on milestone status and smart routing.
 
    **Alternative descriptions:**
    - discuss-phase: "clarify vision and scope"
+   - design-phase: "create UI/UX specifications"
    - research-phase: "investigate implementation approach"
    - plan-phase: "create execution plans directly"
 

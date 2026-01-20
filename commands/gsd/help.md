@@ -72,6 +72,7 @@ Common deviations:
 - Existing repo: `/gsd:map-codebase` before `/gsd:new-project`
 - Plan looks wrong: `/gsd:list-phase-assumptions <phase>` or `/gsd:check-phase <phase>`
 - Unknown domain: `/gsd:research-project` or `/gsd:research-phase <phase>`
+- UI-heavy phase: `/gsd:design-phase <phase>` before `/gsd:research-phase <phase>`
 - Execution gaps: `/gsd:plan-phase <phase> --gaps` then `/gsd:execute-phase <phase>`
 - New urgent work: `/gsd:insert-phase <after> "<desc>"`
 - New non-urgent work: `/gsd:add-todo "<desc>"`
@@ -140,6 +141,16 @@ Help articulate your vision for a phase before planning.
 - Use when you have ideas about how something should look/feel
 
 Usage: `/gsd:discuss-phase 2`
+
+**`/gsd:design-phase <number>`**
+Create visual/UX design specifications for UI-heavy phases.
+
+- Produces DESIGN.md with layouts, components, flows, verification criteria
+- Applies quality-forcing patterns to prevent generic AI output
+- Checks for existing implement-ui skill and harmonizes with codebase
+- Use for phases with significant UI work, novel components, or cross-platform design
+
+Usage: `/gsd:design-phase 3`
 
 **`/gsd:research-phase <number>`**
 Comprehensive ecosystem research for niche/complex domains.
@@ -428,6 +439,9 @@ Usage: `/gsd:update`
 │   └── CONCERNS.md       # Tech debt, known issues
 └── phases/
     ├── 01-foundation/
+    │   ├── 01-CONTEXT.md      # Vision from discuss-phase
+    │   ├── 01-DESIGN.md       # UI/UX specs from design-phase
+    │   ├── 01-RESEARCH.md     # Technical research
     │   ├── 01-01-PLAN.md
     │   └── 01-01-SUMMARY.md
     └── 02-core-features/

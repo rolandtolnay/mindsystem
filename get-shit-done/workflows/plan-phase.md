@@ -335,6 +335,7 @@ Understand:
 - Any {phase}-RESEARCH.md (from /gsd:research-phase)
 - Any DISCOVERY.md (from mandatory discovery)
 - Any {phase}-CONTEXT.md (from /gsd:discuss-phase)
+- Any {phase}-DESIGN.md (from /gsd:design-phase)
 
 ```bash
 # If mid-project, understand current state
@@ -346,13 +347,22 @@ cat .planning/phases/XX-name/${PHASE}-RESEARCH.md 2>/dev/null
 
 # Check for phase context (from /gsd:discuss-phase)
 cat .planning/phases/XX-name/${PHASE}-CONTEXT.md 2>/dev/null
+
+# Check for design specs (from /gsd:design-phase)
+cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 ```
 
 **If RESEARCH.md exists:** Use standard_stack (these libraries), architecture_patterns (follow in task structure), dont_hand_roll (NEVER custom solutions for listed problems), common_pitfalls (inform verification), code_examples (reference in actions).
 
 **If CONTEXT.md exists:** Honor vision, prioritize essential, respect boundaries, incorporate specifics.
 
-**If neither exist:** Suggest /gsd:research-phase for niche domains, /gsd:discuss-phase for simpler domains, or proceed with roadmap only.
+**If DESIGN.md exists:**
+- Tasks reference specific screens/components from design
+- Verification criteria include design verification items
+- must_haves include design-specified observable behaviors
+- Task actions specify exact values (colors, spacing) from design
+
+**If none exist:** Suggest /gsd:research-phase for niche domains, /gsd:discuss-phase for simpler domains, or proceed with roadmap only.
 </step>
 
 <step name="break_into_tasks">

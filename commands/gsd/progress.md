@@ -63,6 +63,7 @@ If missing both ROADMAP.md and PROJECT.md: suggest `/gsd:new-project`.
 - Calculate: total plans, completed plans, remaining plans
 - Note any blockers or concerns
 - Check for CONTEXT.md: For phases without PLAN.md files, check if `{phase}-CONTEXT.md` exists in phase directory
+- Check for DESIGN.md: For UI-heavy phases, check if `{phase}-DESIGN.md` exists in phase directory
 - Count pending todos: `ls .planning/todos/pending/*.md 2>/dev/null | wc -l`
 - Check for active debug sessions: `ls .planning/debug/*.md 2>/dev/null | grep -v resolved | wc -l`
   </step>
@@ -83,6 +84,7 @@ If missing both ROADMAP.md and PROJECT.md: suggest `/gsd:new-project`.
 Phase [N] of [total]: [phase-name]
 Plan [M] of [phase-total]: [status]
 CONTEXT: [✓ if CONTEXT.md exists | - if not]
+DESIGN: [✓ if DESIGN.md exists | - if not]
 
 ## Key Decisions Made
 - [decision 1 from STATE.md]
@@ -201,6 +203,7 @@ Check if `{phase}-CONTEXT.md` exists in phase directory.
 
 **Also available:**
 - `/gsd:discuss-phase {phase}` — gather context first
+- `/gsd:design-phase {phase}` — create UI/UX specifications
 - `/gsd:research-phase {phase}` — investigate unknowns
 - `/gsd:list-phase-assumptions {phase}` — see Claude's assumptions
 
@@ -275,6 +278,7 @@ Read ROADMAP.md to get the next phase's name and goal.
 **Also available:**
 - `/gsd:verify-work {Z}` — user acceptance test before continuing
 - `/gsd:discuss-phase {Z+1}` — gather context first
+- `/gsd:design-phase {Z+1}` — create UI/UX specifications
 - `/gsd:research-phase {Z+1}` — investigate unknowns
 
 ---

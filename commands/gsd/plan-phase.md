@@ -61,6 +61,9 @@ After loading, extract the requirements for the current phase:
 **Load phase context if exists (created by /gsd:discuss-phase):**
 Check for and read `.planning/phases/XX-name/{phase}-CONTEXT.md` - contains research findings, clarifications, and decisions from phase discussion.
 
+**Load design specs if exists (created by /gsd:design-phase):**
+Check for and read `.planning/phases/XX-name/{phase}-DESIGN.md` - contains visual/UX specifications including layouts, components, flows, and verification criteria.
+
 **Load codebase context if exists:**
 Check for `.planning/codebase/` and load relevant documents based on phase type.
 
