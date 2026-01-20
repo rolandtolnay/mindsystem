@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.10.0] - 2026-01-20
+
+### Added
+- **`/gsd:do-work` command** — Bridges gap between `/gsd:add-todo` (capture for later) and `/gsd:insert-phase` (full planning). Executes small adhoc work (max 2 tasks) with proper audit trail in `.planning/adhoc/` while keeping overhead proportional to work size
+- GSD patterns reference document
+
+### Changed
+- Updated CLAUDE.md contributor guidelines
+
 ## [2.9.0] - 2026-01-20
 
 ### Added
@@ -872,7 +881,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.9.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.10.0...HEAD
+[2.10.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.0
 [2.9.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.9.0
 [2.8.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.1
 [2.8.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.0
