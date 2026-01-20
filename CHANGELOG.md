@@ -9,12 +9,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.9.0] - 2026-01-20
 
 ### Added
-- **Design phase mathematical validation** — gsd-designer agent now performs blocking validation before returning: bounds containment, platform-specific touch target minimums (Web 32×32px, iOS 44×44pt, Android 48×48dp), spacing minimums, and WCAG AA color contrast checks
-- **Design iteration template** — Structured feedback format for major design redesigns: what worked (keep), what needs improvement (fix), new requirements (add), and primary focus for iteration success
-- **gsd-meta skill** — Expert guidance for understanding and modifying GSD itself
+- **Design phase** (`/gsd:design-phase`) — New phase between discuss and research for UI/UX specifications. Creates DESIGN.md with ASCII wireframes, component specs, UX flows, and verification criteria
+- **gsd-designer agent** — Dedicated agent for design work with quality-forcing patterns (commercial benchmark, pre-emptive criticism, accountability check, mandatory self-review)
+- **DESIGN.md template** — 7-section specification format: Visual Identity, Screen Layouts, Component Specifications, UX Flows, Design System Decisions, Platform-Specific Notes, Verification Criteria
+- **Mathematical validation** — Blocking validation before design completion: bounds containment, platform-specific touch targets (Web 32×32px, iOS 44×44pt, Android 48×48dp), spacing minimums, WCAG AA contrast
+- **Design iteration template** — Structured feedback format for major redesigns: what worked (keep), what needs improvement (fix), new requirements (add), primary focus
+- **verify-changes command** — Goal-backward verification that code changes achieve requirements
+- **gsd-meta skill** — Expert guidance for understanding and modifying GSD itself, with reference docs for architecture, concepts, execution model, and workflows for diagnose/plan-change
 
 ### Changed
-- Design phase refinement (step 7) now references iteration template for major redesigns with structured feedback flow
+- Research phase now loads DESIGN.md and uses design specifications to guide technical research
+- Plan phase references design specifications when creating tasks
+- Execute phase includes smart routing to suggest design-phase for UI-heavy work
+- Progress command shows DESIGN.md status alongside other phase artifacts
+- gsd-executor honors DESIGN.md specifications during implementation
 
 ## [2.8.1] - 2026-01-19
 
