@@ -297,6 +297,7 @@ GSD handles it for you:
 | `PLAN.md` | Atomic task with XML structure, verification steps |
 | `SUMMARY.md` | What happened, what changed, committed to history |
 | `todos/` | Captured ideas and tasks for later work |
+| `adhoc/` | Small work executed mid-session with audit trail |
 
 Size limits based on where Claude's quality degrades. Stay under, get consistent excellence.
 
@@ -424,6 +425,7 @@ For full details and up-to-date usage, run `/gsd:help` inside Claude Code (or re
 |---------|--------------|
 | `/gsd:add-todo [desc]` | Capture idea or task for later |
 | `/gsd:check-todos [area]` | List pending todos, select one to work on |
+| `/gsd:do-work <desc>` | Execute small discovered work (max 2 tasks) |
 | `/gsd:debug [desc]` | Systematic debugging with persistent state |
 | `/gsd:help` | Show all commands and usage guide |
 | `/gsd:update` | Update GSD with changelog display |

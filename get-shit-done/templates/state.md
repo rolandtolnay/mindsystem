@@ -60,6 +60,14 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Recent Adhoc Work
+
+[Small work items executed via /gsd:do-work]
+
+None yet.
+
+*See `.planning/adhoc/` for full history*
+
 ### Blockers/Concerns
 
 [Issues that affect future work]
@@ -109,6 +117,9 @@ STATE.md is the project's short-term memory spanning all phases and sessions.
   - Update progress bar
   - Clear resolved blockers
   - Refresh Project Reference date
+- do-work: After adhoc work completed
+  - Add entry to "Recent Adhoc Work" section
+  - Keep last 5 entries (older entries remain in .planning/adhoc/)
 
 </lifecycle>
 
@@ -150,6 +161,12 @@ Updated after each plan completion.
 - Reference to .planning/todos/pending/
 - Brief list if few, count if many (e.g., "5 pending todos — see /gsd:check-todos")
 
+**Recent Adhoc Work:** Small fixes executed via /gsd:do-work
+- Last 5 adhoc work entries
+- Format: `- [date]: [description] (.planning/adhoc/[file]-SUMMARY.md)`
+- Full history remains in .planning/adhoc/ directory
+- Older entries removed from STATE.md but files preserved
+
 **Blockers/Concerns:** From "Next Phase Readiness" sections
 - Issues that affect future work
 - Prefix with originating phase
@@ -190,6 +207,7 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 **When updated:**
 - After each plan execution (update position, note decisions, update issues/blockers)
 - After phase transitions (update progress bar, clear resolved blockers, refresh project reference)
+- After adhoc work via /gsd:do-work (add entry to "Recent Adhoc Work")
 
 **Size management:**
 - Keep under 100 lines total
@@ -200,7 +218,7 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 - Project Reference: Pointer to PROJECT.md with core value
 - Current Position: Where we are now (phase, plan, status)
 - Performance Metrics: Velocity tracking
-- Accumulated Context: Recent decisions, pending todos, blockers
+- Accumulated Context: Recent decisions, pending todos, adhoc work, blockers
 - Session Continuity: Resume information
 
 </guidelines>

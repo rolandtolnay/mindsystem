@@ -389,6 +389,20 @@ List pending todos and select one to work on.
 Usage: `/gsd:check-todos`
 Usage: `/gsd:check-todos api`
 
+### Adhoc Work
+
+**`/gsd:do-work <description>`**
+Execute small discovered work without phase overhead (max 2 tasks).
+
+- Use when: you discover small work mid-session that needs to be done now but doesn't warrant a full phase.
+- Bridges the gap between `/gsd:add-todo` (capture for later) and `/gsd:insert-phase` (full planning)
+- Maximum 2 tasks — refuses and suggests `/gsd:insert-phase` for larger work
+- Creates lightweight artifacts in `.planning/adhoc/` for audit trail
+- Updates STATE.md with adhoc work entry
+- Single git commit with all changes
+
+Usage: `/gsd:do-work Fix auth token not refreshing on 401`
+
 ### Utility Commands
 
 **`/gsd:help`**
@@ -427,6 +441,9 @@ Usage: `/gsd:update`
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on
 │   └── done/             # Completed todos
+├── adhoc/                # Small work executed via /gsd:do-work
+│   ├── *-PLAN.md         # Lightweight plans
+│   └── *-SUMMARY.md      # Completion summaries
 ├── debug/                # Active debug sessions
 │   └── resolved/         # Archived resolved issues
 ├── codebase/             # Codebase map (brownfield projects)
@@ -514,6 +531,8 @@ Change anytime by editing `.planning/config.json`
 ```
 /gsd:debug "form submission fails silently"    # Systematic investigation (persists across /clear)
 # Then decide where the fix belongs:
+# - If it's small (1-2 tasks) and needed now:
+/gsd:do-work "Fix auth token refresh on 401"   # Quick fix with audit trail
 # - If it's required to satisfy the current phase goal: add more plans to the current phase
 /gsd:plan-phase 5                              # (or: /gsd:plan-phase 5 --gaps after verification)
 /gsd:execute-phase 5
