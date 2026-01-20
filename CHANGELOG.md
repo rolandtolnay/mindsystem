@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-01-20
+
+### Added
+- **Design phase mathematical validation** — gsd-designer agent now performs blocking validation before returning: bounds containment, platform-specific touch target minimums (Web 32×32px, iOS 44×44pt, Android 48×48dp), spacing minimums, and WCAG AA color contrast checks
+- **Design iteration template** — Structured feedback format for major design redesigns: what worked (keep), what needs improvement (fix), new requirements (add), and primary focus for iteration success
+- **gsd-meta skill** — Expert guidance for understanding and modifying GSD itself
+
+### Changed
+- Design phase refinement (step 7) now references iteration template for major redesigns with structured feedback flow
+
 ## [2.8.1] - 2026-01-19
 
 ### Added
@@ -854,7 +864,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.8.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.9.0...HEAD
+[2.9.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.9.0
 [2.8.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.1
 [2.8.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.8.0
 [2.7.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.7.0
