@@ -290,12 +290,33 @@ After initial generation, if user wants to refine:
 - Read DESIGN.md directly
 - Discuss changes conversationally
 - Edit DESIGN.md directly (no subagent needed for small changes)
-- For major redesign, spawn gsd-designer again with existing design + feedback
+- For major redesign, spawn gsd-designer again with structured feedback
 
 **Refinement principles:**
 - Direct edits — Edit DESIGN.md directly, don't regenerate
 - Preserve decisions — Changes are incremental, not wholesale replacement
 - User controls pace — User decides when design is "done"
+
+**For major redesigns (multiple aspects changing):**
+
+Use the iteration template from `~/.claude/get-shit-done/templates/design-iteration.md`:
+
+1. Capture feedback using the structured format:
+   - What worked well (KEEP)
+   - What needs improvement (FIX)
+   - New requirements (ADD)
+   - Primary focus for this iteration
+
+2. Spawn gsd-designer with iteration context:
+   - Include `<previous_design>` with relevant sections
+   - Include `<feedback_on_previous>` with structured feedback
+   - Include `<specific_focus>` identifying the ONE thing
+   - Include `<constraints>` noting what must NOT change
+
+3. After iteration completes:
+   - Verify "what worked well" was preserved
+   - Verify "what needs improvement" was addressed
+   - Update design version in DESIGN.md frontmatter
 
 </process>
 

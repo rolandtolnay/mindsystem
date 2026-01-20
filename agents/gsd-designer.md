@@ -133,6 +133,62 @@ Quality failures — if you see these, the design is NOT done:
 - Centered everything (lazy layout solution)
 </quality_forcing>
 
+<validation_rules>
+## Mathematical Validation (BLOCKING)
+
+BEFORE returning DESIGN.md, verify these constraints mathematically. Design CANNOT be returned until all checks pass.
+
+### 1. Bounds Containment (per screen)
+
+For each component in ASCII wireframes:
+- `x + width <= screen_width`
+- `y + height <= screen_height`
+
+If components overflow container bounds, fix placement or dimensions before returning.
+
+### 2. Minimum Touch/Click Target Sizes
+
+| Platform | Minimum Size | Check |
+|----------|--------------|-------|
+| Web | 32×32px | Interactive elements (buttons, links, inputs) |
+| iOS | 44×44pt | All tappable elements |
+| Android | 48×48dp | All touchable elements |
+
+If any interactive element is smaller than platform minimum, increase size or add padding before returning.
+
+### 3. Spacing Minimums
+
+| Constraint | Minimum | Check |
+|------------|---------|-------|
+| Edge padding | 15px | Content distance from screen edges |
+| Component gaps | 8px | Space between distinct components |
+| Text legibility | 16px | Body text size (14px acceptable with high contrast) |
+
+If spacing violates minimums, adjust layout before returning.
+
+### 4. Accessibility Constraints
+
+| Constraint | Requirement | Check |
+|------------|-------------|-------|
+| Color contrast (body text) | 4.5:1 | Text color vs background color |
+| Color contrast (large text) | 3:1 | Headers 18px+ or 14px+ bold |
+| Focus indicators | Visible | All interactive elements must have focus states |
+
+If contrast ratios fail, adjust colors before returning.
+
+### Validation Process
+
+After completing design but BEFORE returning:
+
+1. **Scan each wireframe** — Check bounds, spacing, target sizes
+2. **Verify color pairs** — Primary text/background, secondary text/background
+3. **Check all interactive elements** — Buttons, links, inputs, cards with actions
+4. **Fix violations** — Adjust specs until all checks pass
+5. **Document in Verification Criteria** — Note which validations were verified
+
+**This validation is not optional.** A design that violates these constraints will cause implementation issues. Fix now, not later.
+</validation_rules>
+
 <execution_flow>
 ## Step 1: Load Context Chain
 
@@ -230,7 +286,24 @@ Run through the quality-forcing checklist:
 
 If any answer is "generic/arbitrary/default/no" → refine before returning.
 
-## Step 11: Write DESIGN.md
+## Step 11: Mathematical Validation (BLOCKING)
+
+Run through validation rules from `<validation_rules>` section:
+
+1. **Bounds check** — For each screen, verify components fit within dimensions
+2. **Touch targets** — Verify all interactive elements meet platform minimums
+3. **Spacing** — Verify edge padding ≥15px, component gaps ≥8px
+4. **Contrast** — Verify text/background pairs meet WCAG AA (4.5:1 body, 3:1 large)
+
+**If any validation fails:**
+- Fix the spec (adjust sizes, spacing, or colors)
+- Re-run validation
+- Do NOT proceed until all checks pass
+
+**Document in Verification Criteria:**
+- "Validation passed: bounds, touch targets, spacing, contrast"
+
+## Step 12: Write DESIGN.md
 
 Write to: `.planning/phases/{phase}-{slug}/{phase}-DESIGN.md`
 
@@ -330,6 +403,7 @@ Design is complete when:
 - [ ] UX flows document all user journeys
 - [ ] Verification criteria are observable and testable
 - [ ] Self-review checklist passed (no generic/arbitrary answers)
+- [ ] **Mathematical validation passed (bounds, touch targets, spacing, contrast)**
 - [ ] DESIGN.md written to phase directory
 
 Quality indicators:
