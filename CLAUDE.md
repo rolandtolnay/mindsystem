@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-> **Comprehensive reference.** Core rules auto-load from `.claude/rules/`. This document provides deep explanations and examples for when you need the full picture.
+> **Contributor guidelines.** For GSD concepts, architecture, and deep knowledge, invoke `gsd-meta` skill.
 
-This document explains how GSD is written so future Claude instances can contribute consistently.
+This document contains rules that affect every output when developing GSD.
 
 ## Core Philosophy
 
@@ -198,19 +198,6 @@ Build authentication system
 
 ---
 
-## Naming Conventions
-
-| Type | Convention | Example |
-|------|------------|---------|
-| Files | kebab-case | `execute-phase.md` |
-| Commands | `gsd:kebab-case` | `gsd:execute-phase` |
-| XML tags | kebab-case | `<execution_context>` |
-| Step names | snake_case | `name="load_project_state"` |
-| Bash variables | CAPS_UNDERSCORES | `PHASE_ARG`, `PLAN_START_TIME` |
-| Type attributes | colon separator | `type="checkpoint:human-verify"` |
-
----
-
 ## Language & Tone
 
 ### Imperative Voice
@@ -236,26 +223,6 @@ Present: Factual statements, verification results, direct answers
 **Good one-liner:** "JWT auth with refresh rotation using jose library"
 
 **Bad one-liner:** "Phase complete" or "Authentication implemented"
-
----
-
-## Context Engineering
-
-### Size Constraints
-
-- **Plans:** 2-3 tasks maximum
-- **Quality curve:** 0-30% peak, 30-50% good, 50-70% degrading, 70%+ poor
-- **Split triggers:** >3 tasks, multiple subsystems, >5 files per task
-
-### Fresh Context Pattern
-
-Use subagents for autonomous work. Reserve main context for user interaction.
-
-### State Preservation
-
-- `STATE.md` — Living memory across sessions
-- `agent-history.json` — Subagent tracking for resume
-- SUMMARY.md frontmatter — Machine-readable for dependency graphs
 
 ---
 
@@ -301,34 +268,6 @@ Use subagents for autonomous work. Reserve main context for user interaction.
   <done>Valid credentials → 200 + cookie. Invalid → 401.</done>
 </task>
 ```
-
----
-
-## Commit Conventions
-
-### Format
-
-```
-{type}({phase}-{plan}): {description}
-```
-
-### Types
-
-| Type | Use |
-|------|-----|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `test` | Tests only (TDD RED) |
-| `refactor` | Code cleanup (TDD REFACTOR) |
-| `docs` | Documentation/metadata |
-| `chore` | Config/dependencies |
-
-### Rules
-
-- One commit per task during execution
-- Stage files individually (never `git add .`)
-- Capture hash for SUMMARY.md
-- Include Co-Authored-By line
 
 ---
 
@@ -390,57 +329,6 @@ Each layer answers different questions:
 - Workflow: "What happens?"
 - Template: "What does output look like?"
 - Reference: "Why this design?"
-
----
-
-## Depth & Compression
-
-Depth setting controls compression tolerance:
-
-- **Quick:** Compress aggressively (1-3 plans/phase)
-- **Standard:** Balanced (3-5 plans/phase)
-- **Comprehensive:** Resist compression (5-10 plans/phase)
-
-**Key principle:** Depth controls compression, not inflation. Never pad to hit a target number. Derive plans from actual work.
-
----
-
-## TDD Plans
-
-### Detection Heuristic
-
-> Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
-
-Yes → TDD plan (one feature per plan)
-No → Standard plan
-
-### TDD Plan Structure
-
-```yaml
----
-type: tdd
----
-```
-
-```xml
-<objective>
-Implement [feature] using TDD (RED → GREEN → REFACTOR)
-</objective>
-
-<behavior>
-Expected behavior specification
-</behavior>
-
-<implementation>
-How to make tests pass
-</implementation>
-```
-
-### TDD Commits
-
-- RED: `test({phase}-{plan}): add failing test for [feature]`
-- GREEN: `feat({phase}-{plan}): implement [feature]`
-- REFACTOR: `refactor({phase}-{plan}): clean up [feature]`
 
 ---
 
