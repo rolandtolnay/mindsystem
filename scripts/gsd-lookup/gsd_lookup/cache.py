@@ -14,22 +14,24 @@ def _get_cache() -> diskcache.Cache:
     return diskcache.Cache(str(CACHE_DIR))
 
 
-def _make_key(command: str, *args: str, max_tokens: int) -> str:
-    """Create cache key from command, args, and max_tokens."""
-    key_parts = [command] + list(args) + [str(max_tokens)]
+def _make_key(command: str, *args: str, max_tokens: int | None = None) -> str:
+    """Create cache key from command, args, and optionally max_tokens."""
+    key_parts = [command] + list(args)
+    if max_tokens is not None:
+        key_parts.append(str(max_tokens))
     key_string = ":".join(key_parts)
     key_hash = hashlib.sha256(key_string.encode()).hexdigest()[:16]
     return f"{command}:{key_hash}"
 
 
-def get_cached(command: str, *args: str, max_tokens: int) -> Any | None:
+def get_cached(command: str, *args: str, max_tokens: int | None = None) -> Any | None:
     """Get cached result if exists and not expired."""
     cache = _get_cache()
     key = _make_key(command, *args, max_tokens=max_tokens)
     return cache.get(key)
 
 
-def set_cached(command: str, *args: str, max_tokens: int, value: Any) -> None:
+def set_cached(command: str, *args: str, max_tokens: int | None = None, value: Any) -> None:
     """Cache a result with appropriate TTL."""
     cache = _get_cache()
     key = _make_key(command, *args, max_tokens=max_tokens)

@@ -19,5 +19,5 @@ CACHE_TTL_DEEP = 60 * 60 * 6   # 6 hours for deep research
 # Default token limits
 DEFAULT_MAX_TOKENS = 2000
 
-# Perplexity model
-PERPLEXITY_DEEP_MODEL = "sonar-deep-research"
+# Perplexity model - sonar-reasoning-pro for faster chain-of-thought research
+PERPLEXITY_DEEP_MODEL = "sonar-reasoning-pro"

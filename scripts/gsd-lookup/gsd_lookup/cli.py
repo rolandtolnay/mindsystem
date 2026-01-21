@@ -12,7 +12,7 @@ from gsd_lookup.cache import get_cached, set_cached
 from gsd_lookup.config import DEFAULT_MAX_TOKENS
 from gsd_lookup.errors import GsdLookupError
 from gsd_lookup.output import format_error, format_success, output_json
-from gsd_lookup.tokens import truncate_results
+from gsd_lookup.tokens import estimate_tokens, truncate_results
 
 app = typer.Typer(
     name="gsd-lookup",
@@ -136,12 +136,6 @@ def docs(
 @app.command()
 def deep(
     query: str = typer.Argument(..., help="Research query"),
-    max_tokens: int = typer.Option(
-        DEFAULT_MAX_TOKENS,
-        "--max-tokens",
-        "-t",
-        help="Maximum tokens in response",
-    ),
     no_cache: bool = typer.Option(
         False,
         "--no-cache",
@@ -154,10 +148,13 @@ def deep(
         help="Pretty-print JSON output",
     ),
 ) -> None:
-    """Perform deep research via Perplexity.
+    """Perform research via Perplexity's reasoning model.
 
-    Use for comprehensive multi-source research and synthesis.
-    Cost: ~$0.005 per query + tokens. Use sparingly for high-value questions.
+    Uses chain-of-thought reasoning with web search to synthesize
+    actionable findings from multiple sources. Faster than exhaustive
+    deep research while maintaining quality.
+
+    Cost: ~$0.005 per query. Use for high-value technical questions.
 
     Examples:
         gsd-lookup deep "authentication patterns for SaaS applications"
@@ -168,7 +165,7 @@ def deep(
 
     # Check cache first
     if not no_cache:
-        cached = get_cached(command, query, max_tokens=max_tokens)
+        cached = get_cached(command, query)
         if cached is not None:
             cached["metadata"]["cache_hit"] = True
             typer.echo(output_json(cached, pretty=json_pretty))
@@ -180,22 +177,20 @@ def deep(
         # Perform research query
         raw_response = client.query(query)
 
-        # Format results
+        # Format results - no truncation for deep, output controlled via prompt
         results, citations = client.format_results(raw_response)
-        total_available = len(results)
 
-        # Truncate to token budget
-        truncated_results, tokens_used = truncate_results(results, max_tokens)
+        # Calculate tokens for metadata (no truncation)
+        tokens_used = sum(estimate_tokens(r.get("content", "")) for r in results)
 
         # Build response
         metadata = {
-            "total_available": total_available,
-            "returned": len(truncated_results),
+            "total_available": len(results),
+            "returned": len(results),
             "tokens_used": tokens_used,
-            "max_tokens": max_tokens,
             "cache_hit": False,
             "confidence": "MEDIUM-HIGH",
-            "backend": "perplexity-deep-research",
+            "backend": "perplexity-reasoning",
         }
 
         if citations:
@@ -204,13 +199,13 @@ def deep(
         response = format_success(
             command=command,
             query=query,
-            results=truncated_results,
+            results=results,
             metadata=metadata,
         )
 
         # Cache result
         if not no_cache:
-            set_cached(command, query, max_tokens=max_tokens, value=response)
+            set_cached(command, query, value=response)
 
         typer.echo(output_json(response, pretty=json_pretty))
 

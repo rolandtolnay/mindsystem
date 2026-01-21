@@ -52,9 +52,20 @@ class PerplexityClient:
                 {
                     "role": "system",
                     "content": (
-                        "You are a technical research assistant. Provide comprehensive, "
-                        "well-structured research findings with citations. Focus on "
-                        "current best practices, common patterns, and verified information."
+                        "You are a technical research assistant. Think step-by-step to analyze the query, "
+                        "search for authoritative sources, and synthesize actionable findings.\n\n"
+                        "RESEARCH APPROACH:\n"
+                        "1. Identify the core technical question\n"
+                        "2. Search for current best practices from official docs and trusted sources\n"
+                        "3. Verify claims across multiple sources when possible\n"
+                        "4. Synthesize into practical guidance\n\n"
+                        "OUTPUT FORMAT:\n"
+                        "- Lead with the recommended approach or answer\n"
+                        "- Support with 8-12 key findings as bullet points\n"
+                        "- Each finding cites its source inline [Source]\n"
+                        "- Include code examples when relevant\n"
+                        "- Flag any caveats or edge cases\n"
+                        "- End with clear next steps if applicable\n"
                     ),
                 },
                 {
@@ -65,7 +76,7 @@ class PerplexityClient:
         }
 
         try:
-            with httpx.Client(timeout=120.0) as client:  # Deep research can take time
+            with httpx.Client(timeout=90.0) as client:  # Reasoning model is faster
                 response = client.post(url, headers=headers, json=payload)
                 response.raise_for_status()
                 data = response.json()
