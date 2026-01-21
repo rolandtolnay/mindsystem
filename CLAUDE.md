@@ -14,6 +14,41 @@ GSD is a **meta-prompting system** where every file is both implementation and s
 
 ---
 
+## Fork Philosophy
+
+This is a customized fork of GSD with specific design principles that diverge from upstream.
+
+### Modularity Over Bundling
+
+Keep commands separated rather than unified into mega-flows. Each command has a clear purpose. Users should know exactly which command to use in each situation without consulting documentation.
+
+### Main Context for Collaboration
+
+Planning and interactive work stays in the main context rather than delegating to subagents. This preserves:
+- Conversational iteration during planning
+- User ability to question, redirect, and contribute
+- Visibility into Claude's reasoning
+
+Reserve subagents for autonomous execution work, not collaborative thinking.
+
+### Script + Prompt Hybrid
+
+Combine bash scripts with prompts where deterministic logic fits better in code than natural language. Examples:
+- Patch generation extracted to shell scripts
+- File manipulation via dedicated tooling
+- Research capabilities moving toward CLI tools
+
+Prompts handle reasoning and decisions; scripts handle mechanical operations.
+
+### User as Collaborator
+
+Trust that users can contribute meaningfully. Maintain:
+- **Control** — User decides when to proceed, what to skip
+- **Granularity** — Separate commands for research, requirements, planning, execution
+- **Transparency** — No hidden delegation or background orchestration
+
+---
+
 ## Development Context
 
 **All changes happen in this repository.** Never modify user-scope files (`~/.claude/`).
