@@ -7,35 +7,6 @@ description: Instant GSD expert for diagnosing, understanding, and planning GSD 
 Provides instant expertise about the GSD framework for meta-discussions, diagnostics, and planning GSD changes. Use when working on GSD itself, diagnosing GSD issues, or asking how GSD works.
 </objective>
 
-<intake>
-What do you need help with?
-
-1. Understand GSD concepts (how things work)
-2. Diagnose an issue (something isn't working)
-3. Plan a change (add/modify GSD features)
-4. Just ask a question
-
-**For options 1 & 4:** Ask directly — essential knowledge below covers most questions.
-**For options 2 & 3:** Route to specific workflow.
-</intake>
-
-<routing>
-| Response | Next Action |
-|----------|-------------|
-| 1, "understand", "how does", "what is", "explain" | Answer using essential_knowledge below |
-| 2, "diagnose", "not working", "broken", "bug", "issue" | Read workflows/diagnose.md and follow it |
-| 3, "plan", "add", "modify", "change", "extend", "new command", "new agent" | Read workflows/plan-change.md and follow it |
-| 4, direct question | Answer using essential_knowledge, reference files if deeper context needed |
-
-**Intent-based routing (if user provides clear intent without selecting):**
-- "Why isn't X working?" → workflows/diagnose.md
-- "How do I add a new command?" → workflows/plan-change.md
-- "What is wave execution?" → Answer from essential_knowledge
-- "Explain checkpoints" → Answer from essential_knowledge, deeper: references/concepts.md
-
-**After reading a workflow, follow it exactly.**
-</routing>
-
 <essential_knowledge>
 
 <what_gsd_is>
