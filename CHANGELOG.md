@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.10.2] - 2026-01-21
+
+### Fixed
+- Context7 MCP tool references in `gsd-researcher` agent — corrected tool prefix from `mcp__context7__*` to `mcp__plugin_context7_context7__*`, fixed tool name from `get-library-docs` to `query-docs`, and updated parameter names
+
 ## [2.10.1] - 2026-01-20
 
 ### Changed
@@ -886,7 +891,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.10.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.10.2...HEAD
+[2.10.2]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.2
 [2.10.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.1
 [2.10.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.0
 [2.9.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.9.0
