@@ -51,7 +51,7 @@ Does this look right? (yes / adjust)
 
 | Dimension | Question |
 |-----------|----------|
-| Stack | "What's the standard 2025 stack for [domain]?" |
+| Stack | "What's the standard 2026 stack for [domain]?" |
 | Features | "What features do [domain] products have?" |
 | Architecture | "How are [domain] systems structured?" |
 | Pitfalls | "What do [domain] projects get wrong?" |

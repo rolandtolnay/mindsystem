@@ -149,7 +149,7 @@ Verified patterns from official sources:
 </code_examples>
 
 <sota_updates>
-## State of the Art (2024-2025)
+## State of the Art (2025-2026)
 
 What's changed recently:
 
@@ -228,7 +228,7 @@ Things that couldn't be fully resolved:
 ```markdown
 # Phase 3: 3D City Driving - Research
 
-**Researched:** 2025-01-20
+**Researched:** 2026-01-20
 **Domain:** Three.js 3D web game with driving mechanics
 **Confidence:** HIGH
 
@@ -436,7 +436,7 @@ function useVehicleControls(rigidBodyRef) {
 </code_examples>
 
 <sota_updates>
-## State of the Art (2024-2025)
+## State of the Art (2025-2026)
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
@@ -445,7 +445,7 @@ function useVehicleControls(rigidBodyRef) {
 | Manual InstancedMesh | drei <Instances> | 2022 | Simpler API, handles updates |
 
 **New tools/patterns to consider:**
-- **WebGPU:** Coming but not production-ready for games yet (2025)
+- **WebGPU:** Coming but not production-ready for games yet (2026)
 - **drei Gltf helpers:** <useGLTF.preload> for loading screens
 
 **Deprecated/outdated:**
@@ -484,14 +484,14 @@ function useVehicleControls(rigidBodyRef) {
 - Pitfalls: HIGH - documented in discourse, verified in docs
 - Code examples: HIGH - from Context7/official sources
 
-**Research date:** 2025-01-20
-**Valid until:** 2025-02-20 (30 days - R3F ecosystem stable)
+**Research date:** 2026-01-20
+**Valid until:** 2026-02-20 (30 days - R3F ecosystem stable)
 </metadata>
 
 ---
 
 *Phase: 03-city-driving*
-*Research completed: 2025-01-20*
+*Research completed: 2026-01-20*
 *Ready for planning: yes*
 ```
 

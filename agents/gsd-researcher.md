@@ -118,7 +118,7 @@ When researching "best library for X":
 
 **Example questions:**
 - "What are the options for 3D graphics on the web?"
-- "What state management libraries do React apps use in 2025?"
+- "What state management libraries do React apps use in 2026?"
 - "What are the approaches to real-time sync?"
 
 ## Mode 2: Feasibility
@@ -139,7 +139,7 @@ When researching "best library for X":
 
 **Example questions:**
 - "Can we implement offline-first with real-time sync?"
-- "Is WebGPU ready for production in 2025?"
+- "Is WebGPU ready for production in 2026?"
 - "Can we do ML inference in the browser?"
 
 ## Mode 3: Implementation
