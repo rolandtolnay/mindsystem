@@ -1,0 +1,17 @@
+[project]
+name = "gsd-lookup"
+version = "1.0.0"
+description = "CLI tool for GSD research - Context7 docs and Perplexity deep research"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9.0",
+    "httpx>=0.25.0",
+    "diskcache>=5.6.0",
+]
+
+[project.scripts]
+gsd-lookup = "gsd_lookup.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

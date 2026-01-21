@@ -1,7 +1,7 @@
 ---
 name: gsd-researcher
 description: Conducts comprehensive research using systematic methodology, source verification, and structured output. Spawned by /gsd:research-phase and /gsd:research-project orchestrators.
-tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__plugin_context7_context7__*
+tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch
 color: cyan
 ---
 
@@ -188,112 +188,119 @@ When researching "best library for X":
 
 <tool_strategy>
 
-## Context7: First for Libraries
+## Tool Selection Guide
 
-Context7 provides authoritative, current documentation for libraries and frameworks.
+| Need | Tool | Why |
+|------|------|-----|
+| Library API docs | `gsd-lookup docs` | Authoritative, version-aware, HIGH confidence |
+| Ecosystem discovery | WebSearch | Free with Max, adequate for discovery |
+| Deep synthesis | `gsd-lookup deep` | Exhaustive multi-source research |
+| Specific URL content | WebFetch | Full page content |
+| Project files | Read/Grep/Glob | Local codebase |
+
+## gsd-lookup CLI
+
+The CLI is at `~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh`.
+
+### Library Documentation (Context7)
+
+```bash
+~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh docs <library> "<query>"
+```
+
+Example:
+```bash
+~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh docs nextjs "app router file conventions"
+~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh docs "react-three-fiber" "physics setup"
+```
+
+**When to use:** Library APIs, framework features, configuration options, version-specific behavior. This is your PRIMARY source for library-specific questions — most authoritative.
+
+**Response format:** JSON with results array containing title, content, source_url, tokens.
+
+### Deep Research (Perplexity)
+
+```bash
+~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh deep "<query>"
+```
+
+Example:
+```bash
+~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh deep "authentication patterns for SaaS applications"
+~/.claude/get-shit-done/scripts/gsd-lookup-wrapper.sh deep "WebGPU browser support and production readiness 2026"
+```
+
+**When to use:** Architecture decisions, technology comparisons, comprehensive ecosystem surveys, best practices synthesis. Use for HIGH-VALUE research questions — this costs money.
+
+**Cost awareness:** ~$0.005 per query + tokens. Budget for 5-10 deep queries per research session for important questions only.
+
+### CLI Options
+
+```bash
+--max-tokens, -t    Maximum tokens in response (default: 2000)
+--no-cache          Skip cache lookup
+--json-pretty, -p   Pretty-print JSON output
+```
+
+## WebSearch (Built-in)
+
+Use WebSearch for ecosystem discovery and trend research:
+
+```
+WebSearch("[technology] best practices {current_year}")
+WebSearch("[technology] recommended libraries {current_year}")
+WebSearch("[technology] vs [alternative] {current_year}")
+```
 
 **When to use:**
-- Any question about a library's API
-- How to use a framework feature
-- Current version capabilities
-- Configuration options
+- Finding what exists when you don't know library names
+- Current trends and community patterns
+- Cross-referencing findings
+- Any discovery where you need "what's out there"
 
-**How to use:**
-```
-1. Resolve library ID:
-   mcp__plugin_context7_context7__resolve-library-id with libraryName: "[library name]"
+**Always include current year** in queries for freshness.
 
-2. Query documentation:
-   mcp__plugin_context7_context7__query-docs with:
-   - libraryId: [resolved ID]
-   - query: "[specific question]"
-```
+**Why WebSearch over Perplexity search:** Free with Max subscription. Perplexity search costs $5/1k queries with marginal quality improvement for discovery tasks.
 
-**Best practices:**
-- Resolve first, then query (don't guess IDs)
-- Use specific topics for focused results
-- Query multiple topics if needed (getting started, API, configuration)
-- Trust Context7 over training data
+## Token Limit Strategy (for gsd-lookup)
 
-## Official Docs via WebFetch
+**Default: 2000 tokens per response**
 
-For libraries not in Context7 or for authoritative sources.
+**Rationale:**
+- The 50% rule: Research must complete before hitting 100k tokens
+- At 2000 tokens/query, you can make ~50 queries
+- Context7 returns results ranked by relevance — first 3-4 snippets are most important
+- Query flexibility > per-query comprehensiveness
 
-**When to use:**
-- Library not in Context7
-- Need to verify changelog/release notes
-- Official blog posts or announcements
-- GitHub README or wiki
+**When to increase (`--max-tokens 4000-6000`):**
+- Comprehensive API documentation for a single feature
+- Deep research on complex topics
+- When `metadata.total_available` >> `metadata.returned` AND you need breadth
 
-**How to use:**
-```
-WebFetch with exact URL:
-- https://docs.library.com/getting-started
-- https://github.com/org/repo/releases
-- https://official-blog.com/announcement
-```
+## Confidence Levels
 
-**Best practices:**
-- Use exact URLs, not search results pages
-- Check publication dates
-- Prefer /docs/ paths over marketing pages
-- Fetch multiple pages if needed
-
-## WebSearch: Ecosystem Discovery
-
-For finding what exists, community patterns, real-world usage.
-
-**When to use:**
-- "What libraries exist for X?"
-- "How do people solve Y?"
-- "Common mistakes with Z"
-- Ecosystem surveys
-
-**Query templates (use {current_year}):**
-```
-Ecosystem discovery:
-- "[technology] best practices {current_year}"
-- "[technology] recommended libraries {current_year}"
-- "[technology] vs [alternative] {current_year}"
-
-Pattern discovery:
-- "how to build [type of thing] with [technology]"
-- "[technology] project structure"
-- "[technology] architecture patterns"
-
-Problem discovery:
-- "[technology] common mistakes"
-- "[technology] performance issues"
-- "[technology] gotchas"
-```
-
-**Best practices:**
-- Include current year for freshness
-- Use multiple query variations
-- Cross-verify findings with authoritative sources
-- Mark WebSearch-only findings as LOW confidence
+| Source | Confidence | Use |
+|--------|------------|-----|
+| gsd-lookup docs | HIGH | State as fact |
+| gsd-lookup deep | MEDIUM-HIGH | State with attribution |
+| WebSearch verified | MEDIUM | State with source |
+| WebSearch unverified | LOW | Flag for validation |
 
 ## Verification Protocol
 
-**CRITICAL:** WebSearch findings must be verified.
-
 ```
-For each WebSearch finding:
+1. Is confidence HIGH (from gsd-lookup docs)?
+   YES → State as fact with source attribution
+   NO → Continue
 
-1. Can I verify with Context7?
-   YES → Query Context7, upgrade to HIGH confidence
-   NO → Continue to step 2
-
-2. Can I verify with official docs?
-   YES → WebFetch official source, upgrade to MEDIUM confidence
-   NO → Remains LOW confidence, flag for validation
+2. Can WebSearch or deep research verify?
+   YES → Upgrade confidence one level
+   NO → Mark as LOW, flag for validation
 
 3. Do multiple sources agree?
-   YES → Increase confidence one level
-   NO → Note contradiction, investigate further
+   YES → Increase confidence
+   NO → Note contradiction, investigate
 ```
-
-**Never present LOW confidence findings as authoritative.**
 
 </tool_strategy>
 

@@ -2,31 +2,39 @@
 
 ## Executive Summary
 
-The gsd-researcher agent cannot use Context7 MCP tools due to a Claude Code bug preventing subagents from accessing MCP tools. Additionally, MCP tool definitions consume significant context window space, and Perplexity MCP returns outsized responses (15k+ tokens) that exhaust agent context before research completes.
+The gsd-researcher agent cannot use Context7 MCP tools due to a Claude Code bug preventing subagents from accessing MCP tools. This breaks access to authoritative library documentation during research.
 
-This proposal introduces `gsd-research`, a Python CLI tool that wraps Context7 and Perplexity APIs with semantic commands (`docs`, `web`, `deep`). The CLI provides controlled output sizing, response caching, and consistent JSON output format. The gsd-researcher agent will invoke the CLI via Bash instead of MCP tools.
+This proposal introduces `gsd-research`, a Python CLI tool with two commands:
+- **`docs`** — Query library documentation via Context7 API
+- **`deep`** — Perform exhaustive multi-source research via Perplexity Research API
+
+**Why not include web search?** Claude Code's built-in WebSearch is included free with Max subscription and works in subagents. Perplexity's basic search ($5/1k queries) doesn't justify the cost when WebSearch is free and adequate for ecosystem discovery.
 
 **Key benefits:**
-- Unblocks researcher agent (works around MCP bug)
-- Reduces context consumption by ~50% vs MCP (per beyond-mcp research)
-- Enables response truncation and summarization
+- Unblocks Context7 access for researcher agent (works around MCP bug)
+- Adds deep research capability (unique — WebSearch can't do exhaustive synthesis)
+- Reduces context consumption via response truncation
 - Provides caching layer for repeated queries
-- Establishes reusable pattern for future API integrations
+- Simpler design (2 commands vs 3)
 
 ## Problem Statement
 
 ### Current Issues
 
 1. **MCP Bug:** Claude Code subagents cannot access MCP tools — gsd-researcher's Context7 calls fail silently
-2. **Context Bloat:** MCP tool definitions consume context window just by existing
-3. **Outsized Responses:** Perplexity MCP returns 15k+ tokens per research query, exhausting agent context
-4. **No Control:** Cannot truncate, summarize, or cache MCP responses
+2. **Missing Deep Research:** WebSearch finds sources but can't synthesize exhaustive multi-source reports
+3. **No Control:** Cannot truncate or cache MCP responses when they do work
 
 ### Impact
 
-- `/gsd:research-phase` and `/gsd:research-project` commands effectively broken
-- Research quality degrades as context fills with oversized API responses
-- No workaround available within current architecture
+- `/gsd:research-phase` and `/gsd:research-project` lack authoritative library documentation
+- Research limited to WebSearch discovery without deep synthesis capability
+- No workaround for Context7 access within current architecture
+
+### What Works Fine
+
+- **WebSearch:** Included free with Max subscription, works in subagents, adequate for ecosystem discovery
+- **WebFetch:** Works for fetching specific URLs
 
 ## Proposed Solution
 
@@ -34,12 +42,11 @@ This proposal introduces `gsd-research`, a Python CLI tool that wraps Context7 a
 
 ```
 gsd-researcher agent
-  ↓ (Bash tool)
-gsd-research CLI (Python)
-  ↓ (semantic routing)
-├── docs → Context7 REST API
-├── web → Perplexity Search API
-└── deep → Perplexity Research API
+  ├── WebSearch (built-in) → Ecosystem discovery (free with Max)
+  ├── WebFetch (built-in) → Specific URL content (free)
+  └── Bash → gsd-research CLI
+              ├── docs → Context7 REST API (library documentation)
+              └── deep → Perplexity Research API (exhaustive synthesis)
 ```
 
 ### Design Decisions
@@ -59,7 +66,7 @@ gsd-research CLI (Python)
 
 #### `gsd-research docs <library> "<query>"`
 
-Query library documentation via Context7.
+Query library documentation via Context7. Use for authoritative, version-aware API documentation.
 
 ```bash
 # Example
@@ -73,24 +80,11 @@ gsd-research docs "react-three-fiber" "physics integration"
 3. Truncate response to max tokens
 4. Return JSON with snippets, sources, metadata
 
-#### `gsd-research web "<query>"`
-
-Perform web search via Perplexity Search API.
-
-```bash
-# Example
-gsd-research web "react state management best practices 2026"
-gsd-research web "nextjs vs remix comparison"
-```
-
-**Behavior:**
-1. Call Perplexity search endpoint
-2. Truncate response to max tokens
-3. Return JSON with search results, URLs, snippets
+**When to use:** Library APIs, framework features, configuration options, version-specific behavior.
 
 #### `gsd-research deep "<query>"`
 
-Perform deep research via Perplexity Research API.
+Perform exhaustive multi-source research via Perplexity Research API. Use for comprehensive synthesis across many sources.
 
 ```bash
 # Example
@@ -99,16 +93,29 @@ gsd-research deep "WebGPU browser support and performance characteristics"
 ```
 
 **Behavior:**
-1. Call Perplexity research endpoint
+1. Call Perplexity research endpoint (sonar-deep-research model)
 2. Strip `<think>` tags if present
 3. Truncate response to max tokens
 4. Return JSON with research findings, citations
+
+**When to use:** Architecture decisions, technology comparisons, ecosystem surveys, best practices research.
+
+**Cost:** $5/1k requests + token costs. Use sparingly for high-value research questions.
+
+#### Not Included: Web Search
+
+Basic web search uses Claude Code's built-in **WebSearch** tool, which:
+- Is included free with Max subscription
+- Works in subagents (no MCP bug)
+- Is adequate for ecosystem discovery and trend research
+
+**When to use WebSearch:** Finding what exists, community patterns, current trends, cross-referencing findings.
 
 ### Global Options
 
 ```bash
 gsd-research --max-tokens 2000 docs nextjs "routing"  # Override default
-gsd-research --no-cache web "breaking news topic"     # Skip cache
+gsd-research --no-cache deep "emerging technology"    # Skip cache
 gsd-research --json-pretty docs react "hooks"         # Pretty-print JSON
 gsd-research --version                                # Show version
 ```
@@ -168,9 +175,8 @@ All commands return JSON to stdout:
 
 | Command | Cache TTL | Rationale |
 |---------|-----------|-----------|
-| `docs` | 6 hours | Library docs stable |
-| `web` | 1 hour | Search results change |
-| `deep` | 6 hours | Research comprehensive |
+| `docs` | 24 hours | Library docs stable, Context7 already curated |
+| `deep` | 6 hours | Research comprehensive but web sources change |
 
 **Cache key:** `{command}:{query_hash}:{max_tokens}`
 
@@ -207,11 +213,20 @@ tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch
 ```xml
 <tool_strategy>
 
-## gsd-research CLI: Primary Research Tool
+## Tool Selection Guide
 
-The gsd-research CLI provides access to library documentation and web search with controlled output sizing.
+| Need | Tool | Why |
+|------|------|-----|
+| Library API docs | `gsd-research docs` | Authoritative, version-aware, HIGH confidence |
+| Ecosystem discovery | WebSearch | Free with Max, adequate for discovery |
+| Deep synthesis | `gsd-research deep` | Exhaustive multi-source research |
+| Specific URL content | WebFetch | Full page content |
+| Project files | Read/Grep/Glob | Local codebase |
 
-**For library documentation (Context7):**
+## gsd-research CLI
+
+### Library Documentation (Context7)
+
 ```bash
 gsd-research docs <library> "<query>"
 ```
@@ -219,19 +234,13 @@ gsd-research docs <library> "<query>"
 Example:
 ```bash
 gsd-research docs nextjs "app router file conventions"
+gsd-research docs "react-three-fiber" "physics setup"
 ```
 
-**For web search (Perplexity Search):**
-```bash
-gsd-research web "<query>"
-```
+**When to use:** Library APIs, framework features, configuration options, version-specific behavior. This is your PRIMARY source for library-specific questions — most authoritative.
 
-Example:
-```bash
-gsd-research web "react state management best practices 2026"
-```
+### Deep Research (Perplexity)
 
-**For deep research (Perplexity Research):**
 ```bash
 gsd-research deep "<query>"
 ```
@@ -239,78 +248,70 @@ gsd-research deep "<query>"
 Example:
 ```bash
 gsd-research deep "authentication patterns for SaaS applications"
+gsd-research deep "WebGPU browser support and production readiness 2026"
 ```
 
-**Best practices:**
-1. Start with `docs` for library-specific questions — most authoritative
-2. Use `web` for ecosystem discovery and current trends
-3. Use `deep` for comprehensive research topics
-4. Parse JSON output, check `metadata.returned` vs `metadata.total_available`
-5. Trust `confidence` field: HIGH (use as fact), MEDIUM (verify), LOW (flag for validation)
+**When to use:** Architecture decisions, technology comparisons, comprehensive ecosystem surveys, best practices synthesis. Use for HIGH-VALUE research questions — this costs money.
 
-## Token Limit Strategy
+**Cost awareness:** ~$0.005 per query + tokens. Budget for 5-10 deep queries per research session for important questions only.
 
-**Why 2000 tokens is the default:**
-- The 50% rule: Research must complete before hitting 100k tokens (50% of 200k context)
-- At 2000 tokens/query, you can make ~50 queries — enough for ecosystem survey + verification + implementation details
-- Context7 returns results ranked by relevance — the first 3-4 snippets ARE the most important
-- Query flexibility matters more than per-query comprehensiveness
+## WebSearch (Built-in)
 
-**The tradeoff:** Every extra token per query is one fewer query you can make. More queries = more topics covered, more verification, more iteration.
+Use WebSearch for ecosystem discovery and trend research:
 
-**When to use default (2000 tokens):**
-- Ecosystem discovery (many focused queries across different libraries)
-- Verification queries (cross-referencing specific claims)
-- Implementation patterns (looking up specific API usage)
-- Any iterative research where you'll refine based on results
-
-**When to proactively request more (`--max-tokens 4000-6000`):**
-- Comprehensive API documentation for a single library feature
-- Deep research on a complex topic (`deep` command)
-- When `metadata.total_available` >> `metadata.returned` AND you need breadth
-- Final "gather everything" query after focused exploration
-
-**Escalation pattern:**
-```bash
-# Start focused (default 2000)
-gsd-research docs nextjs "app router"
-
-# If metadata shows 15 available but only 3 returned, AND you need more:
-gsd-research --max-tokens 5000 docs nextjs "app router complete guide"
+```
+WebSearch("react state management libraries 2026")
+WebSearch("nextjs vs remix comparison 2026")
 ```
 
-**Budget awareness:** Track approximate token usage. If you've made 30+ queries, stay with defaults. If you've made <10, you have room for 1-2 comprehensive queries.
-
-**When NOT to use gsd-research:**
-- Reading project files → Use Read tool
-- Searching codebase → Use Grep/Glob tools
-- General web pages → Use WebFetch tool (for specific URLs)
-
-## WebSearch: Fallback Discovery
-
-Use WebSearch for:
+**When to use:**
 - Finding what exists when you don't know library names
-- Cross-referencing gsd-research findings
-- Discovering community patterns and discussions
+- Current trends and community patterns
+- Cross-referencing findings
+- Any discovery where you need "what's out there"
 
-**Always include current year** in WebSearch queries for freshness.
+**Always include current year** in queries for freshness.
+
+**Why WebSearch over Perplexity search:** Free with Max subscription. Perplexity search costs $5/1k queries with marginal quality improvement for discovery tasks.
+
+## Token Limit Strategy (for gsd-research)
+
+**Default: 2000 tokens per response**
+
+**Rationale:**
+- The 50% rule: Research must complete before hitting 100k tokens
+- At 2000 tokens/query, you can make ~50 queries
+- Context7 returns results ranked by relevance — first 3-4 snippets are most important
+- Query flexibility > per-query comprehensiveness
+
+**When to increase (`--max-tokens 4000-6000`):**
+- Comprehensive API documentation for a single feature
+- Deep research on complex topics
+- When `metadata.total_available` >> `metadata.returned` AND you need breadth
+
+## Confidence Levels
+
+| Source | Confidence | Use |
+|--------|------------|-----|
+| gsd-research docs | HIGH | State as fact |
+| gsd-research deep | MEDIUM-HIGH | State with attribution |
+| WebSearch verified | MEDIUM | State with source |
+| WebSearch unverified | LOW | Flag for validation |
 
 ## Verification Protocol
 
 ```
-For each finding from gsd-research:
-
-1. Is confidence HIGH?
+1. Is confidence HIGH (from gsd-research docs)?
    YES → State as fact with source attribution
-   NO → Continue to step 2
+   NO → Continue
 
-2. Can WebSearch verify?
-   YES → Upgrade to MEDIUM confidence
-   NO → Mark as LOW confidence, flag for validation
+2. Can WebSearch or deep research verify?
+   YES → Upgrade confidence one level
+   NO → Mark as LOW, flag for validation
 
 3. Do multiple sources agree?
-   YES → Increase confidence one level
-   NO → Note contradiction, investigate further
+   YES → Increase confidence
+   NO → Note contradiction, investigate
 ```
 
 </tool_strategy>
@@ -349,7 +350,7 @@ The CLI handles library ID resolution automatically.
 
 ### Phase 1: CLI Tool (`scripts/gsd-research/`)
 
-**Deliverable:** Working CLI tool with all three commands
+**Deliverable:** Working CLI tool with `docs` and `deep` commands
 
 | Task | Description | Files |
 |------|-------------|-------|
@@ -360,10 +361,9 @@ The CLI handles library ID resolution automatically.
 | 1.5 | Implement caching layer | `scripts/gsd-research/gsd_research/cache.py` |
 | 1.6 | Implement output formatting | `scripts/gsd-research/gsd_research/output.py` |
 | 1.7 | Wire up `docs` command | `scripts/gsd-research/gsd_research/commands/docs.py` |
-| 1.8 | Wire up `web` command | `scripts/gsd-research/gsd_research/commands/web.py` |
-| 1.9 | Wire up `deep` command | `scripts/gsd-research/gsd_research/commands/deep.py` |
-| 1.10 | Add error handling | All files |
-| 1.11 | Test manually | - |
+| 1.8 | Wire up `deep` command | `scripts/gsd-research/gsd_research/commands/deep.py` |
+| 1.9 | Add error handling | All files |
+| 1.10 | Test manually | - |
 
 **Project structure:**
 ```
@@ -382,7 +382,6 @@ scripts/gsd-research/
     └── commands/
         ├── __init__.py
         ├── docs.py         # docs command
-        ├── web.py          # web command
         └── deep.py         # deep command
 ```
 
@@ -430,8 +429,7 @@ export PERPLEXITY_API_KEY="your-perplexity-api-key"
 |-----|----------|---------|
 | Context7 | `GET /v2/libs/search` | `docs` (resolve library) |
 | Context7 | `GET /v2/context` | `docs` (query docs) |
-| Perplexity | Chat completions (sonar) | `web` |
-| Perplexity | Chat completions (sonar-pro) | `deep` |
+| Perplexity | Chat completions (sonar-deep-research) | `deep` |
 
 ## Risk Assessment
 
@@ -439,16 +437,19 @@ export PERPLEXITY_API_KEY="your-perplexity-api-key"
 |------|------------|--------|------------|
 | API rate limiting | Medium | Medium | Implement exponential backoff, aggressive caching |
 | API key exposure | Low | High | Document secure handling, use env vars only |
-| Context7 library not found | Medium | Low | Return suggestions, fallback to WebSearch |
-| Perplexity response still too large | Low | Medium | Aggressive truncation, configurable max-tokens |
-| Cache staleness | Low | Low | Reasonable TTLs, `--no-cache` option |
+| Context7 library not found | Medium | Low | Return suggestions, agent falls back to WebSearch |
+| Perplexity deep response too large | Low | Medium | Aggressive truncation, strip `<think>` tags |
+| Cache staleness | Low | Low | 24h TTL for docs, 6h for deep, `--no-cache` option |
+| Perplexity cost overruns | Low | Low | Budget awareness in agent prompts, ~$0.005/query |
 
 ## Success Criteria
 
 | Criterion | Measurement |
 |-----------|-------------|
-| Researcher works | `/gsd:research-phase 1` completes without MCP errors |
-| Context reduction | Typical research uses <50% context (vs current >80%) |
+| Context7 access restored | `gsd-research docs nextjs "routing"` returns documentation |
+| Deep research works | `gsd-research deep "auth patterns"` returns synthesis with citations |
+| Researcher completes | `/gsd:research-phase 1` completes using hybrid tool strategy |
+| Context efficiency | Typical research uses <60% context (vs current failures) |
 | Response time | CLI calls complete in <10s (excluding cache miss) |
 | Cache effectiveness | >50% cache hit rate in typical research session |
 | Error clarity | All errors include actionable suggestions |
@@ -464,7 +465,7 @@ export PERPLEXITY_API_KEY="your-perplexity-api-key"
   "required": ["success", "command", "query", "results", "metadata"],
   "properties": {
     "success": { "type": "boolean", "const": true },
-    "command": { "type": "string", "enum": ["docs", "web", "deep"] },
+    "command": { "type": "string", "enum": ["docs", "deep"] },
     "query": { "type": "string" },
     "library": { "type": "string", "description": "Only for docs command" },
     "results": {
@@ -491,7 +492,7 @@ export PERPLEXITY_API_KEY="your-perplexity-api-key"
         "max_tokens": { "type": "integer" },
         "cache_hit": { "type": "boolean" },
         "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
-        "backend": { "type": "string", "enum": ["context7", "perplexity-search", "perplexity-research"] }
+        "backend": { "type": "string", "enum": ["context7", "perplexity-deep-research"] }
       }
     }
   }
@@ -507,7 +508,7 @@ export PERPLEXITY_API_KEY="your-perplexity-api-key"
   "required": ["success", "command", "error"],
   "properties": {
     "success": { "type": "boolean", "const": false },
-    "command": { "type": "string", "enum": ["docs", "web", "deep"] },
+    "command": { "type": "string", "enum": ["docs", "deep"] },
     "error": {
       "type": "object",
       "required": ["code", "message"],
@@ -524,4 +525,5 @@ export PERPLEXITY_API_KEY="your-perplexity-api-key"
 ---
 
 **Proposal created:** 2026-01-21
+**Updated:** 2026-01-21 (hybrid approach — removed `web` command, use built-in WebSearch instead)
 **Status:** Ready for implementation

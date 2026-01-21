@@ -124,6 +124,26 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix) {
 }
 
 /**
+ * Recursively copy directory without path replacement
+ */
+function copyDir(srcDir, destDir) {
+  fs.mkdirSync(destDir, { recursive: true });
+
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+/**
  * Install to the specified directory
  */
 function install(isGlobal) {
@@ -176,11 +196,42 @@ function install(isGlobal) {
   if (fs.existsSync(scriptsSrc)) {
     const scriptsDest = path.join(claudeDir, 'get-shit-done', 'scripts');
     fs.mkdirSync(scriptsDest, { recursive: true });
-    const scriptFiles = fs.readdirSync(scriptsSrc);
-    for (const file of scriptFiles) {
-      fs.copyFileSync(path.join(scriptsSrc, file), path.join(scriptsDest, file));
+    const scriptEntries = fs.readdirSync(scriptsSrc, { withFileTypes: true });
+    for (const entry of scriptEntries) {
+      const srcPath = path.join(scriptsSrc, entry.name);
+      const destPath = path.join(scriptsDest, entry.name);
+      if (entry.isDirectory()) {
+        // Recursively copy directories (like gsd-lookup/)
+        copyDir(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+        // Make shell scripts executable
+        if (entry.name.endsWith('.sh')) {
+          fs.chmodSync(destPath, '755');
+        }
+      }
     }
     console.log(`  ${green}✓${reset} Installed scripts`);
+
+    // Check Python availability for gsd-lookup
+    const gsdLookupPath = path.join(scriptsDest, 'gsd-lookup');
+    if (fs.existsSync(gsdLookupPath)) {
+      try {
+        const { execSync } = require('child_process');
+        const pyVersion = execSync('python3 --version 2>&1', { encoding: 'utf8' });
+        const versionMatch = pyVersion.match(/(\d+)\.(\d+)/);
+        if (versionMatch) {
+          const [, major, minor] = versionMatch;
+          if (parseInt(major) < 3 || (parseInt(major) === 3 && parseInt(minor) < 9)) {
+            console.log(`  ${yellow}⚠${reset} Python 3.9+ required for gsd-lookup (found ${major}.${minor})`);
+          } else {
+            console.log(`  ${green}✓${reset} Installed gsd-lookup CLI (Python ${major}.${minor})`);
+          }
+        }
+      } catch (e) {
+        console.log(`  ${yellow}⚠${reset} Python not found - gsd-lookup CLI requires Python 3.9+`);
+      }
+    }
   }
 
   // Copy CHANGELOG.md
