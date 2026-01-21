@@ -7,15 +7,38 @@ description: Instant GSD expert for diagnosing, understanding, and planning GSD 
 Provides instant expertise about the GSD framework for meta-discussions, diagnostics, and planning GSD changes. Use when working on GSD itself, diagnosing GSD issues, or asking how GSD works.
 </objective>
 
-<quick_start>
-For GSD questions: Just ask directly - this skill loads GSD knowledge automatically.
-For diagnosing issues: Reference workflows/diagnose.md for systematic investigation.
-For planning changes: Reference workflows/plan-change.md for impact analysis.
-</quick_start>
+<intake>
+What do you need help with?
+
+1. Understand GSD concepts (how things work)
+2. Diagnose an issue (something isn't working)
+3. Plan a change (add/modify GSD features)
+4. Just ask a question
+
+**For options 1 & 4:** Ask directly — essential knowledge below covers most questions.
+**For options 2 & 3:** Route to specific workflow.
+</intake>
+
+<routing>
+| Response | Next Action |
+|----------|-------------|
+| 1, "understand", "how does", "what is", "explain" | Answer using essential_knowledge below |
+| 2, "diagnose", "not working", "broken", "bug", "issue" | Read workflows/diagnose.md and follow it |
+| 3, "plan", "add", "modify", "change", "extend", "new command", "new agent" | Read workflows/plan-change.md and follow it |
+| 4, direct question | Answer using essential_knowledge, reference files if deeper context needed |
+
+**Intent-based routing (if user provides clear intent without selecting):**
+- "Why isn't X working?" → workflows/diagnose.md
+- "How do I add a new command?" → workflows/plan-change.md
+- "What is wave execution?" → Answer from essential_knowledge
+- "Explain checkpoints" → Answer from essential_knowledge, deeper: references/concepts.md
+
+**After reading a workflow, follow it exactly.**
+</routing>
 
 <essential_knowledge>
-## What GSD Is
 
+<what_gsd_is>
 GSD (Get Shit Done) is a meta-prompting and context engineering system for Claude Code that solves **context rot** — the quality degradation that happens as Claude fills its context window.
 
 **Core insight:** Claude's quality degrades predictably:
@@ -27,9 +50,9 @@ GSD (Get Shit Done) is a meta-prompting and context engineering system for Claud
 **The 50% rule:** Plans should complete within ~50% context usage. Stop BEFORE quality degrades, not at context limit.
 
 **Solution:** Aggressive atomicity. Plans stay small (2-3 tasks max). Each plan executes in a fresh subagent with 200k tokens purely for implementation.
+</what_gsd_is>
 
-## Philosophy
-
+<philosophy>
 **Solo developer + Claude workflow.** No enterprise patterns (sprint ceremonies, RACI matrices, stakeholder management). User is the visionary. Claude is the builder.
 
 **Plans ARE prompts.** PLAN.md is not a document that gets transformed — it IS the executable prompt containing objective, context, tasks, and verification.
@@ -39,9 +62,9 @@ GSD (Get Shit Done) is a meta-prompting and context engineering system for Claud
 **Goal-backward planning.** Don't ask "what should we build?" — ask "what must be TRUE for the goal to be achieved?" This produces verifiable requirements, not vague task lists.
 
 **Dream extraction, not requirements gathering.** Project initialization is collaborative thinking to help users discover and articulate what they want. Follow the thread, challenge vagueness, make abstract concrete.
+</philosophy>
 
-## Repository Structure
-
+<repository_structure>
 ```
 gsd/
 ├── agents/               # Subagent definitions (Task tool configs)
@@ -65,9 +88,9 @@ gsd/
 ```
 
 **Installation:** `npx get-shit-done-cc` copies to `~/.claude/` (global) or `.claude/` (local).
+</repository_structure>
 
-## Key Files in User Projects
-
+<user_project_files>
 GSD creates `.planning/` directory in user projects:
 
 ```
@@ -87,27 +110,27 @@ GSD creates `.planning/` directory in user projects:
         ├── XX-02-PLAN.md
         └── ...
 ```
+</user_project_files>
 
-## Core Workflow
-
+<core_workflow>
 1. `/gsd:new-project` → Questions → PROJECT.md
 2. `/gsd:research-project` (optional) → .planning/research/
 3. `/gsd:define-requirements` → REQUIREMENTS.md
 4. `/gsd:create-roadmap` → ROADMAP.md + STATE.md
 5. `/gsd:plan-phase N` → Creates PLAN.md files
 6. `/gsd:execute-phase N` → Subagents execute plans, create SUMMARY.md
+</core_workflow>
 
-## Task Types in Plans
-
+<task_types>
 ```xml
 <task type="auto">           <!-- Claude executes autonomously -->
 <task type="checkpoint:human-verify">  <!-- Human confirms visual/UX -->
 <task type="checkpoint:decision">      <!-- Human makes choice -->
 <task type="checkpoint:human-action">  <!-- Truly unavoidable manual (rare) -->
 ```
+</task_types>
 
-## PLAN.md Anatomy
-
+<plan_anatomy>
 ```yaml
 ---
 phase: XX-name
@@ -137,24 +160,24 @@ autonomous: true  # false if has checkpoints
 <success_criteria>Completion criteria</success_criteria>
 <output>SUMMARY.md specification</output>
 ```
+</plan_anatomy>
 
-## Wave-Based Parallel Execution
-
+<wave_execution>
 `/gsd:execute-phase` groups plans by `wave` number:
 - Wave 1: Independent plans run in parallel
 - Wave 2: Plans depending on wave 1 run after
 - Plans within each wave run simultaneously as subagents
+</wave_execution>
 
-## Deviation Rules During Execution
-
+<deviation_rules>
 Executor handles unplanned discoveries automatically:
 - **Rule 1:** Auto-fix bugs (no permission needed)
 - **Rule 2:** Auto-add missing critical functionality (security, validation)
 - **Rule 3:** Auto-fix blocking issues (missing deps, wrong types)
 - **Rule 4:** Ask about architectural changes (stop, return checkpoint)
+</deviation_rules>
 
-## File Conventions
-
+<file_conventions>
 | Type | Convention | Example |
 |------|------------|---------|
 | Files | kebab-case | `execute-phase.md` |
@@ -162,28 +185,52 @@ Executor handles unplanned discoveries automatically:
 | XML tags | kebab-case | `<execution_context>` |
 | Step names | snake_case | `name="load_project_state"` |
 | Bash vars | CAPS_UNDERSCORES | `PHASE_ARG` |
+</file_conventions>
 
-## Anti-Patterns (Banned)
-
+<anti_patterns>
+**Banned:**
 - Enterprise patterns (sprints, story points, stakeholders)
 - Human dev time estimates (hours/days/weeks)
 - Vague tasks ("Add authentication", "Handle edge cases")
 - Temporal language in docs ("We changed X to Y" — describe current state only)
 - Generic XML tags (`<section>`, `<item>` — use semantic tags)
+</anti_patterns>
+
 </essential_knowledge>
 
 <codebase_paths>
-## Quick Reference Paths
+Key locations (relative to repo root):
 
-When exploring GSD, these are the key locations (relative to repo root):
-
-**Commands:** `commands/gsd/`
-**Agents:** `agents/`
-**Workflows:** `get-shit-done/workflows/`
-**Templates:** `get-shit-done/templates/`
-**References:** `get-shit-done/references/`
-**CLAUDE.md:** `CLAUDE.md`
+| Type | Path |
+|------|------|
+| Commands | `commands/gsd/` |
+| Agents | `agents/` |
+| Workflows | `get-shit-done/workflows/` |
+| Templates | `get-shit-done/templates/` |
+| References | `get-shit-done/references/` |
+| Contributor guide | `CLAUDE.md` |
 </codebase_paths>
+
+<workflows_index>
+All in `workflows/`:
+
+| Workflow | Purpose |
+|----------|---------|
+| diagnose.md | Systematically investigate why something isn't working |
+| plan-change.md | Design a modification or extension to GSD |
+</workflows_index>
+
+<reference_index>
+All in `references/`:
+
+| Reference | Purpose |
+|-----------|---------|
+| concepts.md | Deep dive on plans as prompts, checkpoints, deviation rules, wave execution, state management, SUMMARY system, atomic commits, TDD |
+| architecture.md | System architecture and component relationships |
+| execution-model.md | How plan execution works in detail |
+| verification-deep.md | Goal-backward verification patterns |
+| scope-estimation.md | How to estimate plan scope and context usage |
+</reference_index>
 
 <success_criteria>
 A good GSD meta conversation:
