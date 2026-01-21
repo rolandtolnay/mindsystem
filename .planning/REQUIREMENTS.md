@@ -52,22 +52,22 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | — | Pending |
-| CLI-02 | — | Pending |
-| CLI-03 | — | Pending |
-| CLI-04 | — | Pending |
-| AGENT-01 | — | Pending |
-| AGENT-02 | — | Pending |
-| AGENT-03 | — | Pending |
-| AGENT-04 | — | Pending |
-| MAINT-01 | — | Pending |
-| MAINT-02 | — | Pending |
+| CLI-01 | Phase 1 | Pending |
+| CLI-02 | Phase 1 | Pending |
+| CLI-03 | Phase 1 | Pending |
+| CLI-04 | Phase 1 | Pending |
+| AGENT-01 | Phase 2 | Pending |
+| AGENT-02 | Phase 2 | Pending |
+| AGENT-03 | Phase 2 | Pending |
+| AGENT-04 | Phase 3 | Pending |
+| MAINT-01 | Phase 3 | Pending |
+| MAINT-02 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️
+- Mapped to phases: 10
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-01-21*
-*Last updated: 2026-01-21 after initial definition*
+*Last updated: 2026-01-21 after roadmap creation*
