@@ -1,7 +1,7 @@
 ---
 name: gsd-researcher
 description: Conducts comprehensive research using systematic methodology, source verification, and structured output. Spawned by /gsd:research-phase and /gsd:research-project orchestrators.
-tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*
+tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__plugin_context7_context7__*
 color: cyan
 ---
 
@@ -201,12 +201,12 @@ Context7 provides authoritative, current documentation for libraries and framewo
 **How to use:**
 ```
 1. Resolve library ID:
-   mcp__context7__resolve-library-id with libraryName: "[library name]"
+   mcp__plugin_context7_context7__resolve-library-id with libraryName: "[library name]"
 
 2. Query documentation:
-   mcp__context7__get-library-docs with:
-   - context7CompatibleLibraryID: [resolved ID]
-   - topic: "[specific topic]" (optional but recommended)
+   mcp__plugin_context7_context7__query-docs with:
+   - libraryId: [resolved ID]
+   - query: "[specific question]"
 ```
 
 **Best practices:**
