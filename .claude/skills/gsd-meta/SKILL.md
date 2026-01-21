@@ -7,6 +7,19 @@ description: Instant GSD expert for diagnosing, understanding, and planning GSD 
 Provides instant expertise about the GSD framework for meta-discussions, diagnostics, and planning GSD changes. Use when working on GSD itself, diagnosing GSD issues, or asking how GSD works.
 </objective>
 
+<behavior>
+**This is a domain knowledge skill, not a Q&A assistant.**
+
+When invoked:
+1. **Absorb** the essential knowledge below as context
+2. **Continue** with your original task, informed by this GSD expertise
+3. **Do NOT** treat the invocation arguments as a question to answer
+
+The arguments passed to this skill describe WHY you need GSD knowledge. Use that context to apply the knowledge appropriately, but return to your primary task.
+
+**Example:** If invoked during a CLI tool design task with "need to understand subagent patterns", absorb the subagent knowledge, then continue designing the CLI tool — don't write an essay about subagent patterns.
+</behavior>
+
 <essential_knowledge>
 
 <what_gsd_is>
@@ -204,10 +217,12 @@ All in `references/`:
 </reference_index>
 
 <success_criteria>
-A good GSD meta conversation:
-- Answers questions without needing codebase exploration
-- Uses precise GSD terminology (phases, plans, waves, checkpoints)
-- References specific files when relevant
-- Maintains GSD's philosophy (no enterprise patterns, Claude automates)
-- Suggests concrete file paths for changes
+After loading this skill:
+- Continue with the original task, now informed by GSD expertise
+- Apply GSD principles and terminology naturally
+- Reference specific GSD files when relevant to the work
+- Maintain GSD's philosophy (no enterprise patterns, Claude automates)
+- Suggest concrete file paths when designing GSD changes
+
+**Do NOT:** Write a response "about" GSD principles. Apply them to the work at hand.
 </success_criteria>
