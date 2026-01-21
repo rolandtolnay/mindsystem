@@ -6,6 +6,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.11.0] - 2026-01-22
+
+### Added
+- **gsd-lookup CLI** — New research tooling for library documentation (Context7) and deep research (Perplexity) at `scripts/gsd-lookup/`
+- Switched to `sonar-reasoning-pro` model for faster, higher-quality deep research
+
+### Fixed
+- Updated hardcoded 2025 year references to 2026 in research prompts to prevent stale search results
+
+### Changed
+- Reset vanilla branch to upstream base for cleaner fork management
+
 ## [2.10.2] - 2026-01-21
 
 ### Fixed
@@ -891,7 +903,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.10.2...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.11.0...HEAD
+[2.11.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.11.0
 [2.10.2]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.2
 [2.10.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.1
 [2.10.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.0
