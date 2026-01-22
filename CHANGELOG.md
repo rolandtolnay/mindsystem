@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.13.1] - 2026-01-22
+
+### Fixed
+- **simplify-flutter command** — Now uses `fvm flutter` commands for analyze and test steps, ensuring correct Flutter version when fvm is configured
+
 ## [2.13.0] - 2026-01-22
 
 ### Added
