@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.12.0] - 2026-01-22
+
+### Added
+- **`/gsd:simplify-flutter` command** — Code simplification specialist for Flutter/Dart projects. Analyzes code for clarity improvements while preserving functionality. Includes embedded Flutter-specific guidance for widgets, Riverpod, collections, and code organization. Runs `flutter analyze` and `flutter test` to verify no regressions.
+
 ## [2.11.0] - 2026-01-22
 
 ### Added
@@ -903,7 +908,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.11.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.12.0...HEAD
+[2.12.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.12.0
 [2.11.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.11.0
 [2.10.2]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.2
 [2.10.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.1
