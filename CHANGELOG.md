@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.13.0] - 2026-01-22
+
+### Added
+- **`/gsd:review-design` command** — Retroactive design audits for already-implemented features. Reviews existing code against design quality criteria, creates DESIGN.md if missing, presents improvements with trade-offs, and applies approved changes. Use for features built before GSD or periodic design quality checks.
+
 ## [2.12.0] - 2026-01-22
 
 ### Added
@@ -908,7 +913,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.12.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.13.0...HEAD
+[2.13.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.13.0
 [2.12.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.12.0
 [2.11.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.11.0
 [2.10.2]: https://github.com/rolandtolnay/gsd/releases/tag/v2.10.2
