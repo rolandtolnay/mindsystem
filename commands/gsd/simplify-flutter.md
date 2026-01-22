@@ -129,7 +129,7 @@ After completing simplifications, run verification:
 ### Step 4.1: Static Analysis
 
 ```bash
-flutter analyze
+fvm flutter analyze
 ```
 
 Fix any new analysis issues introduced by changes.
@@ -137,7 +137,7 @@ Fix any new analysis issues introduced by changes.
 ### Step 4.2: Run Tests
 
 ```bash
-flutter test
+fvm flutter test
 ```
 
 If tests fail:
