@@ -152,6 +152,19 @@ Create visual/UX design specifications for UI-heavy phases.
 
 Usage: `/gsd:design-phase 3`
 
+**`/gsd:review-design [scope]`**
+Audit and improve design of already-implemented features.
+
+- Reviews existing code against design quality criteria
+- Creates retroactive DESIGN.md if none exists
+- Presents improvements with benefits and trade-offs
+- Applies user-approved changes, runs verification
+- Use for features implemented before GSD, or periodic design audits
+
+Usage: `/gsd:review-design 4` (review phase 4)
+Usage: `/gsd:review-design lib/features/home/home_screen.dart`
+Usage: `/gsd:review-design authentication` (review feature area)
+
 **`/gsd:research-phase <number>`**
 Comprehensive ecosystem research for niche/complex domains.
 

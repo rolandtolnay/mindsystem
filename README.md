@@ -427,6 +427,8 @@ For full details and up-to-date usage, run `/gsd:help` inside Claude Code (or re
 | `/gsd:check-todos [area]` | List pending todos, select one to work on |
 | `/gsd:do-work <desc>` | Execute small discovered work (max 2 tasks) |
 | `/gsd:debug [desc]` | Systematic debugging with persistent state |
+| `/gsd:review-design [scope]` | Audit and improve design of implemented features |
+| `/gsd:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity and maintainability |
 | `/gsd:help` | Show all commands and usage guide |
 | `/gsd:update` | Update GSD with changelog display |
 | `/gsd:whats-new` | See what changed since installed version |
