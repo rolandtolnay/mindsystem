@@ -61,6 +61,14 @@ Mindsystem is a fork of GSD that shares this philosophy but diverges in approach
 
 **Script + prompt hybrid.** Deterministic logic lives in shell scripts, not natural language. Prompts handle reasoning and decisions; scripts handle mechanical operations.
 
+### What's New in This Fork
+
+**Design Phase System.** Full UI/UX specification workflow with `/ms:design-phase`. Dedicated designer agent creates DESIGN.md with ASCII wireframes, component specs, and UX flows. Includes mathematical validation — touch targets, spacing minimums, WCAG AA contrast checks — before implementation begins.
+
+**ms-lookup Research CLI.** Python tool at `scripts/ms-lookup/` for library documentation (Context7) and deep research (Perplexity). Integrated into research workflows. Run standalone or let agents use it automatically.
+
+**Enhanced Verification.** Mock support for isolated testing, batched UAT with grouped test presentation, and auto-diagnosis — when issues are found, parallel debug agents investigate root causes before you decide how to fix them.
+
 ---
 
 Vibecoding has a bad reputation. You describe what you want, AI generates code, and you get inconsistent garbage that falls apart at scale.
