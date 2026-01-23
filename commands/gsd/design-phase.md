@@ -267,6 +267,13 @@ Task(
 
 **`## DESIGN COMPLETE`:**
 
+Commit the design file:
+
+```bash
+git add .planning/phases/${PHASE_ARG}-*/*-DESIGN.md
+git commit -m "docs: create design for phase ${PHASE_ARG}"
+```
+
 Display summary from agent response:
 - Platform designed for
 - Aesthetic source used
@@ -329,5 +336,6 @@ Use the iteration template from `~/.claude/get-shit-done/templates/design-iterat
 - [ ] Adaptive Q&A completed if gaps existed
 - [ ] gsd-designer spawned with quality-forcing patterns
 - [ ] DESIGN.md created with all 7 sections
+- [ ] DESIGN.md committed
 - [ ] User informed of refinement options and next steps
 </success_criteria>
