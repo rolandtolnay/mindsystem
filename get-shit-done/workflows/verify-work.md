@@ -297,7 +297,11 @@ Read current batch from UAT.md.
 **1. Handle mock generation (if needed):**
 
 If `mock_type` is not null AND different from previous batch:
-- Discard old mocks if any: `git stash drop` (if mock_stash exists)
+- Discard old mocks if any (use stash name from `mock_stash` in UAT.md frontmatter):
+  ```bash
+  MOCK_STASH=$(git stash list | grep "mocks-batch" | head -1 | cut -d: -f1)
+  [ -n "$MOCK_STASH" ] && git stash drop "$MOCK_STASH"
+  ```
 - Go to `generate_mocks`
 
 If `mock_type` is null or same as previous:
@@ -427,7 +431,7 @@ For each question:
 | "Can't test" | result: blocked (re-test later) |
 | "Skip" | result: skipped, add to Assumptions |
 | "Other: Skip: {reason}" | result: skipped with custom reason, add to Assumptions |
-| "Other: {text}" | result: issue, go to `investigate_issue` |
+| "Other: {text}" | result: issue, add `fix_status: investigating`, `retry_count: 0`, go to `investigate_issue` |
 
 **Severity inference (for issues):**
 
@@ -625,11 +629,11 @@ questions:
 - Update test: `result: pass`, `fix_status: verified`
 - Continue to next issue or next batch
 
-**If Still broken (retry count < 2):**
-- Increment retry count
+**If Still broken (retry_count < 2):**
+- Increment `retry_count` in UAT.md test entry
 - Go back to `investigate_issue` with new context
 
-**If Still broken (retry count >= 2):**
+**If Still broken (retry_count >= 2):**
 - Present options:
   ```
   Fix didn't resolve the issue after 2 attempts.
@@ -680,7 +684,15 @@ Otherwise, go to `execute_batch`.
 <step name="batch_complete">
 **Handle batch completion:**
 
-Update Batches section:
+**1. Check for blocked tests that can now be retested:**
+
+Before marking batch complete, check if any tests have `result: blocked`.
+If blocked tests exist AND no issues remain in `fixing` status:
+- Re-present the blocked tests via `present_tests`
+- Blocked tests were waiting on other issues to be fixed first
+
+**2. Update Batches section (when no blocked tests remain):**
+
 ```yaml
 ### Batch {N}: [Name]
 tests: [...]
@@ -705,7 +717,9 @@ issues: {count}
 
 **1. Discard mocks:**
 ```bash
-git stash list | grep -q "mocks-batch" && git stash drop
+# Find and drop the specific mock stash (not just the top one)
+MOCK_STASH=$(git stash list | grep "mocks-batch" | head -1 | cut -d: -f1)
+[ -n "$MOCK_STASH" ] && git stash drop "$MOCK_STASH"
 ```
 
 **2. Generate UAT fixes patch (if fixes were made):**
@@ -716,7 +730,9 @@ Output: `.planning/phases/{phase_dir}/{phase}-uat-fixes.patch`
 
 **3. Restore user's pre-existing work (if stashed):**
 ```bash
-git stash list | grep -q "pre-verify-work" && git stash pop
+# Find and pop the specific pre-work stash
+PRE_WORK_STASH=$(git stash list | grep "pre-verify-work" | head -1 | cut -d: -f1)
+[ -n "$PRE_WORK_STASH" ] && git stash pop "$PRE_WORK_STASH"
 ```
 
 **4. Update UAT.md:**
@@ -767,6 +783,7 @@ To review fixes: cat {patch_path}
 | Tests.{N}.result | OVERWRITE | When user responds |
 | Tests.{N}.fix_status | OVERWRITE | During fix flow |
 | Tests.{N}.fix_commit | OVERWRITE | After fix committed |
+| Tests.{N}.retry_count | OVERWRITE | On re-test failure |
 | Fixes Applied | APPEND | After each fix committed |
 | Batches.{N}.status | OVERWRITE | Batch transitions |
 | Assumptions | APPEND | When test skipped |
@@ -796,7 +813,8 @@ Default: **major** (safe default)
 - [ ] Issues investigated with lightweight check (2-3 calls)
 - [ ] Simple issues fixed inline with proper commit
 - [ ] Complex issues escalated to fixer subagent
-- [ ] Re-test retries (2 max) before offering options
+- [ ] Re-test retries (2 max, tracked via retry_count) before offering options
+- [ ] Blocked tests re-presented after blocking issues resolved
 - [ ] Stash conflicts auto-resolved to fix version
 - [ ] Mocks discarded on completion
 - [ ] UAT fixes patch generated

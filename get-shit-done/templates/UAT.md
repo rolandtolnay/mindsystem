@@ -59,6 +59,7 @@ reported: "[verbatim user response]"
 severity: major
 fix_status: [investigating | applied | verified]
 fix_commit: [hash or null]
+retry_count: [0-2]
 
 ### 4. [Test Name]
 expected: [observable behavior]
@@ -151,7 +152,7 @@ mock_type: empty_response
 **Tests:**
 - Each test: OVERWRITE result/fix fields when status changes
 - `result` values: [pending], pass, issue, blocked, skipped
-- If issue: add `reported` (verbatim), `severity` (inferred), `fix_status`, `fix_commit`
+- If issue: add `reported` (verbatim), `severity` (inferred), `fix_status`, `fix_commit`, `retry_count`
 - If blocked: no additional fields (will be re-tested)
 - If skipped: add `reason`
 
@@ -174,7 +175,7 @@ mock_type: empty_response
 **When issue reported:**
 1. result → "issue"
 2. Add `reported`, `severity`
-3. Add `fix_status: investigating`
+3. Add `fix_status: investigating`, `retry_count: 0`
 
 **When fix committed:**
 4. `fix_status: applied`
@@ -185,8 +186,10 @@ mock_type: empty_response
 7. result → "pass"
 8. `fix_status: verified`
 
-**When re-test fails (after retries):**
-- If user chooses skip: result → "skipped", add reason
+**When re-test fails:**
+9. Increment `retry_count`
+10. If `retry_count >= 2`: offer skip/escalate options
+11. If user chooses skip: result → "skipped", add reason
 
 </fix_lifecycle>
 
@@ -310,6 +313,7 @@ reported: "Shows 'Something went wrong' instead of specific error"
 severity: major
 fix_status: applied
 fix_commit: abc123f
+retry_count: 0
 
 ### 5. Network Error Handling
 expected: No connection shows "Check your internet connection" with retry button
