@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.14.0] - 2026-01-23
+
+### Added
+- **verify-work redesign** — Mock support for isolated testing and inline fixing for quick corrections without full plan overhead
+
+### Fixed
+- **verify-work** — Improved retry tracking and stash handling for cleaner verification cycles
+- **design-phase command** — Now commits DESIGN.md after creation (was missing commit step)
+
 ## [2.13.1] - 2026-01-22
 
 ### Fixed
@@ -918,7 +927,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.13.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.14.0...HEAD
+[2.14.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.14.0
+[2.13.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.13.1
 [2.13.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.13.0
 [2.12.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.12.0
 [2.11.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.11.0
