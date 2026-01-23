@@ -12,7 +12,7 @@ CONTEXT7_BASE_URL = "https://context7.com/api/v2"
 PERPLEXITY_BASE_URL = "https://api.perplexity.ai"
 
 # Cache configuration
-CACHE_DIR = Path.home() / ".cache" / "gsd-lookup"
+CACHE_DIR = Path.home() / ".cache" / "ms-lookup"
 CACHE_TTL_DOCS = 60 * 60 * 24  # 24 hours for docs
 CACHE_TTL_DEEP = 60 * 60 * 6   # 6 hours for deep research
 

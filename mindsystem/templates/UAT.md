@@ -219,7 +219,7 @@ mock_type: empty_response
 
 <resume_behavior>
 
-On `/gsd:verify-work` with existing UAT.md:
+On `/ms:verify-work` with existing UAT.md:
 
 1. Check `status`:
    - "complete" → offer to re-run or view results

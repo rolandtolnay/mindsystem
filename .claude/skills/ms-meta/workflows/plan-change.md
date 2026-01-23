@@ -1,7 +1,7 @@
-# Workflow: Plan GSD Change
+# Workflow: Plan Mindsystem Change
 
 <purpose>
-Design a modification or extension to GSD before implementing it.
+Design a modification or extension to Mindsystem before implementing it.
 </purpose>
 
 <process>
@@ -17,7 +17,7 @@ Design a modification or extension to GSD before implementing it.
 
 | Type | Examples | Scope |
 |------|----------|-------|
-| New command | `/gsd:new-feature` | Command + maybe workflow |
+| New command | `/ms:new-feature` | Command + maybe workflow |
 | Modify command | Change behavior of existing | Command and/or workflow |
 | New agent | New specialized executor | Agent definition |
 | Modify agent | Change agent behavior | Agent definition |
@@ -31,36 +31,36 @@ For each change type, identify all files that need modification:
 
 **New command:**
 ```
-commands/gsd/{name}.md        # Create: command definition
-get-shit-done/workflows/{name}.md  # Create: if needs workflow
-commands/gsd/help.md          # Update: add to command list
+commands/ms/{name}.md        # Create: command definition
+mindsystem/workflows/{name}.md  # Create: if needs workflow
+commands/ms/help.md          # Update: add to command list
 ```
 
 **Modify existing behavior:**
 ```
 # Read first to understand current:
-commands/gsd/{name}.md
-get-shit-done/workflows/{name}.md
-agents/gsd-{related}.md
+commands/ms/{name}.md
+mindsystem/workflows/{name}.md
+agents/ms-{related}.md
 
 # Determine what needs to change
 ```
 
 **New agent:**
 ```
-agents/gsd-{name}.md          # Create: agent definition
+agents/ms-{name}.md          # Create: agent definition
 # Update any workflows that should spawn it
 ```
 
 **Template change:**
 ```
-get-shit-done/templates/{name}.md  # Modify or create
+mindsystem/templates/{name}.md  # Modify or create
 # Update workflows that use this template
 ```
 
 ## Step 4: Check Consistency Requirements
 
-GSD has consistency rules that must be maintained:
+Mindsystem has consistency rules that must be maintained:
 
 **Command ↔ Workflow sync:**
 - Command's `<process>` steps must match workflow steps
@@ -120,7 +120,7 @@ Before implementing, ensure you can articulate:
 1. **Create command file:**
 ```yaml
 ---
-name: gsd:new-command
+name: ms:new-command
 description: One-line description
 argument-hint: "[optional]"
 allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
@@ -131,7 +131,7 @@ What this command does and when to use it.
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/new-workflow.md (if needed)
+@~/.claude/mindsystem/workflows/new-workflow.md (if needed)
 </execution_context>
 
 <process>
@@ -151,7 +151,7 @@ How to know it worked
 1. **Create agent file:**
 ```yaml
 ---
-name: gsd-new-agent
+name: ms-new-agent
 description: What it does, when spawned
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: yellow

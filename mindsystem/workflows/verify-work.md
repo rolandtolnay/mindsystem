@@ -5,12 +5,12 @@ Complete verify-and-fix session: by session end, everything verified, issues fix
 </purpose>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/generate-mocks.md
-@~/.claude/get-shit-done/references/mock-patterns.md
+@~/.claude/mindsystem/workflows/generate-mocks.md
+@~/.claude/mindsystem/references/mock-patterns.md
 </execution_context>
 
 <template>
-@~/.claude/get-shit-done/templates/UAT.md
+@~/.claude/mindsystem/templates/UAT.md
 </template>
 
 <philosophy>
@@ -101,7 +101,7 @@ Wait for user response.
 ```
 No active UAT sessions.
 
-Provide a phase number to start testing (e.g., /gsd:verify-work 4)
+Provide a phase number to start testing (e.g., /ms:verify-work 4)
 ```
 
 **If no active sessions AND $ARGUMENTS provided:** Continue to `find_summaries`
@@ -343,9 +343,9 @@ Mock type: {mock_type}
 Tests requiring this mock:
 {test list with expected behaviors}
 
-Follow patterns from @~/.claude/get-shit-done/workflows/generate-mocks.md
+Follow patterns from @~/.claude/mindsystem/workflows/generate-mocks.md
 """,
-  subagent_type="gsd-mock-generator",
+  subagent_type="ms-mock-generator",
   description="Generate {mock_type} mocks"
 )
 ```
@@ -482,7 +482,7 @@ For each question:
 
 **If cause found BUT fix is complex (multiple files, architectural):**
 - Report finding
-- Spawn gsd-verify-fixer subagent (go to `escalate_to_fixer`)
+- Spawn ms-verify-fixer subagent (go to `escalate_to_fixer`)
 
 **If cause NOT found after 2-3 checks:**
 - Escalate to fixer subagent (go to `escalate_to_fixer`)
@@ -548,7 +548,7 @@ Go to `handle_retest`.
 git stash push -m "mocks-batch-{N}"
 ```
 
-**2. Spawn gsd-verify-fixer:**
+**2. Spawn ms-verify-fixer:**
 ```
 Task(
   prompt="""
@@ -580,7 +580,7 @@ You are a GSD verify-fixer. Investigate this issue, find the root cause, impleme
 
 Mocks are stashed — working tree is clean.
 """,
-  subagent_type="gsd-verify-fixer",
+  subagent_type="ms-verify-fixer",
   description="Fix: {test_name}"
 )
 ```
@@ -724,7 +724,7 @@ MOCK_STASH=$(git stash list | grep "mocks-batch" | head -1 | cut -d: -f1)
 
 **2. Generate UAT fixes patch (if fixes were made):**
 ```bash
-~/.claude/get-shit-done/scripts/generate-phase-patch.sh ${PHASE_NUMBER} --suffix=uat-fixes
+~/.claude/mindsystem/scripts/generate-phase-patch.sh ${PHASE_NUMBER} --suffix=uat-fixes
 ```
 Output: `.planning/phases/{phase_dir}/{phase}-uat-fixes.patch`
 

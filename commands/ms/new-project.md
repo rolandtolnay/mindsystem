@@ -1,5 +1,5 @@
 ---
-name: gsd:new-project
+name: ms:new-project
 description: Initialize a new project with deep context gathering and PROJECT.md
 allowed-tools:
   - Read
@@ -20,10 +20,10 @@ Creates `.planning/` with PROJECT.md and config.json.
 
 <execution_context>
 
-@~/.claude/get-shit-done/references/principles.md
-@~/.claude/get-shit-done/references/questioning.md
-@~/.claude/get-shit-done/templates/project.md
-@~/.claude/get-shit-done/templates/config.json
+@~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/references/questioning.md
+@~/.claude/mindsystem/templates/project.md
+@~/.claude/mindsystem/templates/config.json
 
 </execution_context>
 
@@ -35,7 +35,7 @@ Creates `.planning/` with PROJECT.md and config.json.
 
 1. **Abort if project exists:**
    ```bash
-   [ -f .planning/PROJECT.md ] && echo "ERROR: Project already initialized. Use /gsd:progress" && exit 1
+   [ -f .planning/PROJECT.md ] && echo "ERROR: Project already initialized. Use /ms:progress" && exit 1
    ```
 
 2. **Initialize git repo in THIS directory** (required even if inside a parent repo):
@@ -73,12 +73,12 @@ Use AskUserQuestion:
 - header: "Existing Code"
 - question: "I detected existing code in this directory. Would you like to map the codebase first?"
 - options:
-  - "Map codebase first" — Run /gsd:map-codebase to understand existing architecture (Recommended)
+  - "Map codebase first" — Run /ms:map-codebase to understand existing architecture (Recommended)
   - "Skip mapping" — Proceed with project initialization
 
 **If "Map codebase first":**
 ```
-Run `/gsd:map-codebase` first, then return to `/gsd:new-project`
+Run `/ms:map-codebase` first, then return to `/ms:new-project`
 ```
 Exit command.
 
@@ -285,7 +285,7 @@ EOF
 
 <step name="done">
 
-Present completion with next steps (see ~/.claude/get-shit-done/references/continuation-format.md):
+Present completion with next steps (see ~/.claude/mindsystem/references/continuation-format.md):
 
 ```
 Project initialized:
@@ -303,12 +303,12 @@ Choose your path:
 **Option A: Research first** (recommended)
 Research ecosystem → define requirements → create roadmap. Discovers standard stacks, expected features, architecture patterns.
 
-`/gsd:research-project`
+`/ms:research-project`
 
 **Option B: Define requirements directly** (familiar domains)
 Skip research, define requirements from what you know, then create roadmap.
 
-`/gsd:define-requirements`
+`/ms:define-requirements`
 
 <sub>`/clear` first → fresh context window</sub>
 

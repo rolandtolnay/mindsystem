@@ -1,5 +1,5 @@
 ---
-name: gsd:review-design
+name: ms:review-design
 description: Audit and improve design of already-implemented features using quality-forcing principles
 argument-hint: "[phase, file path, feature name, or description]"
 allowed-tools:
@@ -13,11 +13,11 @@ allowed-tools:
 ---
 
 <objective>
-Review and improve the design of already-implemented features, applying the same quality-forcing principles used in `/gsd:design-phase`.
+Review and improve the design of already-implemented features, applying the same quality-forcing principles used in `/ms:design-phase`.
 
 **When to use:**
-- Features implemented before GSD was added (no DESIGN.md exists)
-- Features where `/gsd:design-phase` was skipped
+- Features implemented before Mindsystem was added (no DESIGN.md exists)
+- Features where `/ms:design-phase` was skipped
 - Periodic design quality audits on existing code
 - After receiving user feedback that UI "feels off"
 
@@ -29,7 +29,7 @@ Review and improve the design of already-implemented features, applying the same
 5. Runs platform-specific verification
 6. Creates DESIGN-REVIEW.md report
 
-**Not a replacement for:** `/gsd:design-phase` — use that BEFORE implementing new features.
+**Not a replacement for:** `/ms:design-phase` — use that BEFORE implementing new features.
 </objective>
 
 <context>

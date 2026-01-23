@@ -1,5 +1,5 @@
 ---
-name: gsd:audit-milestone
+name: ms:audit-milestone
 description: Audit milestone completion against original intent before archiving
 argument-hint: "[version]"
 allowed-tools:
@@ -18,7 +18,7 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/principles.md
+@~/.claude/mindsystem/references/principles.md
 </execution_context>
 
 <context>
@@ -110,7 +110,7 @@ Phase exports: {from SUMMARYs}
 API routes: {routes created}
 
 Verify cross-phase wiring and E2E user flows.",
-  subagent_type="gsd-integration-checker"
+  subagent_type="ms-integration-checker"
 )
 ```
 
@@ -215,7 +215,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 **Complete milestone** — archive and tag
 
-`/gsd:complete-milestone {version}`
+`/ms:complete-milestone {version}`
 
 <sub>`/clear` first → fresh context window</sub>
 ```
@@ -252,7 +252,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 **Plan gap closure** — create phases to complete milestone
 
-`/gsd:plan-milestone-gaps`
+`/ms:plan-milestone-gaps`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -260,7 +260,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 **Also available:**
 - `cat .planning/v{version}-MILESTONE-AUDIT.md` — see full report
-- `/gsd:complete-milestone {version}` — proceed anyway (accept tech debt)
+- `/ms:complete-milestone {version}` — proceed anyway (accept tech debt)
 ```
 
 ---
@@ -296,11 +296,11 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 **A. Complete milestone** — accept debt, track in backlog
 
-`/gsd:complete-milestone {version}`
+`/ms:complete-milestone {version}`
 
 **B. Plan cleanup phase** — address debt before completing
 
-`/gsd:plan-milestone-gaps`
+`/ms:plan-milestone-gaps`
 
 <sub>`/clear` first → fresh context window</sub>
 ```

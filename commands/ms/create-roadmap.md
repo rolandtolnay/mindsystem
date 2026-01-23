@@ -1,5 +1,5 @@
 ---
-name: gsd:create-roadmap
+name: ms:create-roadmap
 description: Create roadmap with phases for the project
 allowed-tools:
   - Read
@@ -15,16 +15,16 @@ Create project roadmap with phase breakdown.
 
 Roadmaps define what work happens in what order. Phases map to requirements.
 
-Run after `/gsd:define-requirements`.
+Run after `/ms:define-requirements`.
 
-**Improvement:** Spawns gsd-roadmapper agent for heavy lifting, presents roadmap for approval before committing.
+**Improvement:** Spawns ms-roadmapper agent for heavy lifting, presents roadmap for approval before committing.
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/principles.md
-@~/.claude/get-shit-done/templates/roadmap.md
-@~/.claude/get-shit-done/templates/state.md
-@~/.claude/get-shit-done/references/goal-backward.md
+@~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/templates/roadmap.md
+@~/.claude/mindsystem/templates/state.md
+@~/.claude/mindsystem/references/goal-backward.md
 </execution_context>
 
 <context>
@@ -39,10 +39,10 @@ Run after `/gsd:define-requirements`.
 <step name="validate">
 ```bash
 # Verify project exists
-[ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md found. Run /gsd:new-project first."; exit 1; }
+[ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md found. Run /ms:new-project first."; exit 1; }
 
 # Verify requirements exist
-[ -f .planning/REQUIREMENTS.md ] || { echo "ERROR: No REQUIREMENTS.md found. Run /gsd:define-requirements first."; exit 1; }
+[ -f .planning/REQUIREMENTS.md ] || { echo "ERROR: No REQUIREMENTS.md found. Run /ms:define-requirements first."; exit 1; }
 ```
 </step>
 
@@ -85,11 +85,11 @@ else
 fi
 ```
 
-Spawn gsd-roadmapper agent with full context:
+Spawn ms-roadmapper agent with full context:
 
 ```
 Task(
-  subagent_type="gsd-roadmapper",
+  subagent_type="ms-roadmapper",
   prompt="""
 <planning_context>
 
@@ -190,7 +190,7 @@ Use AskUserQuestion:
 - Re-spawn roadmapper with revision context:
   ```
   Task(
-    subagent_type="gsd-roadmapper",
+    subagent_type="ms-roadmapper",
     prompt="""
 <revision>
 User feedback on roadmap:
@@ -244,15 +244,15 @@ Roadmap created:
 
 **Phase 1: [Name]** — [Goal from ROADMAP.md]
 
-`/gsd:plan-phase 1`
+`/ms:plan-phase 1`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:discuss-phase 1` — gather context first
-- `/gsd:research-phase 1` — investigate unknowns
+- `/ms:discuss-phase 1` — gather context first
+- `/ms:research-phase 1` — investigate unknowns
 
 ---
 ```
@@ -263,7 +263,7 @@ Roadmap created:
 <success_criteria>
 - [ ] PROJECT.md validated
 - [ ] REQUIREMENTS.md validated
-- [ ] gsd-roadmapper spawned with context
+- [ ] ms-roadmapper spawned with context
 - [ ] All v1 requirements mapped to phases (no orphans)
 - [ ] Success criteria derived for each phase (2-5 observable behaviors)
 - [ ] Roadmap presented to user for approval

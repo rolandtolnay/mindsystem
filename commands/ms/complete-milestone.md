@@ -1,6 +1,6 @@
 ---
 type: prompt
-name: gsd:complete-milestone
+name: ms:complete-milestone
 description: Archive completed milestone and prepare for next version
 argument-hint: <version>
 allowed-tools:
@@ -19,8 +19,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 <execution_context>
 **Load these files NOW (before proceeding):**
 
-- @~/.claude/get-shit-done/workflows/complete-milestone.md (main workflow)
-- @~/.claude/get-shit-done/templates/milestone-archive.md (archive template)
+- @~/.claude/mindsystem/workflows/complete-milestone.md (main workflow)
+- @~/.claude/mindsystem/templates/milestone-archive.md (archive template)
   </execution_context>
 
 <context>
@@ -42,19 +42,19 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 0. **Check for audit:**
 
    - Look for `.planning/v{{version}}-MILESTONE-AUDIT.md`
-   - If missing or stale: recommend `/gsd:audit-milestone` first
-   - If audit status is `gaps_found`: recommend `/gsd:plan-milestone-gaps` first
+   - If missing or stale: recommend `/ms:audit-milestone` first
+   - If audit status is `gaps_found`: recommend `/ms:plan-milestone-gaps` first
    - If audit status is `passed`: proceed to step 1
 
    ```markdown
    ## Pre-flight Check
 
    {If no v{{version}}-MILESTONE-AUDIT.md:}
-   ⚠ No milestone audit found. Run `/gsd:audit-milestone` first to verify
+   ⚠ No milestone audit found. Run `/ms:audit-milestone` first to verify
    requirements coverage, cross-phase integration, and E2E flows.
 
    {If audit has gaps:}
-   ⚠ Milestone audit found gaps. Run `/gsd:plan-milestone-gaps` to create
+   ⚠ Milestone audit found gaps. Run `/ms:plan-milestone-gaps` to create
    phases that close the gaps, or proceed anyway to accept as tech debt.
 
    {If audit passed:}
@@ -108,8 +108,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Ask about pushing tag
 
 8. **Offer next steps:**
-   - `/gsd:discuss-milestone` — thinking partner, creates context file
-   - Then `/gsd:new-milestone` — update PROJECT.md with new goals
+   - `/ms:discuss-milestone` — thinking partner, creates context file
+   - Then `/ms:new-milestone` — update PROJECT.md with new goals
 
 </process>
 
@@ -133,5 +133,5 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 - **Archive before deleting:** Always create archive files before updating/deleting originals
 - **One-line summary:** Collapsed milestone in ROADMAP.md should be single line with link
 - **Context efficiency:** Archive keeps ROADMAP.md and REQUIREMENTS.md constant size per milestone
-- **Fresh requirements:** Next milestone starts with `/gsd:define-requirements`, not reusing old file
+- **Fresh requirements:** Next milestone starts with `/ms:define-requirements`, not reusing old file
   </critical_rules>

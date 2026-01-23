@@ -1,37 +1,37 @@
-GSD (Get Shit Done) is a meta-prompting, context engineering, and spec-driven development system for Claude Code by TÂCHES.
+Mindsystem is a meta-prompting, context engineering, and spec-driven development system for Claude Code by TÂCHES.
 
 **Solves context rot** — the quality degradation that happens as Claude fills its context window.
 
 ## Installation
 
 ```bash
-npx get-shit-done-cc
+npx mindsystem-cc
 ```
 
-Verify with `/gsd:help` inside Claude Code. Update with `/gsd:update` or `npx get-shit-done-cc@latest`.
+Verify with `/ms:help` inside Claude Code. Update with `/ms:update` or `npx mindsystem-cc@latest`.
 
 ## Start Here
 
-- If you already have `.planning/` in this repo: run `/gsd:progress` (it routes you to the right next step).
-- If you’re starting in an existing codebase (brownfield): run `/gsd:map-codebase` once, then `/gsd:new-project`.
-- Otherwise: run `/gsd:new-project`.
+- If you already have `.planning/` in this repo: run `/ms:progress` (it routes you to the right next step).
+- If you’re starting in an existing codebase (brownfield): run `/ms:map-codebase` once, then `/ms:new-project`.
+- Otherwise: run `/ms:new-project`.
 
 ## Quick Start
 
 ### Greenfield (new project)
 
-1. `/gsd:new-project` - Extract your idea through questions → creates PROJECT.md
-2. `/gsd:research-project` - (optional) Research domain ecosystem
-3. `/gsd:define-requirements` - Scope v1/v2/out of scope
-4. `/gsd:create-roadmap` - Create phases mapped to requirements
-5. `/gsd:plan-phase 1` - Create detailed plan for first phase
-6. `/gsd:execute-phase 1` - Execute with parallel agents
-7. Repeat for each phase → `/gsd:complete-milestone <ver>` → `/gsd:new-milestone`
+1. `/ms:new-project` - Extract your idea through questions → creates PROJECT.md
+2. `/ms:research-project` - (optional) Research domain ecosystem
+3. `/ms:define-requirements` - Scope v1/v2/out of scope
+4. `/ms:create-roadmap` - Create phases mapped to requirements
+5. `/ms:plan-phase 1` - Create detailed plan for first phase
+6. `/ms:execute-phase 1` - Execute with parallel agents
+7. Repeat for each phase → `/ms:complete-milestone <ver>` → `/ms:new-milestone`
 
 ### Brownfield (existing codebase)
 
-1. `/gsd:map-codebase` - Analyze existing code first
-2. `/gsd:new-project` - Questions focus on what you're **adding/changing**
+1. `/ms:map-codebase` - Analyze existing code first
+2. `/ms:new-project` - Questions focus on what you're **adding/changing**
 3. Continue with steps 2-7 above (codebase docs load automatically)
 
 ## Command Reference
@@ -40,65 +40,65 @@ Verify with `/gsd:help` inside Claude Code. Update with `/gsd:update` or `npx ge
 
 | Command                    | Description                                              |
 | -------------------------- | -------------------------------------------------------- |
-| `/gsd:new-project`         | Extract your idea through questions, create PROJECT.md   |
-| `/gsd:research-project`    | Research domain ecosystem (stacks, features, pitfalls)   |
-| `/gsd:define-requirements` | Scope v1/v2/out-of-scope with checkable requirements     |
-| `/gsd:create-roadmap`      | Create roadmap with phases mapped to requirements        |
-| `/gsd:map-codebase`        | Map existing codebase for brownfield projects            |
+| `/ms:new-project`         | Extract your idea through questions, create PROJECT.md   |
+| `/ms:research-project`    | Research domain ecosystem (stacks, features, pitfalls)   |
+| `/ms:define-requirements` | Scope v1/v2/out-of-scope with checkable requirements     |
+| `/ms:create-roadmap`      | Create roadmap with phases mapped to requirements        |
+| `/ms:map-codebase`        | Map existing codebase for brownfield projects            |
 
 ### Execution
 
 | Command                  | Description                                      |
 | ------------------------ | ------------------------------------------------ |
-| `/gsd:plan-phase [N]`    | Generate task plans for phase (or next unplanned) |
-| `/gsd:execute-phase <N>` | Execute all plans in phase with parallel agents  |
-| `/gsd:progress`          | Where am I? What's next?                         |
+| `/ms:plan-phase [N]`    | Generate task plans for phase (or next unplanned) |
+| `/ms:execute-phase <N>` | Execute all plans in phase with parallel agents  |
+| `/ms:progress`          | Where am I? What's next?                         |
 
 ### Verification
 
 | Command                      | Description                                      |
 | ---------------------------- | ------------------------------------------------ |
-| `/gsd:check-phase <N>`       | Verify phase plans before execution (optional)   |
-| `/gsd:verify-work [N]`       | User acceptance test of phase or plan            |
-| `/gsd:audit-milestone [ver]` | Audit milestone completion before archiving      |
+| `/ms:check-phase <N>`       | Verify phase plans before execution (optional)   |
+| `/ms:verify-work [N]`       | User acceptance test of phase or plan            |
+| `/ms:audit-milestone [ver]` | Audit milestone completion before archiving      |
 
 ### Milestones
 
 | Command                    | Description                              |
 | -------------------------- | ---------------------------------------- |
-| `/gsd:complete-milestone <ver>` | Ship it, prep next version          |
-| `/gsd:discuss-milestone`   | Gather context for next milestone        |
-| `/gsd:new-milestone [name]`| Create new milestone with phases         |
-| `/gsd:plan-milestone-gaps` | Create phases to close gaps from audit   |
+| `/ms:complete-milestone <ver>` | Ship it, prep next version          |
+| `/ms:discuss-milestone`   | Gather context for next milestone        |
+| `/ms:new-milestone [name]`| Create new milestone with phases         |
+| `/ms:plan-milestone-gaps` | Create phases to close gaps from audit   |
 
 ### Phase Management
 
 | Command                           | Description                               |
 | --------------------------------- | ----------------------------------------- |
-| `/gsd:add-phase <desc>`           | Append phase to roadmap                   |
-| `/gsd:insert-phase <after> <desc>` | Insert urgent work between phases        |
-| `/gsd:remove-phase <N>`           | Remove future phase, renumber subsequent  |
-| `/gsd:discuss-phase <N>`          | Gather context before planning            |
-| `/gsd:research-phase <N>`         | Deep research for unfamiliar domains      |
-| `/gsd:list-phase-assumptions <N>` | See what Claude assumes before correcting |
+| `/ms:add-phase <desc>`           | Append phase to roadmap                   |
+| `/ms:insert-phase <after> <desc>` | Insert urgent work between phases        |
+| `/ms:remove-phase <N>`           | Remove future phase, renumber subsequent  |
+| `/ms:discuss-phase <N>`          | Gather context before planning            |
+| `/ms:research-phase <N>`         | Deep research for unfamiliar domains      |
+| `/ms:list-phase-assumptions <N>` | See what Claude assumes before correcting |
 
 ### Session
 
 | Command           | Description                            |
 | ----------------- | -------------------------------------- |
-| `/gsd:pause-work` | Create handoff when stopping mid-phase |
-| `/gsd:resume-work`| Restore from last session              |
+| `/ms:pause-work` | Create handoff when stopping mid-phase |
+| `/ms:resume-work`| Restore from last session              |
 
 ### Utilities
 
 | Command                | Description                                |
 | ---------------------- | ------------------------------------------ |
-| `/gsd:add-todo [desc]` | Capture idea or task for later             |
-| `/gsd:check-todos [area]` | List pending todos, select one to work on |
-| `/gsd:debug [desc]`    | Systematic debugging with persistent state |
-| `/gsd:help`            | Show all commands and usage guide          |
-| `/gsd:update`          | Update GSD with changelog display          |
-| `/gsd:whats-new`       | See changes since installed version        |
+| `/ms:add-todo [desc]` | Capture idea or task for later             |
+| `/ms:check-todos [area]` | List pending todos, select one to work on |
+| `/ms:debug [desc]`    | Systematic debugging with persistent state |
+| `/ms:help`            | Show all commands and usage guide          |
+| `/ms:update`          | Update GSD with changelog display          |
+| `/ms:whats-new`       | See changes since installed version        |
 
 ---
 
@@ -107,18 +107,18 @@ Verify with `/gsd:help` inside Claude Code. Update with `/gsd:update` or `npx ge
 **Initialize → (Optional Research) → Requirements → Roadmap → Plan → Execute → Verify → Milestone**
 
 **Common deviations:**
-- Existing repo: `/gsd:map-codebase` before `/gsd:new-project`
-- Plan looks wrong: `/gsd:list-phase-assumptions <phase>` or `/gsd:check-phase <phase>`
-- Unknown domain: `/gsd:research-project` or `/gsd:research-phase <phase>`
-- Execution gaps: `/gsd:plan-phase <phase> --gaps` then `/gsd:execute-phase <phase>`
-- New urgent work: `/gsd:insert-phase <after> "<desc>"`
-- New non-urgent work: `/gsd:add-todo "<desc>"`
+- Existing repo: `/ms:map-codebase` before `/ms:new-project`
+- Plan looks wrong: `/ms:list-phase-assumptions <phase>` or `/ms:check-phase <phase>`
+- Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
+- Execution gaps: `/ms:plan-phase <phase> --gaps` then `/ms:execute-phase <phase>`
+- New urgent work: `/ms:insert-phase <after> "<desc>"`
+- New non-urgent work: `/ms:add-todo "<desc>"`
 
 ---
 
 ## Project Initialization
 
-### /gsd:new-project
+### /ms:new-project
 
 Initialize new project with brief and configuration.
 
@@ -128,9 +128,9 @@ Initialize new project with brief and configuration.
 - Creates `.planning/PROJECT.md` and `.planning/config.json`
 - Commits initialization files to git
 
-**Usage:** `/gsd:new-project`
+**Usage:** `/ms:new-project`
 
-### /gsd:research-project
+### /ms:research-project
 
 Research domain ecosystem before creating roadmap.
 
@@ -139,9 +139,9 @@ Research domain ecosystem before creating roadmap.
 - Creates `.planning/research/` with ecosystem knowledge
 - Recommended for best results; skip only if you need speed over thoroughness
 
-**Usage:** `/gsd:research-project`
+**Usage:** `/ms:research-project`
 
-### /gsd:define-requirements
+### /ms:define-requirements
 
 Define what "done" looks like with checkable requirements.
 
@@ -150,9 +150,9 @@ Define what "done" looks like with checkable requirements.
 - Works with or without prior research
 - Creates `.planning/REQUIREMENTS.md` with traceability
 
-**Usage:** `/gsd:define-requirements`
+**Usage:** `/ms:define-requirements`
 
-### /gsd:create-roadmap
+### /ms:create-roadmap
 
 Create roadmap and state tracking for initialized project.
 
@@ -161,9 +161,9 @@ Create roadmap and state tracking for initialized project.
 - Creates `.planning/STATE.md` (project memory)
 - Creates `.planning/phases/` directories
 
-**Usage:** `/gsd:create-roadmap`
+**Usage:** `/ms:create-roadmap`
 
-### /gsd:map-codebase
+### /ms:map-codebase
 
 **Entry point for brownfield projects.** Map an existing codebase before adding new features.
 
@@ -177,16 +177,16 @@ Create roadmap and state tracking for initialized project.
   - `TESTING.md` — Test framework, patterns
   - `INTEGRATIONS.md` — External services, APIs
   - `CONCERNS.md` — Tech debt, known issues, fragile areas
-- **Run BEFORE `/gsd:new-project`** — questions then focus on what you're adding, not starting from scratch
+- **Run BEFORE `/ms:new-project`** — questions then focus on what you're adding, not starting from scratch
 - Codebase docs load automatically during planning — Claude knows your patterns and where to put things
 
-**Usage:** `/gsd:map-codebase`
+**Usage:** `/ms:map-codebase`
 
 ---
 
 ## Phase Planning
 
-### /gsd:discuss-phase \<number\>
+### /ms:discuss-phase \<number\>
 
 Help articulate your vision for a phase before planning.
 
@@ -194,9 +194,9 @@ Help articulate your vision for a phase before planning.
 - Creates CONTEXT.md with your vision, essentials, and boundaries
 - Use when you have ideas about how something should look/feel
 
-**Usage:** `/gsd:discuss-phase 2`
+**Usage:** `/ms:discuss-phase 2`
 
-### /gsd:research-phase \<number\>
+### /ms:research-phase \<number\>
 
 Comprehensive ecosystem research for niche/complex domains.
 
@@ -204,9 +204,9 @@ Comprehensive ecosystem research for niche/complex domains.
 - Creates RESEARCH.md with "how experts build this" knowledge
 - Use for 3D, games, audio, shaders, ML, and other specialized domains
 
-**Usage:** `/gsd:research-phase 3`
+**Usage:** `/ms:research-phase 3`
 
-### /gsd:list-phase-assumptions \<number\>
+### /ms:list-phase-assumptions \<number\>
 
 See what Claude is planning to do before it starts.
 
@@ -214,9 +214,9 @@ See what Claude is planning to do before it starts.
 - Lets you course-correct if Claude misunderstood your vision
 - No files created — conversational output only
 
-**Usage:** `/gsd:list-phase-assumptions 3`
+**Usage:** `/ms:list-phase-assumptions 3`
 
-### /gsd:plan-phase \<number\>
+### /ms:plan-phase \<number\>
 
 Create detailed execution plan for a specific phase.
 
@@ -226,13 +226,13 @@ Create detailed execution plan for a specific phase.
 - Includes verification criteria and success measures
 - Multiple plans per phase supported (XX-01, XX-02, etc.)
 
-**Usage:** `/gsd:plan-phase 1`
+**Usage:** `/ms:plan-phase 1`
 
 ---
 
 ## Execution
 
-### /gsd:execute-phase \<phase-number\>
+### /ms:execute-phase \<phase-number\>
 
 Execute all unexecuted plans in a phase with parallel background agents.
 
@@ -243,7 +243,7 @@ Execute all unexecuted plans in a phase with parallel background agents.
 - Respects `max_concurrent_agents` from config.json
 - Generates a phase patch file when possible (`{phase}-changes.patch`) for review/sharing
 
-**Usage:** `/gsd:execute-phase 5`
+**Usage:** `/ms:execute-phase 5`
 
 **Options (via `.planning/config.json`):**
 - `max_concurrent_agents`: Limit parallel agents (default: 3)
@@ -254,7 +254,7 @@ Execute all unexecuted plans in a phase with parallel background agents.
 
 ## Verification
 
-### /gsd:check-phase \<number\>
+### /ms:check-phase \<number\>
 
 Verify phase plans before execution (optional quality gate).
 
@@ -263,9 +263,9 @@ Verify phase plans before execution (optional quality gate).
 - Checks requirement coverage, task completeness, dependencies
 - Use for complex phases before committing to execution
 
-**Usage:** `/gsd:check-phase 5`
+**Usage:** `/ms:check-phase 5`
 
-### /gsd:verify-work [N]
+### /ms:verify-work [N]
 
 User acceptance testing of phase or plan.
 
@@ -274,9 +274,9 @@ User acceptance testing of phase or plan.
 - Verifies features work as expected from user perspective
 - Use after execution to validate before continuing
 
-**Usage:** `/gsd:verify-work 5`
+**Usage:** `/ms:verify-work 5`
 
-### /gsd:audit-milestone [version]
+### /ms:audit-milestone [version]
 
 Audit milestone completion against original intent.
 
@@ -285,13 +285,13 @@ Audit milestone completion against original intent.
 - Spawns integration checker for cross-phase wiring
 - Creates MILESTONE-AUDIT.md with gaps and tech debt
 
-**Usage:** `/gsd:audit-milestone 1.0.0`
+**Usage:** `/ms:audit-milestone 1.0.0`
 
 ---
 
 ## Roadmap Management
 
-### /gsd:add-phase
+### /ms:add-phase
 
 Add new phase to end of current milestone.
 
@@ -300,9 +300,9 @@ Add new phase to end of current milestone.
 - Uses next sequential number
 - Updates phase directory structure
 
-**Usage:** `/gsd:add-phase "Add admin dashboard"`
+**Usage:** `/ms:add-phase "Add admin dashboard"`
 
-### /gsd:insert-phase \<after\> \<description\>
+### /ms:insert-phase \<after\> \<description\>
 
 Insert urgent work as decimal phase between existing phases.
 
@@ -311,9 +311,9 @@ Insert urgent work as decimal phase between existing phases.
 - Useful for discovered work that must happen mid-milestone
 - Maintains phase ordering
 
-**Usage:** `/gsd:insert-phase 7 "Fix critical auth bug"`
+**Usage:** `/ms:insert-phase 7 "Fix critical auth bug"`
 
-### /gsd:remove-phase \<number\>
+### /ms:remove-phase \<number\>
 
 Remove a future phase and renumber subsequent phases.
 
@@ -323,23 +323,23 @@ Remove a future phase and renumber subsequent phases.
 - Only works on future (unstarted) phases
 - Git commit preserves historical record
 
-**Usage:** `/gsd:remove-phase 17`
+**Usage:** `/ms:remove-phase 17`
 
 ---
 
 ## Milestone Management
 
-### /gsd:discuss-milestone
+### /ms:discuss-milestone
 
 Figure out what you want to build in the next milestone.
 
 - Reviews what shipped in previous milestone
 - Helps you identify features to add, improve, or fix
-- Routes to `/gsd:new-milestone` when ready
+- Routes to `/ms:new-milestone` when ready
 
-**Usage:** `/gsd:discuss-milestone`
+**Usage:** `/ms:discuss-milestone`
 
-### /gsd:new-milestone \<name\>
+### /ms:new-milestone \<name\>
 
 Create a new milestone with phases for an existing project.
 
@@ -347,9 +347,9 @@ Create a new milestone with phases for an existing project.
 - Creates phase directories
 - Updates STATE.md for new milestone
 
-**Usage:** `/gsd:new-milestone "v2.0 Features"`
+**Usage:** `/ms:new-milestone "v2.0 Features"`
 
-### /gsd:complete-milestone \<version\>
+### /ms:complete-milestone \<version\>
 
 Archive completed milestone and prepare for next version.
 
@@ -358,9 +358,9 @@ Archive completed milestone and prepare for next version.
 - Creates git tag for the release
 - Prepares workspace for next version
 
-**Usage:** `/gsd:complete-milestone 1.0.0`
+**Usage:** `/ms:complete-milestone 1.0.0`
 
-### /gsd:plan-milestone-gaps
+### /ms:plan-milestone-gaps
 
 Create phases to close gaps identified by milestone audit.
 
@@ -368,13 +368,13 @@ Create phases to close gaps identified by milestone audit.
 - Prioritizes by requirement importance (must/should/nice)
 - Creates phase entries in ROADMAP.md automatically
 
-**Usage:** `/gsd:plan-milestone-gaps`
+**Usage:** `/ms:plan-milestone-gaps`
 
 ---
 
 ## Progress Tracking
 
-### /gsd:progress
+### /ms:progress
 
 Check project status and intelligently route to next action.
 
@@ -386,13 +386,13 @@ Check project status and intelligently route to next action.
 - Offers to execute next plan or create it if missing
 - Detects 100% milestone completion
 
-**Usage:** `/gsd:progress`
+**Usage:** `/ms:progress`
 
 ---
 
 ## Session Management
 
-### /gsd:resume-work
+### /ms:resume-work
 
 Resume work from previous session with full context restoration.
 
@@ -401,9 +401,9 @@ Resume work from previous session with full context restoration.
 - Shows current position and recent progress
 - Offers next actions based on project state
 
-**Usage:** `/gsd:resume-work`
+**Usage:** `/ms:resume-work`
 
-### /gsd:pause-work
+### /ms:pause-work
 
 Create context handoff when pausing work mid-phase.
 
@@ -412,13 +412,13 @@ Create context handoff when pausing work mid-phase.
 - Updates STATE.md session continuity section
 - Captures in-progress work context
 
-**Usage:** `/gsd:pause-work`
+**Usage:** `/ms:pause-work`
 
 ---
 
 ## Debugging
 
-### /gsd:debug [issue description]
+### /ms:debug [issue description]
 
 Systematic debugging with persistent state across context resets.
 
@@ -426,18 +426,18 @@ Systematic debugging with persistent state across context resets.
 - Gathers symptoms through adaptive questioning
 - Creates `.planning/debug/[slug].md` to track investigation
 - Investigates using scientific method (evidence → hypothesis → test)
-- Survives `/clear` — run `/gsd:debug` with no args to resume
+- Survives `/clear` — run `/ms:debug` with no args to resume
 - Archives resolved issues to `.planning/debug/resolved/`
 
-**Usage:** `/gsd:debug "login button doesn't work"`
+**Usage:** `/ms:debug "login button doesn't work"`
 
-**Usage:** `/gsd:debug` (resume active session)
+**Usage:** `/ms:debug` (resume active session)
 
 ---
 
 ## Todo Management
 
-### /gsd:add-todo [description]
+### /ms:add-todo [description]
 
 Capture idea or task as todo from current conversation.
 
@@ -448,34 +448,34 @@ Capture idea or task as todo from current conversation.
 - Checks for duplicates before creating
 - Updates STATE.md todo count
 
-**Usage:** `/gsd:add-todo` (infers from conversation)
+**Usage:** `/ms:add-todo` (infers from conversation)
 
-**Usage:** `/gsd:add-todo Add auth token refresh`
+**Usage:** `/ms:add-todo Add auth token refresh`
 
-### /gsd:check-todos [area]
+### /ms:check-todos [area]
 
 List pending todos and select one to work on.
 
 - Use when: you want to pick up deferred work and route it into the right place (do now vs schedule vs plan into a phase).
 - Lists all pending todos with title, area, age
-- Optional area filter (e.g., `/gsd:check-todos api`)
+- Optional area filter (e.g., `/ms:check-todos api`)
 - Loads full context for selected todo
 - Routes to appropriate action (work now, add to phase, brainstorm)
 - Moves todo to `done/` when work begins
 
-**Usage:** `/gsd:check-todos`
+**Usage:** `/ms:check-todos`
 
-**Usage:** `/gsd:check-todos api`
+**Usage:** `/ms:check-todos api`
 
 ---
 
 ## Utility Commands
 
-### /gsd:help
+### /ms:help
 
 Show all commands and usage guide.
 
-### /gsd:whats-new
+### /ms:whats-new
 
 See what's changed since your installed version.
 
@@ -484,24 +484,24 @@ See what's changed since your installed version.
 - Highlights breaking changes
 - Provides update instructions when behind
 
-**Usage:** `/gsd:whats-new`
+**Usage:** `/ms:whats-new`
 
-### /gsd:update
+### /ms:update
 
-Update GSD to latest version with changelog display.
+Update Mindsystem to latest version with changelog display.
 
 - Checks npm for latest version
 - Runs update if behind
 - Shows what changed between versions
-- Better UX than raw `npx get-shit-done-cc`
+- Better UX than raw `npx mindsystem-cc`
 
-**Usage:** `/gsd:update`
+**Usage:** `/ms:update`
 
 ---
 
 ## Workflow Modes
 
-Set during `/gsd:new-project`:
+Set during `/ms:new-project`:
 
 **Interactive Mode**
 - Confirms each major decision
@@ -600,125 +600,125 @@ Git bisect finds exact failing task. Each task independently revertable.
 ### Starting a new project (greenfield)
 
 ```
-/gsd:new-project                 # Extract your idea through questions
-/gsd:research-project            # (recommended) Research domain ecosystem
-/gsd:define-requirements         # Scope v1/v2/out of scope
-/gsd:create-roadmap              # Create phases mapped to requirements
-/gsd:plan-phase 1                # Create detailed plan
-/gsd:execute-phase 1             # Execute with parallel agents
+/ms:new-project                 # Extract your idea through questions
+/ms:research-project            # (recommended) Research domain ecosystem
+/ms:define-requirements         # Scope v1/v2/out of scope
+/ms:create-roadmap              # Create phases mapped to requirements
+/ms:plan-phase 1                # Create detailed plan
+/ms:execute-phase 1             # Execute with parallel agents
 # repeat for each phase
-/gsd:complete-milestone 1.0.0
+/ms:complete-milestone 1.0.0
 ```
 
 Common deviations:
-- If you’re in an existing repo: start with `/gsd:map-codebase`
-- If you need speed: skip `/gsd:research-project` (expect more rework later)
+- If you’re in an existing repo: start with `/ms:map-codebase`
+- If you need speed: skip `/ms:research-project` (expect more rework later)
 
 ### Adding a feature to an existing codebase (brownfield)
 
 ```
-/gsd:map-codebase                # Step 1: Analyze existing code
-/gsd:new-project                 # Step 2: Questions focus on what you're ADDING
-/gsd:research-project            # (optional) Research new domain areas
-/gsd:define-requirements         # Scope what's changing
-/gsd:create-roadmap              # Create roadmap
-/gsd:plan-phase 1                # Codebase docs load automatically
-/gsd:execute-phase 1             # Claude knows your patterns & conventions
+/ms:map-codebase                # Step 1: Analyze existing code
+/ms:new-project                 # Step 2: Questions focus on what you're ADDING
+/ms:research-project            # (optional) Research new domain areas
+/ms:define-requirements         # Scope what's changing
+/ms:create-roadmap              # Create roadmap
+/ms:plan-phase 1                # Codebase docs load automatically
+/ms:execute-phase 1             # Claude knows your patterns & conventions
 ```
 
 **How brownfield differs:**
-- `/gsd:map-codebase` creates 7 docs in `.planning/codebase/` describing your stack, architecture, conventions, etc.
-- `/gsd:new-project` then asks what you're **adding or changing**, not building from scratch
+- `/ms:map-codebase` creates 7 docs in `.planning/codebase/` describing your stack, architecture, conventions, etc.
+- `/ms:new-project` then asks what you're **adding or changing**, not building from scratch
 - During planning and execution, codebase docs load automatically — Claude knows where things go and follows your existing patterns
 
 ### Not sure what to do next / returning after a break
 
 ```
-/gsd:progress  # See where you left off and continue
+/ms:progress  # See where you left off and continue
 ```
 
 ### Plan → execute loop (with optional quality gates)
 
 ```
-/gsd:plan-phase 5                 # Create one or more PLAN.md files
-/gsd:check-phase 5                # (optional) Sanity check: plans will achieve goal
-/gsd:execute-phase 5              # Execute; produces SUMMARY + VERIFICATION
+/ms:plan-phase 5                 # Create one or more PLAN.md files
+/ms:check-phase 5                # (optional) Sanity check: plans will achieve goal
+/ms:execute-phase 5              # Execute; produces SUMMARY + VERIFICATION
 # If gaps found during verification:
-/gsd:plan-phase 5 --gaps          # Create additional plans to close verifier gaps
-/gsd:execute-phase 5              # Re-run until phase verifies cleanly
+/ms:plan-phase 5 --gaps          # Create additional plans to close verifier gaps
+/ms:execute-phase 5              # Re-run until phase verifies cleanly
 ```
 
 ### Found a bug
 
 ```
-/gsd:debug "form submission fails silently"    # Systematic investigation (persists across /clear)
+/ms:debug "form submission fails silently"    # Systematic investigation (persists across /clear)
 # Then decide where the fix belongs:
 # - If it's required to satisfy the current phase goal: add more plans to the current phase
-/gsd:plan-phase 5                              # (or: /gsd:plan-phase 5 --gaps after verification)
-/gsd:execute-phase 5
+/ms:plan-phase 5                              # (or: /ms:plan-phase 5 --gaps after verification)
+/ms:execute-phase 5
 # - If it's urgent but should happen before the next phase (and not worth renumbering):
-/gsd:insert-phase 5 "Fix critical auth bug"     # Creates 05.1
-/gsd:plan-phase 5.1
-/gsd:execute-phase 5.1
+/ms:insert-phase 5 "Fix critical auth bug"     # Creates 05.1
+/ms:plan-phase 5.1
+/ms:execute-phase 5.1
 # - If it can wait:
-/gsd:add-todo "Fix modal z-index"
+/ms:add-todo "Fix modal z-index"
 ```
 
 ### Need to adjust scope (new info, new requirements, or a cut)
 
 Common options:
-- If the current phase goal can’t be met: add more plans to the current phase (`/gsd:plan-phase <current>` or `/gsd:plan-phase <current> --gaps`) then `/gsd:execute-phase <current>`
-- Add work later: `/gsd:add-phase "…"`
-- Insert urgent work before the next phase: `/gsd:insert-phase <after> "…"`
-- Cut future work: `/gsd:remove-phase <phase>`
-- Re-scope v1/v2/out-of-scope: `/gsd:define-requirements` (choose Replace) → `/gsd:create-roadmap` (choose Replace)
+- If the current phase goal can’t be met: add more plans to the current phase (`/ms:plan-phase <current>` or `/ms:plan-phase <current> --gaps`) then `/ms:execute-phase <current>`
+- Add work later: `/ms:add-phase "…"`
+- Insert urgent work before the next phase: `/ms:insert-phase <after> "…"`
+- Cut future work: `/ms:remove-phase <phase>`
+- Re-scope v1/v2/out-of-scope: `/ms:define-requirements` (choose Replace) → `/ms:create-roadmap` (choose Replace)
 
 ### Implementing a new feature after shipping (new milestone)
 
 ```
-/gsd:discuss-milestone                 # Clarify what’s next (optional but helpful)
-/gsd:new-milestone "v1.1 New feature"  # Update PROJECT.md for the next milestone
-/gsd:research-project                  # (optional) Domain / stack research
-/gsd:define-requirements               # Re-scope v1/v2 for this milestone
-/gsd:create-roadmap                    # New phases mapped to requirements
-/gsd:plan-phase                        # Auto-detect next unplanned phase
-/gsd:execute-phase <phase>
+/ms:discuss-milestone                 # Clarify what’s next (optional but helpful)
+/ms:new-milestone "v1.1 New feature"  # Update PROJECT.md for the next milestone
+/ms:research-project                  # (optional) Domain / stack research
+/ms:define-requirements               # Re-scope v1/v2 for this milestone
+/ms:create-roadmap                    # New phases mapped to requirements
+/ms:plan-phase                        # Auto-detect next unplanned phase
+/ms:execute-phase <phase>
 ```
 
 ### Completing a milestone
 
 ```
-/gsd:audit-milestone 1.0.0       # Verify before completing
-/gsd:complete-milestone 1.0.0    # Archive and tag
-/gsd:discuss-milestone           # Gather context for next
-/gsd:new-milestone "v1.1 Features"
+/ms:audit-milestone 1.0.0       # Verify before completing
+/ms:complete-milestone 1.0.0    # Archive and tag
+/ms:discuss-milestone           # Gather context for next
+/ms:new-milestone "v1.1 Features"
 ```
 
 ### Closing gaps from audit
 
 ```
-/gsd:audit-milestone 1.0.0       # Finds gaps
-/gsd:plan-milestone-gaps         # Creates phases to fix them
-/gsd:plan-phase 6                # Plan first gap closure phase
-/gsd:execute-phase 6
-/gsd:audit-milestone 1.0.0       # Re-audit when done
+/ms:audit-milestone 1.0.0       # Finds gaps
+/ms:plan-milestone-gaps         # Creates phases to fix them
+/ms:plan-phase 6                # Plan first gap closure phase
+/ms:execute-phase 6
+/ms:audit-milestone 1.0.0       # Re-audit when done
 ```
 
 ### Capturing ideas during work
 
 ```
-/gsd:add-todo                    # Capture from conversation context
-/gsd:add-todo Fix modal z-index  # Capture with explicit description
-/gsd:check-todos                 # Review and work on todos
-/gsd:check-todos api             # Filter by area
+/ms:add-todo                    # Capture from conversation context
+/ms:add-todo Fix modal z-index  # Capture with explicit description
+/ms:check-todos                 # Review and work on todos
+/ms:check-todos api             # Filter by area
 ```
 
 ### Pausing and resuming mid-phase
 
 ```
-/gsd:pause-work                # Creates a handoff pointer
+/ms:pause-work                # Creates a handoff pointer
 # later...
-/gsd:resume-work               # Restore context and continue
+/ms:resume-work               # Restore context and continue
 ```
 
 ---
@@ -728,4 +728,4 @@ Common options:
 - Read `.planning/PROJECT.md` for project vision
 - Read `.planning/STATE.md` for current context
 - Check `.planning/ROADMAP.md` for phase status
-- Run `/gsd:progress` to check where you're up to
+- Run `/ms:progress` to check where you're up to

@@ -1,10 +1,25 @@
 # Changelog
 
-All notable changes to GSD will be documented in this file.
+All notable changes to Mindsystem will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+
+## [3.0.0] - 2026-01-23
+
+### Changed
+- **BREAKING:** Rebranded from GSD to Mindsystem
+- Command prefix changed from `gsd:` to `ms:`
+- NPM package renamed to `mindsystem-cc`
+- All agents renamed from `gsd-*` to `ms-*`
+- Directory structure: `get-shit-done/` → `mindsystem/`
+- Skill renamed from `gsd-meta` to `ms-meta`
+- Python CLI renamed from `gsd-lookup` to `ms-lookup`
+
+### Migration
+Users must reinstall: `npx mindsystem-cc`
+All commands change from `/gsd:*` to `/ms:*`
 
 ## [2.14.0] - 2026-01-23
 

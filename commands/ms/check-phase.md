@@ -1,5 +1,5 @@
 ---
-name: check-phase
+name: ms:check-phase
 description: Verify phase plans before execution (optional quality gate)
 arguments: phase
 allowed-tools:
@@ -13,7 +13,7 @@ allowed-tools:
 <purpose>
 On-demand plan verification. Use when a plan seems large or complex and you want a structured review before executing.
 
-This spawns gsd-plan-checker to analyze your PLAN.md files against the phase goal.
+This spawns ms-plan-checker to analyze your PLAN.md files against the phase goal.
 </purpose>
 
 <what_it_checks>
@@ -44,7 +44,7 @@ echo "Phase directory: $PHASE_DIR"
 ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 ```
 
-If no PLAN.md files found, remind user to run `/gsd:plan-phase` first.
+If no PLAN.md files found, remind user to run `/ms:plan-phase` first.
 </step>
 
 <step name="load_context">
@@ -69,7 +69,7 @@ Spawn the plan checker agent:
 
 ```
 Task(
-  subagent_type="gsd-plan-checker",
+  subagent_type="ms-plan-checker",
   prompt="""
 Verify plans for phase $ARGUMENTS.
 
@@ -107,7 +107,7 @@ All checks passed:
 ✓ Scope within budget
 ✓ Verification criteria derived
 
-Ready to execute: /gsd:execute-phase $ARGUMENTS
+Ready to execute: /ms:execute-phase $ARGUMENTS
 ```
 
 **Format for ISSUES FOUND:**
@@ -139,8 +139,8 @@ WARNINGS (should fix):
 ---
 
 Options:
-- Fix the issues and run /gsd:check-phase $ARGUMENTS again
-- Proceed anyway: /gsd:execute-phase $ARGUMENTS (not recommended if blockers exist)
+- Fix the issues and run /ms:check-phase $ARGUMENTS again
+- Proceed anyway: /ms:execute-phase $ARGUMENTS (not recommended if blockers exist)
 ```
 </step>
 
@@ -149,14 +149,14 @@ Options:
 <examples>
 **Check before executing a complex phase:**
 ```
-/gsd:check-phase 5
+/ms:check-phase 5
 ```
 
 **Typical workflow:**
 ```
-/gsd:plan-phase 5      # Interactive planning in main context
+/ms:plan-phase 5      # Interactive planning in main context
 # ... review and iterate ...
-/gsd:check-phase 5      # Optional verification for complex plans
-/gsd:execute-phase 5   # Execute
+/ms:check-phase 5      # Optional verification for complex plans
+/ms:execute-phase 5   # Execute
 ```
 </examples>

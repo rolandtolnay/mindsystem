@@ -1,7 +1,7 @@
 <execution_model>
 
 <overview>
-GSD uses wave-based parallel execution where the orchestrator stays lean while subagents execute with fresh context. This document explains the complete execution model.
+Mindsystem uses wave-based parallel execution where the orchestrator stays lean while subagents execute with fresh context. This document explains the complete execution model.
 </overview>
 
 <orchestrator_role>
@@ -10,7 +10,7 @@ GSD uses wave-based parallel execution where the orchestrator stays lean while s
 The orchestrator's job is **coordination, not execution**. It:
 - Discovers plans in phase directory
 - Groups plans by pre-computed wave number
-- Spawns subagents (gsd-executor) in parallel per wave
+- Spawns subagents (ms-executor) in parallel per wave
 - Handles checkpoints between waves
 - Collects results and updates state
 - Runs verification after completion
@@ -23,7 +23,7 @@ The orchestrator's job is **coordination, not execution**. It:
 <wave_computation>
 ## Wave Assignment (During Planning)
 
-Wave numbers are pre-computed during `/gsd:plan-phase`, not at execution time.
+Wave numbers are pre-computed during `/ms:plan-phase`, not at execution time.
 
 **Assignment rules:**
 ```
@@ -58,20 +58,20 @@ autonomous: true  # No checkpoints
 execute-phase orchestrator
     │
     ├── Wave 1 (parallel) ─────────────────────────┐
-    │   ├── Task(gsd-executor) → plan-01           │
-    │   ├── Task(gsd-executor) → plan-02           │ All spawn simultaneously
-    │   └── Task(gsd-executor) → plan-03           │
+    │   ├── Task(ms-executor) → plan-01           │
+    │   ├── Task(ms-executor) → plan-02           │ All spawn simultaneously
+    │   └── Task(ms-executor) → plan-03           │
     │       │                                      │
     │       └── [All agents block until complete] ─┘
     │
     ├── Wave 2 (parallel) ─────────────────────────┐
-    │   ├── Task(gsd-executor) → plan-04           │
-    │   └── Task(gsd-executor) → plan-05           │
+    │   ├── Task(ms-executor) → plan-04           │
+    │   └── Task(ms-executor) → plan-05           │
     │       │                                      │
     │       └── [All agents block until complete] ─┘
     │
     └── verify_phase_goal
-        └── Task(gsd-verifier)
+        └── Task(ms-verifier)
 ```
 
 **Each subagent:**
@@ -96,10 +96,10 @@ Commit each task atomically. Create SUMMARY.md. Update STATE.md.
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/execute-plan.md
-@~/.claude/get-shit-done/templates/summary.md
-@~/.claude/get-shit-done/references/checkpoints.md
-@~/.claude/get-shit-done/references/tdd.md
+@~/.claude/mindsystem/workflows/execute-plan.md
+@~/.claude/mindsystem/templates/summary.md
+@~/.claude/mindsystem/references/checkpoints.md
+@~/.claude/mindsystem/references/tdd.md
 </execution_context>
 
 <context>
@@ -186,8 +186,8 @@ Continue execution of plan {plan_number} from task {resume_task_number}.
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/execute-plan.md
-@~/.claude/get-shit-done/templates/summary.md
+@~/.claude/mindsystem/workflows/execute-plan.md
+@~/.claude/mindsystem/templates/summary.md
 </execution_context>
 
 <context>
@@ -247,7 +247,7 @@ Task {resume_task_number}: {resume_task_name}
 
 If phase execution was interrupted:
 
-1. Run `/gsd:execute-phase {phase}` again
+1. Run `/ms:execute-phase {phase}` again
 2. discover_plans finds completed SUMMARYs
 3. Skips completed plans
 4. Resumes from first incomplete plan
@@ -262,7 +262,7 @@ If phase execution was interrupted:
 <verification_after_execution>
 ## Verification Phase
 
-After all waves complete, orchestrator spawns gsd-verifier:
+After all waves complete, orchestrator spawns ms-verifier:
 
 ```
 Task(
@@ -272,7 +272,7 @@ Task(
   Phase goal: {goal from ROADMAP.md}
 
   Check must_haves against actual codebase. Create VERIFICATION.md.",
-  subagent_type="gsd-verifier"
+  subagent_type="ms-verifier"
 )
 ```
 
@@ -286,7 +286,7 @@ Task(
 |--------|--------|
 | `passed` | Update roadmap, offer next phase |
 | `human_needed` | Present items for human testing |
-| `gaps_found` | Offer `/gsd:plan-phase --gaps` |
+| `gaps_found` | Offer `/ms:plan-phase --gaps` |
 </verification_after_execution>
 
 <context_efficiency>
@@ -320,29 +320,29 @@ Task(
 
 **Sequential:**
 ```
-plan-phase → gsd-planner → PLAN.md
+plan-phase → ms-planner → PLAN.md
 ```
 
 **Parallel (same type):**
 ```
-research-project → 4× gsd-researcher (parallel)
+research-project → 4× ms-researcher (parallel)
                       ↓
-                   gsd-research-synthesizer
+                   ms-research-synthesizer
 ```
 
 **Parallel (wave-based):**
 ```
-execute-phase Wave 1 → gsd-executor (plan-01)
-                     → gsd-executor (plan-02)
-              Wave 2 → gsd-executor (plan-03)
+execute-phase Wave 1 → ms-executor (plan-01)
+                     → ms-executor (plan-02)
+              Wave 2 → ms-executor (plan-03)
 ```
 
 **Hierarchical:**
 ```
-audit-milestone → gsd-milestone-auditor
+audit-milestone → ms-milestone-auditor
                     ↓
-                  gsd-verifier (per phase)
-                  gsd-integration-checker
+                  ms-verifier (per phase)
+                  ms-integration-checker
 ```
 </spawning_patterns>
 

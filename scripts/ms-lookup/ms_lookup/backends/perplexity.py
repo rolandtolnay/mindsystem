@@ -4,8 +4,8 @@ import re
 
 import httpx
 
-from gsd_lookup.config import PERPLEXITY_API_KEY, PERPLEXITY_BASE_URL, PERPLEXITY_DEEP_MODEL
-from gsd_lookup.errors import ErrorCode, GsdLookupError
+from ms_lookup.config import PERPLEXITY_API_KEY, PERPLEXITY_BASE_URL, PERPLEXITY_DEEP_MODEL
+from ms_lookup.errors import ErrorCode, MsLookupError
 
 
 class PerplexityClient:
@@ -18,7 +18,7 @@ class PerplexityClient:
     def _check_api_key(self) -> None:
         """Verify API key is configured."""
         if not self.api_key:
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.MISSING_API_KEY,
                 "PERPLEXITY_API_KEY environment variable not set",
                 suggestions=[
@@ -37,7 +37,7 @@ class PerplexityClient:
             Dict with research response
 
         Raises:
-            GsdLookupError: If API error
+            MsLookupError: If API error
         """
         self._check_api_key()
 
@@ -82,23 +82,23 @@ class PerplexityClient:
                 data = response.json()
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
-                raise GsdLookupError(
+                raise MsLookupError(
                     ErrorCode.MISSING_API_KEY,
                     "Invalid PERPLEXITY_API_KEY",
                     suggestions=["Check your API key at https://docs.perplexity.ai/"],
                 )
             elif e.response.status_code == 429:
-                raise GsdLookupError(
+                raise MsLookupError(
                     ErrorCode.RATE_LIMITED,
                     "Perplexity API rate limit exceeded",
                     suggestions=["Wait a moment and try again"],
                 )
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.API_ERROR,
                 f"Perplexity API error: {e.response.status_code}",
             )
         except httpx.RequestError as e:
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.NETWORK_ERROR,
                 f"Network error connecting to Perplexity: {str(e)}",
             )

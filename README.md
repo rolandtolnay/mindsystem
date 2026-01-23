@@ -1,27 +1,27 @@
 <div align="center">
 
-# GET SHIT DONE
+# MINDSYSTEM
 
 **A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by TÂCHES.**
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
-[![npm version](https://img.shields.io/npm/v/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
-[![npm downloads](https://img.shields.io/npm/dm/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
+[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
+[![npm downloads](https://img.shields.io/npm/dm/mindsystem-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/rolandtolnay/gsd?style=for-the-badge&logo=github&color=181717)](https://github.com/rolandtolnay/gsd)
+[![GitHub stars](https://img.shields.io/github/stars/rolandtolnay/mindsystem?style=for-the-badge&logo=github&color=181717)](https://github.com/rolandtolnay/mindsystem)
 
 <br>
 
 ```bash
-npx get-shit-done-cc
+npx mindsystem-cc
 ```
 
 **Works on Mac, Windows, and Linux.**
 
 <br>
 
-![GSD Install](assets/terminal.svg)
+![Mindsystem Install](assets/terminal.svg)
 
 <br>
 
@@ -47,7 +47,7 @@ I'm a solo developer. I don't write code — Claude Code does.
 
 Other spec-driven development tools exist; BMAD, Speckit... But they all seem to make things way more complicated than they need to be (sprint ceremonies, story points, stakeholder syncs, retrospectives, Jira workflows) or lack real big picture understanding of what you're building. I'm not a 50-person software company. I don't want to play enterprise theater. I'm just a creative person trying to build great things that work.
 
-So I built GSD. The complexity is in the system, not in your workflow. Behind the scenes: context engineering, XML prompt formatting, subagent orchestration, state management. What you see: a few commands that just work.
+So I built Mindsystem. The complexity is in the system, not in your workflow. Behind the scenes: context engineering, XML prompt formatting, subagent orchestration, state management. What you see: a few commands that just work.
 
 The system gives Claude everything it needs to do the work *and* verify it. I trust the workflow. It just does a good job.
 
@@ -59,7 +59,7 @@ That's what this is. No enterprise roleplay bullshit. Just an incredibly effecti
 
 Vibecoding has a bad reputation. You describe what you want, AI generates code, and you get inconsistent garbage that falls apart at scale.
 
-GSD fixes that. It's the context engineering layer that makes Claude Code reliable. Describe your idea, let the system extract everything it needs to know, and let Claude Code get to work.
+Mindsystem fixes that. It's the context engineering layer that makes Claude Code reliable. Describe your idea, let the system extract everything it needs to know, and let Claude Code get to work.
 
 ---
 
@@ -72,38 +72,38 @@ People who want to describe what they want and have it built correctly — witho
 ## Getting Started
 
 ```bash
-npx get-shit-done-cc
+npx mindsystem-cc
 ```
 
-That's it. Verify with `/gsd:help` inside your Claude Code interface.
+That's it. Verify with `/ms:help` inside your Claude Code interface.
 
 ### Start Here
 
-- If you already have `.planning/` in this repo: run `/gsd:progress`.
-- If you’re starting in an existing codebase (brownfield): run `/gsd:map-codebase`, then `/gsd:new-project`.
-- Otherwise: run `/gsd:new-project`.
+- If you already have `.planning/` in this repo: run `/ms:progress`.
+- If you’re starting in an existing codebase (brownfield): run `/ms:map-codebase`, then `/ms:new-project`.
+- Otherwise: run `/ms:new-project`.
 
 ### Staying Updated
 
-GSD evolves fast. Check for updates periodically:
+Mindsystem evolves fast. Check for updates periodically:
 
 ```
-/gsd:whats-new       # See what changed since your version
-/gsd:update          # Update and show changelog
+/ms:whats-new       # See what changed since your version
+/ms:update          # Update and show changelog
 ```
 
 Or update directly via npm:
 
 ```bash
-npx get-shit-done-cc@latest
+npx mindsystem-cc@latest
 ```
 
 <details>
 <summary><strong>Non-interactive Install (Docker, CI, Scripts)</strong></summary>
 
 ```bash
-npx get-shit-done-cc --global   # Install to ~/.claude/
-npx get-shit-done-cc --local    # Install to ./.claude/
+npx mindsystem-cc --global   # Install to ~/.claude/
+npx mindsystem-cc --local    # Install to ./.claude/
 ```
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the interactive prompt.
@@ -116,7 +116,7 @@ Use `--global` (`-g`) or `--local` (`-l`) to skip the interactive prompt.
 Clone the repository and run the installer locally:
 
 ```bash
-git clone https://github.com/rolandtolnay/gsd.git
+git clone https://github.com/rolandtolnay/mindsystem.git
 cd gsd
 node bin/install.js --local
 ```
@@ -127,14 +127,14 @@ Installs to `./.claude/` for testing modifications before contributing.
 
 ### Recommended: Skip Permissions Mode
 
-GSD is designed for frictionless automation. Run Claude Code with:
+Mindsystem is designed for frictionless automation. Run Claude Code with:
 
 ```bash
 claude --dangerously-skip-permissions
 ```
 
 > [!TIP]
-> This is how GSD is intended to be used — stopping to approve `date` and `git commit` 50 times defeats the purpose.
+> This is how Mindsystem is intended to be used — stopping to approve `date` and `git commit` 50 times defeats the purpose.
 
 <details>
 <summary><strong>Alternative: Granular Permissions</strong></summary>
@@ -176,7 +176,7 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 ### 1. Start with an idea
 
 ```
-/gsd:new-project
+/ms:new-project
 ```
 
 The system asks questions. Keeps asking until it has everything — your goals, constraints, tech preferences, edge cases. You go back and forth until the idea is fully captured. Creates **PROJECT.md**.
@@ -184,7 +184,7 @@ The system asks questions. Keeps asking until it has everything — your goals, 
 ### 1.5. Research the domain (optional)
 
 ```
-/gsd:research-project
+/ms:research-project
 ```
 
 Spawns parallel agents to investigate the domain — what's the standard stack, what features users expect, common architectural patterns, and pitfalls to avoid. Creates `.planning/research/` with ecosystem knowledge.
@@ -194,7 +194,7 @@ Spawns parallel agents to investigate the domain — what's the standard stack, 
 ### 2. Define requirements
 
 ```
-/gsd:define-requirements
+/ms:define-requirements
 ```
 
 Scope what's v1, what's v2, and what's out of scope. Creates **REQUIREMENTS.md** with checkable requirements and traceability. Works with or without prior research.
@@ -202,7 +202,7 @@ Scope what's v1, what's v2, and what's out of scope. Creates **REQUIREMENTS.md**
 ### 3. Create roadmap
 
 ```
-/gsd:create-roadmap
+/ms:create-roadmap
 ```
 
 Produces:
@@ -212,28 +212,28 @@ Produces:
 ### 4. Plan and execute phases
 
 ```
-/gsd:plan-phase 1      # System creates atomic task plans
-/gsd:execute-phase 1   # Parallel agents execute all plans (includes verification)
+/ms:plan-phase 1      # System creates atomic task plans
+/ms:execute-phase 1   # Parallel agents execute all plans (includes verification)
 ```
 
 Each phase breaks into 2-3 task plans. Each plan runs in a fresh subagent context — 200k tokens purely for implementation, zero degradation. Plans without dependencies run in parallel.
 
-Checkpoints and resumption are handled automatically — if interrupted, run `/gsd:execute-phase 1` again and it picks up where it left off.
+Checkpoints and resumption are handled automatically — if interrupted, run `/ms:execute-phase 1` again and it picks up where it left off.
 
 If a phase verifies with gaps, close them with:
 
 ```
-/gsd:plan-phase 1 --gaps
-/gsd:execute-phase 1
+/ms:plan-phase 1 --gaps
+/ms:execute-phase 1
 ```
 
 ### 5. Ship and iterate
 
 ```
-/gsd:audit-milestone 1.0.0        # (recommended) verify milestone before archiving
-/gsd:complete-milestone 1.0.0     # Archive v1, prep for v2
-/gsd:add-phase "Add admin dashboard"
-/gsd:insert-phase 2 "Fix critical auth bug"
+/ms:audit-milestone 1.0.0        # (recommended) verify milestone before archiving
+/ms:complete-milestone 1.0.0     # Archive v1, prep for v2
+/ms:add-phase "Add admin dashboard"
+/ms:insert-phase 2 "Fix critical auth bug"
 ```
 
 Ship your MVP in a day. Add features. Insert hotfixes. The system stays modular — you're never stuck.
@@ -247,7 +247,7 @@ Already have code? Start here instead.
 ### 1. Map the codebase
 
 ```
-/gsd:map-codebase
+/ms:map-codebase
 ```
 
 Spawns parallel agents to analyze your code. Creates `.planning/codebase/` with 7 documents:
@@ -265,7 +265,7 @@ Spawns parallel agents to analyze your code. Creates `.planning/codebase/` with 
 ### 2. Initialize project
 
 ```
-/gsd:new-project
+/ms:new-project
 ```
 
 Same as greenfield, but the system knows your codebase. Questions focus on what you're adding/changing, not starting from scratch.
@@ -273,7 +273,7 @@ Same as greenfield, but the system knows your codebase. Questions focus on what 
 ### 3. Continue as normal
 
 From here, it's the same flow:
-- `/gsd:research-project` (optional) → `/gsd:define-requirements` → `/gsd:create-roadmap` → `/gsd:plan-phase` → `/gsd:execute-phase <phase>`
+- `/ms:research-project` (optional) → `/ms:define-requirements` → `/ms:create-roadmap` → `/ms:plan-phase` → `/ms:execute-phase <phase>`
 
 The codebase docs load automatically during planning. Claude knows your patterns, conventions, and where to put things.
 
@@ -285,7 +285,7 @@ The codebase docs load automatically during planning. Claude knows your patterns
 
 Claude Code is incredibly powerful *if* you give it the context it needs. Most people don't.
 
-GSD handles it for you:
+Mindsystem handles it for you:
 
 | File | What it does |
 |------|--------------|
@@ -325,7 +325,7 @@ Precise instructions. No guessing. Verification built in.
 
 As Claude fills its context window, quality degrades. You've seen it: *"Due to context limits, I'll be more concise now."* That "concision" is code for cutting corners.
 
-GSD prevents this. Each plan is maximum 3 tasks. Each plan runs in a fresh subagent — 200k tokens purely for implementation, zero accumulated garbage.
+Mindsystem prevents this. Each plan is maximum 3 tasks. Each plan runs in a fresh subagent — 200k tokens purely for implementation, zero accumulated garbage.
 
 | Task | Context | Quality |
 |------|---------|---------|
@@ -364,74 +364,74 @@ You're never locked in. The system adapts.
 
 ## Commands
 
-For full details and up-to-date usage, run `/gsd:help` inside Claude Code (or read `commands/gsd/help.md`).
+For full details and up-to-date usage, run `/ms:help` inside Claude Code (or read `commands/ms/help.md`).
 
 ### Setup
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:new-project` | Extract your idea through questions, create PROJECT.md |
-| `/gsd:research-project` | Research domain ecosystem (stacks, features, pitfalls) |
-| `/gsd:define-requirements` | Scope v1/v2/out-of-scope with checkable requirements |
-| `/gsd:create-roadmap` | Create roadmap with phases mapped to requirements |
-| `/gsd:map-codebase` | Map existing codebase for brownfield projects |
+| `/ms:new-project` | Extract your idea through questions, create PROJECT.md |
+| `/ms:research-project` | Research domain ecosystem (stacks, features, pitfalls) |
+| `/ms:define-requirements` | Scope v1/v2/out-of-scope with checkable requirements |
+| `/ms:create-roadmap` | Create roadmap with phases mapped to requirements |
+| `/ms:map-codebase` | Map existing codebase for brownfield projects |
 
 ### Execution
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close verification gaps) |
-| `/gsd:execute-phase <N>` | Execute all plans in phase (parallel, handles checkpoints) |
-| `/gsd:progress` | Where am I? What's next? |
+| `/ms:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close verification gaps) |
+| `/ms:execute-phase <N>` | Execute all plans in phase (parallel, handles checkpoints) |
+| `/ms:progress` | Where am I? What's next? |
 
 ### Verification
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:check-phase <N>` | Verify phase plans before execution (optional) |
-| `/gsd:verify-work [N]` | User acceptance test of phase or plan ¹ |
-| `/gsd:audit-milestone [version]` | Audit milestone completion before archiving |
+| `/ms:check-phase <N>` | Verify phase plans before execution (optional) |
+| `/ms:verify-work [N]` | User acceptance test of phase or plan ¹ |
+| `/ms:audit-milestone [version]` | Audit milestone completion before archiving |
 
 ### Milestones
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:complete-milestone <version>` | Ship it, prep next version |
-| `/gsd:discuss-milestone` | Gather context for next milestone |
-| `/gsd:new-milestone [name]` | Create new milestone with phases |
-| `/gsd:plan-milestone-gaps` | Create phases to close gaps from audit |
+| `/ms:complete-milestone <version>` | Ship it, prep next version |
+| `/ms:discuss-milestone` | Gather context for next milestone |
+| `/ms:new-milestone [name]` | Create new milestone with phases |
+| `/ms:plan-milestone-gaps` | Create phases to close gaps from audit |
 
 ### Phase Management
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:add-phase <desc>` | Append phase to roadmap |
-| `/gsd:insert-phase <after> <desc>` | Insert urgent work between phases |
-| `/gsd:remove-phase <N>` | Remove future phase, renumber subsequent |
-| `/gsd:discuss-phase <N>` | Gather context before planning |
-| `/gsd:research-phase <N>` | Deep research for unfamiliar domains |
-| `/gsd:list-phase-assumptions <N>` | See what Claude assumes before correcting |
+| `/ms:add-phase <desc>` | Append phase to roadmap |
+| `/ms:insert-phase <after> <desc>` | Insert urgent work between phases |
+| `/ms:remove-phase <N>` | Remove future phase, renumber subsequent |
+| `/ms:discuss-phase <N>` | Gather context before planning |
+| `/ms:research-phase <N>` | Deep research for unfamiliar domains |
+| `/ms:list-phase-assumptions <N>` | See what Claude assumes before correcting |
 
 ### Session
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:pause-work` | Create handoff file when stopping mid-phase |
-| `/gsd:resume-work` | Restore from last session |
+| `/ms:pause-work` | Create handoff file when stopping mid-phase |
+| `/ms:resume-work` | Restore from last session |
 
 ### Utilities
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd:add-todo [desc]` | Capture idea or task for later |
-| `/gsd:check-todos [area]` | List pending todos, select one to work on |
-| `/gsd:do-work <desc>` | Execute small discovered work (max 2 tasks) |
-| `/gsd:debug [desc]` | Systematic debugging with persistent state |
-| `/gsd:review-design [scope]` | Audit and improve design of implemented features |
-| `/gsd:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity and maintainability |
-| `/gsd:help` | Show all commands and usage guide |
-| `/gsd:update` | Update GSD with changelog display |
-| `/gsd:whats-new` | See what changed since installed version |
+| `/ms:add-todo [desc]` | Capture idea or task for later |
+| `/ms:check-todos [area]` | List pending todos, select one to work on |
+| `/ms:do-work <desc>` | Execute small discovered work (max 2 tasks) |
+| `/ms:debug [desc]` | Systematic debugging with persistent state |
+| `/ms:review-design [scope]` | Audit and improve design of implemented features |
+| `/ms:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity and maintainability |
+| `/ms:help` | Show all commands and usage guide |
+| `/ms:update` | Update Mindsystem with changelog display |
+| `/ms:whats-new` | See what changed since installed version |
 
 <sup>¹ Contributed by reddit user OracleGreyBeard</sup>
 
@@ -441,22 +441,22 @@ For full details and up-to-date usage, run `/gsd:help` inside Claude Code (or re
 
 **Commands not found after install?**
 - Restart Claude Code to reload slash commands
-- Verify files exist in `~/.claude/commands/gsd/` (global) or `./.claude/commands/gsd/` (local)
+- Verify files exist in `~/.claude/commands/ms/` (global) or `./.claude/commands/ms/` (local)
 
 **Commands not working as expected?**
-- Run `/gsd:help` to verify installation
-- Re-run `npx get-shit-done-cc` to reinstall
+- Run `/ms:help` to verify installation
+- Re-run `npx mindsystem-cc` to reinstall
 
 **Updating to the latest version?**
 ```bash
-npx get-shit-done-cc@latest
+npx mindsystem-cc@latest
 ```
 
 **Using Docker or containerized environments?**
 
 If file reads fail with tilde paths (`~/.claude/...`), set `CLAUDE_CONFIG_DIR` before installing:
 ```bash
-CLAUDE_CONFIG_DIR=/home/youruser/.claude npx get-shit-done-cc --global
+CLAUDE_CONFIG_DIR=/home/youruser/.claude npx mindsystem-cc --global
 ```
 This ensures absolute paths are used instead of `~` which may not expand correctly in containers.
 
@@ -482,6 +482,6 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Claude Code is powerful. GSD makes it reliable.**
+**Claude Code is powerful. Mindsystem makes it reliable.**
 
 </div>

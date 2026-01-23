@@ -1,22 +1,22 @@
-# gsd-lookup
+# ms-lookup
 
-CLI tool for GSD research providing access to Context7 library documentation and Perplexity deep research.
+CLI tool for Mindsystem research providing access to Context7 library documentation and Perplexity deep research.
 
 ## Installation
 
-The tool is installed automatically with GSD. To use it standalone:
+The tool is installed automatically with Mindsystem. To use it standalone:
 
 ```bash
-cd scripts/gsd-lookup
+cd scripts/ms-lookup
 uv sync
-uv run python -m gsd_lookup --help
+uv run python -m ms_lookup --help
 ```
 
 Or with pip:
 
 ```bash
 pip install -e .
-gsd-lookup --help
+ms-lookup --help
 ```
 
 ## Environment Variables
@@ -40,12 +40,12 @@ Get API keys:
 Query library documentation via Context7. Provides authoritative, version-aware API documentation.
 
 ```bash
-gsd-lookup docs <library> "<query>"
+ms-lookup docs <library> "<query>"
 
 # Examples
-gsd-lookup docs nextjs "app router setup"
-gsd-lookup docs react "hooks useEffect cleanup"
-gsd-lookup docs "react-three-fiber" "physics integration"
+ms-lookup docs nextjs "app router setup"
+ms-lookup docs react "hooks useEffect cleanup"
+ms-lookup docs "react-three-fiber" "physics integration"
 ```
 
 ### deep - Deep Research
@@ -55,11 +55,11 @@ Perform comprehensive multi-source research via Perplexity.
 **Note:** This costs ~$0.005 per query + tokens. Use sparingly for high-value research questions.
 
 ```bash
-gsd-lookup deep "<query>"
+ms-lookup deep "<query>"
 
 # Examples
-gsd-lookup deep "authentication patterns for SaaS applications"
-gsd-lookup deep "WebGPU browser support and performance 2026"
+ms-lookup deep "authentication patterns for SaaS applications"
+ms-lookup deep "WebGPU browser support and performance 2026"
 ```
 
 ## Options
@@ -105,7 +105,7 @@ All commands return JSON:
 
 ## Caching
 
-Results are cached in `~/.cache/gsd-lookup/`:
+Results are cached in `~/.cache/ms-lookup/`:
 - docs: 24 hours TTL
 - deep: 6 hours TTL
 

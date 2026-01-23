@@ -183,7 +183,7 @@ Debug sessions: ${DEBUG_DIR}/
 
 **Plan fixes** — create fix plans from diagnosed gaps
 
-`/gsd:plan-phase {phase} --gaps`
+`/ms:plan-phase {phase} --gaps`
 
 `/clear` first for fresh context window
 
@@ -191,7 +191,7 @@ Debug sessions: ${DEBUG_DIR}/
 
 **Also available:**
 - Review debug sessions for detailed investigation
-- `/gsd:debug {issue}` — investigate specific issue further
+- `/ms:debug {issue}` — investigate specific issue further
 ```
 </step>
 
@@ -223,7 +223,7 @@ Debug sessions: ${DEBUG_DIR}/
 
 **Agent times out:**
 - Check DEBUG-{slug}.md for partial progress
-- Can resume with /gsd:debug
+- Can resume with /ms:debug
 
 **All agents fail:**
 - Something systemic (permissions, git, etc.)

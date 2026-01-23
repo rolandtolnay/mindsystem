@@ -15,7 +15,7 @@ Template for structured feedback when refining a design. Use this for major rede
 
 ## Iteration Prompt Structure
 
-When spawning gsd-designer for a redesign, assemble this context:
+When spawning ms-designer for a redesign, assemble this context:
 
 ```markdown
 <iteration_context>

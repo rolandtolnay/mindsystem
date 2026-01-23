@@ -1,5 +1,5 @@
 ---
-name: gsd:plan-phase
+name: ms:plan-phase
 description: Create detailed execution plan for a phase (PLAN.md)
 argument-hint: "[phase] [--gaps]"
 allowed-tools:
@@ -24,14 +24,14 @@ When invoked with `--gaps`, plans address gaps identified by the verifier. Load 
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/principles.md
-@~/.claude/get-shit-done/workflows/plan-phase.md
-@~/.claude/get-shit-done/templates/phase-prompt.md
-@~/.claude/get-shit-done/references/plan-format.md
-@~/.claude/get-shit-done/references/scope-estimation.md
-@~/.claude/get-shit-done/references/checkpoints.md
-@~/.claude/get-shit-done/references/tdd.md
-@~/.claude/get-shit-done/references/goal-backward.md
+@~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/workflows/plan-phase.md
+@~/.claude/mindsystem/templates/phase-prompt.md
+@~/.claude/mindsystem/references/plan-format.md
+@~/.claude/mindsystem/references/scope-estimation.md
+@~/.claude/mindsystem/references/checkpoints.md
+@~/.claude/mindsystem/references/tdd.md
+@~/.claude/mindsystem/references/goal-backward.md
 </execution_context>
 
 <context>
@@ -58,10 +58,10 @@ After loading, extract the requirements for the current phase:
    - PROF-03: User can write bio (max 500 chars)
    ```
 
-**Load phase context if exists (created by /gsd:discuss-phase):**
+**Load phase context if exists (created by /ms:discuss-phase):**
 Check for and read `.planning/phases/XX-name/{phase}-CONTEXT.md` - contains research findings, clarifications, and decisions from phase discussion.
 
-**Load design specs if exists (created by /gsd:design-phase):**
+**Load design specs if exists (created by /ms:design-phase):**
 Check for and read `.planning/phases/XX-name/{phase}-DESIGN.md` - contains visual/UX specifications including layouts, components, flows, and verification criteria.
 
 **Load codebase context if exists:**
@@ -72,7 +72,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 </context>
 
 <process>
-1. Check .planning/ directory exists (error if not - user should run /gsd:new-project)
+1. Check .planning/ directory exists (error if not - user should run /ms:new-project)
 2. Parse arguments: extract phase number and check for `--gaps` flag
 3. If phase number provided, validate it exists in roadmap
 4. If no phase number, detect next unplanned phase from roadmap

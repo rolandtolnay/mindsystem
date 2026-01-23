@@ -1,5 +1,5 @@
 ---
-name: gsd:research-project
+name: ms:research-project
 description: Research domain ecosystem before creating roadmap
 allowed-tools:
   - Read
@@ -10,7 +10,7 @@ allowed-tools:
 ---
 
 <objective>
-Research domain ecosystem. Spawns 4 parallel gsd-researcher agents for comprehensive coverage.
+Research domain ecosystem. Spawns 4 parallel ms-researcher agents for comprehensive coverage.
 
 **Orchestrator role:** Analyze project, generate research questions, spawn 4 parallel agents, synthesize SUMMARY.md.
 
@@ -27,7 +27,7 @@ Research domain ecosystem. Spawns 4 parallel gsd-researcher agents for comprehen
 ## 1. Validate Prerequisites
 
 ```bash
-[ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md. Run /gsd:new-project first."; exit 1; }
+[ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md. Run /ms:new-project first."; exit 1; }
 [ -f .planning/ROADMAP.md ] && echo "WARNING: ROADMAP.md exists. Research is typically done before roadmap."
 [ -d .planning/research ] && echo "RESEARCH_EXISTS" || echo "NO_RESEARCH"
 ```
@@ -102,7 +102,7 @@ IMPORTANT for subsequent milestones:
 </project_context>
 
 <downstream_consumer>
-Your STACK.md feeds into /gsd:create-roadmap. Be prescriptive:
+Your STACK.md feeds into /ms:create-roadmap. Be prescriptive:
 - Specific libraries with versions
 - Clear rationale for each choice
 - What NOT to use and why
@@ -116,9 +116,9 @@ Your STACK.md feeds into /gsd:create-roadmap. Be prescriptive:
 
 <output>
 Write to: .planning/research/STACK.md
-Use template: ~/.claude/get-shit-done/templates/research-project/STACK.md
+Use template: ~/.claude/mindsystem/templates/research-project/STACK.md
 </output>
-", subagent_type="gsd-researcher", description="Stack research")
+", subagent_type="ms-researcher", description="Stack research")
 
 Task(prompt="
 <research_type>
@@ -150,7 +150,7 @@ IMPORTANT for subsequent milestones:
 </project_context>
 
 <downstream_consumer>
-Your FEATURES.md feeds into /gsd:define-requirements. Categorize clearly:
+Your FEATURES.md feeds into /ms:define-requirements. Categorize clearly:
 - Table stakes (must have or users leave)
 - Differentiators (competitive advantage)
 - Anti-features (things to deliberately NOT build)
@@ -164,9 +164,9 @@ Your FEATURES.md feeds into /gsd:define-requirements. Categorize clearly:
 
 <output>
 Write to: .planning/research/FEATURES.md
-Use template: ~/.claude/get-shit-done/templates/research-project/FEATURES.md
+Use template: ~/.claude/mindsystem/templates/research-project/FEATURES.md
 </output>
-", subagent_type="gsd-researcher", description="Features research")
+", subagent_type="ms-researcher", description="Features research")
 
 Task(prompt="
 <research_type>
@@ -212,9 +212,9 @@ Your ARCHITECTURE.md informs phase structure in roadmap. Include:
 
 <output>
 Write to: .planning/research/ARCHITECTURE.md
-Use template: ~/.claude/get-shit-done/templates/research-project/ARCHITECTURE.md
+Use template: ~/.claude/mindsystem/templates/research-project/ARCHITECTURE.md
 </output>
-", subagent_type="gsd-researcher", description="Architecture research")
+", subagent_type="ms-researcher", description="Architecture research")
 
 Task(prompt="
 <research_type>
@@ -260,9 +260,9 @@ Your PITFALLS.md prevents mistakes in roadmap/planning. For each pitfall:
 
 <output>
 Write to: .planning/research/PITFALLS.md
-Use template: ~/.claude/get-shit-done/templates/research-project/PITFALLS.md
+Use template: ~/.claude/mindsystem/templates/research-project/PITFALLS.md
 </output>
-", subagent_type="gsd-researcher", description="Pitfalls research")
+", subagent_type="ms-researcher", description="Pitfalls research")
 ```
 
 **Announce:** "Spawning 4 research agents... may take 2-3 minutes."
@@ -303,7 +303,7 @@ Then commit ALL research files together:
 git add .planning/research/
 git commit -m 'docs: complete [domain] project research'
 ",
-  subagent_type="gsd-research-synthesizer",
+  subagent_type="ms-research-synthesizer",
   description="Synthesize research"
 )
 ```
@@ -322,7 +322,7 @@ Key findings:
 
 ---
 ## > Next Up
-**Define requirements** - `/gsd:define-requirements`
+**Define requirements** - `/ms:define-requirements`
 <sub>`/clear` first</sub>
 ---
 ```
@@ -332,8 +332,8 @@ Key findings:
 <success_criteria>
 - [ ] PROJECT.md validated
 - [ ] Domain identified and approved
-- [ ] 4 gsd-researcher agents spawned in parallel
+- [ ] 4 ms-researcher agents spawned in parallel
 - [ ] All 4 research files created (STACK, FEATURES, ARCHITECTURE, PITFALLS)
-- [ ] gsd-research-synthesizer spawned to create SUMMARY.md
+- [ ] ms-research-synthesizer spawned to create SUMMARY.md
 - [ ] All research files committed atomically by synthesizer
 </success_criteria>

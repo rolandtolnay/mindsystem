@@ -2,17 +2,17 @@
 
 ## DEPRECATED
 
-**This reference has been consolidated into the gsd-researcher agent.**
+**This reference has been consolidated into the ms-researcher agent.**
 
 The verification protocols and pitfall patterns now live in:
-- `agents/gsd-researcher.md` (section: `<verification_protocol>`)
+- `agents/ms-researcher.md` (section: `<verification_protocol>`)
 
 The content below is preserved for reference but is no longer the primary source.
 
 ---
 
 *Deprecated: 2026-01-15*
-*Replaced by: agents/gsd-researcher.md*
+*Replaced by: agents/ms-researcher.md*
 
 ---
 

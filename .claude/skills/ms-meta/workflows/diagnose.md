@@ -1,7 +1,7 @@
-# Workflow: Diagnose GSD Issue
+# Workflow: Diagnose Mindsystem Issue
 
 <purpose>
-Systematically investigate why something in GSD isn't working as expected.
+Systematically investigate why something in Mindsystem isn't working as expected.
 </purpose>
 
 <process>
@@ -12,12 +12,12 @@ Systematically investigate why something in GSD isn't working as expected.
 
 | Category | Symptoms | Likely Location |
 |----------|----------|-----------------|
-| Command not found | `/gsd:X` doesn't work | Installation, `commands/gsd/` |
-| Command wrong behavior | Runs but does unexpected thing | `commands/gsd/X.md`, `workflows/*.md` |
-| Agent fails | Subagent errors or wrong output | `agents/gsd-*.md` |
-| Plan execution issue | Tasks fail, wrong commits, no SUMMARY | `workflows/execute-plan.md`, `agents/gsd-executor.md` |
+| Command not found | `/ms:X` doesn't work | Installation, `commands/ms/` |
+| Command wrong behavior | Runs but does unexpected thing | `commands/ms/X.md`, `workflows/*.md` |
+| Agent fails | Subagent errors or wrong output | `agents/ms-*.md` |
+| Plan execution issue | Tasks fail, wrong commits, no SUMMARY | `workflows/execute-plan.md`, `agents/ms-executor.md` |
 | Wave execution issue | Plans not parallel, wrong order | `workflows/execute-phase.md`, plan frontmatter |
-| Verification gaps | Verifier reports gaps that exist | `agents/gsd-verifier.md`, `references/goal-backward.md` |
+| Verification gaps | Verifier reports gaps that exist | `agents/ms-verifier.md`, `references/goal-backward.md` |
 | Checkpoint handling | Checkpoints not pausing, wrong format | `references/checkpoints.md`, executor |
 | State corruption | STATE.md wrong, position incorrect | `templates/state.md`, workflow state updates |
 | Template wrong | Output file has wrong structure | `templates/*.md` |
@@ -28,27 +28,27 @@ Based on category, read the source files (relative to repo root):
 
 **Command issues:**
 ```
-commands/gsd/{command}.md
+commands/ms/{command}.md
 ```
 
 **Workflow issues:**
 ```
-get-shit-done/workflows/{workflow}.md
+mindsystem/workflows/{workflow}.md
 ```
 
 **Agent issues:**
 ```
-agents/gsd-{agent}.md
+agents/ms-{agent}.md
 ```
 
 **Template issues:**
 ```
-get-shit-done/templates/{template}.md
+mindsystem/templates/{template}.md
 ```
 
 **Reference issues:**
 ```
-get-shit-done/references/{reference}.md
+mindsystem/references/{reference}.md
 ```
 
 ## Step 3: Trace the Flow
@@ -89,8 +89,8 @@ Based on gap:
 ### Command & Installation Issues
 
 **"Command not working after install"**
-- **Check:** `ls ~/.claude/commands/gsd/` exists
-- **Fix:** Re-run `npx get-shit-done-cc`
+- **Check:** `ls ~/.claude/commands/ms/` exists
+- **Fix:** Re-run `npx mindsystem-cc`
 
 **"Command works locally but not globally"**
 - **Check:** Which installation is active (`.claude/` vs `~/.claude/`)
@@ -204,20 +204,20 @@ Based on gap:
 
 ```bash
 # Check installation
-ls -la ~/.claude/commands/gsd/
-ls -la .claude/commands/gsd/
+ls -la ~/.claude/commands/ms/
+ls -la .claude/commands/ms/
 
 # Check specific command
-cat commands/gsd/{command}.md
+cat commands/ms/{command}.md
 
 # Check workflow
-cat get-shit-done/workflows/{workflow}.md
+cat mindsystem/workflows/{workflow}.md
 
 # Check agent
-cat agents/gsd-{agent}.md
+cat agents/ms-{agent}.md
 
 # Check template
-cat get-shit-done/templates/{template}.md
+cat mindsystem/templates/{template}.md
 
 # Check plan structure
 cat .planning/phases/XX-name/XX-NN-PLAN.md | head -30

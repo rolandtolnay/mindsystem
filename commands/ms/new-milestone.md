@@ -1,5 +1,5 @@
 ---
-name: gsd:new-milestone
+name: ms:new-milestone
 description: Start a new milestone cycle — update PROJECT.md and route to requirements
 argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
 allowed-tools:
@@ -18,8 +18,8 @@ Output: Updated PROJECT.md, routes to research-project or define-requirements
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/questioning.md
-@~/.claude/get-shit-done/templates/project.md
+@~/.claude/mindsystem/references/questioning.md
+@~/.claude/mindsystem/templates/project.md
 </execution_context>
 
 <context>
@@ -31,7 +31,7 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 @.planning/MILESTONES.md
 @.planning/config.json
 
-**Load milestone context (if exists, from /gsd:discuss-milestone):**
+**Load milestone context (if exists, from /ms:discuss-milestone):**
 @.planning/MILESTONE-CONTEXT.md
 </context>
 
@@ -41,7 +41,7 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Read PROJECT.md (existing project, Validated requirements, decisions)
    - Read MILESTONES.md (what shipped previously)
    - Read STATE.md (pending todos, blockers)
-   - Check for MILESTONE-CONTEXT.md (from /gsd:discuss-milestone)
+   - Check for MILESTONE-CONTEXT.md (from /ms:discuss-milestone)
 
 2. **Present what shipped (if MILESTONES.md exists):**
 
@@ -125,7 +125,7 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    ```markdown
    ## Current Position
 
-   Phase: Not started (run /gsd:create-roadmap)
+   Phase: Not started (run /ms:create-roadmap)
    Plan: —
    Status: Defining requirements
    Last activity: [today] — Milestone v[X.Y] started
@@ -169,12 +169,12 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    **Option A: Research first** (new domains/capabilities)
    Research ecosystem before scoping. Discovers patterns, expected features, architecture approaches.
 
-   `/gsd:research-project`
+   `/ms:research-project`
 
    **Option B: Define requirements directly** (familiar territory)
    Skip research, define requirements from what you know.
 
-   `/gsd:define-requirements`
+   `/ms:define-requirements`
 
    <sub>`/clear` first → fresh context window</sub>
 

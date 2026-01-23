@@ -14,8 +14,8 @@ class ErrorCode(str, Enum):
     INVALID_RESPONSE = "INVALID_RESPONSE"
 
 
-class GsdLookupError(Exception):
-    """Base exception for gsd-lookup errors."""
+class MsLookupError(Exception):
+    """Base exception for ms-lookup errors."""
 
     def __init__(self, code: ErrorCode, message: str, suggestions: list[str] | None = None):
         self.code = code

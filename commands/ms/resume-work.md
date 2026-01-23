@@ -1,5 +1,5 @@
 ---
-name: gsd:resume-work
+name: ms:resume-work
 description: Resume work from previous session with full context restoration
 allowed-tools:
   - Read
@@ -22,11 +22,11 @@ Routes to the resume-project workflow which handles:
   </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/resume-project.md
+@~/.claude/mindsystem/workflows/resume-project.md
 </execution_context>
 
 <process>
-**Follow the resume-project workflow** from `@~/.claude/get-shit-done/workflows/resume-project.md`.
+**Follow the resume-project workflow** from `@~/.claude/mindsystem/workflows/resume-project.md`.
 
 The workflow handles all resumption logic including:
 

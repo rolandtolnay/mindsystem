@@ -19,8 +19,8 @@ What to build and why
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/execute-plan.md
-@~/.claude/get-shit-done/templates/summary.md
+@~/.claude/mindsystem/workflows/execute-plan.md
+@~/.claude/mindsystem/templates/summary.md
 </execution_context>
 
 <context>
@@ -225,7 +225,7 @@ Trend: [Improving / Stable / Degrading]
 - [Phase Y]: Chose Supabase for auth
 
 ### Pending Todos
-3 pending — see /gsd:check-todos
+3 pending — see /ms:check-todos
 
 ### Blockers/Concerns
 - [Phase 2]: Need API key before deployment

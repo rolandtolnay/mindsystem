@@ -56,7 +56,7 @@ TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file r
 - Dedicated plans ensure full quality throughout RED-GREEN-REFACTOR
 - Each TDD feature gets fresh context, peak quality
 
-See `~/.claude/get-shit-done/references/tdd.md` for TDD plan structure.
+See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 </tdd_plans>
 
 <split_signals>

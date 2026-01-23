@@ -1,14 +1,14 @@
 {
-  "name": "get-shit-done-cc",
-  "version": "2.14.0",
+  "name": "mindsystem-cc",
+  "version": "3.0.0",
   "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by TÂCHES.",
   "bin": {
-    "get-shit-done-cc": "bin/install.js"
+    "mindsystem-cc": "bin/install.js"
   },
   "files": [
     "bin",
     "commands",
-    "get-shit-done",
+    "mindsystem",
     "agents",
     "scripts"
   ],
@@ -24,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rolandtolnay/gsd.git"
+    "url": "git+https://github.com/rolandtolnay/mindsystem.git"
   },
   "engines": {
     "node": ">=16.7.0"

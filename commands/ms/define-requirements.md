@@ -1,5 +1,5 @@
 ---
-name: gsd:define-requirements
+name: ms:define-requirements
 description: Define what "done" looks like with checkable requirements
 allowed-tools:
   - Read
@@ -16,15 +16,15 @@ Two modes:
 1. **With research** — Transform FEATURES.md into scoped requirements
 2. **Without research** — Gather requirements through questioning
 
-Run before `/gsd:create-roadmap`.
+Run before `/ms:create-roadmap`.
 
 Output: `.planning/REQUIREMENTS.md`
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/principles.md
-@~/.claude/get-shit-done/workflows/define-requirements.md
-@~/.claude/get-shit-done/templates/requirements.md
+@~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/workflows/define-requirements.md
+@~/.claude/mindsystem/templates/requirements.md
 </execution_context>
 
 <context>
@@ -38,7 +38,7 @@ Output: `.planning/REQUIREMENTS.md`
 <step name="validate">
 ```bash
 # Verify project exists
-[ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md found. Run /gsd:new-project first."; exit 1; }
+[ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md found. Run /ms:new-project first."; exit 1; }
 
 # Check for research
 [ -f .planning/research/FEATURES.md ] && echo "HAS_RESEARCH" || echo "NO_RESEARCH"
@@ -100,7 +100,7 @@ Requirements defined:
 
 **Create roadmap** — phases mapped to requirements
 
-`/gsd:create-roadmap`
+`/ms:create-roadmap`
 
 <sub>`/clear` first → fresh context window</sub>
 

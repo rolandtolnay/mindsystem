@@ -423,7 +423,7 @@ Extract completed milestone details and create archive file.
 
 1. Create archive file path: `.planning/milestones/v[X.Y]-ROADMAP.md`
 
-2. Read `~/.claude/get-shit-done/templates/milestone-archive.md` template
+2. Read `~/.claude/mindsystem/templates/milestone-archive.md` template
 
 3. Extract data from current ROADMAP.md:
    - All phases belonging to this milestone (by phase number range)
@@ -528,7 +528,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
    ✅ REQUIREMENTS.md deleted (fresh one needed for next milestone)
    ```
 
-**Important:** The next milestone workflow starts with `/gsd:define-requirements` to create a fresh REQUIREMENTS.md. PROJECT.md's Validated section carries the cumulative record across milestones.
+**Important:** The next milestone workflow starts with `/ms:define-requirements` to create a fresh REQUIREMENTS.md. PROJECT.md's Validated section carries the cumulative record across milestones.
 
 </step>
 
@@ -683,18 +683,18 @@ Tag: v[X.Y]
 
 **Discuss Next Milestone** — figure out what to build next
 
-`/gsd:discuss-milestone`
+`/ms:discuss-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Next milestone flow:**
-1. `/gsd:discuss-milestone` — thinking partner, creates context file
-2. `/gsd:new-milestone` — update PROJECT.md with new goals
-3. `/gsd:research-project` — (optional) research ecosystem
-4. `/gsd:define-requirements` — scope what to build
-5. `/gsd:create-roadmap` — plan how to build it
+1. `/ms:discuss-milestone` — thinking partner, creates context file
+2. `/ms:new-milestone` — update PROJECT.md with new goals
+3. `/ms:research-project` — (optional) research ecosystem
+4. `/ms:define-requirements` — scope what to build
+5. `/ms:create-roadmap` — plan how to build it
 
 ---
 ```
@@ -754,6 +754,6 @@ Milestone completion is successful when:
 - [ ] STATE.md updated with fresh project reference
 - [ ] Git tag created (v[X.Y])
 - [ ] Milestone commit made (includes archive files and deletion)
-- [ ] User knows next steps (starting with /gsd:define-requirements)
+- [ ] User knows next steps (starting with /ms:define-requirements)
 
 </success_criteria>

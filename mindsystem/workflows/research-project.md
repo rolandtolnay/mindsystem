@@ -2,12 +2,12 @@
 
 ## DEPRECATED
 
-**This workflow has been consolidated into the gsd-researcher agent.**
+**This workflow has been consolidated into the ms-researcher agent.**
 
 The research methodology for project research now lives in:
-- `agents/gsd-researcher.md`
+- `agents/ms-researcher.md`
 
-The `/gsd:research-project` command spawns 4 parallel gsd-researcher agents:
+The `/ms:research-project` command spawns 4 parallel ms-researcher agents:
 - Stack agent -> .planning/research/STACK.md
 - Features agent -> .planning/research/FEATURES.md
 - Architecture agent -> .planning/research/ARCHITECTURE.md
@@ -20,4 +20,4 @@ The orchestrator synthesizes SUMMARY.md after all agents complete.
 ---
 
 *Deprecated: 2026-01-15*
-*Replaced by: agents/gsd-researcher.md*
+*Replaced by: agents/ms-researcher.md*

@@ -19,9 +19,9 @@ Then verify each level against the actual codebase.
 
 <required_reading>
 **Load these references:**
-- ~/.claude/get-shit-done/references/goal-backward.md (derivation process)
-- ~/.claude/get-shit-done/references/verification-patterns.md (detection patterns)
-- ~/.claude/get-shit-done/templates/verification-report.md (output format)
+- ~/.claude/mindsystem/references/goal-backward.md (derivation process)
+- ~/.claude/mindsystem/references/verification-patterns.md (detection patterns)
+- ~/.claude/mindsystem/templates/verification-report.md (output format)
 </required_reading>
 
 <process>
@@ -97,7 +97,7 @@ If no must_haves in frontmatter, derive using goal-backward process:
 
 5. **Document derived must-haves** before proceeding to verification.
 
-See ~/.claude/get-shit-done/references/goal-backward.md for detailed derivation guidance.
+See ~/.claude/mindsystem/references/goal-backward.md for detailed derivation guidance.
 </step>
 
 <step name="verify_truths">
@@ -565,7 +565,7 @@ Fill template sections:
 9. **Recommended Fix Plans:** If gaps_found
 10. **Verification Metadata:** Approach, timing, counts
 
-See ~/.claude/get-shit-done/templates/verification-report.md for complete template.
+See ~/.claude/mindsystem/templates/verification-report.md for complete template.
 </step>
 
 <step name="return_to_orchestrator">

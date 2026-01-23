@@ -16,14 +16,14 @@ const reset = '\x1b[0m';
 const pkg = require('../package.json');
 
 const banner = `
-${cyan}   ██████╗ ███████╗██████╗
-  ██╔════╝ ██╔════╝██╔══██╗
-  ██║  ███╗███████╗██║  ██║
-  ██║   ██║╚════██║██║  ██║
-  ╚██████╔╝███████║██████╔╝
-   ╚═════╝ ╚══════╝╚═════╝${reset}
+${cyan}   ███╗   ███╗██╗███╗   ██╗██████╗ ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗
+   ████╗ ████║██║████╗  ██║██╔══██╗██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║
+   ██╔████╔██║██║██╔██╗ ██║██║  ██║███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║
+   ██║╚██╔╝██║██║██║╚██╗██║██║  ██║╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║
+   ██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║
+   ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝${reset}
 
-  Get Shit Done ${dim}v${pkg.version}${reset}
+  Mindsystem ${dim}v${pkg.version}${reset}
   A meta-prompting, context engineering and spec-driven
   development system for Claude Code by TÂCHES.
 `;
@@ -59,7 +59,7 @@ console.log(banner);
 
 // Show help if requested
 if (hasHelp) {
-  console.log(`  ${yellow}Usage:${reset} npx get-shit-done-cc [options]
+  console.log(`  ${yellow}Usage:${reset} npx mindsystem-cc [options]
 
   ${yellow}Options:${reset}
     ${cyan}-g, --global${reset}              Install globally (to Claude config directory)
@@ -69,16 +69,16 @@ if (hasHelp) {
 
   ${yellow}Examples:${reset}
     ${dim}# Install to default ~/.claude directory${reset}
-    npx get-shit-done-cc --global
+    npx mindsystem-cc --global
 
     ${dim}# Install to custom config directory (for multiple Claude accounts)${reset}
-    npx get-shit-done-cc --global --config-dir ~/.claude-bc
+    npx mindsystem-cc --global --config-dir ~/.claude-bc
 
     ${dim}# Using environment variable${reset}
-    CLAUDE_CONFIG_DIR=~/.claude-bc npx get-shit-done-cc --global
+    CLAUDE_CONFIG_DIR=~/.claude-bc npx mindsystem-cc --global
 
     ${dim}# Install to current project only${reset}
-    npx get-shit-done-cc --local
+    npx mindsystem-cc --local
 
   ${yellow}Notes:${reset}
     The --config-dir option is useful when you have multiple Claude Code
@@ -171,17 +171,17 @@ function install(isGlobal) {
   const commandsDir = path.join(claudeDir, 'commands');
   fs.mkdirSync(commandsDir, { recursive: true });
 
-  // Copy commands/gsd with path replacement
-  const gsdSrc = path.join(src, 'commands', 'gsd');
-  const gsdDest = path.join(commandsDir, 'gsd');
-  copyWithPathReplacement(gsdSrc, gsdDest, pathPrefix);
-  console.log(`  ${green}✓${reset} Installed commands/gsd`);
+  // Copy commands/ms with path replacement
+  const msSrc = path.join(src, 'commands', 'ms');
+  const msDest = path.join(commandsDir, 'ms');
+  copyWithPathReplacement(msSrc, msDest, pathPrefix);
+  console.log(`  ${green}✓${reset} Installed commands/ms`);
 
-  // Copy get-shit-done skill with path replacement
-  const skillSrc = path.join(src, 'get-shit-done');
-  const skillDest = path.join(claudeDir, 'get-shit-done');
+  // Copy mindsystem skill with path replacement
+  const skillSrc = path.join(src, 'mindsystem');
+  const skillDest = path.join(claudeDir, 'mindsystem');
   copyWithPathReplacement(skillSrc, skillDest, pathPrefix);
-  console.log(`  ${green}✓${reset} Installed get-shit-done`);
+  console.log(`  ${green}✓${reset} Installed mindsystem`);
 
   // Copy agents to ~/.claude/agents (subagents must be at root level)
   const agentsSrc = path.join(src, 'agents');
@@ -191,17 +191,17 @@ function install(isGlobal) {
     console.log(`  ${green}✓${reset} Installed agents`);
   }
 
-  // Copy scripts to ~/.claude/get-shit-done/scripts/
+  // Copy scripts to ~/.claude/mindsystem/scripts/
   const scriptsSrc = path.join(src, 'scripts');
   if (fs.existsSync(scriptsSrc)) {
-    const scriptsDest = path.join(claudeDir, 'get-shit-done', 'scripts');
+    const scriptsDest = path.join(claudeDir, 'mindsystem', 'scripts');
     fs.mkdirSync(scriptsDest, { recursive: true });
     const scriptEntries = fs.readdirSync(scriptsSrc, { withFileTypes: true });
     for (const entry of scriptEntries) {
       const srcPath = path.join(scriptsSrc, entry.name);
       const destPath = path.join(scriptsDest, entry.name);
       if (entry.isDirectory()) {
-        // Recursively copy directories (like gsd-lookup/)
+        // Recursively copy directories (like ms-lookup/)
         copyDir(srcPath, destPath);
       } else {
         fs.copyFileSync(srcPath, destPath);
@@ -213,9 +213,9 @@ function install(isGlobal) {
     }
     console.log(`  ${green}✓${reset} Installed scripts`);
 
-    // Check Python availability for gsd-lookup
-    const gsdLookupPath = path.join(scriptsDest, 'gsd-lookup');
-    if (fs.existsSync(gsdLookupPath)) {
+    // Check Python availability for ms-lookup
+    const msLookupPath = path.join(scriptsDest, 'ms-lookup');
+    if (fs.existsSync(msLookupPath)) {
       try {
         const { execSync } = require('child_process');
         const pyVersion = execSync('python3 --version 2>&1', { encoding: 'utf8' });
@@ -223,32 +223,32 @@ function install(isGlobal) {
         if (versionMatch) {
           const [, major, minor] = versionMatch;
           if (parseInt(major) < 3 || (parseInt(major) === 3 && parseInt(minor) < 9)) {
-            console.log(`  ${yellow}⚠${reset} Python 3.9+ required for gsd-lookup (found ${major}.${minor})`);
+            console.log(`  ${yellow}⚠${reset} Python 3.9+ required for ms-lookup (found ${major}.${minor})`);
           } else {
-            console.log(`  ${green}✓${reset} Installed gsd-lookup CLI (Python ${major}.${minor})`);
+            console.log(`  ${green}✓${reset} Installed ms-lookup CLI (Python ${major}.${minor})`);
           }
         }
       } catch (e) {
-        console.log(`  ${yellow}⚠${reset} Python not found - gsd-lookup CLI requires Python 3.9+`);
+        console.log(`  ${yellow}⚠${reset} Python not found - ms-lookup CLI requires Python 3.9+`);
       }
     }
   }
 
   // Copy CHANGELOG.md
   const changelogSrc = path.join(src, 'CHANGELOG.md');
-  const changelogDest = path.join(claudeDir, 'get-shit-done', 'CHANGELOG.md');
+  const changelogDest = path.join(claudeDir, 'mindsystem', 'CHANGELOG.md');
   if (fs.existsSync(changelogSrc)) {
     fs.copyFileSync(changelogSrc, changelogDest);
     console.log(`  ${green}✓${reset} Installed CHANGELOG.md`);
   }
 
   // Write VERSION file for whats-new command
-  const versionDest = path.join(claudeDir, 'get-shit-done', 'VERSION');
+  const versionDest = path.join(claudeDir, 'mindsystem', 'VERSION');
   fs.writeFileSync(versionDest, pkg.version);
   console.log(`  ${green}✓${reset} Wrote VERSION (${pkg.version})`);
 
   console.log(`
-  ${green}Done!${reset} Launch Claude Code and run ${cyan}/gsd:help${reset}.
+  ${green}Done!${reset} Launch Claude Code and run ${cyan}/ms:help${reset}.
 `);
 }
 

@@ -35,7 +35,7 @@ autonomous: true            # false if plan has checkpoints
 | `files_modified` | Yes | Files this plan touches. |
 | `autonomous` | Yes | `true` if no checkpoints, `false` if has checkpoints |
 
-**Wave is pre-computed:** `/gsd:plan-phase` assigns wave numbers based on `depends_on`. `/gsd:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
+**Wave is pre-computed:** `/ms:plan-phase` assigns wave numbers based on `depends_on`. `/ms:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
 
 **Checkpoint handling:** Plans with `autonomous: false` require user interaction. They run in their assigned wave but pause at checkpoints.
 </frontmatter>
@@ -61,10 +61,10 @@ Output: [...]
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/execute-plan.md
-@~/.claude/get-shit-done/templates/summary.md
+@~/.claude/mindsystem/workflows/execute-plan.md
+@~/.claude/mindsystem/templates/summary.md
 [If checkpoints exist:]
-@~/.claude/get-shit-done/references/checkpoints.md
+@~/.claude/mindsystem/references/checkpoints.md
 </execution_context>
 
 <context>

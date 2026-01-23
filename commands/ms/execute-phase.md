@@ -1,5 +1,5 @@
 ---
-name: gsd:execute-phase
+name: ms:execute-phase
 description: Execute all plans in a phase with wave-based parallelization
 argument-hint: "<phase-number>"
 allowed-tools:
@@ -23,8 +23,8 @@ Context budget: ~15% orchestrator, 100% fresh per subagent.
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/principles.md
-@~/.claude/get-shit-done/workflows/execute-phase.md
+@~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/workflows/execute-phase.md
 </execution_context>
 
 <context>
@@ -52,7 +52,7 @@ Phase: $ARGUMENTS
 
 4. **Execute waves**
    For each wave in order:
-   - Spawn `gsd-executor` for each plan in wave (parallel Task calls)
+   - Spawn `ms-executor` for each plan in wave (parallel Task calls)
    - Wait for completion (Task blocks)
    - Verify SUMMARYs created
    - Proceed to next wave
@@ -62,16 +62,16 @@ Phase: $ARGUMENTS
    - Report phase completion status
 
 6. **Verify phase goal**
-   - Spawn `gsd-verifier` subagent with phase directory and goal
+   - Spawn `ms-verifier` subagent with phase directory and goal
    - Verifier checks must_haves against actual codebase (not SUMMARY claims)
    - Creates VERIFICATION.md with detailed report
    - Route by status:
      - `passed` → continue to step 7
      - `human_needed` → present items, get approval or feedback
-     - `gaps_found` → present gaps, offer `/gsd:plan-phase {X} --gaps`
+     - `gaps_found` → present gaps, offer `/ms:plan-phase {X} --gaps`
 
 7. **Generate phase patch**
-   - Run: `~/.claude/get-shit-done/scripts/generate-phase-patch.sh ${PHASE_NUMBER}`
+   - Run: `~/.claude/mindsystem/scripts/generate-phase-patch.sh ${PHASE_NUMBER}`
    - Outputs to `.planning/phases/{phase_dir}/{phase}-changes.patch`
    - Verify: patch file exists OR skip message logged
 
@@ -123,16 +123,16 @@ All {Y} plans finished. Phase goal verified.
 
 **Phase {Z+1}: {Name}** — {Goal from ROADMAP.md}
 
-`/gsd:plan-phase {Z+1}`
+`/ms:plan-phase {Z+1}`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work {Z}` — manual acceptance testing before continuing
-- `/gsd:discuss-phase {Z+1}` — gather context first
-- `/gsd:research-phase {Z+1}` — investigate unknowns
+- `/ms:verify-work {Z}` — manual acceptance testing before continuing
+- `/ms:discuss-phase {Z+1}` — gather context first
+- `/ms:research-phase {Z+1}` — investigate unknowns
 
 ---
 ```
@@ -154,16 +154,16 @@ All {N} phases finished. Phase goals verified.
 
 **Audit milestone** — verify requirements, cross-phase integration, E2E flows
 
-`/gsd:audit-milestone`
+`/ms:audit-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work` — manual acceptance testing
-- `/gsd:complete-milestone` — skip audit, archive directly
-- `/gsd:add-phase <description>` — add another phase first
+- `/ms:verify-work` — manual acceptance testing
+- `/ms:complete-milestone` — skip audit, archive directly
+- `/ms:add-phase <description>` — add another phase first
 
 ---
 ```
@@ -188,7 +188,7 @@ All {N} phases finished. Phase goals verified.
 
 **Plan gap closure** — create additional plans to complete the phase
 
-`/gsd:plan-phase {Z} --gaps`
+`/ms:plan-phase {Z} --gaps`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -196,15 +196,15 @@ All {N} phases finished. Phase goals verified.
 
 **Also available:**
 - `cat .planning/phases/{phase_dir}/{phase}-VERIFICATION.md` — see full report
-- `/gsd:verify-work {Z}` — manual testing before planning
+- `/ms:verify-work {Z}` — manual testing before planning
 
 ---
 ```
 
-After user runs `/gsd:plan-phase {Z} --gaps`:
+After user runs `/ms:plan-phase {Z} --gaps`:
 1. Planner reads VERIFICATION.md gaps
 2. Creates plans 04, 05, etc. to close gaps
-3. User runs `/gsd:execute-phase {Z}` again
+3. User runs `/ms:execute-phase {Z}` again
 4. Execute-phase runs incomplete plans (04, 05...)
 5. Verifier runs again → loop until passed
 </offer_next>
@@ -215,9 +215,9 @@ After user runs `/gsd:plan-phase {Z} --gaps`:
 Spawn all plans in a wave with a single message containing multiple Task calls:
 
 ```
-Task(prompt="Execute plan at {plan_01_path}\n\nPlan: @{plan_01_path}\nProject state: @.planning/STATE.md", subagent_type="gsd-executor")
-Task(prompt="Execute plan at {plan_02_path}\n\nPlan: @{plan_02_path}\nProject state: @.planning/STATE.md", subagent_type="gsd-executor")
-Task(prompt="Execute plan at {plan_03_path}\n\nPlan: @{plan_03_path}\nProject state: @.planning/STATE.md", subagent_type="gsd-executor")
+Task(prompt="Execute plan at {plan_01_path}\n\nPlan: @{plan_01_path}\nProject state: @.planning/STATE.md", subagent_type="ms-executor")
+Task(prompt="Execute plan at {plan_02_path}\n\nPlan: @{plan_02_path}\nProject state: @.planning/STATE.md", subagent_type="ms-executor")
+Task(prompt="Execute plan at {plan_03_path}\n\nPlan: @{plan_03_path}\nProject state: @.planning/STATE.md", subagent_type="ms-executor")
 ```
 
 All three run in parallel. Task tool blocks until all complete.
@@ -231,7 +231,7 @@ Plans with `autonomous: false` have checkpoints. The execute-phase.md workflow h
 - Orchestrator presents to user, collects response
 - Spawns fresh continuation agent (not resume)
 
-See `@~/.claude/get-shit-done/workflows/execute-phase.md` step `checkpoint_handling` for complete details.
+See `@~/.claude/mindsystem/workflows/execute-phase.md` step `checkpoint_handling` for complete details.
 </checkpoint_handling>
 
 <deviation_rules>

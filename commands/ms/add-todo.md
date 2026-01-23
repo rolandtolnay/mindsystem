@@ -1,5 +1,5 @@
 ---
-name: gsd:add-todo
+name: ms:add-todo
 description: Capture idea or task as todo from current conversation context
 argument-hint: [optional description]
 allowed-tools:
@@ -10,7 +10,7 @@ allowed-tools:
 ---
 
 <objective>
-Capture an idea, task, or issue that surfaces during a GSD session as a structured todo for later work.
+Capture an idea, task, or issue that surfaces during a Mindsystem session as a structured todo for later work.
 
 Enables "thought → capture → continue" flow without losing context or derailing current work.
 </objective>
@@ -37,7 +37,7 @@ Note existing areas for consistency in infer_area step.
 
 <step name="extract_content">
 **With arguments:** Use as the title/focus.
-- `/gsd:add-todo Add auth token refresh` → title = "Add auth token refresh"
+- `/ms:add-todo Add auth token refresh` → title = "Add auth token refresh"
 
 **Without arguments:** Analyze recent conversation to extract:
 - The specific problem, idea, or task discussed
@@ -154,7 +154,7 @@ Would you like to:
 
 1. Continue with current work
 2. Add another todo
-3. View all todos (/gsd:check-todos)
+3. View all todos (/ms:check-todos)
 ```
 </step>
 

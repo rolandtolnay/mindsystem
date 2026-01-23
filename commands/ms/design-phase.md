@@ -1,5 +1,5 @@
 ---
-name: gsd:design-phase
+name: ms:design-phase
 description: Create visual/UX design specifications before planning
 argument-hint: "[phase]"
 allowed-tools:
@@ -10,7 +10,7 @@ allowed-tools:
 ---
 
 <objective>
-Create design specifications for a phase. Spawns gsd-designer agent with phase context.
+Create design specifications for a phase. Spawns ms-designer agent with phase context.
 
 **Orchestrator role:** Parse phase, validate against roadmap, check existing design, gather context chain (CONTEXT.md → implement-ui → codebase), adaptive Q&A if gaps, spawn designer agent, enable conversational refinement.
 
@@ -160,7 +160,7 @@ Use AskUserQuestion to confirm:
 2. **Ask more questions** — Continue gathering context
 3. **Add context** — Let user provide additional information
 
-## 5. Spawn gsd-designer Agent
+## 5. Spawn ms-designer Agent
 
 Assemble the design prompt from gathered context:
 
@@ -258,7 +258,7 @@ Spawn the agent:
 ```
 Task(
   prompt=assembled_design_prompt,
-  subagent_type="gsd-designer",
+  subagent_type="ms-designer",
   description="Design Phase {phase}"
 )
 ```
@@ -281,7 +281,7 @@ Display summary from agent response:
 - Key design decisions
 
 Then offer next steps:
-1. **Proceed to research** — `/gsd:research-phase {phase}`
+1. **Proceed to research** — `/ms:research-phase {phase}`
 2. **Refine design** — Discuss changes conversationally
 3. **View full design** — Display DESIGN.md
 4. **Done for now** — Exit
@@ -297,7 +297,7 @@ After initial generation, if user wants to refine:
 - Read DESIGN.md directly
 - Discuss changes conversationally
 - Edit DESIGN.md directly (no subagent needed for small changes)
-- For major redesign, spawn gsd-designer again with structured feedback
+- For major redesign, spawn ms-designer again with structured feedback
 
 **Refinement principles:**
 - Direct edits — Edit DESIGN.md directly, don't regenerate
@@ -306,7 +306,7 @@ After initial generation, if user wants to refine:
 
 **For major redesigns (multiple aspects changing):**
 
-Use the iteration template from `~/.claude/get-shit-done/templates/design-iteration.md`:
+Use the iteration template from `~/.claude/mindsystem/templates/design-iteration.md`:
 
 1. Capture feedback using the structured format:
    - What worked well (KEEP)
@@ -314,7 +314,7 @@ Use the iteration template from `~/.claude/get-shit-done/templates/design-iterat
    - New requirements (ADD)
    - Primary focus for this iteration
 
-2. Spawn gsd-designer with iteration context:
+2. Spawn ms-designer with iteration context:
    - Include `<previous_design>` with relevant sections
    - Include `<feedback_on_previous>` with structured feedback
    - Include `<specific_focus>` identifying the ONE thing
@@ -334,7 +334,7 @@ Use the iteration template from `~/.claude/get-shit-done/templates/design-iterat
 - [ ] implement-ui skill loaded if exists
 - [ ] Codebase analyzed for existing patterns
 - [ ] Adaptive Q&A completed if gaps existed
-- [ ] gsd-designer spawned with quality-forcing patterns
+- [ ] ms-designer spawned with quality-forcing patterns
 - [ ] DESIGN.md created with all 7 sections
 - [ ] DESIGN.md committed
 - [ ] User informed of refinement options and next steps

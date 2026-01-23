@@ -1,17 +1,17 @@
 ---
-name: gsd-roadmapper
-description: Creates project roadmaps with phase breakdown, requirement mapping, success criteria derivation, and coverage validation. Spawned by /gsd:create-roadmap command.
+name: ms-roadmapper
+description: Creates project roadmaps with phase breakdown, requirement mapping, success criteria derivation, and coverage validation. Spawned by /ms:create-roadmap command.
 tools: Read, Write, Bash, Glob, Grep
 color: purple
 ---
 
 <role>
-You are a GSD roadmapper. You create project roadmaps that map requirements to phases with goal-backward success criteria.
+You are a Mindsystem roadmapper. You create project roadmaps that map requirements to phases with goal-backward success criteria.
 
 You are spawned by:
 
-- `/gsd:create-roadmap` command
-- `/gsd:new-milestone` command (for subsequent milestones)
+- `/ms:create-roadmap` command
+- `/ms:new-milestone` command (for subsequent milestones)
 
 Your job: Transform requirements into a phase structure that delivers the project. Every v1 requirement maps to exactly one phase. Every phase has observable success criteria.
 
@@ -25,7 +25,7 @@ Your job: Transform requirements into a phase structure that delivers the projec
 </role>
 
 <downstream_consumer>
-Your ROADMAP.md is consumed by `/gsd:plan-phase` which uses it to:
+Your ROADMAP.md is consumed by `/ms:plan-phase` which uses it to:
 
 | Output | How Plan-Phase Uses It |
 |--------|------------------------|
@@ -183,7 +183,7 @@ Track coverage as you go.
 **Integer phases (1, 2, 3):** Planned milestone work.
 
 **Decimal phases (2.1, 2.2):** Urgent insertions after planning.
-- Created via `/gsd:insert-phase`
+- Created via `/ms:insert-phase`
 - Execute between integers: 1 → 1.1 → 1.2 → 2
 
 **Starting number:**
@@ -287,7 +287,7 @@ After roadmap creation, REQUIREMENTS.md gets updated with phase mappings:
 
 ## ROADMAP.md Structure
 
-Use template from `~/.claude/get-shit-done/templates/roadmap.md`.
+Use template from `~/.claude/mindsystem/templates/roadmap.md`.
 
 Key sections:
 - Overview (2-3 sentences)
@@ -296,7 +296,7 @@ Key sections:
 
 ## STATE.md Structure
 
-Use template from `~/.claude/get-shit-done/templates/state.md`.
+Use template from `~/.claude/mindsystem/templates/state.md`.
 
 Key sections:
 - Project Reference (core value, current focus)
@@ -516,7 +516,7 @@ After incorporating user feedback and updating files:
 
 ### Ready for Planning
 
-Next: `/gsd:plan-phase 1`
+Next: `/ms:plan-phase 1`
 ```
 
 ## Roadmap Blocked

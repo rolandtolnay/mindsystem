@@ -44,7 +44,7 @@ Standard format for presenting next steps after completing a command or workflow
 
 **Phase 2: Authentication** — JWT login with refresh tokens
 
-`/gsd:execute-phase 2`
+`/ms:execute-phase 2`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -52,7 +52,7 @@ Standard format for presenting next steps after completing a command or workflow
 
 **Also available:**
 - Review plans before executing
-- `/gsd:list-phase-assumptions 2` — check assumptions
+- `/ms:list-phase-assumptions 2` — check assumptions
 
 ---
 ```
@@ -69,7 +69,7 @@ Add note that this is the last phase and what comes after:
 **Phase 3: Core Features** — User dashboard, settings, and data export
 <sub>Final phase in milestone</sub>
 
-`/gsd:execute-phase 3`
+`/ms:execute-phase 3`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -77,7 +77,7 @@ Add note that this is the last phase and what comes after:
 
 **After this completes:**
 - Milestone complete
-- Next: `/gsd:complete-milestone` — archive and tag
+- Next: `/ms:complete-milestone` — archive and tag
 
 ---
 ```
@@ -91,15 +91,15 @@ Add note that this is the last phase and what comes after:
 
 **Phase 2: Authentication** — JWT login flow with refresh tokens
 
-`/gsd:plan-phase 2`
+`/ms:plan-phase 2`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:discuss-phase 2` — gather context first
-- `/gsd:research-phase 2` — investigate unknowns
+- `/ms:discuss-phase 2` — gather context first
+- `/ms:research-phase 2` — investigate unknowns
 - Review roadmap
 
 ---
@@ -120,15 +120,15 @@ Show completion status before next action:
 
 **Phase 3: Core Features** — User dashboard, settings, and data export
 
-`/gsd:plan-phase 3`
+`/ms:plan-phase 3`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:discuss-phase 3` — gather context first
-- `/gsd:research-phase 3` — investigate unknowns
+- `/ms:discuss-phase 3` — gather context first
+- `/ms:research-phase 3` — investigate unknowns
 - Review what Phase 2 built
 
 ---
@@ -145,11 +145,11 @@ When there's no clear primary action:
 
 **Phase 3: Core Features** — User dashboard, settings, and data export
 
-**To plan directly:** `/gsd:plan-phase 3`
+**To plan directly:** `/ms:plan-phase 3`
 
-**To discuss context first:** `/gsd:discuss-phase 3`
+**To discuss context first:** `/ms:discuss-phase 3`
 
-**To research unknowns:** `/gsd:research-phase 3`
+**To research unknowns:** `/ms:research-phase 3`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -169,14 +169,14 @@ All 4 phases shipped
 
 **Plan v1.1** — Enhanced features and optimizations
 
-`/gsd:discuss-milestone`
+`/ms:discuss-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:new-milestone` — create directly if scope is clear
+- `/ms:new-milestone` — create directly if scope is clear
 - Review accomplishments before moving on
 
 ---
@@ -220,7 +220,7 @@ Extract: `**02-03: Refresh Token Rotation** — Add /api/auth/refresh with slidi
 ## To Continue
 
 Run `/clear`, then paste:
-/gsd:execute-phase 2
+/ms:execute-phase 2
 ```
 
 User has no idea what Phase 2 is about.
@@ -228,7 +228,7 @@ User has no idea what Phase 2 is about.
 ### Don't: Missing /clear explanation
 
 ```
-`/gsd:plan-phase 3`
+`/ms:plan-phase 3`
 
 Run /clear first.
 ```
@@ -248,7 +248,7 @@ Sounds like an afterthought. Use "Also available:" instead.
 
 ```
 ```
-/gsd:plan-phase 3
+/ms:plan-phase 3
 ```
 ```
 

@@ -9,8 +9,8 @@ requirements → roadmap cycle.
 <required_reading>
 **Read these files NOW:**
 
-1. ~/.claude/get-shit-done/references/questioning.md
-2. ~/.claude/get-shit-done/templates/project.md
+1. ~/.claude/mindsystem/references/questioning.md
+2. ~/.claude/mindsystem/templates/project.md
 3. `.planning/PROJECT.md`
 4. `.planning/MILESTONES.md` (if exists)
 5. `.planning/STATE.md`
@@ -42,7 +42,7 @@ Extract:
 </step>
 
 <step name="gather_goals">
-**If MILESTONE-CONTEXT.md exists (from /gsd:discuss-milestone):**
+**If MILESTONE-CONTEXT.md exists (from /ms:discuss-milestone):**
 - Use features and scope already gathered
 - Present summary for confirmation
 - Skip to confirm_goals step
@@ -127,7 +127,7 @@ Update `.planning/STATE.md`:
 ```markdown
 ## Current Position
 
-Phase: Not started (run /gsd:create-roadmap)
+Phase: Not started (run /ms:create-roadmap)
 Plan: —
 Status: Defining requirements
 Last activity: [today] — Milestone v[X.Y] started
@@ -173,19 +173,19 @@ PROJECT.md updated with:
 
 **Define Requirements** — scope v[X.Y] features into REQUIREMENTS.md
 
-`/gsd:define-requirements`
+`/ms:define-requirements`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Or research first:**
-- `/gsd:research-project` — investigate ecosystem before scoping
+- `/ms:research-project` — investigate ecosystem before scoping
 
 **Full flow:**
-1. `/gsd:define-requirements` — create REQUIREMENTS.md
-2. `/gsd:create-roadmap` — create ROADMAP.md with phases
-3. `/gsd:plan-phase [N]` — start execution
+1. `/ms:define-requirements` — create REQUIREMENTS.md
+2. `/ms:create-roadmap` — create ROADMAP.md with phases
+3. `/ms:plan-phase [N]` — start execution
 
 ---
 ```

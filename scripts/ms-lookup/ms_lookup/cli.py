@@ -1,22 +1,22 @@
-"""Main CLI entry point for gsd-lookup."""
+"""Main CLI entry point for ms-lookup."""
 
 import sys
 from typing import Optional
 
 import typer
 
-from gsd_lookup import __version__
-from gsd_lookup.backends.context7 import Context7Client
-from gsd_lookup.backends.perplexity import PerplexityClient
-from gsd_lookup.cache import get_cached, set_cached
-from gsd_lookup.config import DEFAULT_MAX_TOKENS
-from gsd_lookup.errors import GsdLookupError
-from gsd_lookup.output import format_error, format_success, output_json
-from gsd_lookup.tokens import estimate_tokens, truncate_results
+from ms_lookup import __version__
+from ms_lookup.backends.context7 import Context7Client
+from ms_lookup.backends.perplexity import PerplexityClient
+from ms_lookup.cache import get_cached, set_cached
+from ms_lookup.config import DEFAULT_MAX_TOKENS
+from ms_lookup.errors import MsLookupError
+from ms_lookup.output import format_error, format_success, output_json
+from ms_lookup.tokens import estimate_tokens, truncate_results
 
 app = typer.Typer(
-    name="gsd-lookup",
-    help="GSD research CLI - Context7 docs and Perplexity deep research",
+    name="ms-lookup",
+    help="Mindsystem research CLI - Context7 docs and Perplexity deep research",
     add_completion=False,
 )
 
@@ -24,7 +24,7 @@ app = typer.Typer(
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
-        typer.echo(f"gsd-lookup {__version__}")
+        typer.echo(f"ms-lookup {__version__}")
         raise typer.Exit()
 
 
@@ -39,7 +39,7 @@ def main(
         help="Show version and exit",
     ),
 ) -> None:
-    """GSD research CLI - Context7 docs and Perplexity deep research."""
+    """Mindsystem research CLI - Context7 docs and Perplexity deep research."""
     pass
 
 
@@ -70,9 +70,9 @@ def docs(
     Use for authoritative, version-aware API documentation.
 
     Examples:
-        gsd-lookup docs nextjs "app router setup"
-        gsd-lookup docs react "hooks useEffect cleanup"
-        gsd-lookup docs "react-three-fiber" "physics integration"
+        ms-lookup docs nextjs "app router setup"
+        ms-lookup docs react "hooks useEffect cleanup"
+        ms-lookup docs "react-three-fiber" "physics integration"
     """
     command = "docs"
 
@@ -127,7 +127,7 @@ def docs(
 
         typer.echo(output_json(response, pretty=json_pretty))
 
-    except GsdLookupError as e:
+    except MsLookupError as e:
         error_response = format_error(command, e)
         typer.echo(output_json(error_response, pretty=json_pretty))
         raise typer.Exit(code=1)
@@ -157,9 +157,9 @@ def deep(
     Cost: ~$0.005 per query. Use for high-value technical questions.
 
     Examples:
-        gsd-lookup deep "authentication patterns for SaaS applications"
-        gsd-lookup deep "WebGPU browser support and performance 2026"
-        gsd-lookup deep "best practices for real-time collaboration"
+        ms-lookup deep "authentication patterns for SaaS applications"
+        ms-lookup deep "WebGPU browser support and performance 2026"
+        ms-lookup deep "best practices for real-time collaboration"
     """
     command = "deep"
 
@@ -209,7 +209,7 @@ def deep(
 
         typer.echo(output_json(response, pretty=json_pretty))
 
-    except GsdLookupError as e:
+    except MsLookupError as e:
         error_response = format_error(command, e)
         typer.echo(output_json(error_response, pretty=json_pretty))
         raise typer.Exit(code=1)

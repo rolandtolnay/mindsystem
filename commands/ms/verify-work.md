@@ -1,5 +1,5 @@
 ---
-name: gsd:verify-work
+name: ms:verify-work
 description: Validate built features through batched UAT with inline fixing
 argument-hint: "[phase number, e.g., '4']"
 allowed-tools:
@@ -22,10 +22,10 @@ Output: {phase}-UAT.md tracking all test results. Fixes committed with `fix({pha
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/workflows/verify-work.md
-@~/.claude/get-shit-done/workflows/generate-mocks.md
-@~/.claude/get-shit-done/templates/UAT.md
-@~/.claude/get-shit-done/references/mock-patterns.md
+@~/.claude/mindsystem/workflows/verify-work.md
+@~/.claude/mindsystem/workflows/generate-mocks.md
+@~/.claude/mindsystem/templates/UAT.md
+@~/.claude/mindsystem/references/mock-patterns.md
 </execution_context>
 
 <context>
@@ -52,7 +52,7 @@ Phase: $ARGUMENTS (optional)
    - **For each issue found:**
      - Lightweight investigation (2-3 tool calls)
      - If simple: Fix inline, commit, ask for re-test
-     - If complex: Spawn gsd-verify-fixer subagent
+     - If complex: Spawn ms-verify-fixer subagent
      - 2 retries on failed re-test, then offer options
 8. **On batch transition:**
    - If new mock_type: Discard old mocks, generate new ones

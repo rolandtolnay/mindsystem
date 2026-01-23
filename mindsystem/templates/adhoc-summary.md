@@ -1,6 +1,6 @@
 # Adhoc Summary Template
 
-Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for small work items executed via `/gsd:do-work`.
+Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for small work items executed via `/ms:do-work`.
 
 ---
 
@@ -128,7 +128,7 @@ commit: abc123f
 <guidelines>
 
 **When to create:**
-- After completing adhoc work via `/gsd:do-work`
+- After completing adhoc work via `/ms:do-work`
 - Required output from do-work workflow
 
 **Size:**

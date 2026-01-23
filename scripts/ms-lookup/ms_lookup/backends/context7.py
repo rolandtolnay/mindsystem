@@ -2,8 +2,8 @@
 
 import httpx
 
-from gsd_lookup.config import CONTEXT7_API_KEY, CONTEXT7_BASE_URL
-from gsd_lookup.errors import ErrorCode, GsdLookupError
+from ms_lookup.config import CONTEXT7_API_KEY, CONTEXT7_BASE_URL
+from ms_lookup.errors import ErrorCode, MsLookupError
 
 
 class Context7Client:
@@ -16,7 +16,7 @@ class Context7Client:
     def _check_api_key(self) -> None:
         """Verify API key is configured."""
         if not self.api_key:
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.MISSING_API_KEY,
                 "CONTEXT7_API_KEY environment variable not set",
                 suggestions=[
@@ -36,7 +36,7 @@ class Context7Client:
             Dict with library_id and library info
 
         Raises:
-            GsdLookupError: If library not found or API error
+            MsLookupError: If library not found or API error
         """
         self._check_api_key()
 
@@ -51,23 +51,23 @@ class Context7Client:
                 data = response.json()
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
-                raise GsdLookupError(
+                raise MsLookupError(
                     ErrorCode.MISSING_API_KEY,
                     "Invalid CONTEXT7_API_KEY",
                     suggestions=["Check your API key at https://context7.com/dashboard"],
                 )
             elif e.response.status_code == 429:
-                raise GsdLookupError(
+                raise MsLookupError(
                     ErrorCode.RATE_LIMITED,
                     "Context7 API rate limit exceeded",
                     suggestions=["Wait a moment and try again", "Use --no-cache sparingly"],
                 )
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.API_ERROR,
                 f"Context7 API error: {e.response.status_code}",
             )
         except httpx.RequestError as e:
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.NETWORK_ERROR,
                 f"Network error connecting to Context7: {str(e)}",
             )
@@ -75,7 +75,7 @@ class Context7Client:
         # Find best matching library
         libraries = data.get("results", [])
         if not libraries:
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.LIBRARY_NOT_FOUND,
                 f"Could not find library '{library_name}' in Context7",
                 suggestions=self._get_library_suggestions(library_name),
@@ -101,7 +101,7 @@ class Context7Client:
             Dict with documentation results
 
         Raises:
-            GsdLookupError: If API error
+            MsLookupError: If API error
         """
         self._check_api_key()
 
@@ -123,21 +123,21 @@ class Context7Client:
                     data = {"content": response.text, "format": "markdown"}
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
-                raise GsdLookupError(
+                raise MsLookupError(
                     ErrorCode.LIBRARY_NOT_FOUND,
                     f"Library '{library_id}' not found in Context7",
                 )
             elif e.response.status_code == 429:
-                raise GsdLookupError(
+                raise MsLookupError(
                     ErrorCode.RATE_LIMITED,
                     "Context7 API rate limit exceeded",
                 )
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.API_ERROR,
                 f"Context7 API error: {e.response.status_code}",
             )
         except httpx.RequestError as e:
-            raise GsdLookupError(
+            raise MsLookupError(
                 ErrorCode.NETWORK_ERROR,
                 f"Network error connecting to Context7: {str(e)}",
             )

@@ -24,8 +24,8 @@ Current milestone in progress: v[X.Y] [Name]
 Phases [N]-[M], [P]% complete
 
 Did you want to:
-1. Complete current milestone first (/gsd:complete-milestone)
-2. Add phases to current milestone (/gsd:add-phase)
+1. Complete current milestone first (/ms:complete-milestone)
+2. Add phases to current milestone (/ms:add-phase)
 3. Continue anyway - discuss next milestone scope
 
 ```
@@ -175,7 +175,7 @@ Use AskUserQuestion:
 - header: "Ready?"
 - question: "Ready to create the milestone, or explore more?"
 - options (ALL THREE REQUIRED):
-  - "Create milestone" - Proceed to /gsd:new-milestone
+  - "Create milestone" - Proceed to /ms:new-milestone
   - "Ask more questions" - Help me think through this more
   - "Let me add context" - I have more to share
 
@@ -189,7 +189,7 @@ Write milestone context to file for handoff.
 
 **File:** `.planning/MILESTONE-CONTEXT.md`
 
-Use template from ~/.claude/get-shit-done/templates/milestone-context.md
+Use template from ~/.claude/mindsystem/templates/milestone-context.md
 
 **Calculate next phase number:**
 
@@ -219,7 +219,7 @@ cat > .planning/MILESTONE-CONTEXT.md << 'EOF'
 # Milestone Context
 
 **Generated:** [today's date]
-**Status:** Ready for /gsd:new-milestone
+**Status:** Ready for /ms:new-milestone
 
 <features>
 ## Features to Build
@@ -262,7 +262,7 @@ Next phase number: $NEXT_PHASE (calculated from existing phases)
 
 ---
 
-*This file is temporary. It will be deleted after /gsd:new-milestone creates the milestone.*
+*This file is temporary. It will be deleted after /ms:new-milestone creates the milestone.*
 EOF
 ```
 </step>
@@ -288,7 +288,7 @@ Context saved to `.planning/MILESTONE-CONTEXT.md`
 
 **Create Milestone v[X.Y]** — [Theme Name]
 
-`/gsd:new-milestone`
+`/ms:new-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -306,5 +306,5 @@ Context saved to `.planning/MILESTONE-CONTEXT.md`
 - Features explored with clarifying questions
 - Scope synthesized from features (not asked abstractly)
 - **MILESTONE-CONTEXT.md created** with features and scope
-- Context handed off to /gsd:new-milestone
+- Context handed off to /ms:new-milestone
 </success_criteria>

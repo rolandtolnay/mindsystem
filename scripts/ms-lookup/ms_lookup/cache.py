@@ -5,7 +5,7 @@ from typing import Any
 
 import diskcache
 
-from gsd_lookup.config import CACHE_DIR, CACHE_TTL_DOCS, CACHE_TTL_DEEP
+from ms_lookup.config import CACHE_DIR, CACHE_TTL_DOCS, CACHE_TTL_DEEP
 
 
 def _get_cache() -> diskcache.Cache:

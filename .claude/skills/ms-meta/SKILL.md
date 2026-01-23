@@ -1,10 +1,10 @@
 ---
-name: gsd-meta
-description: Instant GSD expert for diagnosing, understanding, and planning GSD framework changes. Use when working on GSD itself or asking how it works.
+name: ms-meta
+description: Instant Mindsystem expert for diagnosing, understanding, and planning Mindsystem framework changes. Use when working on Mindsystem itself or asking how it works.
 ---
 
 <objective>
-Provides instant expertise about the GSD framework for meta-discussions, diagnostics, and planning GSD changes. Use when working on GSD itself, diagnosing GSD issues, or asking how GSD works.
+Provides instant expertise about the Mindsystem framework for meta-discussions, diagnostics, and planning Mindsystem changes. Use when working on Mindsystem itself, diagnosing Mindsystem issues, or asking how Mindsystem works.
 </objective>
 
 <behavior>
@@ -12,10 +12,10 @@ Provides instant expertise about the GSD framework for meta-discussions, diagnos
 
 When invoked:
 1. **Absorb** the essential knowledge below as context
-2. **Continue** with your original task, informed by this GSD expertise
+2. **Continue** with your original task, informed by this Mindsystem expertise
 3. **Do NOT** treat the invocation arguments as a question to answer
 
-The arguments passed to this skill describe WHY you need GSD knowledge. Use that context to apply the knowledge appropriately, but return to your primary task.
+The arguments passed to this skill describe WHY you need Mindsystem knowledge. Use that context to apply the knowledge appropriately, but return to your primary task.
 
 **Example:** If invoked during a CLI tool design task with "need to understand subagent patterns", absorb the subagent knowledge, then continue designing the CLI tool — don't write an essay about subagent patterns.
 </behavior>
@@ -23,7 +23,7 @@ The arguments passed to this skill describe WHY you need GSD knowledge. Use that
 <essential_knowledge>
 
 <what_gsd_is>
-GSD (Get Shit Done) is a meta-prompting and context engineering system for Claude Code that solves **context rot** — the quality degradation that happens as Claude fills its context window.
+Mindsystem (Get Shit Done) is a meta-prompting and context engineering system for Claude Code that solves **context rot** — the quality degradation that happens as Claude fills its context window.
 
 **Core insight:** Claude's quality degrades predictably:
 - 0-30% context: Peak quality
@@ -52,30 +52,30 @@ GSD (Get Shit Done) is a meta-prompting and context engineering system for Claud
 ```
 gsd/
 ├── agents/               # Subagent definitions (Task tool configs)
-│   ├── gsd-executor.md       # Executes PLAN.md files
-│   ├── gsd-verifier.md       # Verifies phase goals achieved
-│   ├── gsd-planner.md        # Creates PLAN.md files
-│   ├── gsd-debugger.md       # Systematic debugging
-│   ├── gsd-researcher.md     # Domain research
+│   ├── ms-executor.md       # Executes PLAN.md files
+│   ├── ms-verifier.md       # Verifies phase goals achieved
+│   ├── ms-planner.md        # Creates PLAN.md files
+│   ├── ms-debugger.md       # Systematic debugging
+│   ├── ms-researcher.md     # Domain research
 │   └── ...
-├── commands/gsd/         # Slash commands (/gsd:*)
+├── commands/ms/         # Slash commands (/ms:*)
 │   ├── new-project.md        # Initialize project
 │   ├── plan-phase.md         # Create plans for phase
 │   ├── execute-phase.md      # Execute all plans
 │   ├── progress.md           # Where am I? What's next?
 │   └── ...
-├── get-shit-done/        # Core system
+├── mindsystem/        # Core system
 │   ├── workflows/            # Step-by-step procedures
 │   ├── templates/            # Output structures (STATE.md, SUMMARY.md, etc.)
 │   └── references/           # Deep knowledge (plan-format.md, checkpoints.md)
 └── scripts/              # Shell scripts for automation
 ```
 
-**Installation:** `npx get-shit-done-cc` copies to `~/.claude/` (global) or `.claude/` (local).
+**Installation:** `npx mindsystem-cc` copies to `~/.claude/` (global) or `.claude/` (local).
 </repository_structure>
 
 <user_project_files>
-GSD creates `.planning/` directory in user projects:
+Mindsystem creates `.planning/` directory in user projects:
 
 ```
 .planning/
@@ -97,12 +97,12 @@ GSD creates `.planning/` directory in user projects:
 </user_project_files>
 
 <core_workflow>
-1. `/gsd:new-project` → Questions → PROJECT.md
-2. `/gsd:research-project` (optional) → .planning/research/
-3. `/gsd:define-requirements` → REQUIREMENTS.md
-4. `/gsd:create-roadmap` → ROADMAP.md + STATE.md
-5. `/gsd:plan-phase N` → Creates PLAN.md files
-6. `/gsd:execute-phase N` → Subagents execute plans, create SUMMARY.md
+1. `/ms:new-project` → Questions → PROJECT.md
+2. `/ms:research-project` (optional) → .planning/research/
+3. `/ms:define-requirements` → REQUIREMENTS.md
+4. `/ms:create-roadmap` → ROADMAP.md + STATE.md
+5. `/ms:plan-phase N` → Creates PLAN.md files
+6. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
 </core_workflow>
 
 <task_types>
@@ -147,7 +147,7 @@ autonomous: true  # false if has checkpoints
 </plan_anatomy>
 
 <wave_execution>
-`/gsd:execute-phase` groups plans by `wave` number:
+`/ms:execute-phase` groups plans by `wave` number:
 - Wave 1: Independent plans run in parallel
 - Wave 2: Plans depending on wave 1 run after
 - Plans within each wave run simultaneously as subagents
@@ -165,7 +165,7 @@ Executor handles unplanned discoveries automatically:
 | Type | Convention | Example |
 |------|------------|---------|
 | Files | kebab-case | `execute-phase.md` |
-| Commands | `gsd:kebab-case` | `/gsd:execute-phase` |
+| Commands | `ms:kebab-case` | `/ms:execute-phase` |
 | XML tags | kebab-case | `<execution_context>` |
 | Step names | snake_case | `name="load_project_state"` |
 | Bash vars | CAPS_UNDERSCORES | `PHASE_ARG` |
@@ -187,11 +187,11 @@ Key locations (relative to repo root):
 
 | Type | Path |
 |------|------|
-| Commands | `commands/gsd/` |
+| Commands | `commands/ms/` |
 | Agents | `agents/` |
-| Workflows | `get-shit-done/workflows/` |
-| Templates | `get-shit-done/templates/` |
-| References | `get-shit-done/references/` |
+| Workflows | `mindsystem/workflows/` |
+| Templates | `mindsystem/templates/` |
+| References | `mindsystem/references/` |
 | Contributor guide | `CLAUDE.md` |
 </codebase_paths>
 
@@ -201,7 +201,7 @@ All in `workflows/`:
 | Workflow | Purpose |
 |----------|---------|
 | diagnose.md | Systematically investigate why something isn't working |
-| plan-change.md | Design a modification or extension to GSD |
+| plan-change.md | Design a modification or extension to Mindsystem |
 </workflows_index>
 
 <reference_index>
@@ -218,11 +218,11 @@ All in `references/`:
 
 <success_criteria>
 After loading this skill:
-- Continue with the original task, now informed by GSD expertise
-- Apply GSD principles and terminology naturally
-- Reference specific GSD files when relevant to the work
-- Maintain GSD's philosophy (no enterprise patterns, Claude automates)
-- Suggest concrete file paths when designing GSD changes
+- Continue with the original task, now informed by Mindsystem expertise
+- Apply Mindsystem principles and terminology naturally
+- Reference specific Mindsystem files when relevant to the work
+- Maintain Mindsystem's philosophy (no enterprise patterns, Claude automates)
+- Suggest concrete file paths when designing Mindsystem changes
 
-**Do NOT:** Write a response "about" GSD principles. Apply them to the work at hand.
+**Do NOT:** Write a response "about" Mindsystem principles. Apply them to the work at hand.
 </success_criteria>

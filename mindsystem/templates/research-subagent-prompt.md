@@ -1,6 +1,6 @@
 # Research Subagent Prompt Template
 
-Template for spawning gsd-researcher agent. The agent contains all research expertise - this template provides research context only.
+Template for spawning ms-researcher agent. The agent contains all research expertise - this template provides research context only.
 
 ---
 
@@ -53,11 +53,11 @@ Use RESEARCH.md template structure for phase research.
 
 ## Usage
 
-**From /gsd:research-phase:**
+**From /ms:research-phase:**
 ```python
 Task(
   prompt=filled_template,
-  subagent_type="gsd-researcher",
+  subagent_type="ms-researcher",
   description="Research Phase {phase}"
 )
 ```
@@ -89,4 +89,4 @@ Continue: {research_mode}
 
 ---
 
-**Note:** Research methodology, tool strategy (Context7 > Official > WebSearch), and verification protocols are baked into the gsd-researcher agent. This template only passes context.
+**Note:** Research methodology, tool strategy (Context7 > Official > WebSearch), and verification protocols are baked into the ms-researcher agent. This template only passes context.

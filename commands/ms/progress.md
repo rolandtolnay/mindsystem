@@ -1,5 +1,5 @@
 ---
-name: gsd:progress
+name: ms:progress
 description: Check project progress, show context, and route to next action (execute or plan)
 allowed-tools:
   - Read
@@ -26,18 +26,18 @@ If no `.planning/` directory:
 ```
 No planning structure found.
 
-Run /gsd:new-project to start a new project.
+Run /ms:new-project to start a new project.
 ```
 
 Exit.
 
-If missing STATE.md: suggest `/gsd:new-project`.
+If missing STATE.md: suggest `/ms:new-project`.
 
 **If ROADMAP.md missing but PROJECT.md exists:**
 
 This means a milestone was completed and archived. Go to **Route F** (between milestones).
 
-If missing both ROADMAP.md and PROJECT.md: suggest `/gsd:new-project`.
+If missing both ROADMAP.md and PROJECT.md: suggest `/ms:new-project`.
 </step>
 
 <step name="load">
@@ -94,10 +94,10 @@ DESIGN: [✓ if DESIGN.md exists | - if not]
 - [any blockers or concerns from STATE.md]
 
 ## Pending Todos
-- [count] pending — /gsd:check-todos to review
+- [count] pending — /ms:check-todos to review
 
 ## Active Debug Sessions
-- [count] active — /gsd:debug to continue
+- [count] active — /ms:debug to continue
 (Only show this section if count > 0)
 
 ## What's Next
@@ -156,7 +156,7 @@ Read its `<objective>` section.
 
 **Phase {N}: [Phase Name]** — [objective from ROADMAP.md]
 
-`/gsd:execute-phase {N}`
+`/ms:execute-phase {N}`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -179,7 +179,7 @@ Check if `{phase}-CONTEXT.md` exists in phase directory.
 **Phase {N}: {Name}** — {Goal from ROADMAP.md}
 <sub>✓ Context gathered, ready to plan</sub>
 
-`/gsd:plan-phase {phase-number}`
+`/ms:plan-phase {phase-number}`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -195,17 +195,17 @@ Check if `{phase}-CONTEXT.md` exists in phase directory.
 
 **Phase {N}: {Name}** — {Goal from ROADMAP.md}
 
-`/gsd:plan-phase {phase}`
+`/ms:plan-phase {phase}`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:discuss-phase {phase}` — gather context first
-- `/gsd:design-phase {phase}` — create UI/UX specifications
-- `/gsd:research-phase {phase}` — investigate unknowns
-- `/gsd:list-phase-assumptions {phase}` — see Claude's assumptions
+- `/ms:discuss-phase {phase}` — gather context first
+- `/ms:design-phase {phase}` — create UI/UX specifications
+- `/ms:research-phase {phase}` — investigate unknowns
+- `/ms:list-phase-assumptions {phase}` — see Claude's assumptions
 
 ---
 ```
@@ -223,14 +223,14 @@ UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
 
 **{phase}-UAT.md** has {N} gaps requiring fixes.
 
-`/gsd:plan-phase {phase} --gaps`
+`/ms:plan-phase {phase} --gaps`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work {phase}` — run more UAT testing
+- `/ms:verify-work {phase}` — run more UAT testing
 
 ---
 ```
@@ -269,17 +269,17 @@ Read ROADMAP.md to get the next phase's name and goal.
 
 **Phase {Z+1}: {Name}** — {Goal from ROADMAP.md}
 
-`/gsd:plan-phase {Z+1}`
+`/ms:plan-phase {Z+1}`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work {Z}` — user acceptance test before continuing
-- `/gsd:discuss-phase {Z+1}` — gather context first
-- `/gsd:design-phase {Z+1}` — create UI/UX specifications
-- `/gsd:research-phase {Z+1}` — investigate unknowns
+- `/ms:verify-work {Z}` — user acceptance test before continuing
+- `/ms:discuss-phase {Z+1}` — gather context first
+- `/ms:design-phase {Z+1}` — create UI/UX specifications
+- `/ms:research-phase {Z+1}` — investigate unknowns
 
 ---
 ```
@@ -299,14 +299,14 @@ All {N} phases finished!
 
 **Complete Milestone** — archive and prepare for next
 
-`/gsd:complete-milestone`
+`/ms:complete-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work` — user acceptance test before completing milestone
+- `/ms:verify-work` — user acceptance test before completing milestone
 
 ---
 ```
@@ -330,18 +330,18 @@ Ready to plan the next milestone.
 
 **Discuss Next Milestone** — figure out what to build next
 
-`/gsd:discuss-milestone`
+`/ms:discuss-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Next milestone flow:**
-1. `/gsd:discuss-milestone` — thinking partner, creates context file
-2. `/gsd:new-milestone` — update PROJECT.md with new goals
-3. `/gsd:research-project` — (optional) research ecosystem
-4. `/gsd:define-requirements` — scope what to build
-5. `/gsd:create-roadmap` — plan how to build it
+1. `/ms:discuss-milestone` — thinking partner, creates context file
+2. `/ms:new-milestone` — update PROJECT.md with new goals
+3. `/ms:research-project` — (optional) research ecosystem
+4. `/ms:define-requirements` — scope what to build
+5. `/ms:create-roadmap` — plan how to build it
 
 ---
 ```
@@ -351,10 +351,10 @@ Ready to plan the next milestone.
 <step name="edge_cases">
 **Handle edge cases:**
 
-- Phase complete but next phase not planned → offer `/gsd:plan-phase [next]`
+- Phase complete but next phase not planned → offer `/ms:plan-phase [next]`
 - All work complete → offer milestone completion
 - Blockers present → highlight before offering to continue
-- Handoff file exists → mention it, offer `/gsd:resume-work`
+- Handoff file exists → mention it, offer `/ms:resume-work`
   </step>
 
 </process>
@@ -364,7 +364,7 @@ Ready to plan the next milestone.
 - [ ] Rich context provided (recent work, decisions, issues)
 - [ ] Current position clear with visual progress
 - [ ] What's next clearly explained
-- [ ] Smart routing: /gsd:execute-phase if plan exists, /gsd:plan-phase if not
+- [ ] Smart routing: /ms:execute-phase if plan exists, /ms:plan-phase if not
 - [ ] User confirms before any action
 - [ ] Seamless handoff to appropriate gsd command
       </success_criteria>

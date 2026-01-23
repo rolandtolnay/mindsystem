@@ -1,6 +1,6 @@
 ---
-name: gsd:whats-new
-description: See what's new in GSD since your installed version
+name: ms:whats-new
+description: See what's new in Mindsystem since your installed version
 ---
 
 <objective>
@@ -15,18 +15,18 @@ Shows version comparison, changelog entries for missed versions, and update inst
 Read installed version from VERSION file:
 
 ```bash
-cat ~/.claude/get-shit-done/VERSION 2>/dev/null
+cat ~/.claude/mindsystem/VERSION 2>/dev/null
 ```
 
 **If VERSION file missing:**
 ```
-## GSD What's New
+## Mindsystem What's New
 
 **Installed version:** Unknown
 
 Your installation doesn't include version tracking.
 
-**To fix:** `npx get-shit-done-cc --global`
+**To fix:** `npx mindsystem-cc --global`
 
 This will reinstall with version tracking enabled.
 ```
@@ -44,7 +44,7 @@ Use WebFetch tool with:
 **If fetch fails:**
 Fall back to local changelog:
 ```bash
-cat ~/.claude/get-shit-done/CHANGELOG.md 2>/dev/null
+cat ~/.claude/mindsystem/CHANGELOG.md 2>/dev/null
 ```
 
 Note to user: "Couldn't check for updates (offline or GitHub unavailable). Showing local changelog."
@@ -68,7 +68,7 @@ Format output clearly:
 
 **If up to date:**
 ```
-## GSD What's New
+## Mindsystem What's New
 
 **Installed:** 1.4.26
 **Latest:** 1.4.26
@@ -80,7 +80,7 @@ You're on the latest version.
 
 **If updates available:**
 ```
-## GSD What's New
+## Mindsystem What's New
 
 **Installed:** 1.4.23
 **Latest:** 1.4.26
@@ -107,7 +107,7 @@ You're on the latest version.
 
 [View full changelog](https://github.com/rolandtolnay/gsd/blob/main/CHANGELOG.md)
 
-**To update:** `npx get-shit-done-cc --global`
+**To update:** `npx mindsystem-cc --global`
 ```
 
 **Breaking changes:** Surface prominently with **BREAKING:** prefix in the output.

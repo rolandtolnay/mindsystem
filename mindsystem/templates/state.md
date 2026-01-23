@@ -62,7 +62,7 @@ None yet.
 
 ### Recent Adhoc Work
 
-[Small work items executed via /gsd:do-work]
+[Small work items executed via /ms:do-work]
 
 None yet.
 
@@ -156,12 +156,12 @@ Updated after each plan completion.
 
 **Decisions:** Reference to PROJECT.md Key Decisions table, plus recent decisions summary for quick access. Full decision log lives in PROJECT.md.
 
-**Pending Todos:** Ideas captured via /gsd:add-todo
+**Pending Todos:** Ideas captured via /ms:add-todo
 - Count of pending todos
 - Reference to .planning/todos/pending/
-- Brief list if few, count if many (e.g., "5 pending todos — see /gsd:check-todos")
+- Brief list if few, count if many (e.g., "5 pending todos — see /ms:check-todos")
 
-**Recent Adhoc Work:** Small fixes executed via /gsd:do-work
+**Recent Adhoc Work:** Small fixes executed via /ms:do-work
 - Last 5 adhoc work entries
 - Format: `- [date]: [description] (.planning/adhoc/[file]-SUMMARY.md)`
 - Full history remains in .planning/adhoc/ directory
@@ -207,7 +207,7 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 **When updated:**
 - After each plan execution (update position, note decisions, update issues/blockers)
 - After phase transitions (update progress bar, clear resolved blockers, refresh project reference)
-- After adhoc work via /gsd:do-work (add entry to "Recent Adhoc Work")
+- After adhoc work via /ms:do-work (add entry to "Recent Adhoc Work")
 
 **Size management:**
 - Keep under 100 lines total

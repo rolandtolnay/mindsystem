@@ -168,9 +168,9 @@ Mock type needed: {mock_type}
 3. Provide clear toggle instructions
 4. Write all files to disk
 
-Follow the patterns from @~/.claude/get-shit-done/workflows/generate-mocks.md
+Follow the patterns from @~/.claude/mindsystem/workflows/generate-mocks.md
 """,
-  subagent_type="gsd-mock-generator",
+  subagent_type="ms-mock-generator",
   description="Generate {mock_type} mocks"
 )
 ```

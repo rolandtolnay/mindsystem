@@ -1,5 +1,5 @@
 ---
-name: gsd:simplify-flutter
+name: ms:simplify-flutter
 description: Simplify and refine Flutter/Dart code for clarity, consistency, and maintainability while preserving all functionality
 argument-hint: [file path, feature name, or description of what to simplify]
 ---

@@ -1,14 +1,14 @@
 # Debug Workflow (DEPRECATED)
 
-This workflow has been consolidated into the `gsd-debugger` agent.
+This workflow has been consolidated into the `ms-debugger` agent.
 
-**Location:** `agents/gsd-debugger.md`
+**Location:** `agents/ms-debugger.md`
 
-**Reason:** The gsd-debugger agent contains all debugging expertise. Loading a separate workflow into orchestrator context was wasteful.
+**Reason:** The ms-debugger agent contains all debugging expertise. Loading a separate workflow into orchestrator context was wasteful.
 
 **Migration:**
-- `/gsd:debug` now spawns `gsd-debugger` agent directly
+- `/ms:debug` now spawns `ms-debugger` agent directly
 - All debugging methodology lives in the agent file
-- Templates remain at `get-shit-done/templates/DEBUG.md`
+- Templates remain at `mindsystem/templates/DEBUG.md`
 
-See `agents/gsd-debugger.md` for debugging expertise.
+See `agents/ms-debugger.md` for debugging expertise.

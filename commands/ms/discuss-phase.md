@@ -1,5 +1,5 @@
 ---
-name: gsd:discuss-phase
+name: ms:discuss-phase
 description: Gather phase context through adaptive questioning before planning
 argument-hint: "[phase]"
 ---
@@ -13,9 +13,9 @@ Output: {phase}-CONTEXT.md capturing the user's vision for the phase
 </objective>
 
 <execution_context>
-@~/.claude/get-shit-done/references/principles.md
-@~/.claude/get-shit-done/workflows/discuss-phase.md
-@~/.claude/get-shit-done/templates/context.md
+@~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/workflows/discuss-phase.md
+@~/.claude/mindsystem/templates/context.md
 </execution_context>
 
 <context>

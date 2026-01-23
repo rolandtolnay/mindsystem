@@ -1,5 +1,5 @@
 ---
-name: gsd:pause-work
+name: ms:pause-work
 description: Create context handoff when pausing work mid-phase
 allowed-tools:
   - Read
@@ -107,7 +107,7 @@ Current state:
 - Status: [in_progress/blocked]
 - Committed as WIP
 
-To resume: /gsd:resume-work
+To resume: /ms:resume-work
 
 ```
 </step>

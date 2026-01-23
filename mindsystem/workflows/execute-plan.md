@@ -205,7 +205,7 @@ No segmentation benefit - execute entirely in main
 ```
 1. Run init_agent_tracking step first (see step below)
 
-2. Use Task tool with subagent_type="gsd-executor":
+2. Use Task tool with subagent_type="ms-executor":
 
    Prompt: "Execute plan at .planning/phases/{phase}-{plan}-PLAN.md
 
@@ -357,7 +357,7 @@ For Pattern A (fully autonomous) and Pattern C (decision-dependent), skip this s
 
    B. If routing = Subagent:
       ```
-      Spawn Task tool with subagent_type="gsd-executor":
+      Spawn Task tool with subagent_type="ms-executor":
 
       Prompt: "Execute tasks [task numbers/names] from plan at [plan path].
 
@@ -949,7 +949,7 @@ After TDD plan completion, ensure:
 - Standard plans: Multiple tasks, 1 commit per task, 2-4 commits total
 - TDD plans: Single feature, 2-3 commits for RED/GREEN/REFACTOR cycle
 
-See `~/.claude/get-shit-done/references/tdd.md` for TDD plan structure.
+See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 </tdd_plan_execution>
 
 <task_commit>
@@ -1124,7 +1124,7 @@ I'll verify after: [verification]
 - If verification passes or N/A: continue to next task
 - If verification fails: inform user, wait for resolution
 
-See ~/.claude/get-shit-done/references/checkpoints.md for complete checkpoint guidance.
+See ~/.claude/mindsystem/references/checkpoints.md for complete checkpoint guidance.
 </step>
 
 <step name="checkpoint_return_for_orchestrator">
@@ -1254,7 +1254,7 @@ grep -A 50 "^user_setup:" .planning/phases/XX-name/{phase}-{plan}-PLAN.md | head
 
 **If user_setup exists and is not empty:**
 
-Create `.planning/phases/XX-name/{phase}-USER-SETUP.md` using template from `~/.claude/get-shit-done/templates/user-setup.md`.
+Create `.planning/phases/XX-name/{phase}-USER-SETUP.md` using template from `~/.claude/mindsystem/templates/user-setup.md`.
 
 **Content generation:**
 
@@ -1315,7 +1315,7 @@ Set `USER_SETUP_CREATED=true` if file was generated, for use in completion messa
 
 <step name="create_summary">
 Create `{phase}-{plan}-SUMMARY.md` as specified in the prompt's `<output>` section.
-Use ~/.claude/get-shit-done/templates/summary.md for structure.
+Use ~/.claude/mindsystem/templates/summary.md for structure.
 
 **File location:** `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 
@@ -1570,7 +1570,7 @@ lmn012o feat(08-02): create user registration endpoint
 
 Each task has its own commit, followed by one metadata commit documenting plan completion.
 
-For commit message conventions, see ~/.claude/get-shit-done/references/git-integration.md
+For commit message conventions, see ~/.claude/mindsystem/references/git-integration.md
 </step>
 
 <step name="update_codebase_map">
@@ -1697,14 +1697,14 @@ Summary: .planning/phases/{phase-dir}/{phase}-{plan}-SUMMARY.md
 
 **Phase {X}: [Phase Name]** — [goal from ROADMAP.md]
 
-`/gsd:execute-phase {phase-number}`
+`/ms:execute-phase {phase-number}`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work {phase}` — manual acceptance testing before continuing
+- `/ms:verify-work {phase}` — manual acceptance testing before continuing
 - Review what was built before continuing
 
 ---
@@ -1758,16 +1758,16 @@ All {Y} plans finished.
 
 **Phase {Z+1}: {Next Phase Name}** — {Goal from ROADMAP.md}
 
-`/gsd:plan-phase {Z+1}`
+`/ms:plan-phase {Z+1}`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work {Z}` — manual acceptance testing before continuing
-- `/gsd:discuss-phase {Z+1}` — gather context first
-- `/gsd:research-phase {Z+1}` — investigate unknowns
+- `/ms:verify-work {Z}` — manual acceptance testing before continuing
+- `/ms:discuss-phase {Z+1}` — gather context first
+- `/ms:research-phase {Z+1}` — investigate unknowns
 - Review phase accomplishments before continuing
 
 ---
@@ -1797,15 +1797,15 @@ All {Y} plans finished.
 
 **Complete Milestone** — archive and prepare for next
 
-`/gsd:complete-milestone`
+`/ms:complete-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/gsd:verify-work` — manual acceptance testing before completing milestone
-- `/gsd:add-phase <description>` — add another phase before completing
+- `/ms:verify-work` — manual acceptance testing before completing milestone
+- `/ms:add-phase <description>` — add another phase before completing
 - Review accomplishments before archiving
 
 ---

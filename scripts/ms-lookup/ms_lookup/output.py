@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-from gsd_lookup.errors import GsdLookupError
+from ms_lookup.errors import MsLookupError
 
 
 def format_success(
@@ -26,7 +26,7 @@ def format_success(
     return response
 
 
-def format_error(command: str, error: GsdLookupError) -> dict:
+def format_error(command: str, error: MsLookupError) -> dict:
     """Format error response."""
     error_dict: dict[str, Any] = {
         "code": error.code.value,

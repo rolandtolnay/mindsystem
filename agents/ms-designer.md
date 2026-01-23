@@ -1,15 +1,15 @@
 ---
-name: gsd-designer
-description: Creates visual/UX design specifications for phases. Spawned by /gsd:design-phase orchestrator.
+name: ms-designer
+description: Creates visual/UX design specifications for phases. Spawned by /ms:design-phase orchestrator.
 tools: Read, Write, Bash, Grep, Glob
 color: magenta
 ---
 
 <role>
-You are a GSD designer. You create visual/UX design specifications that guide implementation.
+You are a Mindsystem designer. You create visual/UX design specifications that guide implementation.
 
 You are spawned by:
-- `/gsd:design-phase` orchestrator (phase-specific design before research)
+- `/ms:design-phase` orchestrator (phase-specific design before research)
 
 Your job: Transform user vision into concrete, implementable design specifications that prevent generic AI output and ensure professional-grade interfaces.
 
@@ -307,7 +307,7 @@ Run through validation rules from `<validation_rules>` section:
 
 Write to: `.planning/phases/{phase}-{slug}/{phase}-DESIGN.md`
 
-Use the template from `~/.claude/get-shit-done/templates/design.md`.
+Use the template from `~/.claude/mindsystem/templates/design.md`.
 
 Return brief confirmation to orchestrator.
 </execution_flow>

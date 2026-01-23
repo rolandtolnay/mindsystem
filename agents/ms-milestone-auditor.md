@@ -1,5 +1,5 @@
 ---
-name: gsd-milestone-auditor
+name: ms-milestone-auditor
 description: Orchestrates milestone-level verification. Spawns phase verifiers in parallel, runs integration checks, aggregates into MILESTONE-AUDIT.md.
 tools: Read, Bash, Grep, Glob, Task
 color: blue
@@ -92,11 +92,11 @@ Re-verify each phase to catch regressions. Later phases may have broken earlier 
 **Spawn all phases in a single message with multiple Task calls:**
 
 ```
-Task(prompt="Re-verify phase 1...", subagent_type="gsd-verifier")
-Task(prompt="Re-verify phase 2...", subagent_type="gsd-verifier")
-Task(prompt="Re-verify phase 3...", subagent_type="gsd-verifier")
-Task(prompt="Re-verify phase 4...", subagent_type="gsd-verifier")
-Task(prompt="Re-verify phase 5...", subagent_type="gsd-verifier")
+Task(prompt="Re-verify phase 1...", subagent_type="ms-verifier")
+Task(prompt="Re-verify phase 2...", subagent_type="ms-verifier")
+Task(prompt="Re-verify phase 3...", subagent_type="ms-verifier")
+Task(prompt="Re-verify phase 4...", subagent_type="ms-verifier")
+Task(prompt="Re-verify phase 5...", subagent_type="ms-verifier")
 ```
 
 All run in parallel. Task tool blocks until all complete.
@@ -137,7 +137,7 @@ Verify:
 4. Auth protects appropriate routes
 
 Create integration report.",
-  subagent_type="gsd-integration-checker"
+  subagent_type="ms-integration-checker"
 )
 ```
 
@@ -213,7 +213,7 @@ flow_score = complete_flows / expected_flows
 
 ## Step 8: Structure Gap Output
 
-When gaps found, structure for consumption by `/gsd:plan-milestone-gaps`.
+When gaps found, structure for consumption by `/ms:plan-milestone-gaps`.
 
 Group gaps by type and affected phase:
 
@@ -380,7 +380,7 @@ gaps:
 ---
 
 _Audited: {timestamp}_
-_Auditor: Claude (gsd-milestone-auditor)_
+_Auditor: Claude (ms-milestone-auditor)_
 ```
 
 ## Return to Orchestrator
@@ -396,7 +396,7 @@ Return with:
 
 {If passed:}
 All requirements satisfied. All phases verified. Integration complete. E2E flows working.
-Ready for `/gsd:complete-milestone {version}`.
+Ready for `/ms:complete-milestone {version}`.
 
 {If gaps_found:}
 
@@ -414,7 +414,7 @@ Ready for `/gsd:complete-milestone {version}`.
 {For each:}
 - **{flow name}:** breaks at {step}
 
-Structured gaps in MILESTONE-AUDIT.md for `/gsd:plan-milestone-gaps`.
+Structured gaps in MILESTONE-AUDIT.md for `/ms:plan-milestone-gaps`.
 ```
 
 </output>

@@ -15,11 +15,11 @@ Decimal phases enable urgent work insertion without renumbering:
 <required_reading>
 **Read these files NOW:**
 
-1. ~/.claude/get-shit-done/templates/phase-prompt.md
-2. ~/.claude/get-shit-done/references/plan-format.md
-3. ~/.claude/get-shit-done/references/scope-estimation.md
-4. ~/.claude/get-shit-done/references/checkpoints.md
-5. ~/.claude/get-shit-done/references/tdd.md
+1. ~/.claude/mindsystem/templates/phase-prompt.md
+2. ~/.claude/mindsystem/references/plan-format.md
+3. ~/.claude/mindsystem/references/scope-estimation.md
+4. ~/.claude/mindsystem/references/checkpoints.md
+5. ~/.claude/mindsystem/references/tdd.md
 6. .planning/ROADMAP.md
 7. .planning/PROJECT.md
 
@@ -207,7 +207,7 @@ gap_closure: true     # Flag for tracking
 
 **Execute gap closure plans**
 
-`/gsd:execute-phase {X}`
+`/ms:execute-phase {X}`
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -251,7 +251,7 @@ gap_closure: true     # Flag for tracking
 
 If roadmap flagged `Research: Likely`, Level 0 (skip) is not available.
 
-For niche domains (3D, games, audio, shaders, ML), suggest `/gsd:research-phase` before plan-phase.
+For niche domains (3D, games, audio, shaders, ML), suggest `/ms:research-phase` before plan-phase.
 </step>
 
 <step name="read_project_history">
@@ -332,23 +332,23 @@ Understand:
 - Phase goal (from roadmap)
 - What exists already (scan codebase if mid-project)
 - Dependencies met (previous phases complete?)
-- Any {phase}-RESEARCH.md (from /gsd:research-phase)
+- Any {phase}-RESEARCH.md (from /ms:research-phase)
 - Any DISCOVERY.md (from mandatory discovery)
-- Any {phase}-CONTEXT.md (from /gsd:discuss-phase)
-- Any {phase}-DESIGN.md (from /gsd:design-phase)
+- Any {phase}-CONTEXT.md (from /ms:discuss-phase)
+- Any {phase}-DESIGN.md (from /ms:design-phase)
 
 ```bash
 # If mid-project, understand current state
 ls -la src/ 2>/dev/null
 cat package.json 2>/dev/null | head -20
 
-# Check for ecosystem research (from /gsd:research-phase)
+# Check for ecosystem research (from /ms:research-phase)
 cat .planning/phases/XX-name/${PHASE}-RESEARCH.md 2>/dev/null
 
-# Check for phase context (from /gsd:discuss-phase)
+# Check for phase context (from /ms:discuss-phase)
 cat .planning/phases/XX-name/${PHASE}-CONTEXT.md 2>/dev/null
 
-# Check for design specs (from /gsd:design-phase)
+# Check for design specs (from /ms:design-phase)
 cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 ```
 
@@ -362,7 +362,7 @@ cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 - must_haves include design-specified observable behaviors
 - Task actions specify exact values (colors, spacing) from design
 
-**If none exist:** Suggest /gsd:research-phase for niche domains, /gsd:discuss-phase for simpler domains, or proceed with roadmap only.
+**If none exist:** Suggest /ms:research-phase for niche domains, /ms:discuss-phase for simpler domains, or proceed with roadmap only.
 </step>
 
 <step name="break_into_tasks">
@@ -406,13 +406,13 @@ Standard tasks (remain in standard plans):
 
 **Test framework:** If project has no test setup and TDD plans are needed, the first TDD plan's RED phase handles framework setup as part of writing the first test.
 
-See `~/.claude/get-shit-done/references/tdd.md` for TDD plan structure.
+See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 
 **Checkpoints:** Visual/functional verification → checkpoint:human-verify. Implementation choices → checkpoint:decision. Manual action (email, 2FA) → checkpoint:human-action (rare).
 
 **Critical:** If external resource has CLI/API (Vercel, Stripe, etc.), use type="auto" to automate. Only checkpoint for verification AFTER automation.
 
-See ~/.claude/get-shit-done/references/checkpoints.md for checkpoint structure.
+See ~/.claude/mindsystem/references/checkpoints.md for checkpoint structure.
 
 **User setup detection:** For tasks involving external services, identify human-required configuration:
 
@@ -625,7 +625,7 @@ For quick depth:
 
 **Each plan must be:** 2-3 tasks max, ~50% context target, independently committable.
 
-See ~/.claude/get-shit-done/references/scope-estimation.md for complete guidance.
+See ~/.claude/mindsystem/references/scope-estimation.md for complete guidance.
 </step>
 
 <step name="confirm_breakdown">
@@ -672,7 +672,7 @@ Wait for confirmation. If "adjust": revise. If "start over": return to gather_ph
 </step>
 
 <step name="write_phase_prompt">
-Use template from `~/.claude/get-shit-done/templates/phase-prompt.md`.
+Use template from `~/.claude/mindsystem/templates/phase-prompt.md`.
 
 **Single plan:** Write to `.planning/phases/XX-name/{phase}-01-PLAN.md`
 
@@ -731,7 +731,7 @@ user_setup:
 
 Do NOT include: npm install, code changes, file creation, CLI commands Claude can run.
 
-**Wave is pre-computed:** Wave numbers are assigned during planning (see `assign_waves` step). `/gsd:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
+**Wave is pre-computed:** Wave numbers are assigned during planning (see `assign_waves` step). `/ms:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
 
 **Context section - parallel-aware:**
 
@@ -760,9 +760,9 @@ Only include prior plan SUMMARY references if this plan genuinely needs decision
 Include checkpoint reference in execution_context:
 ```markdown
 <execution_context>
-@~/.claude/get-shit-done/workflows/execute-plan.md
-@~/.claude/get-shit-done/templates/summary.md
-@~/.claude/get-shit-done/references/checkpoints.md
+@~/.claude/mindsystem/workflows/execute-plan.md
+@~/.claude/mindsystem/templates/summary.md
+@~/.claude/mindsystem/references/checkpoints.md
 </execution_context>
 ```
 
@@ -808,7 +808,7 @@ Wave 2: {plan-03}
 
 **Phase {X}: [Phase Name]** - {N} plan(s) in {M} wave(s)
 
-`/gsd:execute-phase {X}`
+`/ms:execute-phase {X}`
 
 <sub>`/clear` first - fresh context window</sub>
 
@@ -834,7 +834,7 @@ Wave 2: {plan-03}
 
 If you can't specify Files + Action + Verify + Done, the task is too vague.
 
-**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, create a TDD plan for it. See `~/.claude/get-shit-done/references/tdd.md` for TDD plan structure.
+**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, create a TDD plan for it. See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 </task_quality>
 
 <anti_patterns>
@@ -872,5 +872,5 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] PLAN file(s) exist with gap_closure: true
 - [ ] Each plan: tasks derived from gap.missing items
 - [ ] PLAN file(s) committed to git
-- [ ] User knows to run `/gsd:execute-phase {X}` next
+- [ ] User knows to run `/ms:execute-phase {X}` next
 </success_criteria>

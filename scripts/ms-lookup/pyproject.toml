@@ -1,7 +1,7 @@
 [project]
-name = "gsd-lookup"
+name = "ms-lookup"
 version = "1.0.0"
-description = "CLI tool for GSD research - Context7 docs and Perplexity deep research"
+description = "CLI tool for Mindsystem research - Context7 docs and Perplexity deep research"
 requires-python = ">=3.10"
 dependencies = [
     "typer>=0.9.0",
@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-gsd-lookup = "gsd_lookup.cli:app"
+ms-lookup = "ms_lookup.cli:app"
 
 [build-system]
 requires = ["hatchling"]

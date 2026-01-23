@@ -378,13 +378,13 @@ Some things can't be verified programmatically. Flag these for human testing:
 |--------|---------|--------|
 | `passed` | All must-haves verified | Update roadmap, continue |
 | `human_needed` | Automated passed, needs human | Present test scenarios |
-| `gaps_found` | Missing functionality | Offer `/gsd:plan-phase --gaps` |
+| `gaps_found` | Missing functionality | Offer `/ms:plan-phase --gaps` |
 
 **gaps_found flow:**
 1. Verifier creates VERIFICATION.md with gaps
-2. User runs `/gsd:plan-phase {X} --gaps`
+2. User runs `/ms:plan-phase {X} --gaps`
 3. Planner reads gaps, creates fix plans
-4. User runs `/gsd:execute-phase {X}` again
+4. User runs `/ms:execute-phase {X}` again
 5. Execute runs new plans
 6. Verifier runs again
 7. Repeat until passed

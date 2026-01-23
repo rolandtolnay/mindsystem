@@ -1,12 +1,12 @@
 # CLAUDE.md
 
-> **Contributor guidelines.** For GSD concepts, architecture, and deep knowledge, invoke `gsd-meta` skill.
+> **Contributor guidelines.** For GSD concepts, architecture, and deep knowledge, invoke `ms-meta` skill.
 
 This document contains rules that affect every output when developing GSD.
 
 ## Core Philosophy
 
-GSD is a **meta-prompting system** where every file is both implementation and specification. Files teach Claude how to build software systematically. The system optimizes for:
+Mindsystem is a **meta-prompting system** where every file is both implementation and specification. Files teach Claude how to build software systematically. The system optimizes for:
 
 - **Solo developer + Claude workflow** (no enterprise patterns)
 - **Context engineering** (manage Claude's context window deliberately)
@@ -16,7 +16,7 @@ GSD is a **meta-prompting system** where every file is both implementation and s
 
 ## Fork Philosophy
 
-This is a customized fork of GSD with specific design principles that diverge from upstream.
+This is a customized fork of Mindsystem with specific design principles that diverge from upstream.
 
 ### Modularity Over Bundling
 
@@ -53,14 +53,14 @@ Trust that users can contribute meaningfully. Maintain:
 
 **All changes happen in this repository.** Never modify user-scope files (`~/.claude/`).
 
-GSD is distributed via `npx get-shit-done-cc`. During development, the user runs `npx` which symlinks to this repository. Changes made here are immediately available for testing.
+Mindsystem is distributed via `npx mindsystem-cc`. During development, the user runs `npx` which symlinks to this repository. Changes made here are immediately available for testing.
 
 | Location | Purpose |
 |----------|---------|
 | `agents/` | Subagent definitions (copied to `~/.claude/agents/` on install) |
-| `commands/gsd/` | Slash commands (copied to `~/.claude/commands/gsd/` on install) |
-| `get-shit-done/` | Workflows, templates, references (copied to `~/.claude/get-shit-done/` on install) |
-| `scripts/` | Shell scripts (copied to `~/.claude/get-shit-done/scripts/` on install) |
+| `commands/ms/` | Slash commands (copied to `~/.claude/commands/ms/` on install) |
+| `mindsystem/` | Workflows, templates, references (copied to `~/.claude/mindsystem/` on install) |
+| `scripts/` | Shell scripts (copied to `~/.claude/mindsystem/scripts/` on install) |
 
 **Never write to `~/.claude/` directly.** Always modify files in this repository.
 
@@ -70,11 +70,11 @@ GSD is distributed via `npx get-shit-done-cc`. During development, the user runs
 
 ## File Structure Conventions
 
-### Slash Commands (`commands/gsd/*.md`)
+### Slash Commands (`commands/ms/*.md`)
 
 ```yaml
 ---
-name: gsd:command-name
+name: ms:command-name
 description: One-line description
 argument-hint: "<required>" or "[optional]"
 allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
@@ -92,7 +92,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 
 **Keep command and workflow in sync.** When adding/removing steps in a workflow, update the corresponding command's `<process>` section to match. The command lists steps at a high level; the workflow contains the detailed implementation. Both must reflect the same steps.
 
-### Workflows (`get-shit-done/workflows/*.md`)
+### Workflows (`mindsystem/workflows/*.md`)
 
 No YAML frontmatter. Structure varies by workflow.
 
@@ -111,7 +111,7 @@ Some workflows use domain-specific tags like `<philosophy>`, `<references>`, `<p
 
 **Key principle:** Match the style of the specific workflow you're editing.
 
-### Templates (`get-shit-done/templates/*.md`)
+### Templates (`mindsystem/templates/*.md`)
 
 Structure varies. Common patterns:
 - Most start with `# [Name] Template` header
@@ -122,7 +122,7 @@ Structure varies. Common patterns:
 - Square brackets: `[Project Name]`, `[Description]`
 - Curly braces: `{phase}-{plan}-PLAN.md`
 
-### References (`get-shit-done/references/*.md`)
+### References (`mindsystem/references/*.md`)
 
 Typically use outer XML containers related to filename, but structure varies.
 
@@ -220,7 +220,7 @@ Build authentication system
 
 **Static references** (always load):
 ```
-@~/.claude/get-shit-done/workflows/execute-phase.md
+@~/.claude/mindsystem/workflows/execute-phase.md
 @.planning/PROJECT.md
 ```
 

@@ -1,38 +1,38 @@
 <architecture>
 
 <overview>
-GSD's architecture follows a **progressive disclosure** pattern: commands delegate to workflows, workflows use templates and references. Each layer has a specific purpose.
+Mindsystem's architecture follows a **progressive disclosure** pattern: commands delegate to workflows, workflows use templates and references. Each layer has a specific purpose.
 </overview>
 
 <directory_structure>
 ```
 gsd/                              # Development repository
 ├── agents/                       # Subagent definitions
-│   ├── gsd-executor.md              # Executes PLAN.md (core)
-│   ├── gsd-verifier.md              # Verifies phase goals
-│   ├── gsd-planner.md               # Creates PLAN.md files
-│   ├── gsd-debugger.md              # Systematic debugging
-│   ├── gsd-researcher.md            # Domain research
-│   ├── gsd-research-synthesizer.md  # Combines research outputs
-│   ├── gsd-roadmapper.md            # Creates ROADMAP.md
-│   ├── gsd-codebase-mapper.md       # Analyzes existing codebases
-│   ├── gsd-plan-checker.md          # Validates plans before execution
-│   ├── gsd-milestone-auditor.md     # Audits milestone completion
-│   └── gsd-integration-checker.md   # Verifies cross-phase integration
+│   ├── ms-executor.md              # Executes PLAN.md (core)
+│   ├── ms-verifier.md              # Verifies phase goals
+│   ├── ms-planner.md               # Creates PLAN.md files
+│   ├── ms-debugger.md              # Systematic debugging
+│   ├── ms-researcher.md            # Domain research
+│   ├── ms-research-synthesizer.md  # Combines research outputs
+│   ├── ms-roadmapper.md            # Creates ROADMAP.md
+│   ├── ms-codebase-mapper.md       # Analyzes existing codebases
+│   ├── ms-plan-checker.md          # Validates plans before execution
+│   ├── ms-milestone-auditor.md     # Audits milestone completion
+│   └── ms-integration-checker.md   # Verifies cross-phase integration
 │
-├── commands/gsd/                 # Slash commands
-│   ├── new-project.md               # /gsd:new-project
-│   ├── define-requirements.md       # /gsd:define-requirements
-│   ├── create-roadmap.md            # /gsd:create-roadmap
-│   ├── plan-phase.md                # /gsd:plan-phase
-│   ├── execute-phase.md             # /gsd:execute-phase
-│   ├── progress.md                  # /gsd:progress
-│   ├── verify-work.md               # /gsd:verify-work
-│   ├── debug.md                     # /gsd:debug
-│   ├── help.md                      # /gsd:help
+├── commands/ms/                 # Slash commands
+│   ├── new-project.md               # /ms:new-project
+│   ├── define-requirements.md       # /ms:define-requirements
+│   ├── create-roadmap.md            # /ms:create-roadmap
+│   ├── plan-phase.md                # /ms:plan-phase
+│   ├── execute-phase.md             # /ms:execute-phase
+│   ├── progress.md                  # /ms:progress
+│   ├── verify-work.md               # /ms:verify-work
+│   ├── debug.md                     # /ms:debug
+│   ├── help.md                      # /ms:help
 │   └── ... (20+ commands)
 │
-├── get-shit-done/                # Core system files
+├── mindsystem/                # Core system files
 │   ├── workflows/                   # Step-by-step procedures
 │   │   ├── execute-phase.md            # Orchestrates wave execution
 │   │   ├── execute-plan.md             # Single plan execution
@@ -89,14 +89,14 @@ gsd/                              # Development repository
 </directory_structure>
 
 <layer_purposes>
-## Command Layer (`commands/gsd/*.md`)
+## Command Layer (`commands/ms/*.md`)
 
 **Purpose:** User interface. Thin wrappers that delegate to workflows.
 
 **Structure:**
 ```yaml
 ---
-name: gsd:command-name
+name: ms:command-name
 description: One-line description
 argument-hint: "<required>" or "[optional]"
 allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
@@ -115,7 +115,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | Session | `pause-work`, `resume-work` |
 | Utilities | `add-todo`, `check-todos`, `debug`, `help`, `update`, `whats-new` |
 
-## Workflow Layer (`get-shit-done/workflows/*.md`)
+## Workflow Layer (`mindsystem/workflows/*.md`)
 
 **Purpose:** Detailed procedures. Contains the actual logic.
 
@@ -123,15 +123,15 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 
 | Workflow | Spawns | Creates |
 |----------|--------|---------|
-| `execute-phase.md` | gsd-executor (parallel per plan), gsd-verifier | SUMMARY.md, VERIFICATION.md |
+| `execute-phase.md` | ms-executor (parallel per plan), ms-verifier | SUMMARY.md, VERIFICATION.md |
 | `execute-plan.md` | None (runs in executor) | SUMMARY.md, commits |
-| `plan-phase.md` | gsd-planner | PLAN.md files |
+| `plan-phase.md` | ms-planner | PLAN.md files |
 | `discovery-phase.md` | None | PROJECT.md |
 | `define-requirements.md` | None | REQUIREMENTS.md |
-| `research-project.md` | gsd-researcher (×4 parallel) | .planning/research/ |
-| `map-codebase.md` | gsd-codebase-mapper (×4 parallel) | .planning/codebase/ |
+| `research-project.md` | ms-researcher (×4 parallel) | .planning/research/ |
+| `map-codebase.md` | ms-codebase-mapper (×4 parallel) | .planning/codebase/ |
 
-## Template Layer (`get-shit-done/templates/*.md`)
+## Template Layer (`mindsystem/templates/*.md`)
 
 **Purpose:** Define output structures. Claude copies and fills these.
 
@@ -146,7 +146,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | `summary.md` | *-SUMMARY.md | After each plan execution |
 | `verification-report.md` | *-VERIFICATION.md | After phase verification |
 
-## Reference Layer (`get-shit-done/references/*.md`)
+## Reference Layer (`mindsystem/references/*.md`)
 
 **Purpose:** Deep knowledge. Loaded when specific expertise needed.
 
@@ -168,7 +168,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 **Agent anatomy:**
 ```yaml
 ---
-name: gsd-agent-name
+name: ms-agent-name
 description: What it does, when spawned
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: yellow  # Terminal output color
@@ -179,55 +179,55 @@ color: yellow  # Terminal output color
 
 | Agent | Spawned by | Purpose |
 |-------|------------|---------|
-| `gsd-executor` | execute-phase | Execute single PLAN.md |
-| `gsd-verifier` | execute-phase | Verify phase goal achieved |
-| `gsd-planner` | plan-phase | Create PLAN.md |
-| `gsd-debugger` | debug | Systematic debugging |
-| `gsd-researcher` | research-project/phase | Domain research |
-| `gsd-codebase-mapper` | map-codebase | Analyze existing code |
+| `ms-executor` | execute-phase | Execute single PLAN.md |
+| `ms-verifier` | execute-phase | Verify phase goal achieved |
+| `ms-planner` | plan-phase | Create PLAN.md |
+| `ms-debugger` | debug | Systematic debugging |
+| `ms-researcher` | research-project/phase | Domain research |
+| `ms-codebase-mapper` | map-codebase | Analyze existing code |
 </layer_purposes>
 
 <data_flow>
 ## User Project Data Flow
 
 ```
-/gsd:new-project
+/ms:new-project
     ↓
   discovery-phase.md workflow
     ↓
   Creates: .planning/PROJECT.md
     ↓
-/gsd:research-project (optional)
+/ms:research-project (optional)
     ↓
-  Spawns: 4× gsd-researcher (parallel)
+  Spawns: 4× ms-researcher (parallel)
     ↓
   Creates: .planning/research/{STACK,FEATURES,ARCHITECTURE,PITFALLS,SUMMARY}.md
     ↓
-/gsd:define-requirements
+/ms:define-requirements
     ↓
   define-requirements.md workflow
     ↓
   Creates: .planning/REQUIREMENTS.md
     ↓
-/gsd:create-roadmap
+/ms:create-roadmap
     ↓
-  Spawns: gsd-roadmapper
+  Spawns: ms-roadmapper
     ↓
   Creates: .planning/ROADMAP.md, .planning/STATE.md
     ↓
-/gsd:plan-phase N
+/ms:plan-phase N
     ↓
   plan-phase.md workflow
     ↓
-  Spawns: gsd-planner
+  Spawns: ms-planner
     ↓
   Creates: .planning/phases/XX-name/XX-NN-PLAN.md
     ↓
-/gsd:execute-phase N
+/ms:execute-phase N
     ↓
   execute-phase.md workflow (orchestrator)
     ↓
-  Spawns: gsd-executor (parallel per wave)
+  Spawns: ms-executor (parallel per wave)
     ↓
   Each executor:
     - Reads PLAN.md
@@ -241,7 +241,7 @@ color: yellow  # Terminal output color
     - Handles checkpoints
     - Aggregates results
     ↓
-  Spawns: gsd-verifier
+  Spawns: ms-verifier
     ↓
   Creates: XX-VERIFICATION.md
     ↓
@@ -252,19 +252,19 @@ color: yellow  # Terminal output color
 <file_locations>
 ## Where to Find Things
 
-**Adding a new command:** `commands/gsd/new-command.md`
+**Adding a new command:** `commands/ms/new-command.md`
 
-**Modifying execution logic:** `get-shit-done/workflows/execute-phase.md` or `execute-plan.md`
+**Modifying execution logic:** `mindsystem/workflows/execute-phase.md` or `execute-plan.md`
 
-**Changing plan structure:** `get-shit-done/references/plan-format.md` and `templates/phase-prompt.md`
+**Changing plan structure:** `mindsystem/references/plan-format.md` and `templates/phase-prompt.md`
 
-**Modifying an agent:** `agents/gsd-{agent-name}.md`
+**Modifying an agent:** `agents/ms-{agent-name}.md`
 
-**Changing checkpoint behavior:** `get-shit-done/references/checkpoints.md`
+**Changing checkpoint behavior:** `mindsystem/references/checkpoints.md`
 
-**Updating templates:** `get-shit-done/templates/*.md`
+**Updating templates:** `mindsystem/templates/*.md`
 
-**Core philosophy:** `get-shit-done/references/principles.md` and `CLAUDE.md`
+**Core philosophy:** `mindsystem/references/principles.md` and `CLAUDE.md`
 </file_locations>
 
 </architecture>

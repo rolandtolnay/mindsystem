@@ -11,21 +11,21 @@ If work requires more than 2 tasks, REFUSE with:
 ```
 This work requires [N] tasks (max: 2 for adhoc work).
 
-Use `/gsd:insert-phase [current_phase] [description]` instead.
+Use `/ms:insert-phase [current_phase] [description]` instead.
 ```
 
 If work requires architectural changes, REFUSE with:
 ```
 This work requires architectural changes.
 
-Use `/gsd:insert-phase` for proper planning and context tracking.
+Use `/ms:insert-phase` for proper planning and context tracking.
 ```
 </scope_guard>
 
 <required_reading>
 Read STATE.md before any operation to load project context.
 
-@~/.claude/get-shit-done/templates/adhoc-summary.md
+@~/.claude/mindsystem/templates/adhoc-summary.md
 </required_reading>
 
 <process>
@@ -36,8 +36,8 @@ Parse the work description from $ARGUMENTS:
 ```bash
 if [ -z "$ARGUMENTS" ]; then
   echo "ERROR: Work description required"
-  echo "Usage: /gsd:do-work <description>"
-  echo "Example: /gsd:do-work Fix auth token not refreshing on 401"
+  echo "Usage: /ms:do-work <description>"
+  echo "Example: /ms:do-work Fix auth token not refreshing on 401"
   exit 1
 fi
 
@@ -55,8 +55,8 @@ if [ ! -f .planning/STATE.md ]; then
   echo "ERROR: No active GSD project found (.planning/STATE.md missing)"
   echo ""
   echo "Options:"
-  echo "- Initialize project: /gsd:new-project"
-  echo "- Capture as todo: /gsd:add-todo [description]"
+  echo "- Initialize project: /ms:new-project"
+  echo "- Capture as todo: /ms:add-todo [description]"
   exit 1
 fi
 ```
@@ -96,7 +96,7 @@ This work requires approximately [N] tasks:
 
 Adhoc work is limited to 2 tasks maximum.
 
-**Suggestion:** `/gsd:insert-phase [current_phase] [description]`
+**Suggestion:** `/ms:insert-phase [current_phase] [description]`
 ```
 
 If architectural:
@@ -106,7 +106,7 @@ This work involves architectural changes:
 
 Adhoc work handles small, isolated fixes — not structural changes.
 
-**Suggestion:** `/gsd:insert-phase [current_phase] [description]`
+**Suggestion:** `/ms:insert-phase [current_phase] [description]`
 ```
 
 If ≤2 tasks and not architectural: PROCEED
@@ -196,7 +196,7 @@ Work completed so far:
 
 **Next steps:**
 1. Commit partial work (if valuable)
-2. Use `/gsd:insert-phase` for remaining work
+2. Use `/ms:insert-phase` for remaining work
 ```
 
 Use AskUserQuestion to confirm how to proceed.
@@ -218,7 +218,7 @@ Keep verification focused on the specific changes made.
 </step>
 
 <step name="create_adhoc_summary">
-Create SUMMARY.md (see @~/.claude/get-shit-done/templates/adhoc-summary.md for full template):
+Create SUMMARY.md (see @~/.claude/mindsystem/templates/adhoc-summary.md for full template):
 
 ```bash
 summary_file=".planning/adhoc/${timestamp}-${slug}-SUMMARY.md"
@@ -333,8 +333,8 @@ STATE.md updated with adhoc entry.
 ---
 
 Continue with current work or check project status:
-- `/gsd:progress` — see project status
-- `/gsd:execute-phase` — continue phase execution
+- `/ms:progress` — see project status
+- `/ms:execute-phase` — continue phase execution
 ```
 </step>
 
@@ -346,7 +346,7 @@ Adhoc work uses the same deviation rules as plan execution:
 **Rule 1 - Bug in plan:** Auto-fix
 **Rule 2 - Missing critical:** Auto-fix
 **Rule 3 - Blocking issue:** Auto-fix
-**Rule 4 - Architectural change:** STOP and suggest /gsd:insert-phase
+**Rule 4 - Architectural change:** STOP and suggest /ms:insert-phase
 
 Rule 4 is strict for adhoc work — architectural changes exceed adhoc scope by definition.
 </deviation_rules>

@@ -1,5 +1,5 @@
 ---
-name: gsd:research-phase
+name: ms:research-phase
 description: Research how to implement a phase before planning
 argument-hint: "[phase]"
 allowed-tools:
@@ -9,7 +9,7 @@ allowed-tools:
 ---
 
 <objective>
-Research how to implement a phase. Spawns gsd-researcher agent with phase context.
+Research how to implement a phase. Spawns ms-researcher agent with phase context.
 
 **Orchestrator role:** Parse phase, validate against roadmap, check existing research, gather context, spawn researcher agent, present results.
 
@@ -63,7 +63,7 @@ Present summary with phase description, requirements, prior decisions.
 - Platform-specific implementation approaches
 - Component libraries that match the design system
 
-## 4. Spawn gsd-researcher Agent
+## 4. Spawn ms-researcher Agent
 
 Research modes: ecosystem (default), feasibility, implementation, comparison.
 
@@ -99,7 +99,7 @@ Mode: ecosystem
 </context>
 
 <downstream_consumer>
-Your RESEARCH.md will be loaded by `/gsd:plan-phase` which uses specific sections:
+Your RESEARCH.md will be loaded by `/ms:plan-phase` which uses specific sections:
 - `## Standard Stack` → Plans use these libraries
 - `## Architecture Patterns` → Task structure follows these
 - `## Don't Hand-Roll` → Tasks NEVER build custom solutions for listed problems
@@ -126,7 +126,7 @@ Write to: .planning/phases/{phase}-{slug}/{phase}-RESEARCH.md
 ```
 Task(
   prompt=filled_prompt,
-  subagent_type="gsd-researcher",
+  subagent_type="ms-researcher",
   description="Research Phase {phase}"
 )
 ```
@@ -159,7 +159,7 @@ Research file: @.planning/phases/{phase}-{slug}/{phase}-RESEARCH.md
 ```
 Task(
   prompt=continuation_prompt,
-  subagent_type="gsd-researcher",
+  subagent_type="ms-researcher",
   description="Continue research Phase {phase}"
 )
 ```
@@ -169,7 +169,7 @@ Task(
 <success_criteria>
 - [ ] Phase validated against roadmap
 - [ ] Existing research checked
-- [ ] gsd-researcher spawned with context
+- [ ] ms-researcher spawned with context
 - [ ] Checkpoints handled correctly
 - [ ] User knows next steps
 </success_criteria>
