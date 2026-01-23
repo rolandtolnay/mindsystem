@@ -10,7 +10,7 @@
       .text { font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace; }
       .prompt { fill: #7aa2f7; }
       .command { fill: #c0caf5; }
-      .cyan { fill: #7dcfff; }
+      .cyan { fill: #2FA7A0; }
       .green { fill: #9ece6a; }
       .dim { fill: #565f89; }
       .white { fill: #c0caf5; }
