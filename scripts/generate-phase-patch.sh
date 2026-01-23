@@ -1,12 +1,18 @@
 #!/bin/bash
 #
 # generate-phase-patch.sh
-# Generates a patch file with all implementation changes from a phase,
+# Generates a patch file with implementation changes from a phase,
 # excluding documentation and generated files.
 #
-# Usage: ./scripts/generate-phase-patch.sh <phase_number>
+# Usage: ./scripts/generate-phase-patch.sh <phase_number> [--suffix=<suffix>]
 # Example: ./scripts/generate-phase-patch.sh 04
 #          ./scripts/generate-phase-patch.sh 4
+#          ./scripts/generate-phase-patch.sh 04 --suffix=uat-fixes
+#
+# Options:
+#   --suffix=<suffix>  Filter commits by message pattern and use custom output filename
+#                      When --suffix=uat-fixes: looks for commits with "({phase}-uat):" pattern
+#                      Output: {phase}-{suffix}.patch instead of {phase}-changes.patch
 
 set -e
 
@@ -34,10 +40,27 @@ EXCLUSIONS=(
   '*.lock'
 )
 
+# --- Parse arguments ---
+PHASE_INPUT=""
+SUFFIX=""
+
+for arg in "$@"; do
+  case $arg in
+    --suffix=*)
+      SUFFIX="${arg#*=}"
+      ;;
+    *)
+      if [ -z "$PHASE_INPUT" ]; then
+        PHASE_INPUT="$arg"
+      fi
+      ;;
+  esac
+done
+
 # --- Validation ---
-if [ -z "$1" ]; then
+if [ -z "$PHASE_INPUT" ]; then
   echo "Error: Phase number required"
-  echo "Usage: $0 <phase_number>"
+  echo "Usage: $0 <phase_number> [--suffix=<suffix>]"
   exit 1
 fi
 
@@ -50,26 +73,41 @@ fi
 cd "$GIT_ROOT"
 
 # --- Normalize phase number (zero-pad if needed) ---
-PHASE_INPUT="$1"
 if [[ "$PHASE_INPUT" =~ ^[0-9]$ ]]; then
   PHASE_NUMBER=$(printf "%02d" "$PHASE_INPUT")
 else
   PHASE_NUMBER="$PHASE_INPUT"
 fi
 
-echo "Generating patch for phase $PHASE_NUMBER..."
+# --- Determine commit pattern based on suffix ---
+if [ -n "$SUFFIX" ]; then
+  # With suffix: filter by specific pattern
+  # For uat-fixes: look for "fix({phase}-uat):" pattern
+  if [ "$SUFFIX" = "uat-fixes" ]; then
+    COMMIT_PATTERN="\($PHASE_NUMBER-uat\):"
+    echo "Generating UAT fixes patch for phase $PHASE_NUMBER..."
+  else
+    # Generic suffix: look for pattern with suffix in scope
+    COMMIT_PATTERN="\($PHASE_NUMBER-$SUFFIX\):"
+    echo "Generating $SUFFIX patch for phase $PHASE_NUMBER..."
+  fi
+else
+  # No suffix: standard phase commits
+  COMMIT_PATTERN="\($PHASE_NUMBER-"
+  echo "Generating patch for phase $PHASE_NUMBER..."
+fi
 
-# --- Find phase commits ---
-PHASE_COMMITS=$(git log --oneline | grep -E "\($PHASE_NUMBER-" | cut -d' ' -f1 || true)
+# --- Find matching commits ---
+PHASE_COMMITS=$(git log --oneline | grep -E "$COMMIT_PATTERN" | cut -d' ' -f1 || true)
 
 if [ -z "$PHASE_COMMITS" ]; then
-  echo "No phase commits found matching pattern ($PHASE_NUMBER-"
+  echo "No commits found matching pattern: $COMMIT_PATTERN"
   echo "Patch skipped"
   exit 0
 fi
 
 COMMIT_COUNT=$(echo "$PHASE_COMMITS" | wc -l | tr -d ' ')
-echo "Found $COMMIT_COUNT commit(s) for phase $PHASE_NUMBER"
+echo "Found $COMMIT_COUNT commit(s)"
 
 # --- Determine base commit ---
 EARLIEST_COMMIT=$(echo "$PHASE_COMMITS" | tail -1)
@@ -96,11 +134,23 @@ for pattern in "${EXCLUSIONS[@]}"; do
   EXCLUDE_ARGS="$EXCLUDE_ARGS ':!$pattern'"
 done
 
-# --- Generate diff ---
-PATCH_FILE="$PHASE_DIR/${PHASE_NUMBER}-changes.patch"
+# --- Determine output filename ---
+if [ -n "$SUFFIX" ]; then
+  PATCH_FILE="$PHASE_DIR/${PHASE_NUMBER}-${SUFFIX}.patch"
+else
+  PATCH_FILE="$PHASE_DIR/${PHASE_NUMBER}-changes.patch"
+fi
 
-# Use eval to properly handle the exclusion patterns
-eval "git diff \"$BASE_COMMIT\" HEAD -- . $EXCLUDE_ARGS" > "$PATCH_FILE"
+# --- Generate diff ---
+# For suffix mode: generate diff only for the specific commits
+# For standard mode: generate diff from base to HEAD
+if [ -n "$SUFFIX" ]; then
+  # Create combined diff from all matching commits
+  LATEST_COMMIT=$(echo "$PHASE_COMMITS" | head -1)
+  eval "git diff \"$BASE_COMMIT\" \"$LATEST_COMMIT\" -- . $EXCLUDE_ARGS" > "$PATCH_FILE"
+else
+  eval "git diff \"$BASE_COMMIT\" HEAD -- . $EXCLUDE_ARGS" > "$PATCH_FILE"
+fi
 
 # --- Check result ---
 if [ ! -s "$PATCH_FILE" ]; then

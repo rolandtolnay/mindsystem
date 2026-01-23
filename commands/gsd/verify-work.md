@@ -1,6 +1,6 @@
 ---
 name: gsd:verify-work
-description: Validate built features through batched UAT
+description: Validate built features through batched UAT with inline fixing
 argument-hint: "[phase number, e.g., '4']"
 allowed-tools:
   - Read
@@ -14,17 +14,18 @@ allowed-tools:
 ---
 
 <objective>
-Validate built features through batched testing with persistent state.
+Validate built features through batched testing with mock support and inline fixing.
 
-Purpose: Confirm what Claude built actually works from user's perspective. Tests presented in batches of 4 using AskUserQuestion. Optimized for the common case: most tests pass.
+Purpose: Confirm what Claude built actually works from user's perspective. Tests presented in batches of 4 using AskUserQuestion. Issues can be fixed inline during the same session — no context switching to separate plan/execute phases.
 
-Output: {phase}-UAT.md tracking all test results. If issues found: diagnosed gaps with root causes ready for /gsd:plan-phase --gaps. If tests skipped: assumptions logged for milestone audit.
+Output: {phase}-UAT.md tracking all test results. Fixes committed with `fix({phase}-uat):` prefix. Patch file generated for all UAT fixes.
 </objective>
 
 <execution_context>
 @~/.claude/get-shit-done/workflows/verify-work.md
+@~/.claude/get-shit-done/workflows/generate-mocks.md
 @~/.claude/get-shit-done/templates/UAT.md
-@~/.claude/get-shit-done/workflows/diagnose-issues.md
+@~/.claude/get-shit-done/references/mock-patterns.md
 </execution_context>
 
 <context>
@@ -34,45 +35,58 @@ Phase: $ARGUMENTS (optional)
 
 @.planning/STATE.md
 @.planning/ROADMAP.md
+@.planning/PROJECT.md
 </context>
 
 <process>
-1. Check for active UAT sessions (resume or start new)
-2. Find SUMMARY.md files for the phase
-3. Extract testable deliverables (user-observable outcomes)
-4. Create {phase}-UAT.md with test list
-5. Present tests in batches of 4 using AskUserQuestion:
-   - Options: Pass / Can't test / Skip / Other (for issues)
-   - "Pass" = verified, "Can't test" = blocked (re-test later)
-   - "Skip" = assumption (logged), "Other" = issue (severity inferred)
-6. Update UAT.md after each batch (checkpoint)
-7. On completion: commit, present summary
-8. If issues found:
-   - Spawn parallel debug agents to diagnose root causes
-   - Update UAT.md with diagnoses
-   - Update STATE.md with blockers
-   - Present next steps with `/gsd:plan-phase --gaps`
+1. **Check dirty tree** — If uncommitted changes, ask: stash / commit / abort
+2. **Check for active UAT sessions** — Resume or start new
+3. **Find SUMMARY.md files** for the phase
+4. **Extract testable deliverables** from summaries
+5. **Classify tests by mock requirements** — Infer mock_type from test descriptions
+6. **Group into batches** — By mock type, max 4 per batch, no-mock tests first
+7. **For each batch:**
+   - If mock needed: Generate mocks, present toggle instructions, wait for confirmation
+   - Present tests via AskUserQuestion (Pass / Can't test / Skip / Other)
+   - Process results, update UAT.md
+   - **For each issue found:**
+     - Lightweight investigation (2-3 tool calls)
+     - If simple: Fix inline, commit, ask for re-test
+     - If complex: Spawn gsd-verify-fixer subagent
+     - 2 retries on failed re-test, then offer options
+8. **On batch transition:**
+   - If new mock_type: Discard old mocks, generate new ones
+   - If same mock_type: Keep mocks active
+9. **On completion:**
+   - Discard all mocks (git stash drop)
+   - Generate UAT fixes patch
+   - Restore user's pre-existing work (if stashed)
+   - Commit UAT.md, present summary
 </process>
 
 <anti_patterns>
 - Don't ask severity — infer from description
-- Don't present more than 4 tests at a time — batch in groups of 4
+- Don't present more than 4 tests at a time
 - Don't run automated tests — this is manual user validation
-- Don't fix issues during testing — log as gaps, diagnose after all tests complete
-- Don't re-present skipped tests — assumptions stand until explicitly revisited
+- Don't skip investigation — always try 2-3 tool calls before escalating
+- Don't fix complex issues inline — spawn fixer subagent for multi-file or architectural changes
+- Don't commit mock code — always stash before fixing
+- Don't re-present skipped tests — assumptions stand
 </anti_patterns>
 
 <success_criteria>
-- [ ] UAT.md created with tests from SUMMARY.md
+- [ ] Dirty tree handled at start (stash/commit/abort)
+- [ ] Tests extracted from SUMMARY.md and classified
+- [ ] Tests batched by mock requirements
+- [ ] Mocks generated when needed with clear toggle instructions
 - [ ] Tests presented in batches of 4 using AskUserQuestion
-- [ ] Responses processed: pass/issue/blocked/skipped
-- [ ] Severity inferred, never asked
-- [ ] File written after each batch (checkpoint)
-- [ ] Blocked tests re-presented on subsequent runs
-- [ ] Skipped tests logged to Assumptions section
-- [ ] Committed on completion
-- [ ] If issues: parallel debug agents diagnose root causes
-- [ ] If issues: UAT.md updated with root_cause, artifacts, missing
-- [ ] If issues: STATE.md updated with phase blockers
-- [ ] Clear next steps: /gsd:plan-phase --gaps with diagnostic context
+- [ ] Issues investigated with lightweight check first
+- [ ] Simple issues fixed inline with proper commit message
+- [ ] Complex issues escalated to fixer subagent
+- [ ] Failed re-tests get 2 retries then options
+- [ ] Stash conflicts auto-resolved to fix version
+- [ ] Mocks discarded on completion
+- [ ] UAT fixes patch generated
+- [ ] User's pre-existing work restored
+- [ ] UAT.md committed with final summary
 </success_criteria>
