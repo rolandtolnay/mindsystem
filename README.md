@@ -27,17 +27,7 @@ npx mindsystem-cc
 
 <br>
 
-*"If you know clearly what you want, this WILL build it for you. No bs."*
-
-*"I've done SpecKit, OpenSpec and Taskmaster — this has produced the best results for me."*
-
-*"By far the most powerful addition to my Claude Code. Nothing over-engineered. Literally just gets shit done."*
-
-<br>
-
-**Trusted by engineers at Amazon, Google, Shopify, and Webflow.**
-
-[Why I Built This](#why-i-built-this) · [How It Works](#how-it-works) · [Commands](#commands) · [Why It Works](#why-it-works)
+[Why This Exists](#why-this-exists) · [How It Works](#how-it-works) · [Commands](#commands) · [Why It Works](#why-it-works)
 
 </div>
 
@@ -49,7 +39,18 @@ npx mindsystem-cc
 >
 > — **TÂCHES**, creator of the original [GSD](https://github.com/glittercowboy/get-shit-done)
 
-Mindsystem is a fork of GSD that shares this philosophy but diverges in approach.
+Mindsystem is a fork of GSD that shares this philosophy but serves a specific audience: **engineers who think in English**.
+
+You have programming experience. You understand architecture, trade-offs, and quality. But instead of writing code line-by-line, you describe intent and requirements — then let the system handle implementation while you make the critical decisions. Built-in quality checks (verification, simplification, patch review) ensure the output meets engineering standards.
+
+### Why This Fork
+
+The original GSD evolved toward a broader audience — vibe coders, multiple CLI tools, configurability options that add complexity without value. This fork stays focused:
+
+- **Claude Code only** — no abstraction layers for other tools
+- **Engineers, not beginners** — assumes you understand what you're building
+- **Quality over speed** — verification steps, patch generation for review, code simplification
+- **Opinionated defaults** — no "interactive vs yolo" choices, just balanced workflows that work
 
 ### Fork Philosophy
 
@@ -63,23 +64,13 @@ Mindsystem is a fork of GSD that shares this philosophy but diverges in approach
 
 ### What's New in This Fork
 
-**Design Phase System.** Full UI/UX specification workflow with `/ms:design-phase`. Dedicated designer agent creates DESIGN.md with ASCII wireframes, component specs, and UX flows. Includes mathematical validation — touch targets, spacing minimums, WCAG AA contrast checks — before implementation begins.
+**Quality Control Pipeline.** Every code change generates reviewable patch files. Verification steps run automatically after execution. Code simplification passes clean up implementation before committing. You stay in control of what ships.
 
-**ms-lookup Research CLI.** Python tool at `scripts/ms-lookup/` for library documentation (Context7) and deep research (Perplexity). Integrated into research workflows. Run standalone or let agents use it automatically.
+**Design Phase System.** Full UI/UX specification workflow with `/ms:design-phase`. Dedicated designer agent creates DESIGN.md with ASCII wireframes, component specs, and UX flows. Mathematical validation (touch targets, spacing, WCAG AA contrast) before implementation begins.
 
-**Enhanced Verification.** Mock support for isolated testing, batched UAT with grouped test presentation, and auto-diagnosis — when issues are found, parallel debug agents investigate root causes before you decide how to fix them.
+**Research CLI.** Python tool (`scripts/ms-lookup/`) for library documentation (Context7) and deep research (Perplexity). Integrated into workflows or run standalone.
 
----
-
-Vibecoding has a bad reputation. You describe what you want, AI generates code, and you get inconsistent garbage that falls apart at scale.
-
-Mindsystem fixes that. It's the context engineering layer that makes Claude Code reliable. Describe your idea, let the system extract everything it needs to know, and let Claude Code get to work.
-
----
-
-## Who This Is For
-
-People who want to describe what they want and have it built correctly — without pretending they're running a 50-person engineering org.
+**Enhanced Verification.** Mock support for isolated testing, batched UAT with grouped test presentation, auto-diagnosis — when issues are found, parallel debug agents investigate root causes before you decide how to fix.
 
 ---
 
@@ -186,6 +177,16 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 ---
 
 ## How It Works
+
+Not every feature needs every step. Match workflow depth to complexity:
+
+| Feature Complexity | Workflow |
+|--------------------|----------|
+| **Complex** (new domain, UI-heavy, unfamiliar tech) | discuss → design → research → plan → execute |
+| **Medium** (known patterns, external dependencies) | research → plan → execute |
+| **Simple** (clear requirements, familiar territory) | plan → execute |
+
+The full flow below shows all available steps. Skip what you don't need.
 
 ### 1. Start with an idea
 
@@ -473,18 +474,6 @@ If file reads fail with tilde paths (`~/.claude/...`), set `CLAUDE_CONFIG_DIR` b
 CLAUDE_CONFIG_DIR=/home/youruser/.claude npx mindsystem-cc --global
 ```
 This ensures absolute paths are used instead of `~` which may not expand correctly in containers.
-
----
-
-## Star History
-
-<a href="https://star-history.com/#rolandtolnay/mindsystem&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/mindsystem&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/mindsystem&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=rolandtolnay/mindsystem&type=Date" />
- </picture>
-</a>
 
 ---
 
