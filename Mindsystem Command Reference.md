@@ -1,4 +1,4 @@
-Mindsystem is a meta-prompting, context engineering, and spec-driven development system for Claude Code by TÂCHES.
+Mindsystem is a meta-prompting, context engineering, and spec-driven development system for Claude Code by Roland Tolnay. Based on [GSD](https://github.com/taches/gsd) by TÂCHES.
 
 **Solves context rot** — the quality degradation that happens as Claude fills its context window.
 

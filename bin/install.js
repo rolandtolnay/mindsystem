@@ -25,7 +25,8 @@ ${cyan}   ███╗   ███╗██╗███╗   ██╗███�
 
   Mindsystem ${dim}v${pkg.version}${reset}
   A meta-prompting, context engineering and spec-driven
-  development system for Claude Code by TÂCHES.
+  development system for Claude Code by Roland Tolnay.
+  Based on GSD by TÂCHES.
 `;
 
 // Parse args

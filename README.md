@@ -2,7 +2,9 @@
 
 # MINDSYSTEM
 
-**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by TÂCHES.**
+**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by Roland Tolnay.**
+
+*Based on [GSD](https://github.com/taches/gsd) by TÂCHES.*
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
@@ -41,19 +43,23 @@ npx mindsystem-cc
 
 ---
 
-## Why I Built This
+## Why This Exists
 
-I'm a solo developer. I don't write code — Claude Code does.
+> *"I'm a solo developer. I don't write code — Claude Code does. Other spec-driven development tools exist; BMAD, Speckit... But they all seem to make things way more complicated than they need to be. I'm not a 50-person software company. I don't want to play enterprise theater. I'm just a creative person trying to build great things that work."*
+>
+> — **TÂCHES**, creator of the original [GSD](https://github.com/taches/gsd)
 
-Other spec-driven development tools exist; BMAD, Speckit... But they all seem to make things way more complicated than they need to be (sprint ceremonies, story points, stakeholder syncs, retrospectives, Jira workflows) or lack real big picture understanding of what you're building. I'm not a 50-person software company. I don't want to play enterprise theater. I'm just a creative person trying to build great things that work.
+Mindsystem is a fork of GSD that shares this philosophy but diverges in approach.
 
-So I built Mindsystem. The complexity is in the system, not in your workflow. Behind the scenes: context engineering, XML prompt formatting, subagent orchestration, state management. What you see: a few commands that just work.
+### Fork Philosophy
 
-The system gives Claude everything it needs to do the work *and* verify it. I trust the workflow. It just does a good job.
+**Modularity over bundling.** Commands stay separated rather than unified into mega-flows. Each command has a clear purpose — you know exactly which to use without consulting documentation.
 
-That's what this is. No enterprise roleplay bullshit. Just an incredibly effective system for building cool stuff consistently using Claude Code.
+**Main context for collaboration.** Planning and interactive work stays in the main context rather than delegating to subagents. This preserves conversational iteration, your ability to question and redirect, and visibility into Claude's reasoning. Subagents handle autonomous execution, not collaborative thinking.
 
-— **TÂCHES**
+**User as collaborator.** You decide when to proceed, what to skip. Separate commands for research, requirements, planning, execution. No hidden delegation or background orchestration.
+
+**Script + prompt hybrid.** Deterministic logic lives in shell scripts, not natural language. Prompts handle reasoning and decisions; scripts handle mechanical operations.
 
 ---
 
@@ -464,11 +470,11 @@ This ensures absolute paths are used instead of `~` which may not expand correct
 
 ## Star History
 
-<a href="https://star-history.com/#rolandtolnay/gsd&Date">
+<a href="https://star-history.com/#rolandtolnay/mindsystem&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/gsd&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/gsd&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=rolandtolnay/gsd&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/mindsystem&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=rolandtolnay/mindsystem&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=rolandtolnay/mindsystem&type=Date" />
  </picture>
 </a>
 

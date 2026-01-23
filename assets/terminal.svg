@@ -51,7 +51,8 @@
     <!-- Title and subtitle -->
     <text class="text white" font-size="15" y="158">  Mindsystem <tspan class="dim">v1.0.1</tspan></text>
     <text class="text white" font-size="15" y="182">  A meta-prompting, context engineering and spec-driven</text>
-    <text class="text white" font-size="15" y="202">  development system for Claude Code by TÂCHES.</text>
+    <text class="text white" font-size="15" y="202">  development system for Claude Code by Roland Tolnay.</text>
+    <text class="text dim" font-size="13" y="222">  Based on GSD by TÂCHES.</text>
 
     <!-- Install output -->
     <text class="text" font-size="15" y="250"><tspan class="green">  ✓</tspan><tspan class="white"> Installed commands/ms</tspan></text>
