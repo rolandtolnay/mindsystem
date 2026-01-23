@@ -4,7 +4,7 @@
 
 **A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by Roland Tolnay.**
 
-*Based on [GSD](https://github.com/taches/gsd) by TÂCHES.*
+*Based on [GSD](https://github.com/glittercowboy/get-shit-done) by TÂCHES.*
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
@@ -47,7 +47,7 @@ npx mindsystem-cc
 
 > *"I'm a solo developer. I don't write code — Claude Code does. Other spec-driven development tools exist; BMAD, Speckit... But they all seem to make things way more complicated than they need to be. I'm not a 50-person software company. I don't want to play enterprise theater. I'm just a creative person trying to build great things that work."*
 >
-> — **TÂCHES**, creator of the original [GSD](https://github.com/taches/gsd)
+> — **TÂCHES**, creator of the original [GSD](https://github.com/glittercowboy/get-shit-done)
 
 Mindsystem is a fork of GSD that shares this philosophy but diverges in approach.
 

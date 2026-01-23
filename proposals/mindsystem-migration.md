@@ -387,7 +387,7 @@ Phase 10: NPM publish
 ```markdown
 ## Acknowledgments
 
-Mindsystem originated as a fork of [GSD (Get Shit Done)](https://github.com/taches/gsd)
+Mindsystem originated as a fork of [GSD (Get Shit Done)](https://github.com/glittercowboy/get-shit-done)
 by TÂCHES. While the projects have diverged significantly in philosophy and implementation,
 we acknowledge GSD's foundational contribution to AI-assisted development workflows.
 ```
