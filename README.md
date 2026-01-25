@@ -2,16 +2,14 @@
 
 # MINDSYSTEM
 
-**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code by Roland Tolnay.**
+**A lightweight, opinionated spec-driven development system for Claude Code.**
 
 *Based on [GSD](https://github.com/glittercowboy/get-shit-done) by TÂCHES.*
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
-[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
-[![npm downloads](https://img.shields.io/npm/dm/mindsystem-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/rolandtolnay/mindsystem?style=for-the-badge&logo=github&color=181717)](https://github.com/rolandtolnay/mindsystem)
+[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 <br>
 
@@ -19,7 +17,7 @@
 npx mindsystem-cc
 ```
 
-**Works on Mac, Windows, and Linux.**
+**Works on macOS, Windows, and Linux.**
 
 <br>
 
@@ -27,7 +25,7 @@ npx mindsystem-cc
 
 <br>
 
-[Why This Exists](#why-this-exists) · [How It Works](#how-it-works) · [Commands](#commands) · [Why It Works](#why-it-works)
+[Why](#why-this-exists) · [Install](#installation) · [Quickstart](#quickstart) · [Workflows](#common-workflows) · [Commands](#command-index) · [Troubleshooting](#troubleshooting--advanced)
 
 </div>
 
@@ -39,72 +37,45 @@ npx mindsystem-cc
 >
 > — **TÂCHES**, creator of the original [GSD](https://github.com/glittercowboy/get-shit-done)
 
-Mindsystem is a fork of GSD that shares this philosophy but serves a specific audience: **engineers who think in English**.
+Mindsystem is a fork of GSD that shares the same “keep it simple” philosophy, but is tuned for a specific audience: **Claude Code power users who prefer to design in plain English**.
 
-You have programming experience. You understand architecture, trade-offs, and quality. But instead of writing code line-by-line, you describe intent and requirements — then let the system handle implementation while you make the critical decisions. Built-in quality checks (verification, simplification, patch review) ensure the output meets engineering standards.
+You already understand architecture, trade-offs, and quality. Mindsystem focuses on turning your intent into stable outputs over long sessions: it externalizes project memory into files and pushes execution into fresh contexts so quality stays high.
 
-### Why This Fork
+## Philosophy
 
-The original GSD evolved toward a broader audience — vibe coders, multiple CLI tools, configurability options that add complexity without value. This fork stays focused:
+### Opinionated, modular commands
+Mindsystem avoids mega-flows. Commands stay small, explicit, and composable — you pick the depth you need for this task (quick fix vs. new feature vs. UI-heavy system).
 
-- **Claude Code only** — no abstraction layers for other tools
-- **Engineers, not beginners** — assumes you understand what you're building
-- **Quality over speed** — verification steps, patch generation for review, code simplification
-- **Opinionated defaults** — no "interactive vs yolo" choices, just balanced workflows that work
+### Collaboration stays in the main chat
+Planning and back-and-forth happen with you. Subagents are for autonomous execution, not for hiding key decisions or reasoning.
 
-### Fork Philosophy
+### Scripts for mechanics, prompts for judgment
+Deterministic chores live in scripts; language models do what they’re good at: interpreting intent, making trade-offs, and writing code you can review.
 
-**Modularity over bundling.** Commands stay separated rather than unified into mega-flows. Each command has a clear purpose — you know exactly which to use without consulting documentation.
+## What’s New (Fork Highlights)
 
-**Main context for collaboration.** Planning and interactive work stays in the main context rather than delegating to subagents. This preserves conversational iteration, your ability to question and redirect, and visibility into Claude's reasoning. Subagents handle autonomous execution, not collaborative thinking.
-
-**User as collaborator.** You decide when to proceed, what to skip. Separate commands for research, requirements, planning, execution. No hidden delegation or background orchestration.
-
-**Script + prompt hybrid.** Deterministic logic lives in shell scripts, not natural language. Prompts handle reasoning and decisions; scripts handle mechanical operations.
-
-### What's New in This Fork
-
-**Quality Control Pipeline.** Every code change generates reviewable patch files. Verification steps run automatically after execution. Code simplification passes clean up implementation before committing. You stay in control of what ships.
-
-**Design Phase System.** Full UI/UX specification workflow with `/ms:design-phase`. Dedicated designer agent creates DESIGN.md with ASCII wireframes, component specs, and UX flows. Mathematical validation (touch targets, spacing, WCAG AA contrast) before implementation begins.
-
-**Research CLI.** Python tool (`scripts/ms-lookup/`) for library documentation (Context7) and deep research (Perplexity). Integrated into workflows or run standalone.
-
-**Enhanced Verification.** Mock support for isolated testing, batched UAT with grouped test presentation, auto-diagnosis — when issues are found, parallel debug agents investigate root causes before you decide how to fix.
+- **Quality-control pipeline**: execution produces reviewable artifacts and verification steps.
+- **Design phase**: `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation.
+- **Research tooling**: `scripts/ms-lookup/` can be used standalone or inside workflows.
+- **Enhanced verification**: better UAT batching and debugging support when gaps are found.
 
 ---
 
-## Getting Started
+## Installation
 
 ```bash
 npx mindsystem-cc
 ```
 
-That's it. Verify with `/ms:help` inside your Claude Code interface.
+This installs Mindsystem slash commands into `~/.claude/` (global) or `./.claude/` (local).
 
-### Start Here
-
-- If you already have `.planning/` in this repo: run `/ms:progress`.
-- If you’re starting in an existing codebase (brownfield): run `/ms:map-codebase`, then `/ms:new-project`.
-- Otherwise: run `/ms:new-project`.
-
-### Staying Updated
-
-Mindsystem evolves fast. Check for updates periodically:
+After install, restart Claude Code (so it reloads slash commands) and verify with:
 
 ```
-/ms:whats-new       # See what changed since your version
-/ms:update          # Update and show changelog
+/ms:help
 ```
 
-Or update directly via npm:
-
-```bash
-npx mindsystem-cc@latest
-```
-
-<details>
-<summary><strong>Non-interactive Install (Docker, CI, Scripts)</strong></summary>
+### Non-interactive install (Docker, CI, scripts)
 
 ```bash
 npx mindsystem-cc --global   # Install to ~/.claude/
@@ -113,38 +84,210 @@ npx mindsystem-cc --local    # Install to ./.claude/
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the interactive prompt.
 
-</details>
+### Staying updated
 
-<details>
-<summary><strong>Development Installation</strong></summary>
+Inside Claude Code:
+
+```
+/ms:whats-new
+/ms:update
+```
+
+Or via npm:
+
+```bash
+npx mindsystem-cc@latest
+```
+
+### Development installation
 
 Clone the repository and run the installer locally:
 
 ```bash
 git clone https://github.com/rolandtolnay/mindsystem.git
-cd gsd
+cd mindsystem
 node bin/install.js --local
 ```
 
 Installs to `./.claude/` for testing modifications before contributing.
 
-</details>
+---
 
-### Recommended: Skip Permissions Mode
+## Quickstart
 
-Mindsystem is designed for frictionless automation. Run Claude Code with:
+### New project (greenfield MVP)
 
-```bash
-claude --dangerously-skip-permissions
+```
+/ms:new-project
+/ms:define-requirements
+/ms:create-roadmap
+/ms:plan-phase 1
+/ms:execute-phase 1
 ```
 
-> [!TIP]
-> This is how Mindsystem is intended to be used — stopping to approve `date` and `git commit` 50 times defeats the purpose.
+Optional (recommended when the domain/stack is unfamiliar):
+
+```
+/ms:research-project
+```
+
+### Existing project (brownfield)
+
+```
+/ms:map-codebase
+/ms:new-project
+/ms:define-requirements
+/ms:create-roadmap
+/ms:plan-phase 1
+/ms:execute-phase 1
+```
+
+`/ms:map-codebase` is the “adoption” step: it teaches Mindsystem your repo’s conventions, structure, and testing patterns so plans land in the right places.
+
+---
+
+## Common Workflows
+
+Replace `<N>` with the phase you’re working on (usually `1` when you’re starting).
+
+### 1) Ship an MVP (fast, structured)
+
+```
+/ms:new-project
+/ms:define-requirements
+/ms:create-roadmap
+/ms:plan-phase 1
+/ms:execute-phase 1
+```
+
+Use when you already know the shape of the product and want momentum with guardrails (planning + verification).
+
+### 2) Add a feature to an existing codebase
+
+```
+/ms:map-codebase
+/ms:new-project
+/ms:discuss-phase <N>
+/ms:plan-phase <N>
+/ms:execute-phase <N>
+```
+
+Use `/ms:discuss-phase` when you have strong opinions about UX/behavior and want them captured before planning.
+
+### 3) Fix a bug / hotfix with traceability
+
+```
+/ms:debug "Describe the bug and what you observed"
+/ms:insert-phase <after> "Hotfix: <short description>"
+/ms:plan-phase <N>
+/ms:execute-phase <N>
+```
+
+If execution verifies with gaps:
+
+```
+/ms:plan-phase <N> --gaps
+/ms:execute-phase <N>
+```
+
+### 4) Complex UI/UX feature (design first)
+
+```
+/ms:discuss-phase <N>
+/ms:design-phase <N>
+/ms:plan-phase <N>
+/ms:execute-phase <N>
+```
+
+Use when the UI is the product (new interaction patterns, multiple screens, hard edge cases). Design is optional; this is the “pay the thinking cost up front” path.
+
+### 5) Milestone-driven iteration in an existing product
+
+```
+/ms:audit-milestone 1.0.0
+/ms:complete-milestone 1.0.0
+/ms:new-milestone "v1.1"
+/ms:add-phase "Next feature"
+```
+
+Use when you’re shipping continuously: audit what’s “actually done”, archive cleanly, then start the next milestone with explicit phases.
+
+---
+
+## Appendix: How Mindsystem Works (High-Level)
+
+### Context rot → external memory
+Long Claude Code sessions degrade. Mindsystem pushes project “truth” into files that persist across sessions (vision, requirements, roadmap, state, plans), so you’re not relying on chat history as the only source of reality.
+
+### Fresh contexts for execution
+Planning and discussion happen with you; execution happens in fresh subagent contexts, so implementation doesn’t inherit the accumulated noise of a long conversation.
+
+### File-based artifacts you can inspect
+Mindsystem is designed to leave a trail: project docs, phase plans, and execution summaries. These become the stable backbone Claude can reload later.
+
+If you want the authoritative, up-to-date guide, run `/ms:help` inside Claude Code (or read `commands/ms/help.md`).
+
+---
+
+## Command Index
+
+| Command | What it does |
+|--------:|--------------|
+| `/ms:add-phase <desc>` | Append a phase to the roadmap. |
+| `/ms:add-todo [desc]` | Capture an idea/task for later. |
+| `/ms:audit-milestone [version]` | Audit milestone completion before archiving. |
+| `/ms:check-phase <N>` | Verify phase plans before execution (optional). |
+| `/ms:check-todos [area]` | List pending todos and pick one to work on. |
+| `/ms:complete-milestone <version>` | Archive the milestone and prep the next version. |
+| `/ms:create-roadmap` | Create roadmap phases and persistent state tracking. |
+| `/ms:debug [desc]` | Run a systematic debugging workflow with persistent state. |
+| `/ms:define-requirements` | Scope v1/v2/out-of-scope requirements with checkboxes. |
+| `/ms:design-phase <N>` | Produce a UI/UX design spec for a phase. |
+| `/ms:discuss-milestone` | Gather context for the next milestone. |
+| `/ms:discuss-phase <N>` | Gather context before planning a phase. |
+| `/ms:do-work <desc>` | Execute small discovered work (kept intentionally small). |
+| `/ms:execute-phase <N>` | Execute all plans in a phase (parallel, checkpointed). |
+| `/ms:help` | Show the full command reference and usage guide. |
+| `/ms:insert-phase <after> <desc>` | Insert urgent work between phases (renumbers). |
+| `/ms:list-phase-assumptions <N>` | Show what Claude assumes before planning/execution. |
+| `/ms:map-codebase` | Analyze an existing repo and capture conventions + structure. |
+| `/ms:new-milestone [name]` | Create a new milestone with phases. |
+| `/ms:new-project` | Initialize `.planning/` and capture project intent. |
+| `/ms:pause-work` | Create a handoff file when stopping mid-phase. |
+| `/ms:plan-milestone-gaps` | Create phases to close gaps from a milestone audit. |
+| `/ms:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close gaps). |
+| `/ms:progress` | Show where you are and what’s next. |
+| `/ms:remove-phase <N>` | Remove a future phase and renumber subsequent phases. |
+| `/ms:research-phase <N>` | Deep research for unfamiliar or niche phase domains. |
+| `/ms:research-project` | Research the overall domain ecosystem (optional). |
+| `/ms:resume-work` | Restore from the last paused session. |
+| `/ms:review-design [scope]` | Audit and improve design quality of implemented features. |
+| `/ms:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity. |
+| `/ms:update` | Update Mindsystem and show the changelog. |
+| `/ms:verify-work [N]` | User acceptance test of a phase or a plan. |
+| `/ms:whats-new` | See what changed since your installed version. |
+
+---
+
+## Troubleshooting & Advanced
+
+**Commands not found after install?**
+- Restart Claude Code to reload slash commands.
+- Verify files exist in `~/.claude/commands/ms/` (global) or `./.claude/commands/ms/` (local).
+
+**Commands not working as expected?**
+- Run `/ms:help` to verify installation.
+- Re-run `npx mindsystem-cc` to reinstall.
+
+**Updating to the latest version?**
+```bash
+npx mindsystem-cc@latest
+```
 
 <details>
-<summary><strong>Alternative: Granular Permissions</strong></summary>
+<summary><strong>Claude Code permissions (optional)</strong></summary>
 
-If you prefer not to use that flag, add this to your project's `.claude/settings.json`:
+If you use Claude Code’s permissions allowlist, you can add a small set of shell commands Mindsystem commonly needs. Example:
 
 ```json
 {
@@ -173,299 +316,6 @@ If you prefer not to use that flag, add this to your project's `.claude/settings
 ```
 
 </details>
-
----
-
-## How It Works
-
-Not every feature needs every step. Match workflow depth to complexity:
-
-| Feature Complexity | Workflow |
-|--------------------|----------|
-| **Complex** (new domain, UI-heavy, unfamiliar tech) | discuss → design → research → plan → execute |
-| **Medium** (known patterns, external dependencies) | research → plan → execute |
-| **Simple** (clear requirements, familiar territory) | plan → execute |
-
-The full flow below shows all available steps. Skip what you don't need.
-
-### 1. Start with an idea
-
-```
-/ms:new-project
-```
-
-The system asks questions. Keeps asking until it has everything — your goals, constraints, tech preferences, edge cases. You go back and forth until the idea is fully captured. Creates **PROJECT.md**.
-
-### 1.5. Research the domain (optional)
-
-```
-/ms:research-project
-```
-
-Spawns parallel agents to investigate the domain — what's the standard stack, what features users expect, common architectural patterns, and pitfalls to avoid. Creates `.planning/research/` with ecosystem knowledge.
-
-> Recommended for best results. Skip only if you need speed over thoroughness.
-
-### 2. Define requirements
-
-```
-/ms:define-requirements
-```
-
-Scope what's v1, what's v2, and what's out of scope. Creates **REQUIREMENTS.md** with checkable requirements and traceability. Works with or without prior research.
-
-### 3. Create roadmap
-
-```
-/ms:create-roadmap
-```
-
-Produces:
-- **ROADMAP.md** — Phases from start to finish, mapped to requirements
-- **STATE.md** — Living memory that persists across sessions
-
-### 4. Plan and execute phases
-
-```
-/ms:plan-phase 1      # System creates atomic task plans
-/ms:execute-phase 1   # Parallel agents execute all plans (includes verification)
-```
-
-Each phase breaks into 2-3 task plans. Each plan runs in a fresh subagent context — 200k tokens purely for implementation, zero degradation. Plans without dependencies run in parallel.
-
-Checkpoints and resumption are handled automatically — if interrupted, run `/ms:execute-phase 1` again and it picks up where it left off.
-
-If a phase verifies with gaps, close them with:
-
-```
-/ms:plan-phase 1 --gaps
-/ms:execute-phase 1
-```
-
-### 5. Ship and iterate
-
-```
-/ms:audit-milestone 1.0.0        # (recommended) verify milestone before archiving
-/ms:complete-milestone 1.0.0     # Archive v1, prep for v2
-/ms:add-phase "Add admin dashboard"
-/ms:insert-phase 2 "Fix critical auth bug"
-```
-
-Ship your MVP in a day. Add features. Insert hotfixes. The system stays modular — you're never stuck.
-
----
-
-## Existing Projects (Brownfield)
-
-Already have code? Start here instead.
-
-### 1. Map the codebase
-
-```
-/ms:map-codebase
-```
-
-Spawns parallel agents to analyze your code. Creates `.planning/codebase/` with 7 documents:
-
-| Document | Purpose |
-|----------|---------|
-| `STACK.md` | Languages, frameworks, dependencies |
-| `ARCHITECTURE.md` | Patterns, layers, data flow |
-| `STRUCTURE.md` | Directory layout, where things live |
-| `CONVENTIONS.md` | Code style, naming patterns |
-| `TESTING.md` | Test framework, patterns |
-| `INTEGRATIONS.md` | External services, APIs |
-| `CONCERNS.md` | Tech debt, known issues, fragile areas |
-
-### 2. Initialize project
-
-```
-/ms:new-project
-```
-
-Same as greenfield, but the system knows your codebase. Questions focus on what you're adding/changing, not starting from scratch.
-
-### 3. Continue as normal
-
-From here, it's the same flow:
-- `/ms:research-project` (optional) → `/ms:define-requirements` → `/ms:create-roadmap` → `/ms:plan-phase` → `/ms:execute-phase <phase>`
-
-The codebase docs load automatically during planning. Claude knows your patterns, conventions, and where to put things.
-
----
-
-## Why It Works
-
-### Context Engineering
-
-Claude Code is incredibly powerful *if* you give it the context it needs. Most people don't.
-
-Mindsystem handles it for you:
-
-| File | What it does |
-|------|--------------|
-| `PROJECT.md` | Project vision, always loaded |
-| `research/` | Ecosystem knowledge (stack, features, architecture, pitfalls) |
-| `REQUIREMENTS.md` | Scoped v1/v2 requirements with phase traceability |
-| `ROADMAP.md` | Where you're going, what's done |
-| `STATE.md` | Decisions, blockers, position — memory across sessions |
-| `PLAN.md` | Atomic task with XML structure, verification steps |
-| `SUMMARY.md` | What happened, what changed, committed to history |
-| `todos/` | Captured ideas and tasks for later work |
-| `adhoc/` | Small work executed mid-session with audit trail |
-
-Size limits based on where Claude's quality degrades. Stay under, get consistent excellence.
-
-### XML Prompt Formatting
-
-Every plan is structured XML optimized for Claude:
-
-```xml
-<task type="auto">
-  <name>Create login endpoint</name>
-  <files>src/app/api/auth/login/route.ts</files>
-  <action>
-    Use jose for JWT (not jsonwebtoken - CommonJS issues).
-    Validate credentials against users table.
-    Return httpOnly cookie on success.
-  </action>
-  <verify>curl -X POST localhost:3000/api/auth/login returns 200 + Set-Cookie</verify>
-  <done>Valid credentials return cookie, invalid return 401</done>
-</task>
-```
-
-Precise instructions. No guessing. Verification built in.
-
-### Subagent Execution
-
-As Claude fills its context window, quality degrades. You've seen it: *"Due to context limits, I'll be more concise now."* That "concision" is code for cutting corners.
-
-Mindsystem prevents this. Each plan is maximum 3 tasks. Each plan runs in a fresh subagent — 200k tokens purely for implementation, zero accumulated garbage.
-
-| Task | Context | Quality |
-|------|---------|---------|
-| Task 1 | Fresh | ✅ Full |
-| Task 2 | Fresh | ✅ Full |
-| Task 3 | Fresh | ✅ Full |
-
-No degradation. Walk away, come back to completed work.
-
-### Atomic Git Commits
-
-Each task gets its own commit immediately after completion:
-
-```bash
-abc123f docs(08-02): complete user registration plan
-def456g feat(08-02): add email confirmation flow
-hij789k feat(08-02): implement password hashing
-lmn012o feat(08-02): create registration endpoint
-```
-
-> [!NOTE]
-> **Benefits:** Git bisect finds exact failing task. Each task independently revertable. Clear history for Claude in future sessions. Better observability in AI-automated workflow.
-
-Every commit is surgical, traceable, and meaningful.
-
-### Modular by Design
-
-- Add phases to current milestone
-- Insert urgent work between phases
-- Complete milestones and start fresh
-- Adjust plans without rebuilding everything
-
-You're never locked in. The system adapts.
-
----
-
-## Commands
-
-For full details and up-to-date usage, run `/ms:help` inside Claude Code (or read `commands/ms/help.md`).
-
-### Setup
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:new-project` | Extract your idea through questions, create PROJECT.md |
-| `/ms:research-project` | Research domain ecosystem (stacks, features, pitfalls) |
-| `/ms:define-requirements` | Scope v1/v2/out-of-scope with checkable requirements |
-| `/ms:create-roadmap` | Create roadmap with phases mapped to requirements |
-| `/ms:map-codebase` | Map existing codebase for brownfield projects |
-
-### Execution
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close verification gaps) |
-| `/ms:execute-phase <N>` | Execute all plans in phase (parallel, handles checkpoints) |
-| `/ms:progress` | Where am I? What's next? |
-
-### Verification
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:check-phase <N>` | Verify phase plans before execution (optional) |
-| `/ms:verify-work [N]` | User acceptance test of phase or plan ¹ |
-| `/ms:audit-milestone [version]` | Audit milestone completion before archiving |
-
-### Milestones
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:complete-milestone <version>` | Ship it, prep next version |
-| `/ms:discuss-milestone` | Gather context for next milestone |
-| `/ms:new-milestone [name]` | Create new milestone with phases |
-| `/ms:plan-milestone-gaps` | Create phases to close gaps from audit |
-
-### Phase Management
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:add-phase <desc>` | Append phase to roadmap |
-| `/ms:insert-phase <after> <desc>` | Insert urgent work between phases |
-| `/ms:remove-phase <N>` | Remove future phase, renumber subsequent |
-| `/ms:discuss-phase <N>` | Gather context before planning |
-| `/ms:research-phase <N>` | Deep research for unfamiliar domains |
-| `/ms:list-phase-assumptions <N>` | See what Claude assumes before correcting |
-
-### Session
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:pause-work` | Create handoff file when stopping mid-phase |
-| `/ms:resume-work` | Restore from last session |
-
-### Utilities
-
-| Command | What it does |
-|---------|--------------|
-| `/ms:add-todo [desc]` | Capture idea or task for later |
-| `/ms:check-todos [area]` | List pending todos, select one to work on |
-| `/ms:do-work <desc>` | Execute small discovered work (max 2 tasks) |
-| `/ms:debug [desc]` | Systematic debugging with persistent state |
-| `/ms:review-design [scope]` | Audit and improve design of implemented features |
-| `/ms:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity and maintainability |
-| `/ms:help` | Show all commands and usage guide |
-| `/ms:update` | Update Mindsystem with changelog display |
-| `/ms:whats-new` | See what changed since installed version |
-
-<sup>¹ Contributed by reddit user OracleGreyBeard</sup>
-
----
-
-## Troubleshooting
-
-**Commands not found after install?**
-- Restart Claude Code to reload slash commands
-- Verify files exist in `~/.claude/commands/ms/` (global) or `./.claude/commands/ms/` (local)
-
-**Commands not working as expected?**
-- Run `/ms:help` to verify installation
-- Re-run `npx mindsystem-cc` to reinstall
-
-**Updating to the latest version?**
-```bash
-npx mindsystem-cc@latest
-```
 
 **Using Docker or containerized environments?**
 
