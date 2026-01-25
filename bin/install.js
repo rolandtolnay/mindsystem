@@ -5,8 +5,8 @@ const path = require('path');
 const os = require('os');
 const readline = require('readline');
 
-// Colors
-const cyan = '\x1b[38;2;47;167;160m'; // #2FA7A0
+// Colors (using 256-color mode for better terminal compatibility)
+const cyan = '\x1b[38;5;37m'; // Closest to #2FA7A0 in 256-color palette
 const green = '\x1b[32m';
 const yellow = '\x1b[33m';
 const dim = '\x1b[2m';

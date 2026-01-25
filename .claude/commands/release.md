@@ -1,6 +1,6 @@
 ---
 name: release
-description: Auto-version based on commits, update changelog, tag, and push release
+description: Auto-version based on commits, update changelog, tag, push, and publish to npm
 arguments: "[major|minor|patch|X.Y.Z]"
 allowed-tools:
   - Read
@@ -12,7 +12,7 @@ allowed-tools:
 ---
 
 <objective>
-Analyze changes since last release, determine version bump (or use explicit version), update CHANGELOG.md, create release commits, tag the version, and push to remote.
+Analyze changes since last release, determine version bump (or use explicit version), update CHANGELOG.md, create release commits, tag the version, push to remote, and publish to npm.
 
 **SemVer rules applied:**
 - `major` — Breaking changes (BREAKING CHANGE in commit, or explicit)
@@ -185,6 +185,16 @@ git push origin "v$VERSION"
 ```
 </step>
 
+<step name="publish_to_npm">
+Publish the package to npm:
+
+```bash
+npm publish
+```
+
+If publish fails due to authentication, inform the user they need to run `npm login` first.
+</step>
+
 <step name="show_summary">
 Display release summary:
 
@@ -194,7 +204,7 @@ echo ""
 git log --oneline $(git describe --tags --abbrev=0~1 2>/dev/null || echo "HEAD~5")..HEAD
 echo ""
 echo "Tag: v$VERSION"
-echo "To publish: npm publish"
+echo "Published to npm: https://www.npmjs.com/package/mindsystem-cc"
 ```
 </step>
 
