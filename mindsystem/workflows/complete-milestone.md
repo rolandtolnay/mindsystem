@@ -90,8 +90,6 @@ cat .planning/config.json 2>/dev/null
 
 </config-check>
 
-<if mode="yolo">
-
 ```
 ⚡ Auto-approved: Milestone scope verification
 
@@ -101,22 +99,6 @@ Proceeding to stats gathering...
 ```
 
 Proceed directly to gather_stats step.
-
-</if>
-
-<if mode="interactive" OR="custom with gates.confirm_milestone_scope true">
-
-```
-Ready to mark this milestone as shipped?
-(yes / wait / adjust scope)
-```
-
-Wait for confirmation.
-
-If "adjust scope": Ask which phases should be included.
-If "wait": Stop, user will return when ready.
-
-</if>
 
 </step>
 

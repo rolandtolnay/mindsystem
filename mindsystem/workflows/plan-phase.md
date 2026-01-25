@@ -629,46 +629,7 @@ See ~/.claude/mindsystem/references/scope-estimation.md for complete guidance.
 </step>
 
 <step name="confirm_breakdown">
-<if mode="yolo">
 Auto-approve and proceed to write_phase_prompt.
-</if>
-
-<if mode="interactive">
-Present breakdown with wave structure:
-
-```
-Phase [X] breakdown:
-
-## Execution Waves
-
-**Wave 1 (parallel):**
-  {phase}-01: [Plan Name] [autonomous]
-    - Task: [brief]
-    - Task: [brief]
-
-  {phase}-02: [Plan Name] [autonomous]
-    - Task: [brief]
-    - Task: [brief]
-
-**Wave 2 (parallel):**
-  {phase}-03: [Plan Name] (depends: 01, 02) [autonomous]
-    - Task: [brief]
-
-**Wave 3:**
-  {phase}-04: [Plan Name] (depends: 03) [has checkpoint]
-    - Task: [brief]
-    - Checkpoint: [type]
-
----
-Total: [N] plans in [M] waves
-Parallel plans: [X]
-Sequential plans: [Y]
-
-Does this look right? (yes / adjust / start over)
-```
-
-Wait for confirmation. If "adjust": revise. If "start over": return to gather_phase_context.
-</if>
 </step>
 
 <step name="write_phase_prompt">

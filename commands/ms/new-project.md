@@ -217,28 +217,19 @@ Do not compress. Capture everything gathered.
 
 <step name="workflow_preferences">
 
-Ask all workflow preferences in a single AskUserQuestion call (3 questions):
+Ask workflow preferences in a single AskUserQuestion call (2 questions):
 
 Use AskUserQuestion with questions array:
 
 ```
 questions: [
   {
-    header: "Mode",
-    question: "How do you want to work?",
-    multiSelect: false,
-    options: [
-      { label: "YOLO (Recommended)", description: "Auto-approve, just execute" },
-      { label: "Interactive", description: "Confirm at each step" }
-    ]
-  },
-  {
     header: "Depth",
     question: "How thorough should planning be?",
     multiSelect: false,
     options: [
       { label: "Quick", description: "Ship fast (3-5 phases, 1-3 plans each)" },
-      { label: "Standard", description: "Balanced scope and speed (5-8 phases, 3-5 plans each)" },
+      { label: "Standard (Recommended)", description: "Balanced scope and speed (5-8 phases, 3-5 plans each)" },
       { label: "Comprehensive", description: "Thorough coverage (8-12 phases, 5-10 plans each)" }
     ]
   },
@@ -263,7 +254,7 @@ questions: [
 
 <step name="config">
 
-Create `.planning/config.json` with chosen mode, depth, and parallelization using `templates/config.json` structure.
+Create `.planning/config.json` with chosen depth and parallelization using `templates/config.json` structure.
 
 </step>
 
@@ -291,7 +282,7 @@ Present completion with next steps (see ~/.claude/mindsystem/references/continua
 Project initialized:
 
 - Project: .planning/PROJECT.md
-- Config: .planning/config.json (mode: [chosen mode])
+- Config: .planning/config.json
 [If .planning/codebase/ exists:] - Codebase: .planning/codebase/ (7 documents)
 
 ---
@@ -332,7 +323,7 @@ Skip research, define requirements from what you know, then create roadmap.
 - [ ] PROJECT.md captures full context with evolutionary structure
 - [ ] Requirements initialized as hypotheses (greenfield) or with inferred Validated (brownfield)
 - [ ] Key Decisions table initialized
-- [ ] config.json has workflow mode, depth, and parallelization
+- [ ] config.json has depth and parallelization settings
 - [ ] All committed to git
 
 </success_criteria>

@@ -60,8 +60,6 @@ cat .planning/config.json 2>/dev/null
 
 **If all plans complete:**
 
-<if mode="yolo">
-
 ```
 ⚡ Auto-approved: Transition Phase [X] → Phase [X+1]
 Phase [X] complete — all [Y] plans finished.
@@ -70,16 +68,6 @@ Proceeding to mark done and advance...
 ```
 
 Proceed directly to cleanup_handoff step.
-
-</if>
-
-<if mode="interactive" OR="custom with gates.confirm_transition true">
-
-Ask: "Phase [X] complete — all [Y] plans finished. Ready to mark done and move to Phase [X+1]?"
-
-Wait for confirmation before proceeding.
-
-</if>
 
 **If plans incomplete:**
 
@@ -409,8 +397,6 @@ Read ROADMAP.md to get the next phase's name and goal.
 
 **If next phase exists:**
 
-<if mode="yolo">
-
 ```
 Phase [X] marked complete.
 
@@ -421,40 +407,9 @@ Next: Phase [X+1] — [Name]
 
 Exit skill and invoke SlashCommand("/ms:plan-phase [X+1]")
 
-</if>
-
-<if mode="interactive" OR="custom with gates.confirm_transition true">
-
-```
-## ✓ Phase [X] Complete
-
----
-
-## ▶ Next Up
-
-**Phase [X+1]: [Name]** — [Goal from ROADMAP.md]
-
-`/ms:plan-phase [X+1]`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:discuss-phase [X+1]` — gather context first
-- `/ms:research-phase [X+1]` — investigate unknowns
-- Review roadmap
-
----
-```
-
-</if>
-
 ---
 
 **Route B: Milestone complete (all phases done)**
-
-<if mode="yolo">
 
 ```
 Phase {X} marked complete.
@@ -465,35 +420,6 @@ Phase {X} marked complete.
 ```
 
 Exit skill and invoke SlashCommand("/ms:complete-milestone {version}")
-
-</if>
-
-<if mode="interactive" OR="custom with gates.confirm_transition true">
-
-```
-## ✓ Phase {X}: {Phase Name} Complete
-
-🎉 Milestone {version} is 100% complete — all {N} phases finished!
-
----
-
-## ▶ Next Up
-
-**Complete Milestone {version}** — archive and prepare for next
-
-`/ms:complete-milestone {version}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- Review accomplishments before archiving
-
----
-```
-
-</if>
 
 </step>
 

@@ -115,9 +115,8 @@ Verify with `/ms:help` inside Claude Code. Update with `/ms:update` or `npx mind
 
 Initialize new project with brief and configuration.
 
-- Use when: you want GSD to set up `.planning/` and capture intent (new repo, or an existing repo where you’re adding/changing work).
+- Use when: you want GSD to set up `.planning/` and capture intent (new repo, or an existing repo where you're adding/changing work).
 - Asks questions until it understands your idea completely (goals, constraints, tech preferences, edge cases)
-- Asks for workflow mode (interactive/yolo) upfront
 - Creates `.planning/PROJECT.md` and `.planning/config.json`
 - Commits initialization files to git
 
@@ -466,24 +465,6 @@ Update Mindsystem to latest version with changelog display.
 
 ---
 
-## Workflow Modes
-
-Set during `/ms:new-project`:
-
-**Interactive Mode**
-- Confirms each major decision
-- Pauses at checkpoints for approval
-- More guidance throughout
-
-**YOLO Mode**
-- Auto-approves most decisions
-- Executes plans without confirmation
-- Only stops for critical checkpoints
-
-Change anytime by editing `.planning/config.json`
-
----
-
 ## Why It Works
 
 ### Context Engineering
@@ -536,7 +517,7 @@ Git bisect finds exact failing task. Each task independently revertable.
 ├── REQUIREMENTS.md       # Scoped v1/v2 requirements
 ├── ROADMAP.md            # Current phase breakdown
 ├── STATE.md              # Project memory & context
-├── config.json           # Workflow mode & gates
+├── config.json           # Workflow settings
 ├── research/             # Domain ecosystem research
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on

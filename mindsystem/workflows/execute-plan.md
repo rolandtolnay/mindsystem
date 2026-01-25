@@ -83,7 +83,6 @@ cat .planning/config.json 2>/dev/null
 ```
 </config-check>
 
-<if mode="yolo">
 ```
 ⚡ Auto-approved: Execute {phase}-{plan}-PLAN.md
 [Plan X of Y for Phase Z]
@@ -92,20 +91,6 @@ Starting execution...
 ```
 
 Proceed directly to parse_segments step.
-</if>
-
-<if mode="interactive" OR="custom with gates.execute_next_plan true">
-Present:
-
-```
-Found plan to execute: {phase}-{plan}-PLAN.md
-[Plan X of Y for Phase Z]
-
-Proceed with execution?
-```
-
-Wait for confirmation before proceeding.
-</if>
 </step>
 
 <step name="record_start_time">
@@ -1465,21 +1450,15 @@ Before proceeding, check SUMMARY.md content.
 
 If "Issues Encountered" is NOT "None":
 
-<if mode="yolo">
 ```
 ⚡ Auto-approved: Issues acknowledgment
 ⚠️ Note: Issues were encountered during execution:
 - [Issue 1]
 - [Issue 2]
-(Logged - continuing in yolo mode)
+(Logged - continuing)
 ```
 
 Continue without waiting.
-</if>
-
-<if mode="interactive" OR="custom with gates.issues_review true">
-Present issues and wait for acknowledgment before proceeding.
-</if>
 </step>
 
 <step name="update_roadmap">
@@ -1670,7 +1649,6 @@ Identify the next unexecuted plan:
 - Find the first PLAN.md file that has no matching SUMMARY.md
 - Read its `<objective>` section
 
-<if mode="yolo">
 ```
 Plan {phase}-{plan} complete.
 Summary: .planning/phases/{phase-dir}/{phase}-{plan}-SUMMARY.md
@@ -1681,36 +1659,6 @@ Summary: .planning/phases/{phase-dir}/{phase}-{plan}-SUMMARY.md
 ```
 
 Loop back to identify_plan step automatically.
-</if>
-
-<if mode="interactive" OR="custom with gates.execute_next_plan true">
-```
-Plan {phase}-{plan} complete.
-Summary: .planning/phases/{phase-dir}/{phase}-{plan}-SUMMARY.md
-
-{Y} of {X} plans complete for Phase {Z}.
-
----
-
-## ▶ Next Up
-
-**Phase {X}: [Phase Name]** — [goal from ROADMAP.md]
-
-`/ms:execute-phase {phase-number}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:verify-work {phase}` — manual acceptance testing before continuing
-- Review what was built before continuing
-
----
-```
-
-Wait for user to clear and run next command.
-</if>
 
 **STOP here if Route A applies. Do not continue to Step 3.**
 

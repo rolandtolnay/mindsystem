@@ -202,18 +202,6 @@ Build authentication system
 </task>
 ```
 
-### Conditional Logic
-
-```xml
-<if mode="yolo">
-  Content for yolo mode
-</if>
-
-<if mode="interactive" OR="custom with gates.execute_next_plan true">
-  Content for multiple conditions
-</if>
-```
-
 ---
 
 ## @-Reference Patterns

@@ -82,10 +82,9 @@ Common deviations:
 **`/ms:new-project`**
 Initialize new project with brief and configuration.
 
-- Use when: you want Mindsystem to set up `.planning/` and capture intent (new repo, or an existing repo where you’re adding/changing work).
+- Use when: you want Mindsystem to set up `.planning/` and capture intent (new repo, or an existing repo where you're adding/changing work).
 - Creates `.planning/PROJECT.md` (vision and requirements)
-- Creates `.planning/config.json` (workflow mode)
-- Asks for workflow mode (interactive/yolo) upfront
+- Creates `.planning/config.json` (workflow settings)
 - Commits initialization files to git
 
 Usage: `/ms:new-project`
@@ -427,7 +426,7 @@ Usage: `/ms:update`
 ├── REQUIREMENTS.md       # Scoped v1/v2 requirements
 ├── ROADMAP.md            # Current phase breakdown
 ├── STATE.md              # Project memory & context
-├── config.json           # Workflow mode & gates
+├── config.json           # Workflow settings
 ├── research/             # Domain ecosystem research
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on
@@ -456,24 +455,6 @@ Usage: `/ms:update`
         ├── 02-01-PLAN.md
         └── 02-01-SUMMARY.md
 ```
-
-## Workflow Modes
-
-Set during `/ms:new-project`:
-
-**Interactive Mode**
-
-- Confirms each major decision
-- Pauses at checkpoints for approval
-- More guidance throughout
-
-**YOLO Mode**
-
-- Auto-approves most decisions
-- Executes plans without confirmation
-- Only stops for critical checkpoints
-
-Change anytime by editing `.planning/config.json`
 
 ## Common Workflows
 
