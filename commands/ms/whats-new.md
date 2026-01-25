@@ -38,7 +38,7 @@ STOP here if no VERSION file.
 Fetch latest CHANGELOG.md from GitHub:
 
 Use WebFetch tool with:
-- URL: `https://raw.githubusercontent.com/rolandtolnay/gsd/main/CHANGELOG.md`
+- URL: `https://raw.githubusercontent.com/rolandtolnay/mindsystem/main/CHANGELOG.md`
 - Prompt: "Extract all version entries with their dates and changes. Return in Keep-a-Changelog format."
 
 **If fetch fails:**
@@ -75,7 +75,7 @@ Format output clearly:
 
 You're on the latest version.
 
-[View full changelog](https://github.com/rolandtolnay/gsd/blob/main/CHANGELOG.md)
+[View full changelog](https://github.com/rolandtolnay/mindsystem/blob/main/CHANGELOG.md)
 ```
 
 **If updates available:**
@@ -105,7 +105,7 @@ You're on the latest version.
 
 ---
 
-[View full changelog](https://github.com/rolandtolnay/gsd/blob/main/CHANGELOG.md)
+[View full changelog](https://github.com/rolandtolnay/mindsystem/blob/main/CHANGELOG.md)
 
 **To update:** `npx mindsystem-cc --global`
 ```
