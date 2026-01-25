@@ -85,8 +85,10 @@ def load_config(config_path: Path | None = None) -> LinearConfig:
 
 
 def find_config_file() -> Path | None:
-    """Find .linear.json by searching upward from current directory."""
-    current = Path.cwd()
+    """Find .linear.json by searching upward from original working directory."""
+    # Use MS_LINEAR_CWD if set (passed from wrapper script), otherwise fall back to cwd
+    start_dir = os.environ.get("MS_LINEAR_CWD")
+    current = Path(start_dir) if start_dir else Path.cwd()
 
     while current != current.parent:
         config_path = current / ".linear.json"
