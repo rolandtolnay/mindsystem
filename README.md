@@ -119,23 +119,23 @@ Installs to `./.claude/` for testing modifications before contributing.
 
 ```
 /ms:new-project
+/ms:research-project
 /ms:define-requirements
 /ms:create-roadmap
 /ms:plan-phase 1
 /ms:execute-phase 1
 ```
 
-Optional (recommended when the domain/stack is unfamiliar):
+At a high level: `/ms:new-project` captures intent and creates the project workspace, `/ms:research-project` pulls in ecosystem knowledge and common pitfalls, `/ms:define-requirements` turns “what you want” into checkable scope, and `/ms:create-roadmap` converts that scope into phases plus persistent project memory. `/ms:plan-phase` then breaks a phase into small, verifiable tasks, and `/ms:execute-phase` runs those tasks in fresh subagent contexts with verification and reviewable artifacts. The payoff is less context rot, fewer forgotten decisions, and more repeatable output than “just keep chatting until it works”.
 
-```
-/ms:research-project
-```
+`/ms:research-project` is part of the default flow. Skip it only when you already know the domain and stack choices.
 
 ### Existing project (brownfield)
 
 ```
 /ms:map-codebase
 /ms:new-project
+/ms:research-project
 /ms:define-requirements
 /ms:create-roadmap
 /ms:plan-phase 1
@@ -197,9 +197,12 @@ If execution verifies with gaps:
 /ms:design-phase <N>
 /ms:plan-phase <N>
 /ms:execute-phase <N>
+/ms:verify-work <N>
 ```
 
 Use when the UI is the product (new interaction patterns, multiple screens, hard edge cases). Design is optional; this is the “pay the thinking cost up front” path.
+
+`/ms:verify-work` guides you through manual UI verification (UAT). When issues are found, it can spin up subagents to investigate and fix them, then re-present the checks until you’re satisfied.
 
 ### 5) Milestone-driven iteration in an existing product
 
@@ -222,8 +225,8 @@ Long Claude Code sessions degrade. Mindsystem pushes project “truth” into fi
 ### Fresh contexts for execution
 Planning and discussion happen with you; execution happens in fresh subagent contexts, so implementation doesn’t inherit the accumulated noise of a long conversation.
 
-### File-based artifacts you can inspect
-Mindsystem is designed to leave a trail: project docs, phase plans, and execution summaries. These become the stable backbone Claude can reload later.
+### Small plans + verification loops
+Mindsystem keeps plans intentionally small and explicit, with concrete “verify” criteria. When verification finds gaps, you can generate targeted follow-up work (e.g. `/ms:plan-phase <N> --gaps`). For UI-heavy work, `/ms:verify-work` guides manual UAT and can use subagents to investigate and fix issues as they’re found.
 
 If you want the authoritative, up-to-date guide, run `/ms:help` inside Claude Code (or read `commands/ms/help.md`).
 
@@ -231,41 +234,49 @@ If you want the authoritative, up-to-date guide, run `/ms:help` inside Claude Co
 
 ## Command Index
 
+Commands are grouped by workflow domain (start → plan → execute → ship → maintain).
+
 | Command | What it does |
 |--------:|--------------|
-| `/ms:add-phase <desc>` | Append a phase to the roadmap. |
-| `/ms:add-todo [desc]` | Capture an idea/task for later. |
-| `/ms:audit-milestone [version]` | Audit milestone completion before archiving. |
-| `/ms:check-phase <N>` | Verify phase plans before execution (optional). |
-| `/ms:check-todos [area]` | List pending todos and pick one to work on. |
-| `/ms:complete-milestone <version>` | Archive the milestone and prep the next version. |
-| `/ms:create-roadmap` | Create roadmap phases and persistent state tracking. |
-| `/ms:debug [desc]` | Run a systematic debugging workflow with persistent state. |
-| `/ms:define-requirements` | Scope v1/v2/out-of-scope requirements with checkboxes. |
-| `/ms:design-phase <N>` | Produce a UI/UX design spec for a phase. |
-| `/ms:discuss-milestone` | Gather context for the next milestone. |
-| `/ms:discuss-phase <N>` | Gather context before planning a phase. |
-| `/ms:do-work <desc>` | Execute small discovered work (kept intentionally small). |
-| `/ms:execute-phase <N>` | Execute all plans in a phase (parallel, checkpointed). |
 | `/ms:help` | Show the full command reference and usage guide. |
-| `/ms:insert-phase <after> <desc>` | Insert urgent work between phases (renumbers). |
-| `/ms:list-phase-assumptions <N>` | Show what Claude assumes before planning/execution. |
-| `/ms:map-codebase` | Analyze an existing repo and capture conventions + structure. |
-| `/ms:new-milestone [name]` | Create a new milestone with phases. |
-| `/ms:new-project` | Initialize `.planning/` and capture project intent. |
-| `/ms:pause-work` | Create a handoff file when stopping mid-phase. |
-| `/ms:plan-milestone-gaps` | Create phases to close gaps from a milestone audit. |
-| `/ms:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close gaps). |
 | `/ms:progress` | Show where you are and what’s next. |
-| `/ms:remove-phase <N>` | Remove a future phase and renumber subsequent phases. |
-| `/ms:research-phase <N>` | Deep research for unfamiliar or niche phase domains. |
+| `/ms:new-project` | Initialize `.planning/` and capture project intent. |
+| `/ms:map-codebase` | Analyze an existing repo and capture conventions + structure. |
 | `/ms:research-project` | Research the overall domain ecosystem (optional). |
-| `/ms:resume-work` | Restore from the last paused session. |
+| `/ms:define-requirements` | Scope v1/v2/out-of-scope requirements with checkboxes. |
+| `/ms:create-roadmap` | Create roadmap phases and persistent state tracking. |
+|  |  |
+| `/ms:discuss-phase <N>` | Gather context before planning a phase. |
+| `/ms:list-phase-assumptions <N>` | Show what Claude assumes before planning/execution. |
+| `/ms:research-phase <N>` | Deep research for unfamiliar or niche phase domains. |
+| `/ms:design-phase <N>` | Produce a UI/UX design spec for a phase. |
+| `/ms:plan-phase [N] [--gaps]` | Generate task plans for a phase (or close gaps). |
+| `/ms:check-phase <N>` | Verify phase plans before execution (optional). |
+|  |  |
+| `/ms:execute-phase <N>` | Execute all plans in a phase (parallel, checkpointed). |
+| `/ms:verify-work [N]` | User acceptance test of a phase or a plan. |
+| `/ms:debug [desc]` | Run a systematic debugging workflow with persistent state. |
 | `/ms:review-design [scope]` | Audit and improve design quality of implemented features. |
 | `/ms:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity. |
-| `/ms:update` | Update Mindsystem and show the changelog. |
-| `/ms:verify-work [N]` | User acceptance test of a phase or a plan. |
+| `/ms:do-work <desc>` | Execute small discovered work (kept intentionally small). |
+|  |  |
+| `/ms:add-phase <desc>` | Append a phase to the roadmap. |
+| `/ms:insert-phase <after> <desc>` | Insert urgent work between phases (renumbers). |
+| `/ms:remove-phase <N>` | Remove a future phase and renumber subsequent phases. |
+|  |  |
+| `/ms:discuss-milestone` | Gather context for the next milestone. |
+| `/ms:new-milestone [name]` | Create a new milestone with phases. |
+| `/ms:audit-milestone [version]` | Audit milestone completion before archiving. |
+| `/ms:complete-milestone <version>` | Archive the milestone and prep the next version. |
+| `/ms:plan-milestone-gaps` | Create phases to close gaps from a milestone audit. |
+|  |  |
+| `/ms:pause-work` | Create a handoff file when stopping mid-phase. |
+| `/ms:resume-work` | Restore from the last paused session. |
+|  |  |
+| `/ms:add-todo [desc]` | Capture an idea/task for later. |
+| `/ms:check-todos [area]` | List pending todos and pick one to work on. |
 | `/ms:whats-new` | See what changed since your installed version. |
+| `/ms:update` | Update Mindsystem and show the changelog. |
 
 ---
 
