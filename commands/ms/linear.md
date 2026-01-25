@@ -9,9 +9,11 @@ allowed-tools:
 ---
 
 <objective>
-Provide a conversational interface to Linear for issue management. Route to the appropriate CLI command based on user intent.
+Conversational interface to Linear for fast issue management. Primary use case: user describes work → ask high-impact questions → create ticket immediately.
 
-Apply Pareto principle: ask max 4 high-impact questions. Skip questions with obvious answers from context.
+**Speed over polish.** Get tickets into Linear quickly. Don't over-engineer descriptions or explore solutions.
+
+**No codebase exploration unless explicitly requested.** Work from user's description only. Do NOT launch agents, explore files, or analyze code unless the user explicitly asks for it.
 </objective>
 
 <execution_context>
@@ -72,8 +74,8 @@ Apply Pareto principle: ask max 4 high-impact questions. Skip questions with obv
 | `get <ID>` | Fetch details | Execute `get` directly |
 | `states` | List states | Execute `states` directly |
 | `projects` | List projects | Execute `projects` directly |
-| `break <ID>` | Break into sub-issues | Go to break flow |
 | `update <ID> <text>` | Update issue | Execute `update` with parsed fields |
+| `break <ID>` + user provides sub-issues | Break into sub-issues | Execute `break` with user's list |
 | `<ID> <description>` | Create sub-issue | Go to create flow with parent |
 | `<description>` | Create issue | Go to create flow |
 | (empty) | No input | Ask what they want to do |
@@ -82,7 +84,7 @@ Issue ID pattern: 2-4 uppercase letters followed by hyphen and numbers (e.g., `A
 </step>
 
 <step name="direct_commands">
-**For direct commands (done, state, get, states, projects):**
+**For direct commands (done, state, get, states, projects, update):**
 
 Execute CLI and format output.
 
@@ -97,7 +99,7 @@ Parse JSON response and present result:
 </step>
 
 <step name="create_flow">
-**For create/sub-issue:**
+**For create/sub-issue — FAST PATH:**
 
 1. **Parse input for hints:**
    - Title from first sentence or quoted text
@@ -106,47 +108,34 @@ Parse JSON response and present result:
    - Parent ID if pattern `<ID> <description>`
    - Project hints: "in [Project]", "for [Project]", "(project: [Name])", "[Project] project"
 
-2. **Ask clarifying questions (max 4, single AskUserQuestion call):**
+2. **Infer priority and estimate** from the description:
+   - Bug fixes, blockers → High/Urgent
+   - Small tweaks, copy changes → Low priority, XS/S estimate
+   - New features → Normal priority, M estimate
+   - Large features, refactors → Normal priority, L/XL estimate
 
-   Skip questions with obvious answers. Examples:
-   - Title clearly stated → don't ask for title
-   - Priority mentioned → don't ask for priority
-   - Simple task → skip estimate question
-   - Project mentioned → don't ask for project
+3. **Ask UP TO 4 questions in ONE AskUserQuestion call:**
 
-   Use AskUserQuestion with questions like:
-   - Priority (if not obvious from context)
-   - Estimate (if not mentioned)
-   - Project (if multiple projects exist and none specified)
-   - Description details (if ambiguous)
+   Combine these into a single batch:
 
-   For project selection, first run `projects` command to get available options.
+   **Confirmation question:** Show inferred priority/estimate, ask to confirm or adjust
 
-3. **Show preview and confirm:**
+   **High-impact domain questions (pick 1-3 most relevant):**
+   - Scope clarification: "Should this [specific behavior] or [alternative]?"
+   - Edge cases: "What should happen when [edge case]?"
+   - Acceptance criteria: "What's the minimum for this to be done?"
+   - Context: "Is this related to [existing feature/area]?"
 
-   ```
-   ## Create Issue
+   Skip questions with obvious answers from description. If description is very clear, may only need confirmation.
 
-   **Title:** [parsed title]
-   **Project:** [project name or "Team backlog"]
-   **Priority:** [priority name]
-   **Estimate:** [estimate if set]
-   **Parent:** [parent ID if sub-issue]
+   If project not specified and multiple projects exist, include project selection.
 
-   Create this issue?
-   ```
-
-   Use AskUserQuestion: "Create this issue?" with options:
-   - "Yes, create it"
-   - "Edit first"
-   - "Cancel"
-
-4. **Execute CLI:**
+4. **Create immediately after answers:**
 
    ```bash
    ~/.claude/mindsystem/scripts/ms-linear-wrapper.sh create "[title]" \
-     -d "[description]" -p [priority] -e [estimate] [--parent ID] \
-     [--project "Name"] [--no-project] --json-pretty
+     -d "[description with user's answers incorporated]" -p [priority] -e [estimate] \
+     [--parent ID] [--project "Name"] [--no-project] --json-pretty
    ```
 
 5. **Format result:**
@@ -161,49 +150,23 @@ Parse JSON response and present result:
 <step name="break_flow">
 **For breaking down issues:**
 
-1. **Fetch parent issue:**
+User provides the sub-issues in conversation. Do NOT propose or generate sub-issues.
 
-   ```bash
-   ~/.claude/mindsystem/scripts/ms-linear-wrapper.sh get [ID] --json-pretty
-   ```
+1. **Get sub-issue list from user** (they specify titles/estimates in their message)
 
-2. **Analyze and propose sub-issues:**
-
-   Based on title and description, propose 2-5 sub-issues:
-   - Each with clear title
-   - Inherit parent's priority unless specified
-   - Suggest estimates if pattern is clear
-
-   ```
-   ## Break Down: [identifier] — [title]
-
-   Proposed sub-issues:
-   1. [Title 1] (M)
-   2. [Title 2] (S)
-   3. [Title 3] (M)
-   ```
-
-3. **Confirm with user:**
-
-   Use AskUserQuestion: "Create these sub-issues?" with options:
-   - "Yes, create all"
-   - "Let me edit the list"
-   - "Cancel"
-
-4. **Build JSON and execute:**
+2. **Build JSON and execute:**
 
    ```bash
    ~/.claude/mindsystem/scripts/ms-linear-wrapper.sh break [ID] \
      --issues '[{"title":"...","estimate":3},{"title":"...","estimate":2}]' --json-pretty
    ```
 
-5. **Format result:**
+3. **Format result:**
 
    ```
-   Created 3 sub-issues under [parent-identifier]:
+   Created N sub-issues under [parent-identifier]:
    - **[ID-1]** — [title 1]
    - **[ID-2]** — [title 2]
-   - **[ID-3]** — [title 3]
    ```
 </step>
 
@@ -223,9 +186,10 @@ Always parse JSON error response and present human-friendly message with suggest
 
 <success_criteria>
 - [ ] Intent correctly parsed from input
-- [ ] Direct commands execute immediately
-- [ ] Create flow asks max 4 questions
-- [ ] User confirms before creating/updating
+- [ ] Direct commands execute immediately without questions
+- [ ] Create flow asks max 4 questions in ONE AskUserQuestion call
+- [ ] No codebase exploration unless user explicitly requests it
+- [ ] Issue created immediately after user answers questions
 - [ ] CLI output parsed and formatted for readability
 - [ ] Errors handled with helpful suggestions
 </success_criteria>
