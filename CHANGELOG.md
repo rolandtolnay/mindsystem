@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.2.2] - 2026-01-25
+
+### Fixed
+- **`/ms:linear` config lookup** — Wrapper script now preserves original working directory so `.linear.json` is found in the user's project root instead of the script location
+
 ## [3.2.1] - 2026-01-25
 
 ### Changed
