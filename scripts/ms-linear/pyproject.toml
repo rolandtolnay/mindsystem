@@ -1,0 +1,16 @@
+[project]
+name = "ms-linear"
+version = "1.0.0"
+description = "CLI tool for Mindsystem Linear integration - create, update, and manage issues"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9.0",
+    "httpx>=0.25.0",
+]
+
+[project.scripts]
+ms-linear = "ms_linear.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
