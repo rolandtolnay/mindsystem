@@ -73,12 +73,6 @@ None yet.
 [Issues that affect future work]
 
 None yet.
-
-## Session Continuity
-
-Last session: [YYYY-MM-DD HH:MM]
-Stopped at: [Description of last completed action]
-Resume file: [Path to .continue-here*.md if exists, otherwise "None"]
 ```
 
 <purpose>
@@ -172,12 +166,6 @@ Updated after each plan completion.
 - Prefix with originating phase
 - Cleared when addressed
 
-### Session Continuity
-Enables instant resumption:
-- When was last session
-- What was last completed
-- Is there a .continue-here file to resume from
-
 </sections>
 
 <size_constraint>
@@ -219,6 +207,5 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 - Current Position: Where we are now (phase, plan, status)
 - Performance Metrics: Velocity tracking
 - Accumulated Context: Recent decisions, pending todos, adhoc work, blockers
-- Session Continuity: Resume information
 
 </guidelines>

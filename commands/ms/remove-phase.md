@@ -79,8 +79,6 @@ ERROR: Cannot remove Phase {target}
 Only future phases can be removed:
 - Current phase: {current}
 - Phase {target} is current or completed
-
-To abandon current work, use /ms:pause-work instead.
 ```
 
 Exit.

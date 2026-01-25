@@ -31,7 +31,22 @@ Run /ms:new-project to start a new project.
 
 Exit.
 
-If missing STATE.md: suggest `/ms:new-project`.
+**If missing STATE.md but PROJECT.md or ROADMAP.md exist:**
+
+Reconstruct STATE.md from artifacts:
+
+1. Read PROJECT.md → Extract "What This Is" and Core Value
+2. Read ROADMAP.md → Determine phases, find current position
+3. Scan *-SUMMARY.md files → Extract recent decisions, concerns
+4. Count pending todos in .planning/todos/pending/
+
+Write reconstructed STATE.md, then proceed to "load" step.
+
+```
+"STATE.md missing. Reconstructing from artifacts..."
+```
+
+If missing both STATE.md and PROJECT.md/ROADMAP.md: suggest `/ms:new-project`.
 
 **If ROADMAP.md missing but PROJECT.md exists:**
 
@@ -354,7 +369,6 @@ Ready to plan the next milestone.
 - Phase complete but next phase not planned → offer `/ms:plan-phase [next]`
 - All work complete → offer milestone completion
 - Blockers present → highlight before offering to continue
-- Handoff file exists → mention it, offer `/ms:resume-work`
   </step>
 
 </process>

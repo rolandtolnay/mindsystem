@@ -7,3 +7,6 @@ TO-DOS.md
 
 # Local Claude settings (not commands)
 .claude/settings.local.json
+
+.linear.json
+.envrc

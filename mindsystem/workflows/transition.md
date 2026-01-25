@@ -106,18 +106,6 @@ Wait for user decision.
 
 </step>
 
-<step name="cleanup_handoff">
-
-Check for lingering handoffs:
-
-```bash
-ls .planning/phases/XX-current/.continue-here*.md 2>/dev/null
-```
-
-If found, delete them — phase is complete, handoffs are stale.
-
-</step>
-
 <step name="update_roadmap">
 
 Update the roadmap file:
@@ -379,14 +367,12 @@ Update Session Continuity section in STATE.md to reflect transition completion.
 ```markdown
 Last session: [today]
 Stopped at: Phase [X] complete, ready to plan Phase [X+1]
-Resume file: None
 ```
 
 **Step complete when:**
 
 - [ ] Last session timestamp updated to current date and time
 - [ ] Stopped at describes phase completion and next phase
-- [ ] Resume file confirmed as None (transitions don't use resume files)
 
 </step>
 

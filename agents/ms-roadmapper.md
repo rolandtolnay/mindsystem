@@ -303,7 +303,6 @@ Key sections:
 - Current Position (phase, plan, status, progress bar)
 - Performance Metrics
 - Accumulated Context (decisions, todos, blockers)
-- Session Continuity
 
 ## Draft Presentation Format
 

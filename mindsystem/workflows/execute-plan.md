@@ -1455,7 +1455,6 @@ Update Session Continuity section in STATE.md to enable resumption in future ses
 ```markdown
 Last session: [current date and time]
 Stopped at: Completed {phase}-{plan}-PLAN.md
-Resume file: [path to .continue-here if exists, else "None"]
 ```
 
 **Size constraint note:** Keep STATE.md under 150 lines total.

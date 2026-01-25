@@ -691,7 +691,6 @@ Progress: [progress bar]
 ```markdown
 Last session: [current date and time]
 Stopped at: Completed {phase}-{plan}-PLAN.md
-Resume file: [path to .continue-here if exists, else "None"]
 ```
 
 </state_updates>

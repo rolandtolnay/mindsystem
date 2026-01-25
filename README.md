@@ -270,9 +270,6 @@ Commands are grouped by workflow domain (start → plan → execute → ship →
 | `/ms:complete-milestone <version>` | Archive the milestone and prep the next version. |
 | `/ms:plan-milestone-gaps` | Create phases to close gaps from a milestone audit. |
 |  |  |
-| `/ms:pause-work` | Create a handoff file when stopping mid-phase. |
-| `/ms:resume-work` | Restore from the last paused session. |
-|  |  |
 | `/ms:add-todo [desc]` | Capture an idea/task for later. |
 | `/ms:check-todos [area]` | List pending todos and pick one to work on. |
 | `/ms:whats-new` | See what changed since your installed version. |

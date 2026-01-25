@@ -337,28 +337,6 @@ Check project status and intelligently route to next action.
 
 Usage: `/ms:progress`
 
-### Session Management
-
-**`/ms:resume-work`**
-Resume work from previous session with full context restoration.
-
-- Use when: you paused mid-phase and want to restore context and continue.
-- Reads STATE.md for project context
-- Shows current position and recent progress
-- Offers next actions based on project state
-
-Usage: `/ms:resume-work`
-
-**`/ms:pause-work`**
-Create context handoff when pausing work mid-phase.
-
-- Use when: you need to stop mid-stream and want a reliable handoff pointer for next time.
-- Creates `.continue-here` file with current state
-- Updates STATE.md session continuity section
-- Captures in-progress work context
-
-Usage: `/ms:pause-work`
-
 ### Debugging
 
 **`/ms:debug [issue description]`**
@@ -604,14 +582,6 @@ Common options:
 /ms:add-todo Fix modal z-index  # Capture with explicit description
 /ms:check-todos                 # Review and work on todos
 /ms:check-todos api             # Filter by area
-```
-
-**Pausing and resuming mid-phase:**
-
-```
-/ms:pause-work                # Creates a handoff pointer
-# later...
-/ms:resume-work               # Restore context and continue
 ```
 
 ## Getting Help
