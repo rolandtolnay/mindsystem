@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.2.3] - 2026-01-25
+
+### Changed
+- **Removed mode/gates distinction** — Single default behavior (YOLO-style auto-approve) for all workflows. Removes `mode` field and `gates` section from config.json, simplifying configuration. Existing configs with these fields are silently ignored.
+
+### Fixed
+- **`/ms:whats-new` URLs** — Updated GitHub repository URLs from gsd to mindsystem
+
 ## [3.2.2] - 2026-01-25
 
 ### Fixed
