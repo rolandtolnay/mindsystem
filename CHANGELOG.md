@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-01-25
+
+### Removed
+- `/ms:pause-work` and `/ms:resume-work` commands — redundant with `/ms:progress` which now handles session resumption
+- Session Continuity section from STATE.md template
+- Handoff file infrastructure (`.continue-here` files)
+
+### Changed
+- `/ms:progress` now reconstructs STATE.md from artifacts when missing
+- Simplified state tracking without resume file management
+
 ## [3.0.0] - 2026-01-23
 
 ### Changed
@@ -942,7 +953,9 @@ All commands change from `/gsd:*` to `/ms:*`
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/gsd/compare/v2.14.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.1.0
+[3.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.0.0
 [2.14.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.14.0
 [2.13.1]: https://github.com/rolandtolnay/gsd/releases/tag/v2.13.1
 [2.13.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.13.0
