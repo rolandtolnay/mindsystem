@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-01-25
+
+### Added
+- **`ms-linear` CLI tool** — Python CLI wrapping Linear GraphQL API with commands: `create`, `update`, `done`, `state`, `break`, `get`, `states`, `projects`
+- **`/ms:linear` slash command** — Conversational interface for Linear issue management
+- **Flexible project assignment** — `--project` flag to specify project by name, `--no-project` to skip project assignment
+- Sub-issues inherit parent's project by default
+
+### Removed
+- `.claude/skills/linear/` skill — replaced by CLI + slash command architecture
+
 ## [3.1.0] - 2026-01-25
 
 ### Removed
@@ -953,7 +964,8 @@ All commands change from `/gsd:*` to `/ms:*`
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.0
 [3.1.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.1.0
 [3.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.0.0
 [2.14.0]: https://github.com/rolandtolnay/gsd/releases/tag/v2.14.0
