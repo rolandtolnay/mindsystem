@@ -6,6 +6,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-01-25
+
+### Changed
+- **`/ms:linear` streamlined** — Issue creation now prioritizes speed: infer priority/estimate from description, ask up to 4 high-impact questions in one batch, create immediately without preview confirmation
+- Break flow simplified — user provides sub-issues explicitly, no AI-generated proposals
+- Codebase exploration only happens when explicitly requested
+
 ## [3.2.0] - 2026-01-25
 
 ### Added
@@ -964,7 +971,8 @@ All commands change from `/gsd:*` to `/ms:*`
 - YOLO mode for autonomous execution
 - Interactive mode with checkpoints
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.1
 [3.2.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.0
 [3.1.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.1.0
 [3.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.0.0
