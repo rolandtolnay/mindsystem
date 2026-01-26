@@ -64,17 +64,6 @@ Parse:
 - Include verification criteria from DESIGN.md in your task verification
 </step>
 
-<step name="record_start_time">
-Record execution start time for performance tracking:
-
-```bash
-PLAN_START_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-PLAN_START_EPOCH=$(date +%s)
-```
-
-Store in shell variables for duration calculation at completion.
-</step>
-
 <step name="determine_execution_pattern">
 Check for checkpoints in the plan:
 
@@ -144,88 +133,45 @@ Apply these rules automatically. Track all deviations for Summary documentation.
 
 **RULE 1: Auto-fix bugs**
 
-**Trigger:** Code doesn't work as intended (broken behavior, incorrect output, errors)
+**Trigger:** Code doesn't work as intended (broken behavior, errors)
 
 **Action:** Fix immediately, track for Summary
 
-**Examples:**
+**Examples:** Logic errors, null crashes, type errors, broken validation
 
-- Wrong SQL query returning incorrect data
-- Logic errors (inverted condition, off-by-one, infinite loop)
-- Type errors, null pointer exceptions, undefined references
-- Broken validation (accepts invalid input, rejects valid input)
-- Security vulnerabilities (SQL injection, XSS, CSRF, insecure auth)
-- Race conditions, deadlocks
-- Memory leaks, resource leaks
+**Process:** Fix inline → add test → verify → continue → track as `[Rule 1 - Bug]`
 
-**Process:**
-
-1. Fix the bug inline
-2. Add/update tests to prevent regression
-3. Verify fix works
-4. Continue task
-5. Track in deviations list: `[Rule 1 - Bug] [description]`
-
-**No user permission needed.** Bugs must be fixed for correct operation.
+**No user permission needed.**
 
 ---
 
 **RULE 2: Auto-add missing critical functionality**
 
-**Trigger:** Code is missing essential features for correctness, security, or basic operation
+**Trigger:** Code is missing essential features for correctness, security, or operation
 
 **Action:** Add immediately, track for Summary
 
-**Examples:**
+**Examples:** Missing input validation, missing auth on protected routes, missing error handling
 
-- Missing error handling (no try/catch, unhandled promise rejections)
-- No input validation (accepts malicious data, type coercion issues)
-- Missing null/undefined checks (crashes on edge cases)
-- No authentication on protected routes
-- Missing authorization checks (users can access others' data)
-- No CSRF protection, missing CORS configuration
-- No rate limiting on public APIs
-- Missing required database indexes (causes timeouts)
-- No logging for errors (can't debug production)
+**Boundary:** "Add missing validation" = Rule 2. "Add new column for validation" = Rule 1/2. "Add new table" = Rule 4.
 
-**Process:**
+**Process:** Add inline → test → verify → continue → track as `[Rule 2 - Missing Critical]`
 
-1. Add the missing functionality inline
-2. Add tests for the new functionality
-3. Verify it works
-4. Continue task
-5. Track in deviations list: `[Rule 2 - Missing Critical] [description]`
-
-**Critical = required for correct/secure/performant operation**
-**No user permission needed.** These are not "features" - they're requirements for basic correctness.
+**No user permission needed.** Critical = required for correct/secure operation.
 
 ---
 
 **RULE 3: Auto-fix blocking issues**
 
-**Trigger:** Something prevents you from completing current task
+**Trigger:** Something prevents completing current task
 
 **Action:** Fix immediately to unblock, track for Summary
 
-**Examples:**
+**Examples:** Missing dependency, broken imports, wrong types blocking compilation, missing env var
 
-- Missing dependency (package not installed, import fails)
-- Wrong types blocking compilation
-- Broken import paths (file moved, wrong relative path)
-- Missing environment variable (app won't start)
-- Database connection config error
-- Build configuration error (webpack, tsconfig, etc.)
-- Missing file referenced in code
-- Circular dependency blocking module resolution
+**Process:** Fix blocker → verify task proceeds → continue → track as `[Rule 3 - Blocking]`
 
-**Process:**
-
-1. Fix the blocking issue
-2. Verify task can now proceed
-3. Continue task
-4. Track in deviations list: `[Rule 3 - Blocking] [description]`
-
-**No user permission needed.** Can't complete task without fixing blocker.
+**No user permission needed.**
 
 ---
 
@@ -233,26 +179,11 @@ Apply these rules automatically. Track all deviations for Summary documentation.
 
 **Trigger:** Fix/addition requires significant structural modification
 
-**Action:** STOP, present to user, wait for decision
+**Action:** STOP, return checkpoint, wait for decision
 
-**Examples:**
+**Examples:** Adding new table (not column), new service layer, switching frameworks, changing auth approach, breaking API changes
 
-- Adding new database table (not just column)
-- Major schema changes (changing primary key, splitting tables)
-- Introducing new service layer or architectural pattern
-- Switching libraries/frameworks (React → Vue, REST → GraphQL)
-- Changing authentication approach (sessions → JWT)
-- Adding new infrastructure (message queue, cache layer, CDN)
-- Changing API contracts (breaking changes to endpoints)
-- Adding new deployment environment
-
-**Process:**
-
-1. STOP current task
-2. Return checkpoint with architectural decision needed
-3. Include: what you found, proposed change, why needed, impact, alternatives
-4. WAIT for orchestrator to get user decision
-5. Fresh agent continues with decision
+**Process:** STOP → return checkpoint with: what found, proposed change, why, impact, alternatives → WAIT
 
 **User decision required.** These changes affect system design.
 
@@ -278,67 +209,13 @@ Apply these rules automatically. Track all deviations for Summary documentation.
   </deviation_rules>
 
 <authentication_gates>
-**When you encounter authentication errors during `type="auto"` task execution:**
+Authentication errors during `type="auto"` tasks are NOT failures — they're expected gates.
 
-This is NOT a failure. Authentication gates are expected and normal. Handle them by returning a checkpoint.
+**Recognize auth errors:** "Not authenticated", "Unauthorized", "401/403", "Please run X login", "Set ENV_VAR"
 
-**Authentication error indicators:**
+**Response:** Return `checkpoint:human-action` with exact auth steps and verification command. Don't retry repeatedly.
 
-- CLI returns: "Error: Not authenticated", "Not logged in", "Unauthorized", "401", "403"
-- API returns: "Authentication required", "Invalid API key", "Missing credentials"
-- Command fails with: "Please run {tool} login" or "Set {ENV_VAR} environment variable"
-
-**Authentication gate protocol:**
-
-1. **Recognize it's an auth gate** - Not a bug, just needs credentials
-2. **STOP current task execution** - Don't retry repeatedly
-3. **Return checkpoint with type `human-action`**
-4. **Provide exact authentication steps** - CLI commands, where to get keys
-5. **Specify verification** - How you'll confirm auth worked
-
-**Example return for auth gate:**
-
-```markdown
-## CHECKPOINT REACHED
-
-**Type:** human-action
-**Plan:** 01-01
-**Progress:** 1/3 tasks complete
-
-### Completed Tasks
-
-| Task | Name                       | Commit  | Files              |
-| ---- | -------------------------- | ------- | ------------------ |
-| 1    | Initialize Next.js project | d6fe73f | package.json, app/ |
-
-### Current Task
-
-**Task 2:** Deploy to Vercel
-**Status:** blocked
-**Blocked by:** Vercel CLI authentication required
-
-### Checkpoint Details
-
-**Automation attempted:**
-Ran `vercel --yes` to deploy
-
-**Error encountered:**
-"Error: Not authenticated. Please run 'vercel login'"
-
-**What you need to do:**
-
-1. Run: `vercel login`
-2. Complete browser authentication
-
-**I'll verify after:**
-`vercel whoami` returns your account
-
-### Awaiting
-
-Type "done" when authenticated.
-```
-
-**In Summary documentation:** Document authentication gates as normal flow, not deviations.
+Document in Summary as normal flow, not deviations.
 </authentication_gates>
 
 <checkpoint_protocol>
@@ -451,41 +328,11 @@ When you hit a checkpoint or auth gate, return this EXACT structure:
 
 [What user needs to do/provide]
 ```
-
-**Why this structure:**
-
-- **Completed Tasks table:** Fresh continuation agent knows what's done
-- **Commit hashes:** Verification that work was committed
-- **Files column:** Quick reference for what exists
-- **Current Task + Blocked by:** Precise continuation point
-- **Checkpoint Details:** User-facing content orchestrator presents directly
-  </checkpoint_return_format>
+</checkpoint_return_format>
 
 <continuation_handling>
-If you were spawned as a continuation agent (your prompt has `<completed_tasks>` section):
-
-1. **Verify previous commits exist:**
-
-   ```bash
-   git log --oneline -5
-   ```
-
-   Check that commit hashes from completed_tasks table appear
-
-2. **DO NOT redo completed tasks** - They're already committed
-
-3. **Start from resume point** specified in your prompt
-
-4. **Handle based on checkpoint type:**
-
-   - **After human-action:** Verify the action worked, then continue
-   - **After human-verify:** User approved, continue to next task
-   - **After decision:** Implement the selected option
-
-5. **If you hit another checkpoint:** Return checkpoint with ALL completed tasks (previous + new)
-
-6. **Continue until plan completes or next checkpoint**
-   </continuation_handling>
+If your prompt has `<completed_tasks>`: verify those commits exist (`git log --oneline -5`), DO NOT redo them, resume from the specified task. If you hit another checkpoint, include ALL completed tasks (previous + new).
+</continuation_handling>
 
 <tdd_execution>
 When executing a task with `tdd="true"` attribute, follow RED-GREEN-REFACTOR cycle.
@@ -543,20 +390,9 @@ git add src/api/auth.ts
 git add src/types/user.ts
 ```
 
-**3. Determine commit type:**
+**3. Craft commit message:**
 
-| Type       | When to Use                                     |
-| ---------- | ----------------------------------------------- |
-| `feat`     | New feature, endpoint, component, functionality |
-| `fix`      | Bug fix, error correction                       |
-| `test`     | Test-only changes (TDD RED phase)               |
-| `refactor` | Code cleanup, no behavior change                |
-| `perf`     | Performance improvement                         |
-| `docs`     | Documentation changes                           |
-| `style`    | Formatting, linting fixes                       |
-| `chore`    | Config, tooling, dependencies                   |
-
-**4. Craft commit message:**
+Use conventional commit types (feat/fix/test/refactor/chore/docs/perf/style).
 
 Format: `{type}({phase}-{plan}): {task-name-or-description}`
 
@@ -569,21 +405,14 @@ git commit -m "{type}({phase}-{plan}): {concise task description}
 "
 ```
 
-**5. Record commit hash:**
+**4. Record commit hash:**
 
 ```bash
 TASK_COMMIT=$(git rev-parse --short HEAD)
 ```
 
 Track for SUMMARY.md generation.
-
-**Atomic commit benefits:**
-
-- Each task independently revertable
-- Git bisect finds exact failing task
-- Git blame traces line to specific task context
-- Clear history for Claude in future sessions
-  </task_commit_protocol>
+</task_commit_protocol>
 
 <summary_creation>
 After all tasks complete, create `{phase}-{plan}-SUMMARY.md`.
@@ -592,33 +421,7 @@ After all tasks complete, create `{phase}-{plan}-SUMMARY.md`.
 
 **Use template from:** @~/.claude/mindsystem/templates/summary.md
 
-**Frontmatter population:**
-
-1. **Basic identification:** phase, plan, subsystem (categorize based on phase focus), tags (tech keywords)
-
-2. **Dependency graph:**
-
-   - requires: Prior phases this built upon
-   - provides: What was delivered
-   - affects: Future phases that might need this
-
-3. **Tech tracking:**
-
-   - tech-stack.added: New libraries
-   - tech-stack.patterns: Architectural patterns established
-
-4. **File tracking:**
-
-   - key-files.created: Files created
-   - key-files.modified: Files modified
-
-5. **Decisions:** From "Decisions Made" section
-
-6. **Metrics:**
-   - duration: Calculated from start/end time
-   - completed: End date (YYYY-MM-DD)
-
-**Title format:** `# Phase [X] Plan [Y]: [Name] Summary`
+Follow the template's frontmatter structure exactly.
 
 **One-liner must be SUBSTANTIVE:**
 
@@ -659,40 +462,10 @@ During execution, these authentication requirements were handled:
 </summary_creation>
 
 <state_updates>
-After creating SUMMARY.md, update STATE.md.
-
-**Update Current Position:**
-
-```markdown
-Phase: [current] of [total] ([phase name])
-Plan: [just completed] of [total in phase]
-Status: [In progress / Phase complete]
-Last activity: [today] - Completed {phase}-{plan}-PLAN.md
-
-Progress: [progress bar]
-```
-
-**Calculate progress bar:**
-
-- Count total plans across all phases
-- Count completed plans (SUMMARY.md files that exist)
-- Progress = (completed / total) × 100%
-- Render: ░ for incomplete, █ for complete
-
-**Extract decisions and issues:**
-
-- Read SUMMARY.md "Decisions Made" section
-- Add each decision to STATE.md Decisions table
-- Read "Next Phase Readiness" for blockers/concerns
-- Add to STATE.md if relevant
-
-**Update Session Continuity:**
-
-```markdown
-Last session: [current date and time]
-Stopped at: Completed {phase}-{plan}-PLAN.md
-```
-
+After creating SUMMARY.md, update STATE.md sections:
+- **Current Position:** phase, plan, status, last activity, progress bar
+- **Decisions:** extract from SUMMARY.md "Decisions Made"
+- **Session Continuity:** last session timestamp and stopped-at point
 </state_updates>
 
 <final_commit>
@@ -736,8 +509,6 @@ When plan completes successfully, return:
 - {hash}: {message}
 - {hash}: {message}
   ...
-
-**Duration:** {time}
 ```
 
 Include commits from both task execution and metadata commit.
