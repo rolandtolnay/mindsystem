@@ -52,12 +52,13 @@ Planning and back-and-forth happen with you. Subagents are for autonomous execut
 ### Scripts for mechanics, prompts for judgment
 Deterministic chores live in scripts; language models do what they’re good at: interpreting intent, making trade-offs, and writing code you can review.
 
-## What’s New (Fork Highlights)
+## What's New (Fork Highlights)
 
 - **Quality-control pipeline**: execution produces reviewable artifacts and verification steps.
 - **Design phase**: `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation.
 - **Research tooling**: `scripts/ms-lookup/` can be used standalone or inside workflows.
 - **Enhanced verification**: better UAT batching and debugging support when gaps are found.
+- **Automatic code simplification**: after phase execution, a simplifier agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance) with generic fallback. Produces separate commit for easy review. Configure in `config.json` or skip entirely.
 
 ---
 
@@ -257,7 +258,6 @@ Commands are grouped by workflow domain (start → plan → execute → ship →
 | `/ms:verify-work [N]` | User acceptance test of a phase or a plan. |
 | `/ms:debug [desc]` | Run a systematic debugging workflow with persistent state. |
 | `/ms:review-design [scope]` | Audit and improve design quality of implemented features. |
-| `/ms:simplify-flutter [scope]` | Simplify Flutter/Dart code for clarity. |
 | `/ms:do-work <desc>` | Execute small discovered work (kept intentionally small). |
 |  |  |
 | `/ms:add-phase <desc>` | Append a phase to the roadmap. |

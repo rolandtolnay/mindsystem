@@ -61,38 +61,45 @@ Phase: $ARGUMENTS
    - Collect summaries from all plans
    - Report phase completion status
 
-6. **Verify phase goal**
+6. **Simplify code (optional)**
+   - Read `simplifier` from config.json (default: `ms-code-simplifier`)
+   - If `"skip"`: proceed to step 7
+   - Spawn simplifier agent with phase file scope
+   - If changes made: commit as `refactor({phase}): simplify phase code`
+
+7. **Verify phase goal**
    - Spawn `ms-verifier` subagent with phase directory and goal
    - Verifier checks must_haves against actual codebase (not SUMMARY claims)
    - Creates VERIFICATION.md with detailed report
    - Route by status:
-     - `passed` → continue to step 7
+     - `passed` → continue to step 8
      - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/ms:plan-phase {X} --gaps`
 
-7. **Generate phase patch**
+8. **Generate phase patch**
    - Run: `~/.claude/mindsystem/scripts/generate-phase-patch.sh ${PHASE_NUMBER}`
    - Outputs to `.planning/phases/{phase_dir}/{phase}-changes.patch`
    - Verify: patch file exists OR skip message logged
+   - Note: Patch captures all changes including simplifications
 
-8. **Update roadmap and state**
+9. **Update roadmap and state**
    - Update ROADMAP.md, STATE.md
 
-9. **Update requirements**
-   Mark phase requirements as Complete:
-   - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
-   - Read REQUIREMENTS.md traceability table
-   - For each REQ-ID in this phase: change Status from "Pending" to "Complete"
-   - Write updated REQUIREMENTS.md
-   - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
+10. **Update requirements**
+    Mark phase requirements as Complete:
+    - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
+    - Read REQUIREMENTS.md traceability table
+    - For each REQ-ID in this phase: change Status from "Pending" to "Complete"
+    - Write updated REQUIREMENTS.md
+    - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-10. **Commit phase completion**
+11. **Commit phase completion**
     Bundle all phase metadata updates in one commit:
     - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
     - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
     - Commit: `docs({phase}): complete {phase-name} phase`
 
-11. **Offer next steps**
+12. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 </process>
 
@@ -261,9 +268,16 @@ After all tasks in a plan complete:
 2. Commit with format: `docs({phase}-{plan}): complete [plan-name] plan`
 3. NO code files (already committed per-task)
 
+**Simplification Commit (if changes made):**
+
+After code simplification step:
+1. Stage only simplified files
+2. Commit with format: `refactor({phase}): simplify phase code`
+3. Include simplifier agent name and file count in commit body
+
 **Phase Completion Commit:**
 
-After all plans in phase complete (step 7):
+After all plans in phase complete:
 1. Stage: ROADMAP.md, STATE.md, REQUIREMENTS.md (if updated), VERIFICATION.md
 2. Commit with format: `docs({phase}): complete {phase-name} phase`
 3. Bundles all phase-level state updates in one commit
@@ -279,6 +293,7 @@ After all plans in phase complete (step 7):
 <success_criteria>
 - [ ] All incomplete plans in phase executed
 - [ ] Each plan has SUMMARY.md
+- [ ] Code simplified (or skipped if config says "skip")
 - [ ] Phase goal verified (must_haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] Patch file generated OR explicitly skipped with message

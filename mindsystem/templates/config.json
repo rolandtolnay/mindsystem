@@ -11,5 +11,6 @@
   "safety": {
     "always_confirm_destructive": true,
     "always_confirm_external_services": true
-  }
+  },
+  "simplifier": null
 }

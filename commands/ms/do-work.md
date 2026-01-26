@@ -57,9 +57,16 @@ Run verify commands from tasks.
 Create .planning/adhoc/{timestamp}-{slug}-SUMMARY.md.
 </step>
 
+<step name="simplify_code">
+Read `simplifier` from config.json (default: `ms-code-simplifier`).
+If `"skip"`: proceed to update_state_and_commit.
+Spawn simplifier agent with modified files.
+Track if simplifications were applied for commit message.
+</step>
+
 <step name="update_state_and_commit">
 Add entry to STATE.md "Recent Adhoc Work" section.
-Single git commit with all changes (code + PLAN.md + SUMMARY.md + STATE.md).
+Single git commit with all changes (code + simplifications + PLAN.md + SUMMARY.md + STATE.md).
 </step>
 
 <step name="generate_patch">
@@ -88,9 +95,10 @@ Adhoc work is complete when:
 - [ ] .planning/adhoc/ directory exists
 - [ ] PLAN.md created with tasks
 - [ ] All tasks executed and verified
+- [ ] Code simplified (or skipped if config says "skip")
 - [ ] SUMMARY.md created with outcomes
 - [ ] STATE.md updated with adhoc entry
-- [ ] Single git commit with all changes
+- [ ] Single git commit with all changes (including simplifications)
 - [ ] Patch file generated OR explicitly skipped with message
 - [ ] User informed of completion and commit hash
 </success_criteria>

@@ -96,6 +96,14 @@ Write these documents to .planning/codebase/:
 - STACK.md - Languages, runtime, frameworks, dependencies, configuration
 - INTEGRATIONS.md - External APIs, databases, auth providers, webhooks
 
+After writing STACK.md, update config.json simplifier field with the appropriate agent name:
+1. Read STACK.md to detect primary framework
+2. Map framework to simplifier agent name:
+   - Flutter/Dart → "ms-flutter-simplifier"
+   - All others (React, Next.js, Node, Swift, Kotlin, etc.) → "ms-code-simplifier"
+3. If .planning/config.json exists: update the simplifier field
+   If not: note the recommended simplifier for later config creation
+
 Explore thoroughly. Write documents directly using templates. Return confirmation only.
 ```
 

@@ -217,6 +217,56 @@ Verify the work is complete:
 Keep verification focused on the specific changes made.
 </step>
 
+<step name="simplify_code">
+Read simplifier from config:
+
+```bash
+SIMPLIFIER=$(cat .planning/config.json 2>/dev/null | jq -r '.simplifier // empty')
+```
+
+**If SIMPLIFIER = "skip":**
+Skip to create_adhoc_summary.
+
+**If SIMPLIFIER = empty/null:**
+Use default: `SIMPLIFIER="ms-code-simplifier"`
+
+**Otherwise:**
+Use SIMPLIFIER value directly as agent name.
+
+1. **Get modified files:**
+   ```bash
+   git diff --name-only HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$'
+   ```
+
+2. **Spawn simplifier with adhoc scope:**
+   ```
+   Task(
+     prompt="
+     <objective>
+     Simplify code modified in adhoc work.
+     Preserve all functionality. Improve clarity and consistency.
+     </objective>
+
+     <scope>
+     Files to analyze:
+     {MODIFIED_FILES}
+     </scope>
+
+     <output>
+     After simplifications, run static analysis and tests.
+     Report what was simplified and verification results.
+     </output>
+     ",
+     subagent_type="{SIMPLIFIER}"
+   )
+   ```
+
+3. **Track simplification changes:**
+   - If changes made: Set `SIMPLIFICATION_APPLIED=true`
+   - Simplified files will be included in the adhoc commit
+   - Note in SUMMARY.md that simplification was applied
+</step>
+
 <step name="create_adhoc_summary">
 Create SUMMARY.md (see @~/.claude/mindsystem/templates/adhoc-summary.md for full template):
 
@@ -286,11 +336,12 @@ If section doesn't exist, add after "### Pending Todos" section:
 </step>
 
 <step name="git_commit">
-Single commit for all changes:
+Single commit for all changes (including simplifications if applied):
 
 ```bash
-# Add all modified files
+# Add all modified files (code + simplified files)
 git add [code files modified]
+git add [simplified files if SIMPLIFICATION_APPLIED]
 git add "$plan_file"
 git add "$summary_file"
 git add .planning/STATE.md
@@ -300,10 +351,18 @@ git add .planning/STATE.md
 # fix: bug fix, correction
 commit_type="fix"  # or "feat" based on nature of work
 
+# Include simplification note if applied
+if [ "$SIMPLIFICATION_APPLIED" = "true" ]; then
+  simplification_note="Includes code simplification pass."
+else
+  simplification_note=""
+fi
+
 git commit -m "$(cat <<'EOF'
 ${commit_type}(adhoc): [description]
 
 Files: [count] modified
+${simplification_note}
 EOF
 )"
 

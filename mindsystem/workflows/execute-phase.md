@@ -341,6 +341,72 @@ After all waves complete, aggregate results:
 ```
 </step>
 
+<step name="simplify_code">
+Read simplifier agent name from config:
+
+```bash
+SIMPLIFIER=$(cat .planning/config.json 2>/dev/null | jq -r '.simplifier // empty')
+```
+
+**If SIMPLIFIER = "skip":**
+Report: "Code simplification skipped (config: skip)"
+Proceed to verify_phase_goal.
+
+**If SIMPLIFIER = empty/null:**
+Use default: `SIMPLIFIER="ms-code-simplifier"`
+
+**Otherwise:**
+Use SIMPLIFIER value directly as agent name.
+
+1. **Gather changed files:**
+   ```bash
+   # Get all files changed in this phase's commits
+   PHASE_COMMITS=$(git log --oneline --grep="(${PHASE_NUMBER}-" --format="%H")
+   CHANGED_FILES=$(git diff --name-only $(echo "$PHASE_COMMITS" | tail -1)^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
+   ```
+
+2. **Spawn simplifier (agent name from config):**
+   ```
+   Task(
+     prompt="
+     <objective>
+     Simplify code modified in phase {phase_number}.
+     Preserve all functionality. Improve clarity and consistency.
+     </objective>
+
+     <scope>
+     Files to analyze:
+     {CHANGED_FILES}
+     </scope>
+
+     <output>
+     After simplifications, run static analysis and tests.
+     Report what was simplified and verification results.
+     </output>
+     ",
+     subagent_type="{SIMPLIFIER}"
+   )
+   ```
+
+3. **Handle result:**
+   - If changes made: Stage and commit
+   - If no changes: Report "No simplifications needed"
+
+4. **Commit simplifications (if any):**
+   ```bash
+   git add [simplified files]
+   git commit -m "$(cat <<'EOF'
+   refactor({phase}): simplify phase code
+
+   Simplifier: {agent_type}
+   Files simplified: {count}
+   EOF
+   )"
+   ```
+
+Report: "Code simplified. Proceeding to verification."
+</step>
+
 <step name="verify_phase_goal">
 Verify phase achieved its GOAL, not just completed its TASKS.
 

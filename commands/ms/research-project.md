@@ -299,8 +299,16 @@ Create SUMMARY.md with:
 - Confidence assessment
 - Gaps to address
 
+After creating SUMMARY.md, update config.json simplifier with agent name:
+1. Read recommended stack from STACK.md
+2. Map to simplifier agent name:
+   - Flutter/Dart → \"ms-flutter-simplifier\"
+   - All others → \"ms-code-simplifier\"
+3. Update .planning/config.json (create from template if needed)
+
 Then commit ALL research files together:
 git add .planning/research/
+git add .planning/config.json
 git commit -m 'docs: complete [domain] project research'
 ",
   subagent_type="ms-research-synthesizer",
