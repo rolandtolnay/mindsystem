@@ -23,7 +23,7 @@ The arguments passed to this skill describe WHY you need Mindsystem knowledge. U
 <essential_knowledge>
 
 <what_mindsystem_is>
-Mindsystem (Get Shit Done) is a meta-prompting and context engineering system for Claude Code that solves **context rot** — the quality degradation that happens as Claude fills its context window.
+Mindsystem is a meta-prompting and context engineering system for Claude Code that solves **context rot** — the quality degradation that happens as Claude fills its context window.
 
 **Core insight:** Claude's quality degrades predictably:
 - 0-30% context: Peak quality
@@ -39,14 +39,47 @@ Mindsystem (Get Shit Done) is a meta-prompting and context engineering system fo
 <philosophy>
 **Solo developer + Claude workflow.** No enterprise patterns (sprint ceremonies, RACI matrices, stakeholder management). User is the visionary. Claude is the builder.
 
+**Modularity over bundling.** Commands stay small, explicit, and composable. Avoid mega-flows. Users pick the depth they need (quick fix vs. new feature vs. UI-heavy system). Each command has a clear purpose — no consulting documentation to understand which to use.
+
+**Main context for collaboration.** Planning, discussion, and back-and-forth happen with the user in the main conversation. Subagents are for autonomous execution, not for hiding key decisions or reasoning. This preserves conversational iteration, user ability to question and redirect, and visibility into Claude's thinking.
+
+**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: patch generation extracted to shell scripts, file manipulation via dedicated tooling.
+
+**User as collaborator.** Trust that users can contribute meaningfully. Maintain:
+- **Control** — User decides when to proceed, what to skip
+- **Granularity** — Separate commands for research, requirements, planning, execution
+- **Transparency** — No hidden delegation or background orchestration
+
 **Plans ARE prompts.** PLAN.md is not a document that gets transformed — it IS the executable prompt containing objective, context, tasks, and verification.
 
 **Claude automates everything.** If it has CLI/API, Claude does it. Checkpoints are for verification (human confirms visual/UX) and decisions (human chooses direction), not manual work.
 
 **Goal-backward planning.** Don't ask "what should we build?" — ask "what must be TRUE for the goal to be achieved?" This produces verifiable requirements, not vague task lists.
-
-**Dream extraction, not requirements gathering.** Project initialization is collaborative thinking to help users discover and articulate what they want. Follow the thread, challenge vagueness, make abstract concrete.
 </philosophy>
+
+<context_split>
+Mindsystem deliberately separates where work happens:
+
+**Main context (with user):**
+- Project discovery (`/ms:new-project`)
+- Requirements definition (`/ms:define-requirements`)
+- Phase discussion (`/ms:discuss-phase`)
+- Phase planning (`/ms:plan-phase`)
+- Design decisions (`/ms:design-phase`)
+- Verification review (`/ms:verify-work`)
+
+**Fresh subagent contexts (autonomous):**
+- Plan execution (`ms-executor`)
+- Phase verification (`ms-verifier`)
+- Research tasks (`ms-researcher`)
+- Codebase mapping (`ms-codebase-mapper`)
+- Debugging sessions (`ms-debugger`)
+
+**Why this matters:**
+- Collaboration benefits from user visibility and iteration
+- Execution benefits from fresh context (200k tokens, peak quality)
+- Planning stays editable; execution produces artifacts
+</context_split>
 
 <repository_structure>
 ```
@@ -54,21 +87,28 @@ mindsystem/
 ├── agents/               # Subagent definitions (Task tool configs)
 │   ├── ms-executor.md       # Executes PLAN.md files
 │   ├── ms-verifier.md       # Verifies phase goals achieved
-│   ├── ms-planner.md        # Creates PLAN.md files
 │   ├── ms-debugger.md       # Systematic debugging
 │   ├── ms-researcher.md     # Domain research
+│   ├── ms-roadmapper.md     # Creates ROADMAP.md
+│   ├── ms-designer.md       # UI/UX design specs
+│   ├── ms-code-simplifier.md    # Post-execution code review
+│   ├── ms-flutter-simplifier.md # Flutter-specific simplification
+│   ├── ms-codebase-mapper.md    # Brownfield codebase analysis
 │   └── ...
 ├── commands/ms/         # Slash commands (/ms:*)
 │   ├── new-project.md        # Initialize project
 │   ├── plan-phase.md         # Create plans for phase
 │   ├── execute-phase.md      # Execute all plans
+│   ├── design-phase.md       # Generate UI/UX design spec
+│   ├── verify-work.md        # UAT verification
 │   ├── progress.md           # Where am I? What's next?
 │   └── ...
-├── mindsystem/        # Core system
+├── mindsystem/          # Core system
 │   ├── workflows/            # Step-by-step procedures
-│   ├── templates/            # Output structures (STATE.md, SUMMARY.md, etc.)
-│   └── references/           # Deep knowledge (plan-format.md, checkpoints.md)
+│   └── templates/            # Output structures (STATE.md, SUMMARY.md, etc.)
 └── scripts/              # Shell scripts for automation
+    ├── generate-phase-patch.sh
+    └── ms-lookup/            # Research tooling (Python)
 ```
 
 **Installation:** `npx mindsystem-cc` copies to `~/.claude/` (global) or `.claude/` (local).
@@ -83,7 +123,7 @@ Mindsystem creates `.planning/` directory in user projects:
 ├── REQUIREMENTS.md   # Checkable requirements with traceability
 ├── ROADMAP.md        # Phases from start to finish
 ├── STATE.md          # Living memory (position, decisions, blockers)
-├── config.json       # Execution preferences
+├── config.json       # Execution preferences (see below)
 ├── research/         # Domain research (STACK.md, FEATURES.md, etc.)
 ├── codebase/         # Brownfield analysis (ARCHITECTURE.md, etc.)
 ├── todos/            # Captured ideas for later
@@ -91,19 +131,48 @@ Mindsystem creates `.planning/` directory in user projects:
     └── XX-name/
         ├── XX-01-PLAN.md
         ├── XX-01-SUMMARY.md
-        ├── XX-02-PLAN.md
+        ├── DESIGN.md          # If design-phase was run
         └── ...
 ```
 </user_project_files>
+
+<config_json>
+`.planning/config.json` controls execution preferences:
+
+```json
+{
+  "simplifier": "ms-flutter-simplifier"
+}
+```
+
+**Options:**
+- `null` or omitted — Uses `ms-code-simplifier` (default)
+- `"ms-flutter-simplifier"` — Flutter/Dart-specific simplifier
+- `"ms-code-simplifier"` — Generic code simplifier
+- `"skip"` — Skip simplification step entirely
+</config_json>
 
 <core_workflow>
 1. `/ms:new-project` → Questions → PROJECT.md
 2. `/ms:research-project` (optional) → .planning/research/
 3. `/ms:define-requirements` → REQUIREMENTS.md
 4. `/ms:create-roadmap` → ROADMAP.md + STATE.md
-5. `/ms:plan-phase N` → Creates PLAN.md files
-6. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
+5. `/ms:discuss-phase N` (optional) → Gather context before planning
+6. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
+7. `/ms:plan-phase N` → Creates PLAN.md files (main context, with user)
+8. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
+9. `/ms:verify-work N` (optional) → UAT verification with inline fixing
 </core_workflow>
+
+<fork_features>
+**Design phase.** `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation. Use for UI-heavy work.
+
+**Automatic code simplification.** After phase execution, a simplifier agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance via ms-flutter-simplifier) with generic fallback (ms-code-simplifier). Produces separate commit for easy review. Configure in config.json or skip entirely.
+
+**Research tooling.** `scripts/ms-lookup/` provides standalone research capabilities. Can be used inside workflows or directly.
+
+**Enhanced verification.** `/ms:verify-work` batches UAT items and can spawn subagents to investigate and fix issues found during manual testing.
+</fork_features>
 
 <task_types>
 ```xml
@@ -178,6 +247,8 @@ Executor handles unplanned discoveries automatically:
 - Vague tasks ("Add authentication", "Handle edge cases")
 - Temporal language in docs ("We changed X to Y" — describe current state only)
 - Generic XML tags (`<section>`, `<item>` — use semantic tags)
+- Mega-flows that bundle unrelated commands
+- Hidden delegation (subagents making key decisions without user visibility)
 </anti_patterns>
 
 </essential_knowledge>
@@ -191,25 +262,58 @@ Key locations (relative to repo root):
 | Agents | `agents/` |
 | Workflows | `mindsystem/workflows/` |
 | Templates | `mindsystem/templates/` |
-| References | `mindsystem/references/` |
+| Scripts | `scripts/` |
 | Contributor guide | `CLAUDE.md` |
 </codebase_paths>
 
+<agents_index>
+All in `agents/`:
+
+| Agent | Purpose | Spawned by |
+|-------|---------|------------|
+| ms-executor | Execute single PLAN.md, commit per task | execute-phase |
+| ms-verifier | Verify phase goal achievement | execute-phase |
+| ms-debugger | Systematic debugging with persistent state | debug |
+| ms-researcher | Domain research with citations | research-project, research-phase |
+| ms-research-synthesizer | Combine parallel research outputs | research-project |
+| ms-roadmapper | Create ROADMAP.md from requirements | create-roadmap |
+| ms-designer | Create UI/UX design specifications | design-phase |
+| ms-codebase-mapper | Analyze existing codebase structure | map-codebase |
+| ms-code-simplifier | Post-execution code review (generic) | execute-phase |
+| ms-flutter-simplifier | Post-execution code review (Flutter) | execute-phase |
+| ms-plan-checker | Validate plans before execution | check-phase |
+| ms-milestone-auditor | Audit milestone completion | audit-milestone |
+| ms-integration-checker | Verify cross-phase integration | audit-milestone |
+| ms-mock-generator | Generate mocks for UAT testing | verify-work |
+| ms-verify-fixer | Fix issues found during UAT | verify-work |
+| ms-consolidator | Consolidate decisions during milestone completion | complete-milestone |
+</agents_index>
+
 <workflows_index>
-All in `workflows/`:
+Key workflows in `mindsystem/workflows/`:
 
 | Workflow | Purpose |
 |----------|---------|
-| diagnose.md | Systematically investigate why something isn't working |
-| plan-change.md | Design a modification or extension to Mindsystem |
+| execute-phase.md | Orchestrate wave-based parallel plan execution |
+| execute-plan.md | Execute single plan (runs in ms-executor) |
+| plan-phase.md | Create PLAN.md files for a phase |
+| verify-phase.md | Goal-backward verification protocol |
+| verify-work.md | UAT verification with inline fixing |
+| discovery-phase.md | Gather project context |
+| define-requirements.md | Scope requirements with checkboxes |
+| research-project.md | Domain research spawning |
+| research-phase.md | Phase-specific research |
+| map-codebase.md | Brownfield codebase analysis |
+| debug.md | Systematic debugging workflow |
+| complete-milestone.md | Archive and prep next milestone |
 </workflows_index>
 
 <reference_index>
-All in `references/`:
+Skill references in `.claude/skills/ms-meta/references/`:
 
 | Reference | Purpose |
 |-----------|---------|
-| concepts.md | Deep dive on plans as prompts, checkpoints, deviation rules, wave execution, state management, SUMMARY system, atomic commits, TDD |
+| concepts.md | Plans as prompts, checkpoints, deviation rules, wave execution, state management, SUMMARY system, atomic commits, TDD |
 | architecture.md | System architecture and component relationships |
 | execution-model.md | How plan execution works in detail |
 | verification-deep.md | Goal-backward verification patterns |
@@ -221,7 +325,7 @@ After loading this skill:
 - Continue with the original task, now informed by Mindsystem expertise
 - Apply Mindsystem principles and terminology naturally
 - Reference specific Mindsystem files when relevant to the work
-- Maintain Mindsystem's philosophy (no enterprise patterns, Claude automates)
+- Maintain Mindsystem's philosophy (modularity, main context collaboration, user as collaborator)
 - Suggest concrete file paths when designing Mindsystem changes
 
 **Do NOT:** Write a response "about" Mindsystem principles. Apply them to the work at hand.

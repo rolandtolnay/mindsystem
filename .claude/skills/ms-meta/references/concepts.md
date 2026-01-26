@@ -1,5 +1,36 @@
 <concepts>
 
+<context_split>
+## Context Split: Collaboration vs Execution
+
+Mindsystem deliberately separates where work happens:
+
+**Main Context (with user):**
+- Project discovery, requirements, planning, design decisions
+- User can question, redirect, and iterate
+- Visibility into Claude's reasoning
+
+**Fresh Subagent Contexts (autonomous):**
+- Plan execution, verification, research, debugging
+- 200k tokens purely for implementation
+- Peak quality, no accumulated context noise
+
+**Why this matters:**
+- Collaboration benefits from user presence and iteration
+- Execution benefits from fresh context (50% rule applies here)
+- Planning stays editable; execution produces artifacts
+
+**What runs where:**
+| Main Context | Subagent Context |
+|--------------|------------------|
+| `/ms:new-project` | ms-executor |
+| `/ms:define-requirements` | ms-verifier |
+| `/ms:plan-phase` | ms-researcher |
+| `/ms:discuss-phase` | ms-debugger |
+| `/ms:design-phase` | ms-codebase-mapper |
+| `/ms:verify-work` | ms-code-simplifier |
+</context_split>
+
 <plans_as_prompts>
 ## Plans ARE Prompts
 
@@ -371,5 +402,28 @@ How to make tests pass
 - GREEN: `feat({phase}-{plan}): implement [feature]`
 - REFACTOR: `refactor({phase}-{plan}): clean up [feature]` (if needed)
 </tdd_integration>
+
+<config_system>
+## Configuration System
+
+`.planning/config.json` controls execution preferences:
+
+```json
+{
+  "simplify": {
+    "enabled": true,
+    "stack": "flutter"
+  }
+}
+```
+
+**Options:**
+- `simplify.enabled` — Run code simplifier after phase execution (default: true)
+- `simplify.stack` — Stack-specific simplifier: "flutter" uses ms-flutter-simplifier, others use ms-code-simplifier
+
+**When read:**
+- By execute-phase workflow after plans complete
+- By agents that need stack-specific behavior
+</config_system>
 
 </concepts>

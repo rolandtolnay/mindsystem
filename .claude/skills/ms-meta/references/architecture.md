@@ -1,8 +1,39 @@
 <architecture>
 
 <overview>
-Mindsystem's architecture follows a **progressive disclosure** pattern: commands delegate to workflows, workflows use templates and references. Each layer has a specific purpose.
+Mindsystem's architecture follows a **progressive disclosure** pattern with a clear **context split**: commands delegate to workflows, workflows use templates, and execution happens in fresh subagent contexts while collaboration stays in the main context.
 </overview>
+
+<context_split>
+## Where Work Happens
+
+Mindsystem deliberately separates collaborative work from autonomous execution:
+
+**Main Context (with user):**
+| Activity | Command/Workflow |
+|----------|-----------------|
+| Project discovery | `/ms:new-project` |
+| Requirements definition | `/ms:define-requirements` |
+| Phase discussion | `/ms:discuss-phase` |
+| Phase planning | `/ms:plan-phase` |
+| Design decisions | `/ms:design-phase` |
+| Verification review | `/ms:verify-work` |
+
+**Fresh Subagent Contexts (autonomous):**
+| Activity | Agent |
+|----------|-------|
+| Plan execution | ms-executor |
+| Phase verification | ms-verifier |
+| Research tasks | ms-researcher |
+| Codebase mapping | ms-codebase-mapper |
+| Debugging | ms-debugger |
+| Code simplification | ms-code-simplifier |
+
+**Why this matters:**
+- Collaboration benefits from user visibility and iteration
+- Execution benefits from fresh 200k-token context (peak quality)
+- Planning stays editable; execution produces artifacts
+</context_split>
 
 <directory_structure>
 ```
@@ -10,15 +41,20 @@ mindsystem/                              # Development repository
 ├── agents/                       # Subagent definitions
 │   ├── ms-executor.md              # Executes PLAN.md (core)
 │   ├── ms-verifier.md              # Verifies phase goals
-│   ├── ms-planner.md               # Creates PLAN.md files
 │   ├── ms-debugger.md              # Systematic debugging
 │   ├── ms-researcher.md            # Domain research
 │   ├── ms-research-synthesizer.md  # Combines research outputs
 │   ├── ms-roadmapper.md            # Creates ROADMAP.md
+│   ├── ms-designer.md              # UI/UX design specs
 │   ├── ms-codebase-mapper.md       # Analyzes existing codebases
+│   ├── ms-code-simplifier.md       # Post-execution code review
+│   ├── ms-flutter-simplifier.md    # Flutter-specific simplification
 │   ├── ms-plan-checker.md          # Validates plans before execution
 │   ├── ms-milestone-auditor.md     # Audits milestone completion
-│   └── ms-integration-checker.md   # Verifies cross-phase integration
+│   ├── ms-integration-checker.md   # Verifies cross-phase integration
+│   ├── ms-mock-generator.md        # Generate mocks for UAT
+│   ├── ms-verify-fixer.md          # Fix UAT issues
+│   └── ms-consolidator.md          # Consolidate decisions
 │
 ├── commands/ms/                 # Slash commands
 │   ├── new-project.md               # /ms:new-project
@@ -26,11 +62,12 @@ mindsystem/                              # Development repository
 │   ├── create-roadmap.md            # /ms:create-roadmap
 │   ├── plan-phase.md                # /ms:plan-phase
 │   ├── execute-phase.md             # /ms:execute-phase
-│   ├── progress.md                  # /ms:progress
+│   ├── design-phase.md              # /ms:design-phase
 │   ├── verify-work.md               # /ms:verify-work
+│   ├── progress.md                  # /ms:progress
 │   ├── debug.md                     # /ms:debug
 │   ├── help.md                      # /ms:help
-│   └── ... (20+ commands)
+│   └── ... (25+ commands)
 │
 ├── mindsystem/                # Core system files
 │   ├── workflows/                   # Step-by-step procedures
@@ -42,44 +79,38 @@ mindsystem/                              # Development repository
 │   │   ├── research-project.md         # Domain research
 │   │   ├── research-phase.md           # Phase-specific research
 │   │   ├── verify-phase.md             # Verification protocol
+│   │   ├── verify-work.md              # UAT with inline fixing
+│   │   ├── map-codebase.md             # Brownfield analysis
 │   │   ├── complete-milestone.md       # Archive and prep next
 │   │   ├── debug.md                    # Debugging workflow
 │   │   └── ...
 │   │
-│   ├── templates/                   # Output structures
-│   │   ├── project.md                  # PROJECT.md template
-│   │   ├── requirements.md             # REQUIREMENTS.md template
-│   │   ├── roadmap.md                  # ROADMAP.md template
-│   │   ├── state.md                    # STATE.md template
-│   │   ├── summary.md                  # SUMMARY.md template
-│   │   ├── verification-report.md      # VERIFICATION.md template
-│   │   ├── context.md                  # CONTEXT.md template
-│   │   ├── phase-prompt.md             # Subagent prompt template
-│   │   ├── codebase/                   # Brownfield analysis templates
-│   │   │   ├── architecture.md
-│   │   │   ├── stack.md
-│   │   │   └── ...
-│   │   └── research-project/           # Research output templates
-│   │       ├── STACK.md
-│   │       ├── FEATURES.md
-│   │       └── ...
-│   │
-│   └── references/                  # Deep knowledge
-│       ├── principles.md               # Core philosophy
-│       ├── plan-format.md              # PLAN.md structure
-│       ├── checkpoints.md              # Checkpoint types
-│       ├── tdd.md                      # TDD plan format
-│       ├── verification-patterns.md    # How to verify
-│       ├── git-integration.md          # Commit conventions
-│       ├── scope-estimation.md         # Task sizing
-│       ├── goal-backward.md            # Verification philosophy
-│       └── debugging/                  # Debugging references
-│           ├── debugging-mindset.md
-│           ├── hypothesis-testing.md
+│   └── templates/                   # Output structures
+│       ├── project.md                  # PROJECT.md template
+│       ├── requirements.md             # REQUIREMENTS.md template
+│       ├── roadmap.md                  # ROADMAP.md template
+│       ├── state.md                    # STATE.md template
+│       ├── summary.md                  # SUMMARY.md template
+│       ├── verification-report.md      # VERIFICATION.md template
+│       ├── design.md                   # DESIGN.md template
+│       ├── context.md                  # CONTEXT.md template
+│       ├── phase-prompt.md             # Subagent prompt template
+│       ├── codebase/                   # Brownfield analysis templates
+│       │   ├── architecture.md
+│       │   ├── stack.md
+│       │   ├── conventions.md
+│       │   └── ...
+│       └── research-project/           # Research output templates
+│           ├── STACK.md
+│           ├── FEATURES.md
 │           └── ...
 │
 ├── scripts/                      # Shell scripts
-│   └── generate-phase-patch.sh      # Creates diff patches
+│   ├── generate-phase-patch.sh      # Creates diff patches
+│   ├── generate-adhoc-patch.sh      # Creates adhoc patches
+│   └── ms-lookup/                   # Research tooling (Python)
+│       ├── ms_lookup/
+│       └── pyproject.toml
 │
 ├── bin/                          # Installer
 │   └── install.js                   # npx entry point
@@ -108,11 +139,13 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | Category | Commands |
 |----------|----------|
 | Setup | `new-project`, `research-project`, `define-requirements`, `create-roadmap`, `map-codebase` |
-| Execution | `plan-phase`, `execute-phase`, `progress` |
-| Verification | `check-phase`, `verify-work`, `audit-milestone` |
-| Milestones | `complete-milestone`, `discuss-milestone`, `new-milestone`, `plan-milestone-gaps` |
-| Phase mgmt | `add-phase`, `insert-phase`, `remove-phase`, `discuss-phase`, `research-phase` |
-| Utilities | `add-todo`, `check-todos`, `debug`, `help`, `update`, `whats-new` |
+| Planning | `discuss-phase`, `design-phase`, `plan-phase`, `check-phase` |
+| Execution | `execute-phase`, `do-work` |
+| Verification | `verify-work`, `review-design` |
+| Debugging | `debug` |
+| Milestones | `complete-milestone`, `discuss-milestone`, `new-milestone`, `audit-milestone`, `plan-milestone-gaps` |
+| Phase mgmt | `add-phase`, `insert-phase`, `remove-phase`, `research-phase`, `list-phase-assumptions` |
+| Utilities | `add-todo`, `check-todos`, `progress`, `help`, `update`, `whats-new` |
 
 ## Workflow Layer (`mindsystem/workflows/*.md`)
 
@@ -120,15 +153,16 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 
 **Key workflows:**
 
-| Workflow | Spawns | Creates |
-|----------|--------|---------|
-| `execute-phase.md` | ms-executor (parallel per plan), ms-verifier | SUMMARY.md, VERIFICATION.md |
-| `execute-plan.md` | None (runs in executor) | SUMMARY.md, commits |
-| `plan-phase.md` | ms-planner | PLAN.md files |
-| `discovery-phase.md` | None | PROJECT.md |
-| `define-requirements.md` | None | REQUIREMENTS.md |
-| `research-project.md` | ms-researcher (×4 parallel) | .planning/research/ |
-| `map-codebase.md` | ms-codebase-mapper (×4 parallel) | .planning/codebase/ |
+| Workflow | Context | Creates |
+|----------|---------|---------|
+| `execute-phase.md` | Main (orchestrator) | Spawns ms-executor per plan, ms-verifier |
+| `execute-plan.md` | Subagent (ms-executor) | SUMMARY.md, commits |
+| `plan-phase.md` | Main | PLAN.md files |
+| `discovery-phase.md` | Main | PROJECT.md |
+| `define-requirements.md` | Main | REQUIREMENTS.md |
+| `research-project.md` | Main (spawns) | .planning/research/ via 4× ms-researcher |
+| `map-codebase.md` | Main (spawns) | .planning/codebase/ via 4× ms-codebase-mapper |
+| `verify-work.md` | Main | UAT results, spawns ms-verify-fixer |
 
 ## Template Layer (`mindsystem/templates/*.md`)
 
@@ -144,25 +178,11 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | `state.md` | STATE.md | With roadmap, updated constantly |
 | `summary.md` | *-SUMMARY.md | After each plan execution |
 | `verification-report.md` | *-VERIFICATION.md | After phase verification |
-
-## Reference Layer (`mindsystem/references/*.md`)
-
-**Purpose:** Deep knowledge. Loaded when specific expertise needed.
-
-**Key references:**
-
-| Reference | Knowledge |
-|-----------|-----------|
-| `principles.md` | Core philosophy (solo dev, no enterprise) |
-| `plan-format.md` | Complete PLAN.md specification |
-| `checkpoints.md` | Checkpoint types and protocols |
-| `tdd.md` | TDD plan structure |
-| `scope-estimation.md` | How to size plans (2-3 tasks max) |
-| `goal-backward.md` | Verification philosophy |
+| `design.md` | DESIGN.md | After design-phase |
 
 ## Agent Layer (`agents/*.md`)
 
-**Purpose:** Subagent definitions. Spawned via Task tool.
+**Purpose:** Subagent definitions. Spawned via Task tool for autonomous work.
 
 **Agent anatomy:**
 ```yaml
@@ -180,65 +200,63 @@ color: yellow  # Terminal output color
 |-------|------------|---------|
 | `ms-executor` | execute-phase | Execute single PLAN.md |
 | `ms-verifier` | execute-phase | Verify phase goal achieved |
-| `ms-planner` | plan-phase | Create PLAN.md |
 | `ms-debugger` | debug | Systematic debugging |
 | `ms-researcher` | research-project/phase | Domain research |
+| `ms-designer` | design-phase | Create UI/UX specs |
 | `ms-codebase-mapper` | map-codebase | Analyze existing code |
+| `ms-code-simplifier` | execute-phase | Post-execution code review |
+| `ms-flutter-simplifier` | execute-phase | Flutter-specific simplification |
+| `ms-roadmapper` | create-roadmap | Generate roadmap from requirements |
 </layer_purposes>
 
 <data_flow>
 ## User Project Data Flow
 
 ```
-/ms:new-project
+/ms:new-project (main context)
     ↓
   discovery-phase.md workflow
     ↓
   Creates: .planning/PROJECT.md
     ↓
-/ms:research-project (optional)
+/ms:research-project (main context, spawns agents)
     ↓
-  Spawns: 4× ms-researcher (parallel)
+  Spawns: 4× ms-researcher (parallel subagents)
     ↓
   Creates: .planning/research/{STACK,FEATURES,ARCHITECTURE,PITFALLS,SUMMARY}.md
     ↓
-/ms:define-requirements
+/ms:define-requirements (main context)
     ↓
   define-requirements.md workflow
     ↓
   Creates: .planning/REQUIREMENTS.md
     ↓
-/ms:create-roadmap
+/ms:create-roadmap (main context, spawns agent)
     ↓
   Spawns: ms-roadmapper
     ↓
   Creates: .planning/ROADMAP.md, .planning/STATE.md
     ↓
-/ms:plan-phase N
+/ms:plan-phase N (main context — collaboration)
     ↓
-  plan-phase.md workflow
-    ↓
-  Spawns: ms-planner
+  plan-phase.md workflow (runs in main context)
     ↓
   Creates: .planning/phases/XX-name/XX-NN-PLAN.md
     ↓
-/ms:execute-phase N
+/ms:execute-phase N (main context, spawns agents)
     ↓
   execute-phase.md workflow (orchestrator)
     ↓
   Spawns: ms-executor (parallel per wave)
     ↓
-  Each executor:
+  Each executor (fresh subagent context):
     - Reads PLAN.md
     - Executes tasks
     - Commits per task
     - Creates SUMMARY.md
     - Updates STATE.md
     ↓
-  Orchestrator:
-    - Groups by wave
-    - Handles checkpoints
-    - Aggregates results
+  (Optional) Spawns: ms-code-simplifier
     ↓
   Spawns: ms-verifier
     ↓
@@ -255,15 +273,15 @@ color: yellow  # Terminal output color
 
 **Modifying execution logic:** `mindsystem/workflows/execute-phase.md` or `execute-plan.md`
 
-**Changing plan structure:** `mindsystem/references/plan-format.md` and `templates/phase-prompt.md`
+**Modifying plan structure:** `mindsystem/templates/phase-prompt.md`
 
 **Modifying an agent:** `agents/ms-{agent-name}.md`
 
-**Changing checkpoint behavior:** `mindsystem/references/checkpoints.md`
-
 **Updating templates:** `mindsystem/templates/*.md`
 
-**Core philosophy:** `mindsystem/references/principles.md` and `CLAUDE.md`
+**Core philosophy:** `CLAUDE.md`
+
+**Adding shell scripts:** `scripts/`
 </file_locations>
 
 </architecture>

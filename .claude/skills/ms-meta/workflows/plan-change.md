@@ -4,6 +4,18 @@
 Design a modification or extension to Mindsystem before implementing it.
 </purpose>
 
+<philosophy>
+Mindsystem changes should follow the fork philosophy:
+
+**Modularity over bundling.** Keep commands small and explicit. Don't create mega-flows. Each command should have a clear, singular purpose.
+
+**Main context for collaboration.** Planning and discussion happen with the user. Subagents are for autonomous execution. Don't hide key decisions in subagents.
+
+**Script + prompt hybrid.** Deterministic chores belong in scripts (`scripts/`). Language models handle judgment and reasoning.
+
+**User as collaborator.** Trust that users can contribute. Maintain control, granularity, and transparency.
+</philosophy>
+
 <process>
 
 ## Step 1: Clarify the Change
@@ -22,10 +34,25 @@ Design a modification or extension to Mindsystem before implementing it.
 | New agent | New specialized executor | Agent definition |
 | Modify agent | Change agent behavior | Agent definition |
 | New template | New output format | Template file |
-| New reference | New deep knowledge | Reference file |
 | Core workflow change | Execution, planning, etc. | Workflow + maybe agents |
+| New script | Deterministic automation | `scripts/` directory |
 
-## Step 3: Map Affected Files
+## Step 3: Determine Context Split
+
+**Ask:** Where should this work happen?
+
+| If the work involves... | It belongs in... |
+|------------------------|------------------|
+| User collaboration, decisions, iteration | Main context (command/workflow) |
+| Autonomous execution, heavy lifting | Subagent |
+| Deterministic file manipulation, patching | Shell script |
+
+**Examples:**
+- Phase planning → Main context (user iterates)
+- Plan execution → Subagent (fresh context, peak quality)
+- Patch generation → Script (deterministic)
+
+## Step 4: Map Affected Files
 
 For each change type, identify all files that need modification:
 
@@ -52,13 +79,19 @@ agents/ms-{name}.md          # Create: agent definition
 # Update any workflows that should spawn it
 ```
 
+**New script:**
+```
+scripts/{name}.sh            # Create: shell script
+# Update workflows that should call it
+```
+
 **Template change:**
 ```
 mindsystem/templates/{name}.md  # Modify or create
 # Update workflows that use this template
 ```
 
-## Step 4: Check Consistency Requirements
+## Step 5: Check Consistency Requirements
 
 Mindsystem has consistency rules that must be maintained:
 
@@ -74,11 +107,11 @@ Mindsystem has consistency rules that must be maintained:
 - Templates define structure
 - All consumers (agents, workflows) must follow structure
 
-**Reference ↔ Implementation sync:**
-- References describe how things work
-- Implementation must match description
+**Config ↔ Workflow sync:**
+- If adding config options, ensure workflows read them
+- Document new options in SKILL.md or help
 
-## Step 5: Consider Side Effects
+## Step 6: Consider Side Effects
 
 **Will this change affect:**
 - [ ] Other commands that use same workflow?
@@ -88,8 +121,10 @@ Mindsystem has consistency rules that must be maintained:
 - [ ] SUMMARY.md frontmatter?
 - [ ] Wave execution logic?
 - [ ] Checkpoint handling?
+- [ ] config.json options?
+- [ ] The context split (main vs subagent)?
 
-## Step 6: Design the Implementation
+## Step 7: Design the Implementation
 
 For each file:
 
@@ -103,12 +138,13 @@ For each file:
 - Preserve existing patterns
 - Update related documentation
 
-## Step 7: Summarize the Change
+## Step 8: Summarize the Change
 
 Before implementing, ensure you can articulate:
 - What changes and why
 - Which files to create/modify
 - Implementation order (dependencies first)
+- Whether it affects the context split
 
 </process>
 
@@ -172,6 +208,22 @@ What defines completion
 
 2. **Update workflow that spawns it**
 
+### Adding a Script
+
+1. **Create script file:**
+```bash
+#!/bin/bash
+# scripts/new-script.sh
+# Purpose: What this script does
+
+set -euo pipefail
+
+# Script logic here
+```
+
+2. **Update workflow that calls it**
+3. **Make executable:** `chmod +x scripts/new-script.sh`
+
 ### Modifying Execution Flow
 
 1. Read current workflow thoroughly
@@ -190,6 +242,9 @@ What defines completion
 - **Don't break existing commands** without updating all consumers
 - **Don't add checkpoints for automatable work**
 - **Don't skip consistency updates** (help.md, related files)
+- **Don't create mega-flows** that bundle unrelated commands
+- **Don't hide key decisions in subagents** — keep collaboration in main context
+- **Don't put judgment logic in scripts** — scripts are for deterministic operations
 </anti_patterns>
 
 <success_criteria>
@@ -197,5 +252,6 @@ Change plan complete when:
 - All affected files identified
 - Implementation order defined
 - Consistency requirements checked
-- No enterprise patterns introduced
+- Context split (main vs subagent) determined
+- No enterprise patterns or mega-flows introduced
 </success_criteria>

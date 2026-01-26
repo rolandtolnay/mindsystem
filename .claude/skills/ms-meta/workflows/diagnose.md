@@ -13,14 +13,16 @@ Systematically investigate why something in Mindsystem isn't working as expected
 | Category | Symptoms | Likely Location |
 |----------|----------|-----------------|
 | Command not found | `/ms:X` doesn't work | Installation, `commands/ms/` |
-| Command wrong behavior | Runs but does unexpected thing | `commands/ms/X.md`, `workflows/*.md` |
+| Command wrong behavior | Runs but does unexpected thing | `commands/ms/X.md`, `mindsystem/workflows/*.md` |
 | Agent fails | Subagent errors or wrong output | `agents/ms-*.md` |
-| Plan execution issue | Tasks fail, wrong commits, no SUMMARY | `workflows/execute-plan.md`, `agents/ms-executor.md` |
-| Wave execution issue | Plans not parallel, wrong order | `workflows/execute-phase.md`, plan frontmatter |
-| Verification gaps | Verifier reports gaps that exist | `agents/ms-verifier.md`, `references/goal-backward.md` |
-| Checkpoint handling | Checkpoints not pausing, wrong format | `references/checkpoints.md`, executor |
-| State corruption | STATE.md wrong, position incorrect | `templates/state.md`, workflow state updates |
-| Template wrong | Output file has wrong structure | `templates/*.md` |
+| Plan execution issue | Tasks fail, wrong commits, no SUMMARY | `mindsystem/workflows/execute-plan.md`, `agents/ms-executor.md` |
+| Wave execution issue | Plans not parallel, wrong order | `mindsystem/workflows/execute-phase.md`, plan frontmatter |
+| Verification gaps | Verifier reports gaps that exist | `agents/ms-verifier.md` |
+| Checkpoint handling | Checkpoints not pausing, wrong format | Executor agent |
+| State corruption | STATE.md wrong, position incorrect | `mindsystem/templates/state.md`, workflow state updates |
+| Template wrong | Output file has wrong structure | `mindsystem/templates/*.md` |
+| Planning issue | Plans malformed, wrong dependencies | `mindsystem/workflows/plan-phase.md` |
+| Config not applied | Simplifier not running, wrong stack | `mindsystem/workflows/execute-phase.md`, config.json handling |
 
 ## Step 2: Locate Relevant Files
 
@@ -46,19 +48,19 @@ agents/ms-{agent}.md
 mindsystem/templates/{template}.md
 ```
 
-**Reference issues:**
-```
-mindsystem/references/{reference}.md
-```
-
 ## Step 3: Trace the Flow
 
 For behavior issues, trace the execution path:
 
 1. **Command** → What does `allowed-tools` include? What @-references does it load?
 2. **Workflow** → What steps does it follow? What does each step do?
-3. **Agent** → What's its `<execution_flow>`? What are `<success_criteria>`?
+3. **Agent** → What's its role definition? What are success criteria?
 4. **Template** → What's the expected output structure?
+
+**Remember the context split:**
+- Commands run in main context (with user)
+- Agents run in fresh subagent context (autonomous)
+- Planning happens in main context, execution in subagents
 
 ## Step 4: Identify the Gap
 
@@ -80,6 +82,7 @@ Based on gap:
 | Wrong template | Modify template structure |
 | Missing reference | Add @-reference to workflow |
 | Documentation mismatch | Update docs to match behavior |
+| Main/subagent confusion | Ensure correct context split |
 
 </process>
 
@@ -104,9 +107,9 @@ Based on gap:
 - **Fix:** Add missing tools or fix paths
 
 **"Agent completes but output is wrong"**
-- **Check:** Agent's `<execution_flow>` matches expected behavior
-- **Check:** `<success_criteria>` is being verified
-- **Fix:** Update agent logic or criteria
+- **Check:** Agent's role and success criteria
+- **Check:** Agent is receiving correct context
+- **Fix:** Update agent logic or context passing
 
 ### Wave Execution Issues
 
@@ -124,7 +127,7 @@ Based on gap:
 
 **"STATE.md not updating"**
 - **Check:** Executor has Write tool
-- **Check:** STATE.md update step in execute-plan.md
+- **Check:** STATE.md update step in execute-plan workflow
 - **Fix:** Ensure state update runs after SUMMARY creation
 
 **"STATE.md position incorrect"**
@@ -136,29 +139,35 @@ Based on gap:
 
 **"Checkpoints not pausing execution"**
 - **Check:** Task has `type="checkpoint:*"` attribute
-- **Check:** Executor checkpoint handling in execution_flow
+- **Check:** Executor checkpoint handling in agent
 - **Fix:** Ensure checkpoint detection in executor
 
-**"Checkpoint return format wrong"**
-- **Check:** checkpoint-return.md template
-- **Check:** Executor uses template correctly
-- **Fix:** Update template or executor formatting
-
 **"Continuation after checkpoint fails"**
-- **Check:** continuation-prompt.md template
+- **Check:** Continuation prompt template
 - **Check:** Orchestrator fills template correctly
 - **Fix:** Update continuation handling
+
+### Code Simplification Issues
+
+**"Simplifier not running"**
+- **Check:** `.planning/config.json` exists and has `simplify.enabled: true`
+- **Check:** execute-phase workflow reads config correctly
+- **Fix:** Ensure config is read and simplifier is spawned
+
+**"Wrong simplifier used"**
+- **Check:** `simplify.stack` in config.json
+- **Check:** Stack detection logic in execute-phase
+- **Fix:** Update config or stack detection
 
 ### Verification Issues
 
 **"Verifier reports false gaps"**
 - **Check:** must_haves derivation is correct
 - **Check:** Artifact paths match actual files
-- **Check:** Wiring verification patterns
 - **Fix:** Update goal-backward derivation
 
 **"Verifier misses actual gaps (stubs pass)"**
-- **Check:** Stub detection patterns in verification-patterns.md
+- **Check:** Stub detection in ms-verifier
 - **Check:** Substantive checks are running
 - **Fix:** Add stronger stub detection
 
@@ -170,7 +179,6 @@ Based on gap:
 - **Fix:** Update executor commit flow
 
 **"Commit format wrong"**
-- **Check:** git-integration.md specification
 - **Check:** Executor commit message generation
 - **Fix:** Update commit format in executor
 
@@ -183,20 +191,8 @@ Based on gap:
 
 **"Quality degrades mid-plan"**
 - **Check:** Context usage (~50% target)
-- **Check:** TDD plans (~40% target)
 - **Fix:** Split plan, reduce scope
 
-### Template Issues
-
-**"Output file has wrong structure"**
-- **Check:** Template file structure
-- **Check:** Workflow/agent uses template correctly
-- **Fix:** Update template or consumer
-
-**"Missing sections in output"**
-- **Check:** Template has all required sections
-- **Check:** Consumer populates all sections
-- **Fix:** Add missing sections
 </common_issues>
 
 <debugging_commands>
@@ -224,6 +220,9 @@ cat .planning/phases/XX-name/XX-NN-PLAN.md | head -30
 
 # Check STATE.md
 cat .planning/STATE.md
+
+# Check config.json
+cat .planning/config.json
 
 # Check recent commits
 git log --oneline -20

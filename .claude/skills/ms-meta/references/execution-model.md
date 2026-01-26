@@ -1,19 +1,40 @@
 <execution_model>
 
 <overview>
-Mindsystem uses wave-based parallel execution where the orchestrator stays lean while subagents execute with fresh context. This document explains the complete execution model.
+Mindsystem uses wave-based parallel execution where the orchestrator stays lean while subagents execute with fresh context. The key insight: **planning happens in main context (collaboration), execution happens in fresh subagent contexts (autonomy)**.
 </overview>
+
+<context_split>
+## Main Context vs Subagent Context
+
+**Main context (with user):**
+- Phase planning (`/ms:plan-phase`)
+- Phase discussion (`/ms:discuss-phase`)
+- Design decisions (`/ms:design-phase`)
+- Orchestration (execute-phase workflow)
+
+**Subagent context (autonomous):**
+- Plan execution (ms-executor)
+- Phase verification (ms-verifier)
+- Code simplification (ms-code-simplifier)
+
+**Why this matters:**
+- Planning benefits from user collaboration and iteration
+- Execution benefits from fresh 200k-token context
+- Orchestrator stays lean (<15% context) by delegating
+</context_split>
 
 <orchestrator_role>
 ## Orchestrator Responsibilities
 
-The orchestrator's job is **coordination, not execution**. It:
+The orchestrator (execute-phase workflow) runs in **main context**. Its job is **coordination, not execution**. It:
 - Discovers plans in phase directory
 - Groups plans by pre-computed wave number
 - Spawns subagents (ms-executor) in parallel per wave
 - Handles checkpoints between waves
 - Collects results and updates state
 - Runs verification after completion
+- Optionally runs code simplification
 
 **Context usage:** ~10-15% (minimal reads, logic, Task calls)
 
@@ -23,7 +44,7 @@ The orchestrator's job is **coordination, not execution**. It:
 <wave_computation>
 ## Wave Assignment (During Planning)
 
-Wave numbers are pre-computed during `/ms:plan-phase`, not at execution time.
+Wave numbers are pre-computed during `/ms:plan-phase` (which runs in main context), not at execution time.
 
 **Assignment rules:**
 ```
@@ -55,7 +76,7 @@ autonomous: true  # No checkpoints
 ## Parallel Execution Flow
 
 ```
-execute-phase orchestrator
+execute-phase orchestrator (main context)
     │
     ├── Wave 1 (parallel) ─────────────────────────┐
     │   ├── Task(ms-executor) → plan-01           │
@@ -70,6 +91,9 @@ execute-phase orchestrator
     │       │                                      │
     │       └── [All agents block until complete] ─┘
     │
+    ├── (Optional) code_simplification
+    │   └── Task(ms-code-simplifier)
+    │
     └── verify_phase_goal
         └── Task(ms-verifier)
 ```
@@ -77,8 +101,8 @@ execute-phase orchestrator
 **Each subagent:**
 - Gets fresh 200k context
 - Loads full execute-plan workflow
-- Loads relevant templates and references
-- Executes with full capacity
+- Loads relevant templates
+- Executes with full capacity (peak quality)
 - Creates SUMMARY.md, commits per task
 - Returns result to orchestrator
 </parallel_execution>
@@ -98,8 +122,6 @@ Commit each task atomically. Create SUMMARY.md. Update STATE.md.
 <execution_context>
 @~/.claude/mindsystem/workflows/execute-plan.md
 @~/.claude/mindsystem/templates/summary.md
-@~/.claude/mindsystem/references/checkpoints.md
-@~/.claude/mindsystem/references/tdd.md
 </execution_context>
 
 <context>
@@ -216,6 +238,28 @@ Task {resume_task_number}: {resume_task_name}
 ```
 </continuation_prompt>
 
+<code_simplification>
+## Post-Execution Code Simplification
+
+After all plans complete, orchestrator optionally runs code simplification:
+
+1. Check `.planning/config.json` for simplify settings
+2. If `simplify.enabled` is true (default):
+   - If `simplify.stack` is "flutter", spawn ms-flutter-simplifier
+   - Otherwise spawn ms-code-simplifier
+3. Simplifier reviews modified files for clarity and maintainability
+4. Creates separate commit for easy review/revert
+
+**Simplifier gets:**
+- List of files modified in this phase
+- Project context (stack, conventions)
+- Specific guidance for the stack
+
+**Output:**
+- Suggested improvements with rationale
+- Single commit with all changes
+</code_simplification>
+
 <failure_handling>
 ## Failure Scenarios
 
@@ -313,6 +357,11 @@ Task(
 - Orchestrator doesn't read workflow internals
 - Just paths and results
 - Clean separation of concerns
+
+**Planning stays collaborative:**
+- `/ms:plan-phase` runs in main context
+- User can question and redirect
+- Plans are editable before execution
 </context_efficiency>
 
 <spawning_patterns>
@@ -320,7 +369,7 @@ Task(
 
 **Sequential:**
 ```
-plan-phase → ms-planner → PLAN.md
+create-roadmap → ms-roadmapper → ROADMAP.md
 ```
 
 **Parallel (same type):**
