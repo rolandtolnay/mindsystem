@@ -62,8 +62,13 @@ Add entry to STATE.md "Recent Adhoc Work" section.
 Single git commit with all changes (code + PLAN.md + SUMMARY.md + STATE.md).
 </step>
 
+<step name="generate_patch">
+Generate patch file from adhoc commit.
+Run generate-adhoc-patch.sh with commit hash and output path.
+</step>
+
 <step name="completion">
-Report what was done, show commit hash and file paths.
+Report what was done, show commit hash, file paths, and patch file path.
 </step>
 
 </process>
@@ -86,5 +91,6 @@ Adhoc work is complete when:
 - [ ] SUMMARY.md created with outcomes
 - [ ] STATE.md updated with adhoc entry
 - [ ] Single git commit with all changes
+- [ ] Patch file generated OR explicitly skipped with message
 - [ ] User informed of completion and commit hash
 </success_criteria>

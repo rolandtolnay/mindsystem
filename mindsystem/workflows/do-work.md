@@ -314,6 +314,22 @@ commit_hash=$(git rev-parse --short HEAD)
 Update SUMMARY.md with commit hash in frontmatter.
 </step>
 
+<step name="generate_adhoc_patch">
+Generate patch file from the adhoc commit:
+
+```bash
+patch_file=".planning/adhoc/${timestamp}-${slug}.patch"
+
+~/.claude/mindsystem/scripts/generate-adhoc-patch.sh "$commit_hash" "$patch_file"
+```
+
+If patch generated (file exists and non-empty):
+- Update SUMMARY.md frontmatter to include `patch_file: [path]`
+
+If skipped (no implementation changes outside exclusions):
+- Leave patch_file field empty or omit from SUMMARY.md
+</step>
+
 <step name="completion">
 Report completion:
 
@@ -327,6 +343,7 @@ Adhoc work complete: [description]
 Artifacts:
 - Plan: .planning/adhoc/[timestamp]-[slug]-PLAN.md
 - Summary: .planning/adhoc/[timestamp]-[slug]-SUMMARY.md
+- Patch: .planning/adhoc/[timestamp]-[slug].patch (if generated)
 
 STATE.md updated with adhoc entry.
 
@@ -354,6 +371,7 @@ Rule 4 is strict for adhoc work — architectural changes exceed adhoc scope by 
 <output_artifacts>
 - `.planning/adhoc/{timestamp}-{slug}-PLAN.md` — lightweight plan
 - `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — completion summary
+- `.planning/adhoc/{timestamp}-{slug}.patch` — implementation changes (if any)
 - Updated `.planning/STATE.md` — adhoc entry in accumulated context
 - Git commit with all changes
 </output_artifacts>

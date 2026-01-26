@@ -17,6 +17,7 @@ files_modified:
   - [path/to/file1.ts]
   - [path/to/file2.ts]
 commit: [git hash]
+patch_file: [path to .patch file, or empty if skipped]
 ---
 
 # Adhoc: [Description]
@@ -66,6 +67,7 @@ Adhoc summaries document small work items executed outside the normal phase work
 | related_phase | Yes | Current phase from STATE.md, or "none" if between phases |
 | files_modified | Yes | List of file paths changed |
 | commit | Yes | Git commit hash |
+| patch_file | No | Path to generated patch file (empty if no code changes) |
 
 </frontmatter_fields>
 
@@ -100,6 +102,7 @@ files_modified:
   - src/lib/api-client.ts
   - src/hooks/useAuth.ts
 commit: abc123f
+patch_file: .planning/adhoc/2026-01-20-fix-auth-token-not-refreshing-on-401.patch
 ---
 
 # Adhoc: Fix auth token not refreshing on 401
