@@ -25,7 +25,6 @@ Load project context:
 cat .planning/PROJECT.md
 cat .planning/MILESTONES.md 2>/dev/null || echo "No milestones file yet"
 cat .planning/STATE.md
-cat .planning/MILESTONE-CONTEXT.md 2>/dev/null || echo "No milestone context file"
 cat .planning/config.json 2>/dev/null
 ```
 
@@ -33,22 +32,19 @@ Extract:
 - What shipped previously (from MILESTONES.md)
 - Current Validated requirements (from PROJECT.md)
 - Pending todos and blockers (from STATE.md)
-- Any context from discuss-milestone (MILESTONE-CONTEXT.md)
 
 **Calculate next milestone version:**
 - Parse last version from MILESTONES.md
 - If v1.0 → suggest v1.1 (minor) or v2.0 (major)
 - If v1.3 → suggest v1.4 or v2.0
+
+**Calculate previous milestone for context:**
+- If v1.1 starting → previous is v1.0
+- Check for: `.planning/milestones/v{previous}-DECISIONS.md`
+- Check for: `.planning/milestones/v{previous}-MILESTONE-AUDIT.md`
 </step>
 
 <step name="gather_goals">
-**If MILESTONE-CONTEXT.md exists (from /ms:discuss-milestone):**
-- Use features and scope already gathered
-- Present summary for confirmation
-- Skip to confirm_goals step
-
-**If no context file:**
-
 Present what shipped:
 ```
 Last milestone: v[X.Y] [Name]
@@ -62,14 +58,61 @@ Pending todos:
 - [From STATE.md if any]
 ```
 
-Ask (freeform, not AskUserQuestion):
-"What do you want to build in the next milestone?"
+**Decision gate:**
 
-Wait for response. Then use AskUserQuestion to explore:
+Use AskUserQuestion:
+```
+header: "New Milestone"
+question: "How do you want to start v[X.Y]?"
+options:
+  - "I know what to build" — proceed to goal gathering
+  - "Help me figure it out" — enter discovery mode with previous context
+  - "Show previous decisions first" — view DECISIONS.md and AUDIT.md, then decide
+```
+
+**If "I know what to build":**
+- Ask directly: "What do you want to build in the next milestone?"
+- Wait for response
+- Proceed to confirm_goals
+
+**If "Show previous decisions first":**
+- Load and present `.planning/milestones/v{previous}-DECISIONS.md` (if exists)
+- Load and present `.planning/milestones/v{previous}-MILESTONE-AUDIT.md` assumptions section (if exists)
+- Then present decision gate again (without this option)
+
+**If "Help me figure it out" (Discovery Mode):**
+- Load `.planning/milestones/v{previous}-DECISIONS.md` (if exists)
+- Load `.planning/milestones/v{previous}-MILESTONE-AUDIT.md` (if exists)
+
+Surface untested assumptions (from AUDIT.md):
+```
+📋 Untested from v[previous]:
+- Error state displays (couldn't mock API errors)
+- Empty state handling (couldn't clear test data)
+- [etc. from assumptions section]
+
+These were skipped during UAT. Address them in this milestone?
+```
+
+Run AskUserQuestion-based feature discovery:
+```
+header: "What to build"
+question: "What do you want to add, improve, or fix?"
+options:
+  - "Address untested assumptions" — add test infrastructure or fix gaps
+  - "New features" — build something new
+  - "Improvements" — enhance existing features
+  - "Bug fixes" — fix known issues
+  - "Let me describe" — freeform input
+```
+
+Continue with follow-up questions:
 - Probe specific features mentioned
 - Ask about priorities
 - Surface constraints or dependencies
 - Clarify scope boundaries
+
+Use @~/.claude/mindsystem/workflows/discuss-milestone.md patterns for questioning.
 
 Continue until you have clear milestone goals.
 </step>
@@ -138,13 +181,6 @@ Progress: ░░░░░░░░░░ 0%
 Keep Accumulated Context (decisions, blockers) from previous milestone.
 </step>
 
-<step name="cleanup">
-Delete temporary context file if it exists:
-
-```bash
-rm -f .planning/MILESTONE-CONTEXT.md
-```
-</step>
 
 <step name="git_commit">
 ```bash
@@ -197,7 +233,6 @@ PROJECT.md updated with:
 - PROJECT.md updated with Current Milestone section
 - Active requirements reflect new milestone goals
 - STATE.md reset for new milestone (keeps accumulated context)
-- MILESTONE-CONTEXT.md consumed and deleted (if existed)
 - Git commit made
 - User routed to define-requirements (or research-project)
 </success_criteria>

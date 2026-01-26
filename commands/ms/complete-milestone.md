@@ -7,6 +7,7 @@ allowed-tools:
   - Read
   - Write
   - Bash
+  - Task
 ---
 
 <objective>
@@ -67,6 +68,25 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Present milestone scope and stats
    - Wait for confirmation
 
+1.5. **Consolidate decisions:**
+
+   Spawn ms-consolidator to extract decisions from phase artifacts:
+
+   ```
+   Task(
+     prompt="Consolidate decisions from milestone v{{version}}.
+     Phase range: [PHASE_START]-[PHASE_END]
+     Create v{{version}}-DECISIONS.md.
+     Delete source files (PLAN, CONTEXT, RESEARCH, DESIGN).",
+     subagent_type="ms-consolidator"
+   )
+   ```
+
+   Wait for completion. Verify DECISIONS.md created:
+   ```bash
+   ls .planning/milestones/v{{version}}-DECISIONS.md
+   ```
+
 2. **Gather stats:**
 
    - Count phases, plans, tasks
@@ -108,13 +128,14 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Ask about pushing tag
 
 8. **Offer next steps:**
-   - `/ms:discuss-milestone` — thinking partner, creates context file
-   - Then `/ms:new-milestone` — update PROJECT.md with new goals
+   - `/ms:new-milestone` — discover goals and update PROJECT.md (includes optional discovery mode)
 
 </process>
 
 <success_criteria>
 
+- Decisions consolidated to `.planning/milestones/v{{version}}-DECISIONS.md`
+- Phase artifacts cleaned (PLAN, CONTEXT, RESEARCH, DESIGN deleted)
 - Milestone archived to `.planning/milestones/v{{version}}-ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}-REQUIREMENTS.md`
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)
@@ -122,7 +143,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 - PROJECT.md updated with current state
 - Git tag v{{version}} created
 - Commit successful
-- User knows next steps (including need for fresh requirements)
+- User knows next steps (/ms:new-milestone)
   </success_criteria>
 
 <critical_rules>

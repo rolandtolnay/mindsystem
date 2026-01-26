@@ -22,12 +22,14 @@ This is the ritual that separates "development" from "shipped."
 
 When a milestone completes, this workflow:
 
-1. Extracts full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
-2. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
-3. Updates ROADMAP.md to replace milestone details with one-line summary
-4. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-5. Performs full PROJECT.md evolution review
-6. Offers to create next milestone inline
+1. Consolidates phase decisions into `.planning/milestones/v[X.Y]-DECISIONS.md`
+2. Cleans up phase artifacts (PLAN, CONTEXT, RESEARCH, DESIGN files deleted)
+3. Extracts full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
+4. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
+5. Updates ROADMAP.md to replace milestone details with one-line summary
+6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
+7. Performs full PROJECT.md evolution review
+8. Routes to `/ms:new-milestone` for next milestone
 
 **Context Efficiency:**
 
@@ -98,7 +100,50 @@ cat .planning/config.json 2>/dev/null
 Proceeding to stats gathering...
 ```
 
-Proceed directly to gather_stats step.
+Proceed directly to consolidate_decisions step.
+
+</step>
+
+<step name="consolidate_decisions">
+
+Consolidate phase decisions before archiving.
+
+**Spawn ms-consolidator agent:**
+
+```
+Task(
+  prompt="Consolidate decisions from milestone v[X.Y] [Name].
+
+Phase range: [PHASE_START]-[PHASE_END]
+Phase directories:
+- .planning/phases/01-foundation
+- .planning/phases/02-auth
+- [etc. for all phases in milestone]
+
+Extract decisions from PLAN, CONTEXT, RESEARCH, DESIGN files.
+Create v[X.Y]-DECISIONS.md in .planning/milestones/.
+Delete source files (preserve SUMMARY, VERIFICATION, UAT).",
+  subagent_type="ms-consolidator"
+)
+```
+
+**Wait for completion and verify:**
+
+```bash
+ls .planning/milestones/v[X.Y]-DECISIONS.md
+```
+
+**Present consolidation summary:**
+
+```
+✓ Decisions consolidated: [N] decisions in [M] categories
+✓ Source files cleaned: PLAN, CONTEXT, RESEARCH, DESIGN deleted
+✓ Preserved: SUMMARY, VERIFICATION, UAT files
+
+Report: .planning/milestones/v[X.Y]-DECISIONS.md
+```
+
+Continue to gather_stats step.
 
 </step>
 
@@ -604,6 +649,7 @@ Commit milestone completion including archive files and deletions.
 
 ```bash
 # Stage archive files (new)
+git add .planning/milestones/v[X.Y]-DECISIONS.md
 git add .planning/milestones/v[X.Y]-ROADMAP.md
 git add .planning/milestones/v[X.Y]-REQUIREMENTS.md
 git add .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
@@ -621,9 +667,13 @@ git commit -m "$(cat <<'EOF'
 chore: complete v[X.Y] milestone
 
 Archived:
+- milestones/v[X.Y]-DECISIONS.md (consolidated decisions)
 - milestones/v[X.Y]-ROADMAP.md
 - milestones/v[X.Y]-REQUIREMENTS.md
 - milestones/v[X.Y]-MILESTONE-AUDIT.md (if audit was run)
+
+Cleaned:
+- Phase PLAN, CONTEXT, RESEARCH, DESIGN files (consolidated into DECISIONS.md)
 
 Deleted (fresh for next milestone):
 - ROADMAP.md
@@ -663,20 +713,19 @@ Tag: v[X.Y]
 
 ## ▶ Next Up
 
-**Discuss Next Milestone** — figure out what to build next
+**Start Next Milestone** — define goals and requirements
 
-`/ms:discuss-milestone`
+`/ms:new-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Next milestone flow:**
-1. `/ms:discuss-milestone` — thinking partner, creates context file
-2. `/ms:new-milestone` — update PROJECT.md with new goals
-3. `/ms:research-project` — (optional) research ecosystem
-4. `/ms:define-requirements` — scope what to build
-5. `/ms:create-roadmap` — plan how to build it
+1. `/ms:new-milestone` — discover what to build, update PROJECT.md with goals
+2. `/ms:research-project` — (optional) research ecosystem
+3. `/ms:define-requirements` — scope what to build
+4. `/ms:create-roadmap` — plan how to build it
 
 ---
 ```
@@ -725,6 +774,8 @@ If yes → milestone. If no → keep working.
 
 Milestone completion is successful when:
 
+- [ ] Decisions consolidated (milestones/v[X.Y]-DECISIONS.md created)
+- [ ] Phase artifacts cleaned (PLAN, CONTEXT, RESEARCH, DESIGN deleted)
 - [ ] MILESTONES.md entry created with stats and accomplishments
 - [ ] PROJECT.md full evolution review completed
 - [ ] All shipped requirements moved to Validated in PROJECT.md
@@ -736,6 +787,6 @@ Milestone completion is successful when:
 - [ ] STATE.md updated with fresh project reference
 - [ ] Git tag created (v[X.Y])
 - [ ] Milestone commit made (includes archive files and deletion)
-- [ ] User knows next steps (starting with /ms:define-requirements)
+- [ ] User knows next steps (starting with /ms:new-milestone)
 
 </success_criteria>

@@ -31,8 +31,9 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 @.planning/MILESTONES.md
 @.planning/config.json
 
-**Load milestone context (if exists, from /ms:discuss-milestone):**
-@.planning/MILESTONE-CONTEXT.md
+**For discovery mode (load if user selects "Help me figure it out"):**
+@.planning/milestones/v{previous}-DECISIONS.md (if exists)
+@.planning/milestones/v{previous}-MILESTONE-AUDIT.md (if exists)
 </context>
 
 <process>
@@ -41,14 +42,12 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Read PROJECT.md (existing project, Validated requirements, decisions)
    - Read MILESTONES.md (what shipped previously)
    - Read STATE.md (pending todos, blockers)
-   - Check for MILESTONE-CONTEXT.md (from /ms:discuss-milestone)
+   - Calculate previous milestone version for context files
 
 2. **Present what shipped (if MILESTONES.md exists):**
 
    ```bash
    cat .planning/MILESTONES.md 2>/dev/null
-   # Also check for assumptions from last audit
-   cat .planning/v*-MILESTONE-AUDIT.md 2>/dev/null | grep -A 100 "assumptions:" | head -50
    ```
 
    Format the presentation:
@@ -63,7 +62,6 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    **Key accomplishments:**
    - [From MILESTONES.md accomplishments]
    - [From MILESTONES.md accomplishments]
-   - [From MILESTONES.md accomplishments]
 
    **Validated requirements:**
    - [From PROJECT.md Validated section]
@@ -71,37 +69,52 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    **Pending todos (if any):**
    - [From STATE.md accumulated context]
 
-   **Untested assumptions (if any):**
-   - [From MILESTONE-AUDIT.md assumptions section]
-   - Error state displays (04-comments, 05-auth)
-   - Empty state handling (04-comments)
-   - Session timeout behavior (05-auth)
-
-   *These were skipped during UAT because required states couldn't be mocked.*
-
    ---
    ```
 
-   This gives users context before asking what they want to build next.
+3. **Decision gate:**
 
-3. **Gather milestone goals:**
+   Use AskUserQuestion:
+   - header: "New Milestone"
+   - question: "How do you want to start?"
+   - options:
+     - "I know what to build" — proceed to goal gathering
+     - "Help me figure it out" — enter discovery mode with previous context
+     - "Show previous decisions first" — view DECISIONS.md and AUDIT.md, then decide
 
-   **If MILESTONE-CONTEXT.md exists:**
-   - Use features and scope from discuss-milestone
-   - Present summary for confirmation
+4. **Gather milestone goals:**
 
-   **If no context file:**
-   - Present what shipped in last milestone
-   - Ask: "What do you want to build next?"
+   **If "I know what to build":**
+   - Ask directly: "What do you want to build next?"
    - Use AskUserQuestion to explore features
    - Probe for priorities, constraints, scope
 
-4. **Determine milestone version:**
+   **If "Show previous decisions first":**
+   - Load and present `.planning/milestones/v{previous}-DECISIONS.md`
+   - Load and present `.planning/milestones/v{previous}-MILESTONE-AUDIT.md` assumptions
+   - Return to decision gate (without this option)
+
+   **If "Help me figure it out" (Discovery Mode):**
+   - Load `.planning/milestones/v{previous}-DECISIONS.md` and `.planning/milestones/v{previous}-MILESTONE-AUDIT.md`
+   - Surface untested assumptions from AUDIT.md:
+     ```
+     📋 Untested from v[previous]:
+     - Error state displays
+     - Empty state handling
+     - [etc. from assumptions section]
+     ```
+   - Run AskUserQuestion-based discovery:
+     - "What do you want to add, improve, or fix?"
+     - Options: Address untested assumptions, New features, Improvements, Bug fixes, Let me describe
+   - Follow up with probing questions
+   - Continue until clear goals emerge
+
+5. **Determine milestone version:**
    - Parse last version from MILESTONES.md
    - Suggest next version (v1.0 → v1.1, or v2.0 for major)
    - Confirm with user
 
-5. **Update PROJECT.md:**
+6. **Update PROJECT.md:**
 
    Add/update these sections:
 
@@ -120,7 +133,7 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
    Update "Last updated" footer.
 
-6. **Update STATE.md:**
+7. **Update STATE.md:**
 
    ```markdown
    ## Current Position
@@ -130,9 +143,6 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    Status: Defining requirements
    Last activity: [today] — Milestone v[X.Y] started
    ```
-
-7. **Cleanup:**
-   - Delete MILESTONE-CONTEXT.md if exists (consumed)
 
 8. **Git commit:**
    ```bash
@@ -187,7 +197,6 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 - PROJECT.md updated with Current Milestone section
 - Active requirements reflect new milestone goals
 - STATE.md reset for new milestone
-- MILESTONE-CONTEXT.md consumed and deleted (if existed)
 - Git commit made
 - User routed to define-requirements (or research-project)
 </success_criteria>
