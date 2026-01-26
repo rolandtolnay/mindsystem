@@ -60,7 +60,7 @@ Options:
 - "Uncommitted changes" - Review files with uncommitted modifications
 - "Specific file" - I'll provide a file path
 - "Recent feature work" - Review files from recent commits
-- "GSD phase" - Review all code from a specific phase
+- "Mindsystem phase" - Review all code from a specific phase
 ```
 
 ### Step 1.2: Resolve Phase Directory (if phase-based)

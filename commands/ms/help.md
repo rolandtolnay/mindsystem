@@ -158,7 +158,7 @@ Audit and improve design of already-implemented features.
 - Creates retroactive DESIGN.md if none exists
 - Presents improvements with benefits and trade-offs
 - Applies user-approved changes, runs verification
-- Use for features implemented before GSD, or periodic design audits
+- Use for features implemented before Mindsystem, or periodic design audits
 
 Usage: `/ms:review-design 4` (review phase 4)
 Usage: `/ms:review-design lib/features/home/home_screen.dart`

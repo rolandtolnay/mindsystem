@@ -6,7 +6,7 @@ Mindsystem's architecture follows a **progressive disclosure** pattern: commands
 
 <directory_structure>
 ```
-gsd/                              # Development repository
+mindsystem/                              # Development repository
 ├── agents/                       # Subagent definitions
 │   ├── ms-executor.md              # Executes PLAN.md (core)
 │   ├── ms-verifier.md              # Verifies phase goals

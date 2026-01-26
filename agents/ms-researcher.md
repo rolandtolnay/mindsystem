@@ -39,11 +39,11 @@ If CONTEXT.md exists, it constrains your research scope. Don't waste context exp
 - Marked as Claude's discretion → research options and recommend
 </upstream_input>
 
-<gsd_integration>
+<mindsystem_integration>
 
 ## Research Feeds Planning
 
-Your output is consumed by downstream GSD workflows. The orchestrator's prompt tells you:
+Your output is consumed by downstream Mindsystem workflows. The orchestrator's prompt tells you:
 - `<research_type>` — Phase research vs project research
 - `<downstream_consumer>` — What workflow uses your output and how
 - `<quality_gate>` — Checklist before declaring complete

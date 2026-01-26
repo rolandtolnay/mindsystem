@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-> **Contributor guidelines.** For GSD concepts, architecture, and deep knowledge, invoke `ms-meta` skill.
+> **Contributor guidelines.** For Mindsystem concepts, architecture, and deep knowledge, invoke `ms-meta` skill.
 
-This document contains rules that affect every output when developing GSD.
+This document contains rules that affect every output when developing Mindsystem.
 
 ## Core Philosophy
 

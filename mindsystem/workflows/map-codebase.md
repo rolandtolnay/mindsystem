@@ -293,5 +293,5 @@ End workflow.
 - TaskOutput used to collect confirmations only
 - All 7 codebase documents exist
 - Clear completion summary with line counts
-- User offered clear next steps in GSD style
+- User offered clear next steps in Mindsystem style
 </success_criteria>

@@ -48,11 +48,11 @@ Validate description is actionable (not vague like "fix stuff" or "make it work"
 </step>
 
 <step name="validate_project">
-Verify active GSD project:
+Verify active Mindsystem project:
 
 ```bash
 if [ ! -f .planning/STATE.md ]; then
-  echo "ERROR: No active GSD project found (.planning/STATE.md missing)"
+  echo "ERROR: No active Mindsystem project found (.planning/STATE.md missing)"
   echo ""
   echo "Options:"
   echo "- Initialize project: /ms:new-project"

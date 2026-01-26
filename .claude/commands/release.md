@@ -60,7 +60,7 @@ Stage and commit changes with conventional commit format.
 
 **Rules:**
 - Group related changes into logical commits
-- Use descriptive scope (e.g., `gsd`, `agent`, `command`)
+- Use descriptive scope (e.g., `mindsystem`, `agent`, `command`)
 - Stage files individually, never `git add .`
 - Include `Co-Authored-By: Claude <noreply@anthropic.com>` in commit body
 
@@ -160,7 +160,7 @@ grep '"version"' package.json
 </step>
 
 <step name="version_commit">
-Create the version commit (GSD convention: version number only):
+Create the version commit (Mindsystem convention: version number only):
 
 ```bash
 git add package.json

@@ -22,7 +22,7 @@ The arguments passed to this skill describe WHY you need Mindsystem knowledge. U
 
 <essential_knowledge>
 
-<what_gsd_is>
+<what_mindsystem_is>
 Mindsystem (Get Shit Done) is a meta-prompting and context engineering system for Claude Code that solves **context rot** — the quality degradation that happens as Claude fills its context window.
 
 **Core insight:** Claude's quality degrades predictably:
@@ -34,7 +34,7 @@ Mindsystem (Get Shit Done) is a meta-prompting and context engineering system fo
 **The 50% rule:** Plans should complete within ~50% context usage. Stop BEFORE quality degrades, not at context limit.
 
 **Solution:** Aggressive atomicity. Plans stay small (2-3 tasks max). Each plan executes in a fresh subagent with 200k tokens purely for implementation.
-</what_gsd_is>
+</what_mindsystem_is>
 
 <philosophy>
 **Solo developer + Claude workflow.** No enterprise patterns (sprint ceremonies, RACI matrices, stakeholder management). User is the visionary. Claude is the builder.
@@ -50,7 +50,7 @@ Mindsystem (Get Shit Done) is a meta-prompting and context engineering system fo
 
 <repository_structure>
 ```
-gsd/
+mindsystem/
 ├── agents/               # Subagent definitions (Task tool configs)
 │   ├── ms-executor.md       # Executes PLAN.md files
 │   ├── ms-verifier.md       # Verifies phase goals achieved

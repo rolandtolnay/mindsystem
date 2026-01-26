@@ -380,5 +380,5 @@ Ready to plan the next milestone.
 - [ ] What's next clearly explained
 - [ ] Smart routing: /ms:execute-phase if plan exists, /ms:plan-phase if not
 - [ ] User confirms before any action
-- [ ] Seamless handoff to appropriate gsd command
+- [ ] Seamless handoff to appropriate mindsystem command
       </success_criteria>

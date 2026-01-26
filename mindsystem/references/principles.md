@@ -1,6 +1,6 @@
 <principles>
 
-Core principles for the GSD planning system.
+Core principles for the Mindsystem planning system.
 
 <solo_developer_claude>
 

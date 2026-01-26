@@ -255,7 +255,7 @@ Key links are verification priorities. Without them, you check everything equall
 
 </common_failures>
 
-<integration_with_gsd>
+<integration_with_mindsystem>
 
 ## In plan-phase.md
 
@@ -283,4 +283,4 @@ derive_must_haves → tasks → execute → verify → [gaps?] → fix plans →
 
 Must-haves are derived once, verified as many times as needed until all pass.
 
-</integration_with_gsd>
+</integration_with_mindsystem>

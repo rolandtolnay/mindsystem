@@ -552,7 +552,7 @@ git stash push -m "mocks-batch-{N}"
 ```
 Task(
   prompt="""
-You are a GSD verify-fixer. Investigate this issue, find the root cause, implement a fix, and commit it.
+You are a Mindsystem verify-fixer. Investigate this issue, find the root cause, implement a fix, and commit it.
 
 ## Issue
 
