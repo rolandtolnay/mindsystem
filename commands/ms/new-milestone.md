@@ -30,10 +30,6 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 @.planning/STATE.md
 @.planning/MILESTONES.md
 @.planning/config.json
-
-**For discovery mode (load if user selects "Help me figure it out"):**
-@.planning/milestones/v{previous}-DECISIONS.md (if exists)
-@.planning/milestones/v{previous}-MILESTONE-AUDIT.md (if exists)
 </context>
 
 <process>
@@ -42,7 +38,10 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Read PROJECT.md (existing project, Validated requirements, decisions)
    - Read MILESTONES.md (what shipped previously)
    - Read STATE.md (pending todos, blockers)
-   - Calculate previous milestone version for context files
+   - Calculate previous milestone version from MILESTONES.md (e.g., if last shipped was v1.0, previous=1.0)
+   - Note: Previous milestone files will be loaded on-demand based on user's choice in step 3
+
+   **Why only the last milestone?** We load DECISIONS.md and AUDIT.md from only the immediately preceding milestone. Older decisions that remain important should already be in PROJECT.md or visible in the codebase. Older untested assumptions that weren't addressed in subsequent milestones are intentionally skipped or no longer relevant. Loading all previous milestones would bloat context for diminishing returns.
 
 2. **Present what shipped (if MILESTONES.md exists):**
 
@@ -90,20 +89,24 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Probe for priorities, constraints, scope
 
    **If "Show previous decisions first":**
-   - Load and present `.planning/milestones/v{previous}-DECISIONS.md`
-   - Load and present `.planning/milestones/v{previous}-MILESTONE-AUDIT.md` assumptions
+   - Using the previous version calculated in step 1 (e.g., "1.0"):
+     - Check for and read `.planning/milestones/v1.0-DECISIONS.md` if exists
+     - Check for and read `.planning/milestones/v1.0-MILESTONE-AUDIT.md` if exists
+   - Present relevant context from these files
    - Return to decision gate (without this option)
 
    **If "Help me figure it out" (Discovery Mode):**
-   - Load `.planning/milestones/v{previous}-DECISIONS.md` and `.planning/milestones/v{previous}-MILESTONE-AUDIT.md`
-   - Surface untested assumptions from AUDIT.md:
+   - Using the previous version calculated in step 1:
+     - Check for and read `.planning/milestones/v{VERSION}-DECISIONS.md` if exists
+     - Check for and read `.planning/milestones/v{VERSION}-MILESTONE-AUDIT.md` if exists
+   - Surface untested assumptions from AUDIT.md (if found):
      ```
      📋 Untested from v[previous]:
      - Error state displays
      - Empty state handling
      - [etc. from assumptions section]
      ```
-   - Run AskUserQuestion-based discovery:
+   - Follow questioning.md patterns for AskUserQuestion-based discovery:
      - "What do you want to add, improve, or fix?"
      - Options: Address untested assumptions, New features, Improvements, Bug fixes, Let me describe
    - Follow up with probing questions

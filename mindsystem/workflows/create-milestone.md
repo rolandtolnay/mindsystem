@@ -40,8 +40,10 @@ Extract:
 
 **Calculate previous milestone for context:**
 - If v1.1 starting → previous is v1.0
-- Check for: `.planning/milestones/v{previous}-DECISIONS.md`
-- Check for: `.planning/milestones/v{previous}-MILESTONE-AUDIT.md`
+- Store previous version number for use in gather_goals step
+- Context files (DECISIONS.md, AUDIT.md) will be loaded on-demand based on user's choice
+
+**Why only the last milestone?** Older decisions that remain important should already be in PROJECT.md or visible in the codebase. Older untested assumptions that weren't addressed are intentionally skipped. Loading all previous milestones would bloat context for diminishing returns.
 </step>
 
 <step name="gather_goals">
@@ -76,13 +78,16 @@ options:
 - Proceed to confirm_goals
 
 **If "Show previous decisions first":**
-- Load and present `.planning/milestones/v{previous}-DECISIONS.md` (if exists)
-- Load and present `.planning/milestones/v{previous}-MILESTONE-AUDIT.md` assumptions section (if exists)
+- Using the previous version from load_context (e.g., "1.0"):
+  - Check for and read `.planning/milestones/v1.0-DECISIONS.md` if exists
+  - Check for and read `.planning/milestones/v1.0-MILESTONE-AUDIT.md` if exists
+- Present relevant context from these files
 - Then present decision gate again (without this option)
 
 **If "Help me figure it out" (Discovery Mode):**
-- Load `.planning/milestones/v{previous}-DECISIONS.md` (if exists)
-- Load `.planning/milestones/v{previous}-MILESTONE-AUDIT.md` (if exists)
+- Using the previous version from load_context:
+  - Check for and read `.planning/milestones/v{VERSION}-DECISIONS.md` if exists
+  - Check for and read `.planning/milestones/v{VERSION}-MILESTONE-AUDIT.md` if exists
 
 Surface untested assumptions (from AUDIT.md):
 ```
@@ -112,7 +117,7 @@ Continue with follow-up questions:
 - Surface constraints or dependencies
 - Clarify scope boundaries
 
-Use @~/.claude/mindsystem/workflows/discuss-milestone.md patterns for questioning.
+Follow questioning.md patterns for AskUserQuestion-based discovery.
 
 Continue until you have clear milestone goals.
 </step>
