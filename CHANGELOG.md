@@ -6,6 +6,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-01-26
+
+### Added
+- **Decision consolidation on milestone completion** — New `ms-consolidator` agent extracts decisions from phase artifacts (PLAN.md, CONTEXT.md, RESEARCH.md, DESIGN.md) into `v{X.Y}-DECISIONS.md` during `/ms:complete-milestone`. Decisions grouped by category (Technical Stack, Architecture, Data Model, API Design, UI/UX, Security, Performance)
+- **Auto-simplification after phase execution** — Code simplifier agent runs automatically after `/ms:execute-phase` and `/ms:do-work`, reviewing changes for clarity and maintainability. Stack-aware: uses `ms-flutter-simplifier` for Flutter projects (configurable in `config.json`)
+- **Patch generation for do-work** — `/ms:do-work` now generates patches for complex discoveries, enabling execution in fresh context
+
+### Changed
+- **`/ms:new-milestone` consolidates discuss-milestone** — Discovery mode now opt-in via decision gate ("I know what to build" / "Help me figure it out" / "Show previous decisions first"). Loads previous milestone's DECISIONS.md and AUDIT.md on-demand only when user chooses discovery
+- **Rebranded GSD to Mindsystem** — Internal references updated throughout codebase
+- **Streamlined ms-executor** — 30% reduction in agent prompt size
+
+### Removed
+- `/ms:discuss-milestone` command — functionality merged into `/ms:new-milestone`
+- `milestone-context.md` template — replaced by on-demand DECISIONS.md loading
+- `/ms:linear` command and Python CLI — moved to separate skill
+
+### Fixed
+- **Previous milestone context loading** — Removed placeholder @-references that wouldn't resolve; now uses explicit on-demand loading after user choice
+
 ## [3.2.3] - 2026-01-25
 
 ### Changed
@@ -253,7 +273,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.3.0
 [3.2.1]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.1
 [3.2.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.0
 [3.1.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.1.0
