@@ -58,7 +58,7 @@ Deterministic chores live in scripts; language models do what they’re good at:
 - **Design phase**: `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation.
 - **Research tooling**: `scripts/ms-lookup/` can be used standalone or inside workflows.
 - **Enhanced verification**: better UAT batching and debugging support when gaps are found.
-- **Automatic code simplification**: after phase execution, a simplifier agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance) with generic fallback. Produces separate commit for easy review. Configure in `config.json` or skip entirely.
+- **Automatic code simplification**: after phase execution, a simplifier agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance) with generic fallback. Produces separate commit for easy review. See [Configuration](#configuration).
 
 ---
 
@@ -274,6 +274,47 @@ Commands are grouped by workflow domain (start → plan → execute → ship →
 | `/ms:check-todos [area]` | List pending todos and pick one to work on. |
 | `/ms:whats-new` | See what changed since your installed version. |
 | `/ms:update` | Update Mindsystem and show the changelog. |
+
+---
+
+## Configuration
+
+Mindsystem stores project configuration in `.planning/config.json`. This file is created when you initialize a project and can be edited to customize behavior.
+
+### Code Simplifier
+
+After phase execution, Mindsystem runs a code simplifier agent to review changes for clarity and maintainability. Configure this in `config.json`:
+
+```json
+{
+  "simplifier": "ms-code-simplifier"
+}
+```
+
+**Available options:**
+
+| Value | Behavior |
+|-------|----------|
+| `null` (default) | Uses `ms-code-simplifier` — generic simplifier for any language |
+| `"ms-flutter-simplifier"` | Flutter/Dart-specific simplifier with Riverpod and widget patterns |
+| `"skip"` | Disable code simplification entirely |
+| `"my-custom-agent"` | Use any custom agent you've defined |
+
+**Example: Flutter project**
+```json
+{
+  "simplifier": "ms-flutter-simplifier"
+}
+```
+
+**Example: Skip simplification**
+```json
+{
+  "simplifier": "skip"
+}
+```
+
+The simplifier runs automatically at the end of `/ms:execute-phase` and creates a separate commit for easy review. Changes are purely cosmetic (clarity, consistency) — functionality is preserved.
 
 ---
 
