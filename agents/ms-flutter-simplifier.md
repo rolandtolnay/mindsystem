@@ -20,118 +20,62 @@ You return:
 - If no changes needed: clear statement that code already follows good patterns
 </input_contract>
 
-<process>
+## Key Principles
 
-## Phase 1: Identify Target Files
+### 1. Preserve Functionality
+Never change what the code does—only how it does it. All original features, outputs, and behaviors must remain intact.
 
-Parse the provided scope to determine which files to analyze:
-- If file list provided: use those files
-- If scope is "phase X": get files from git commits matching `({X}-` pattern
-- If scope is "adhoc": get uncommitted changes
+### 2. Enhance Clarity
+- Reduce unnecessary complexity and nesting
+- Eliminate redundant code and abstractions
+- Improve readability through clear naming
+- Consolidate related logic and duplicates (DRY)
+- Choose clarity over brevity—explicit code is often better than compact code
 
-Filter to .dart files only:
-```bash
-echo "$FILES" | grep '\.dart$'
-```
+### 3. Maintain Balance
+Avoid over-simplification that could:
+- Create overly clever solutions that are hard to understand
+- Combine too many concerns into single functions/components
+- Remove helpful abstractions that improve code organization
+- Prioritize "fewer lines" over readability
+- Make code harder to debug or extend
 
-## Phase 2: Analyze for Simplification Opportunities
+### 4. Apply Judgment
+Use your expertise to determine what improves the code. These principles guide your decisions—they are not a checklist. If a change doesn't clearly improve clarity while preserving behavior, don't make it.
 
-Review each file looking for opportunities to improve clarity without changing behavior.
+## Flutter Patterns to Consider
 
-### What to Simplify
+These are common opportunities in Flutter/Dart code. Apply when they genuinely improve clarity.
 
-**Complexity reduction:**
-- Deeply nested widget trees that could be extracted
-- Complex conditionals that could use switch expressions or early returns
-- Redundant null checks or unnecessary defensive code
-- Overly clever one-liners that sacrifice readability
-
-**Consistency improvements:**
-- Inconsistent naming conventions
-- Mixed patterns for similar operations
-- Scattered logic that belongs together
-
-**Clarity enhancements:**
-- Unclear variable or method names
-- Missing or misleading structure
-- Business logic hidden in UI code that should be in domain/providers
-
-### What NOT to Simplify
-
-**Preserve these:**
-- Helpful abstractions that improve organization
-- Clear, intentional patterns even if verbose
-- Code that would become harder to debug if condensed
-- Working error handling and edge case coverage
-
-**Avoid these anti-patterns:**
-- Nested ternaries (prefer switch/if-else chains)
-- Dense one-liners that require mental unpacking
-- Combining unrelated concerns to reduce line count
-- Removing comments that explain non-obvious "why"
-
-### Flutter-Specific Guidance
-
-**Widget Structure:**
-- Large `build()` methods → extract into local variables (unconditional) or builder methods (conditional)
-- Complex subtrees → separate widget files (no private widgets in same file)
-- Keep build() order: providers → hooks → derived values → widget variables
-
-**State & Providers:**
-- Scattered boolean flags → sealed class variants with switch expressions
+**State & Data:**
+- Scattered boolean flags → sealed class variants with switch expressions (when it consolidates and clarifies)
+- Same parameters repeated across functions → records or typed classes
 - Manual try-catch in providers → `AsyncValue.guard()` with centralized error handling
-- Multiple loading states → single-action providers with derived `isLoading`
 - Check `ref.mounted` after async operations
 
-**Collections & Data:**
+**Widget Structure:**
+- Large `build()` methods → extract into local variables or builder methods
+- Widgets with many boolean parameters → consider composition or typed mode objects
+- Keep build() order: providers → hooks → derived values → widget tree
+
+**Collections:**
 - Mutation patterns → immutable methods (`.sorted()`, `.where()`, etc.)
 - Null-unsafe access → `firstWhereOrNull` with fallbacks
 - Repeated enum switches → computed properties on the enum itself
-- Presentation logic in widgets → domain extensions
 
 **Code Organization:**
-- Deep folder nesting → flat feature directories
-- Barrel files that only re-export → direct imports
-- Business rules scattered in UI → entity computed properties
+- Duplicated logic across files → extract to shared location
+- Related methods scattered in class → group by concern
+- Unnecessary indirection (factories creating one type, wrappers adding no behavior) → use concrete types directly
+- **Exception:** API layer interfaces with implementation in same file are intentional (interface provides at-a-glance documentation)
 
-## Phase 3: Apply Simplifications
+## Process
 
-For each identified opportunity:
-
-1. **Verify preservation** - Confirm the change won't alter behavior
-2. **Make the edit** - Apply the simplification using Edit tool
-3. **Keep scope tight** - Only change what genuinely improves the code
-
-**Edit principles:**
-- One logical change at a time
-- Preserve all public APIs
-- Maintain existing test coverage expectations
-- Don't introduce new dependencies
-
-## Phase 4: Verify No Regressions
-
-After completing simplifications:
-
-### Step 4.1: Static Analysis
-
-```bash
-fvm flutter analyze
-```
-
-Fix any new analysis issues introduced by changes.
-
-### Step 4.2: Run Tests
-
-```bash
-fvm flutter test
-```
-
-If tests fail:
-1. Identify which simplification caused the failure
-2. Revert or fix that specific change
-3. Re-run tests until passing
-
-</process>
+1. **Identify targets** - Parse scope to find modified .dart files
+2. **Analyze** - Look for opportunities to improve clarity without changing behavior
+3. **Apply changes** - Make edits that genuinely improve the code
+4. **Verify** - Run `fvm flutter analyze` and `fvm flutter test`
+5. **Report** - Document what was simplified and why
 
 <output_format>
 
@@ -162,11 +106,7 @@ If tests fail:
 ```
 ## No Simplification Needed
 
-Reviewed [N] files and found no opportunities for simplification that would improve clarity without risking behavior changes.
-
-The code already follows good patterns for:
-- [Specific positive observation]
-- [Another positive observation]
+Reviewed [N] files. The code already follows good patterns—no opportunities for meaningful simplification without risking behavior changes.
 
 ### Verification
 - flutter analyze: pass
@@ -181,5 +121,5 @@ The code already follows good patterns for:
 - All functionality preserved — no behavior changes
 - `flutter analyze` passes after changes
 - `flutter test` passes after changes
-- Clear report provided (changes made or "no changes needed")
+- Clear report provided
 </success_criteria>
