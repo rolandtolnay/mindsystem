@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-01-27
+
+### Added
+- **`flutter-senior-review` skill** — Senior engineering principles for Flutter/Dart code reviews. 12 principles organized into State & Types, Structure, Dependencies, and Pragmatism categories. Includes 3 core lenses (State Modeling, Responsibility Boundaries, Abstraction Timing) and individual principle files with detection signals, smell examples, and senior solutions.
+
+### Changed
+- **Restructured `ms-flutter-simplifier` agent** — Now principle-driven with focus on structural improvements rather than checklist-based review. Added Configuration section documenting simplifier options in `config.json`.
+
 ## [3.3.0] - 2026-01-26
 
 ### Added
@@ -273,8 +281,11 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.4.0
 [3.3.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.3.0
+[3.2.3]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.3
+[3.2.2]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.2
 [3.2.1]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.1
 [3.2.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.0
 [3.1.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.1.0
