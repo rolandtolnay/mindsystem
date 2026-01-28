@@ -185,16 +185,6 @@ git push origin "v$VERSION"
 ```
 </step>
 
-<step name="publish_to_npm">
-Publish the package to npm:
-
-```bash
-npm publish
-```
-
-If publish fails due to authentication, inform the user they need to run `npm login` first.
-</step>
-
 <step name="show_summary">
 Display release summary:
 
@@ -204,7 +194,8 @@ echo ""
 git log --oneline $(git describe --tags --abbrev=0~1 2>/dev/null || echo "HEAD~5")..HEAD
 echo ""
 echo "Tag: v$VERSION"
-echo "Published to npm: https://www.npmjs.com/package/mindsystem-cc"
+echo ""
+echo "To publish to npm, run: npm publish"
 ```
 </step>
 
