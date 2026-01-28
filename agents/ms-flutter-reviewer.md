@@ -1,7 +1,6 @@
 ---
 name: ms-flutter-reviewer
 description: Analyzes Flutter/Dart code for structural issues during milestone audits. Reports findings only — does NOT fix anything.
-model: sonnet
 tools: Read, Bash, Glob, Grep
 mode: analyze-only
 color: yellow
@@ -55,6 +54,8 @@ Look for:
 
 **Senior pattern:** Sealed classes where each variant is a valid state. Factory methods that encapsulate decision logic. Compiler-enforced exhaustive handling.
 
+**Related principles:** `state-invalid-states.md`, `state-type-hierarchies.md`, `state-single-source-of-truth.md`, `state-data-clumps.md`
+
 ### Lens 2: Responsibility Boundaries
 
 **Question:** If I remove/modify feature X, how many files change?
@@ -65,6 +66,8 @@ Look for:
 - Deep callback chains passing flags through layers
 
 **Senior pattern:** Wrapper components for optional features. Typed data objects instead of flag parades. Each widget has one job.
+
+**Related principles:** `structure-wrapper-pattern.md`, `structure-shared-visual-patterns.md`, `structure-composition-over-config.md`, `dependencies-data-not-callbacks.md`
 
 ### Lens 3: Abstraction Timing
 
@@ -78,11 +81,19 @@ Look for:
 
 **Senior pattern:** Abstract when you have 2-3 concrete cases, not before. Extract when duplication causes bugs or drift, not for aesthetics.
 
+**Related principles:** `pragmatism-speculative-generality.md`, `dependencies-temporal-coupling.md`
+
 ## Principles Reference
 
-For detailed diagnosis and examples, consult:
-
 @~/.claude/skills/flutter-senior-review/principles/
+
+Each principle file contains:
+- **Detection signals** — specific patterns to look for
+- **Incorrect example** — code smell with explanation
+- **Correct example** — senior solution with explanation
+- **Why it matters** — evolution impact rationale
+
+**When to consult:** After identifying an issue via the lenses, read the matching principle file for precise diagnosis, concrete terminology, and before/after examples to include in your suggestion.
 
 | Category | Principles | Focus |
 |----------|------------|-------|
@@ -107,7 +118,7 @@ For each file:
 
 1. **Read the file** - Understand what it does, not just its structure
 2. **Apply the three lenses** - Note specific instances for each lens
-3. **Consult principles** - For issues found, identify the matching principle
+3. **Consult principles** — Read the matching principle file from `principles/` for detection signals, concrete examples, and precise terminology to use in findings
 4. **Prioritize by evolution impact:**
    - High: Will cause cascading changes when requirements shift
    - Medium: Creates friction but contained to one area
