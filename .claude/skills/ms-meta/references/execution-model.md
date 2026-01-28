@@ -16,7 +16,7 @@ Mindsystem uses wave-based parallel execution where the orchestrator stays lean 
 **Subagent context (autonomous):**
 - Plan execution (ms-executor)
 - Phase verification (ms-verifier)
-- Code simplification (ms-code-simplifier)
+- Code review (ms-code-simplifier)
 
 **Why this matters:**
 - Planning benefits from user collaboration and iteration
@@ -91,7 +91,7 @@ execute-phase orchestrator (main context)
     │       │                                      │
     │       └── [All agents block until complete] ─┘
     │
-    ├── (Optional) code_simplification
+    ├── (Optional) code_review
     │   └── Task(ms-code-simplifier)
     │
     └── verify_phase_goal
@@ -238,19 +238,19 @@ Task {resume_task_number}: {resume_task_name}
 ```
 </continuation_prompt>
 
-<code_simplification>
-## Post-Execution Code Simplification
+<code_review>
+## Post-Execution Code Review
 
-After all plans complete, orchestrator optionally runs code simplification:
+After all plans complete, orchestrator optionally runs code review:
 
-1. Check `.planning/config.json` for simplify settings
-2. If `simplify.enabled` is true (default):
-   - If `simplify.stack` is "flutter", spawn ms-flutter-simplifier
-   - Otherwise spawn ms-code-simplifier
-3. Simplifier reviews modified files for clarity and maintainability
-4. Creates separate commit for easy review/revert
+1. Check `.planning/config.json` for `code_review.phase` setting
+2. If value is `"skip"`: skip code review
+3. If value is `null` or empty: use default `ms-code-simplifier`
+4. Otherwise use the specified agent name (e.g., `ms-flutter-simplifier`)
+5. Code review agent reviews modified files for clarity and maintainability
+6. Creates separate commit for easy review/revert
 
-**Simplifier gets:**
+**Code review agent gets:**
 - List of files modified in this phase
 - Project context (stack, conventions)
 - Specific guidance for the stack
@@ -258,7 +258,10 @@ After all plans complete, orchestrator optionally runs code simplification:
 **Output:**
 - Suggested improvements with rationale
 - Single commit with all changes
-</code_simplification>
+
+**Milestone-level code review:**
+After `/ms:audit-milestone`, a similar code review can run using `code_review.milestone` setting. This reviews all files changed across the milestone for cross-phase consistency and architectural patterns.
+</code_review>
 
 <failure_handling>
 ## Failure Scenarios

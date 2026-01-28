@@ -28,7 +28,7 @@ Mindsystem deliberately separates where work happens:
 | `/ms:plan-phase` | ms-researcher |
 | `/ms:discuss-phase` | ms-debugger |
 | `/ms:design-phase` | ms-codebase-mapper |
-| `/ms:verify-work` | ms-code-simplifier |
+| `/ms:verify-work` | ms-verify-fixer |
 </context_split>
 
 <plans_as_prompts>
@@ -410,20 +410,26 @@ How to make tests pass
 
 ```json
 {
-  "simplify": {
-    "enabled": true,
-    "stack": "flutter"
+  "code_review": {
+    "phase": "ms-flutter-simplifier",
+    "milestone": null
   }
 }
 ```
 
-**Options:**
-- `simplify.enabled` — Run code simplifier after phase execution (default: true)
-- `simplify.stack` — Stack-specific simplifier: "flutter" uses ms-flutter-simplifier, others use ms-code-simplifier
+**Code review levels:**
+- `code_review.phase` — Runs after `/ms:execute-phase` (per-phase review)
+- `code_review.milestone` — Runs after `/ms:audit-milestone` (cross-phase review)
+
+**Values for each level:**
+- `null` or empty — Uses `ms-code-simplifier` (default)
+- `"ms-flutter-simplifier"` — Flutter/Dart-specific reviewer
+- `"skip"` — Skip code review at this level
+- `"custom-agent"` — Use any custom agent
 
 **When read:**
 - By execute-phase workflow after plans complete
-- By agents that need stack-specific behavior
+- By audit-milestone command after aggregating results
 </config_system>
 
 </concepts>

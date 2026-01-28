@@ -27,7 +27,7 @@ Mindsystem deliberately separates collaborative work from autonomous execution:
 | Research tasks | ms-researcher |
 | Codebase mapping | ms-codebase-mapper |
 | Debugging | ms-debugger |
-| Code simplification | ms-code-simplifier |
+| Code review | ms-code-simplifier |
 
 **Why this matters:**
 - Collaboration benefits from user visibility and iteration
@@ -47,8 +47,8 @@ mindsystem/                              # Development repository
 │   ├── ms-roadmapper.md            # Creates ROADMAP.md
 │   ├── ms-designer.md              # UI/UX design specs
 │   ├── ms-codebase-mapper.md       # Analyzes existing codebases
-│   ├── ms-code-simplifier.md       # Post-execution code review
-│   ├── ms-flutter-simplifier.md    # Flutter-specific simplification
+│   ├── ms-code-simplifier.md       # Post-execution code review (generic)
+│   ├── ms-flutter-simplifier.md    # Post-execution code review (Flutter)
 │   ├── ms-plan-checker.md          # Validates plans before execution
 │   ├── ms-milestone-auditor.md     # Audits milestone completion
 │   ├── ms-integration-checker.md   # Verifies cross-phase integration
@@ -204,8 +204,8 @@ color: yellow  # Terminal output color
 | `ms-researcher` | research-project/phase | Domain research |
 | `ms-designer` | design-phase | Create UI/UX specs |
 | `ms-codebase-mapper` | map-codebase | Analyze existing code |
-| `ms-code-simplifier` | execute-phase | Post-execution code review |
-| `ms-flutter-simplifier` | execute-phase | Flutter-specific simplification |
+| `ms-code-simplifier` | execute-phase, audit-milestone | Post-execution code review (generic) |
+| `ms-flutter-simplifier` | execute-phase, audit-milestone | Post-execution code review (Flutter) |
 | `ms-roadmapper` | create-roadmap | Generate roadmap from requirements |
 </layer_purposes>
 
@@ -256,7 +256,7 @@ color: yellow  # Terminal output color
     - Creates SUMMARY.md
     - Updates STATE.md
     ↓
-  (Optional) Spawns: ms-code-simplifier
+  (Optional) Spawns: ms-code-simplifier (code review)
     ↓
   Spawns: ms-verifier
     ↓

@@ -141,15 +141,22 @@ Mindsystem creates `.planning/` directory in user projects:
 
 ```json
 {
-  "simplifier": "ms-flutter-simplifier"
+  "code_review": {
+    "phase": "ms-flutter-simplifier",
+    "milestone": null
+  }
 }
 ```
 
-**Options:**
+**Code review levels:**
+- `code_review.phase` — Runs after `/ms:execute-phase` (per-phase review)
+- `code_review.milestone` — Runs after `/ms:audit-milestone` (cross-phase review)
+
+**Values for each level:**
 - `null` or omitted — Uses `ms-code-simplifier` (default)
-- `"ms-flutter-simplifier"` — Flutter/Dart-specific simplifier
-- `"ms-code-simplifier"` — Generic code simplifier
-- `"skip"` — Skip simplification step entirely
+- `"ms-flutter-simplifier"` — Flutter/Dart-specific reviewer
+- `"ms-code-simplifier"` — Generic code reviewer
+- `"skip"` — Skip code review at this level
 </config_json>
 
 <core_workflow>
@@ -167,7 +174,7 @@ Mindsystem creates `.planning/` directory in user projects:
 <fork_features>
 **Design phase.** `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation. Use for UI-heavy work.
 
-**Automatic code simplification.** After phase execution, a simplifier agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance via ms-flutter-simplifier) with generic fallback (ms-code-simplifier). Produces separate commit for easy review. Configure in config.json or skip entirely.
+**Automatic code review.** After phase execution (and optionally at milestone completion), a code review agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance via ms-flutter-simplifier) with generic fallback (ms-code-simplifier). Produces separate commit for easy review. Configure `code_review.phase` and `code_review.milestone` in config.json.
 
 **Research tooling.** `scripts/ms-lookup/` provides standalone research capabilities. Can be used inside workflows or directly.
 

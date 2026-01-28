@@ -61,11 +61,11 @@ Phase: $ARGUMENTS
    - Collect summaries from all plans
    - Report phase completion status
 
-6. **Simplify code (optional)**
-   - Read `simplifier` from config.json (default: `ms-code-simplifier`)
+6. **Code review (optional)**
+   - Read `code_review.phase` from config.json (default: `ms-code-simplifier`)
    - If `"skip"`: proceed to step 7
-   - Spawn simplifier agent with phase file scope
-   - If changes made: commit as `refactor({phase}): simplify phase code`
+   - Spawn code review agent with phase file scope
+   - If changes made: commit as `refactor({phase}): code review improvements`
 
 7. **Verify phase goal**
    - Spawn `ms-verifier` subagent with phase directory and goal
@@ -293,7 +293,7 @@ After all plans in phase complete:
 <success_criteria>
 - [ ] All incomplete plans in phase executed
 - [ ] Each plan has SUMMARY.md
-- [ ] Code simplified (or skipped if config says "skip")
+- [ ] Code review completed (or skipped if config says "skip")
 - [ ] Phase goal verified (must_haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] Patch file generated OR explicitly skipped with message

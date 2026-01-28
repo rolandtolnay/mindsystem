@@ -12,5 +12,8 @@
     "always_confirm_destructive": true,
     "always_confirm_external_services": true
   },
-  "simplifier": null
+  "code_review": {
+    "phase": null,
+    "milestone": null
+  }
 }

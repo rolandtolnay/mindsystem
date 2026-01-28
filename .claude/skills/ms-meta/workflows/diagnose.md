@@ -147,17 +147,17 @@ Based on gap:
 - **Check:** Orchestrator fills template correctly
 - **Fix:** Update continuation handling
 
-### Code Simplification Issues
+### Code Review Issues
 
-**"Simplifier not running"**
-- **Check:** `.planning/config.json` exists and has `simplify.enabled: true`
+**"Code review not running"**
+- **Check:** `.planning/config.json` exists and has `code_review.phase` not set to `"skip"`
 - **Check:** execute-phase workflow reads config correctly
-- **Fix:** Ensure config is read and simplifier is spawned
+- **Fix:** Ensure config is read and code review agent is spawned
 
-**"Wrong simplifier used"**
-- **Check:** `simplify.stack` in config.json
-- **Check:** Stack detection logic in execute-phase
-- **Fix:** Update config or stack detection
+**"Wrong code review agent used"**
+- **Check:** `code_review.phase` in config.json
+- **Check:** Agent name detection logic in execute-phase
+- **Fix:** Update config to correct agent name (e.g., `ms-flutter-simplifier`)
 
 ### Verification Issues
 

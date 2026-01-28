@@ -341,22 +341,22 @@ After all waves complete, aggregate results:
 ```
 </step>
 
-<step name="simplify_code">
-Read simplifier agent name from config:
+<step name="code_review">
+Read code review agent name from config:
 
 ```bash
-SIMPLIFIER=$(cat .planning/config.json 2>/dev/null | jq -r '.simplifier // empty')
+CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.phase // empty')
 ```
 
-**If SIMPLIFIER = "skip":**
-Report: "Code simplification skipped (config: skip)"
+**If CODE_REVIEW = "skip":**
+Report: "Code review skipped (config: skip)"
 Proceed to verify_phase_goal.
 
-**If SIMPLIFIER = empty/null:**
-Use default: `SIMPLIFIER="ms-code-simplifier"`
+**If CODE_REVIEW = empty/null:**
+Use default: `CODE_REVIEW="ms-code-simplifier"`
 
 **Otherwise:**
-Use SIMPLIFIER value directly as agent name.
+Use CODE_REVIEW value directly as agent name.
 
 1. **Gather changed files:**
    ```bash
@@ -365,12 +365,12 @@ Use SIMPLIFIER value directly as agent name.
    CHANGED_FILES=$(git diff --name-only $(echo "$PHASE_COMMITS" | tail -1)^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
    ```
 
-2. **Spawn simplifier (agent name from config):**
+2. **Spawn code review agent (from config):**
    ```
    Task(
      prompt="
      <objective>
-     Simplify code modified in phase {phase_number}.
+     Review code modified in phase {phase_number}.
      Preserve all functionality. Improve clarity and consistency.
      </objective>
 
@@ -380,31 +380,31 @@ Use SIMPLIFIER value directly as agent name.
      </scope>
 
      <output>
-     After simplifications, run static analysis and tests.
-     Report what was simplified and verification results.
+     After review and simplifications, run static analysis and tests.
+     Report what was improved and verification results.
      </output>
      ",
-     subagent_type="{SIMPLIFIER}"
+     subagent_type="{CODE_REVIEW}"
    )
    ```
 
 3. **Handle result:**
    - If changes made: Stage and commit
-   - If no changes: Report "No simplifications needed"
+   - If no changes: Report "No improvements needed"
 
-4. **Commit simplifications (if any):**
+4. **Commit review changes (if any):**
    ```bash
-   git add [simplified files]
+   git add [modified files]
    git commit -m "$(cat <<'EOF'
-   refactor({phase}): simplify phase code
+   refactor({phase}): code review improvements
 
-   Simplifier: {agent_type}
-   Files simplified: {count}
+   Reviewer: {agent_type}
+   Files reviewed: {count}
    EOF
    )"
    ```
 
-Report: "Code simplified. Proceeding to verification."
+Report: "Code review complete. Proceeding to verification."
 </step>
 
 <step name="verify_phase_goal">

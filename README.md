@@ -58,7 +58,7 @@ Deterministic chores live in scripts; language models do what they’re good at:
 - **Design phase**: `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation.
 - **Research tooling**: `scripts/ms-lookup/` can be used standalone or inside workflows.
 - **Enhanced verification**: better UAT batching and debugging support when gaps are found.
-- **Automatic code simplification**: after phase execution, a simplifier agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance) with generic fallback. Produces separate commit for easy review. See [Configuration](#configuration).
+- **Automatic code review**: after phase execution (and optionally at milestone completion), a code review agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance) with generic fallback. Produces separate commit for easy review. See [Configuration](#configuration).
 
 ---
 
@@ -281,40 +281,56 @@ Commands are grouped by workflow domain (start → plan → execute → ship →
 
 Mindsystem stores project configuration in `.planning/config.json`. This file is created when you initialize a project and can be edited to customize behavior.
 
-### Code Simplifier
+### Code Review
 
-After phase execution, Mindsystem runs a code simplifier agent to review changes for clarity and maintainability. Configure this in `config.json`:
+After phase execution (and optionally at milestone completion), Mindsystem runs a code review agent to review changes for clarity and maintainability. Configure this in `config.json`:
 
 ```json
 {
-  "simplifier": "ms-code-simplifier"
+  "code_review": {
+    "phase": null,
+    "milestone": null
+  }
 }
 ```
 
-**Available options:**
+**Configuration levels:**
+
+| Level | When it runs | Config key |
+|-------|--------------|------------|
+| Phase | After `/ms:execute-phase` completes | `code_review.phase` |
+| Milestone | After `/ms:audit-milestone` completes | `code_review.milestone` |
+
+**Available values for each level:**
 
 | Value | Behavior |
 |-------|----------|
-| `null` (default) | Uses `ms-code-simplifier` — generic simplifier for any language |
-| `"ms-flutter-simplifier"` | Flutter/Dart-specific simplifier with Riverpod and widget patterns |
-| `"skip"` | Disable code simplification entirely |
+| `null` (default) | Uses `ms-code-simplifier` — generic reviewer for any language |
+| `"ms-flutter-simplifier"` | Flutter/Dart-specific reviewer with Riverpod and widget patterns |
+| `"skip"` | Skip code review at this level |
 | `"my-custom-agent"` | Use any custom agent you've defined |
 
-**Example: Flutter project**
+**Example: Flutter project with phase review only**
 ```json
 {
-  "simplifier": "ms-flutter-simplifier"
+  "code_review": {
+    "phase": "ms-flutter-simplifier",
+    "milestone": "skip"
+  }
 }
 ```
 
-**Example: Skip simplification**
+**Example: Skip all code review**
 ```json
 {
-  "simplifier": "skip"
+  "code_review": {
+    "phase": "skip",
+    "milestone": "skip"
+  }
 }
 ```
 
-The simplifier runs automatically at the end of `/ms:execute-phase` and creates a separate commit for easy review. Changes are purely cosmetic (clarity, consistency) — functionality is preserved.
+Code review runs automatically and creates a separate commit for easy review. Changes are purely cosmetic (clarity, consistency) — functionality is preserved.
 
 ---
 

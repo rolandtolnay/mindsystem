@@ -190,6 +190,69 @@ Plus full markdown report with tables for requirements, phases, integration, tec
 
 Route by status (see `<offer_next>`).
 
+## 8. Code Review (Milestone)
+
+Read code review agent from config:
+
+```bash
+CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.milestone // empty')
+```
+
+**If CODE_REVIEW = "skip":**
+Report: "Milestone code review skipped (config: skip)"
+Proceed to next steps.
+
+**If CODE_REVIEW = empty/null:**
+Use default: `CODE_REVIEW="ms-code-simplifier"`
+
+1. **Get all files changed in milestone:**
+   ```bash
+   # Find first commit in milestone (first phase commit)
+   FIRST_PHASE=$(ls -d .planning/phases/*/ | sort -V | head -1 | xargs basename | cut -d- -f1)
+   FIRST_COMMIT=$(git log --oneline --grep="(${FIRST_PHASE}-" --format="%H" | tail -1)
+
+   # Get all implementation files changed since first commit
+   CHANGED_FILES=$(git diff --name-only ${FIRST_COMMIT}^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
+   ```
+
+2. **Spawn code review agent:**
+   ```
+   Task(
+     prompt="
+     <objective>
+     Review code from milestone {version}.
+     Focus on architectural patterns, cross-phase consistency, and structural improvements.
+     Preserve all functionality. Make changes that improve clarity and maintainability.
+     </objective>
+
+     <scope>
+     Files to analyze:
+     {CHANGED_FILES}
+     </scope>
+
+     <output>
+     After review, run static analysis and tests.
+     Report what was improved and verification results.
+     </output>
+     ",
+     subagent_type="{CODE_REVIEW}"
+   )
+   ```
+
+3. **Commit if changes made:**
+   ```bash
+   git add [modified files]
+   git commit -m "$(cat <<'EOF'
+   refactor(milestone): code review improvements
+
+   Reviewer: {agent_type}
+   Files reviewed: {count}
+   EOF
+   )"
+   ```
+
+Report: "Milestone code review complete."
+
 </process>
 
 <offer_next>
@@ -314,5 +377,6 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 - [ ] Assumptions aggregated by phase
 - [ ] Integration checker spawned for cross-phase wiring
 - [ ] v{version}-MILESTONE-AUDIT.md created with assumptions section
+- [ ] Code review completed (or skipped if config says "skip")
 - [ ] Results presented with actionable next steps
 </success_criteria>
