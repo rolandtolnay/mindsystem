@@ -235,6 +235,14 @@ function install(isGlobal) {
     }
   }
 
+  // Copy skills
+  const skillsSrc = path.join(src, 'skills');
+  if (fs.existsSync(skillsSrc)) {
+    const skillsDest = path.join(claudeDir, 'skills');
+    copyWithPathReplacement(skillsSrc, skillsDest, pathPrefix);
+    console.log(`  ${green}✓${reset} Installed skills`);
+  }
+
   // Copy CHANGELOG.md
   const changelogSrc = path.join(src, 'CHANGELOG.md');
   const changelogDest = path.join(claudeDir, 'mindsystem', 'CHANGELOG.md');

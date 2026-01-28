@@ -205,51 +205,193 @@ Proceed to next steps.
 **If CODE_REVIEW = empty/null:**
 Use default: `CODE_REVIEW="ms-code-simplifier"`
 
-1. **Get all files changed in milestone:**
-   ```bash
-   # Find first commit in milestone (first phase commit)
-   FIRST_PHASE=$(ls -d .planning/phases/*/ | sort -V | head -1 | xargs basename | cut -d- -f1)
-   FIRST_COMMIT=$(git log --oneline --grep="(${FIRST_PHASE}-" --format="%H" | tail -1)
+### Step 8.1: Get Changed Files
 
-   # Get all implementation files changed since first commit
-   CHANGED_FILES=$(git diff --name-only ${FIRST_COMMIT}^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
-   ```
+```bash
+# Find first commit in milestone (first phase commit)
+FIRST_PHASE=$(ls -d .planning/phases/*/ | sort -V | head -1 | xargs basename | cut -d- -f1)
+FIRST_COMMIT=$(git log --oneline --grep="(${FIRST_PHASE}-" --format="%H" | tail -1)
 
-2. **Spawn code review agent:**
-   ```
-   Task(
-     prompt="
-     <objective>
-     Review code from milestone {version}.
-     Focus on architectural patterns, cross-phase consistency, and structural improvements.
-     Preserve all functionality. Make changes that improve clarity and maintainability.
-     </objective>
+# Get all implementation files changed since first commit
+CHANGED_FILES=$(git diff --name-only ${FIRST_COMMIT}^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
+```
 
-     <scope>
-     Files to analyze:
-     {CHANGED_FILES}
-     </scope>
+### Step 8.2: Determine Agent Mode
 
-     <output>
-     After review, run static analysis and tests.
-     Report what was improved and verification results.
-     </output>
-     ",
-     subagent_type="{CODE_REVIEW}"
-   )
-   ```
+```bash
+# Read agent mode from frontmatter
+AGENT_MODE=$(grep -A10 '^---' ~/.claude/agents/${CODE_REVIEW}.md | grep 'mode:' | awk '{print $2}')
+```
 
-3. **Commit if changes made:**
-   ```bash
-   git add [modified files]
-   git commit -m "$(cat <<'EOF'
-   refactor(milestone): code review improvements
+---
 
-   Reviewer: {agent_type}
-   Files reviewed: {count}
-   EOF
-   )"
-   ```
+### Path A: Analysis-Only Reviewers (mode: analyze-only)
+
+For agents with `mode: analyze-only` (e.g., `ms-flutter-reviewer`):
+
+**A1. Spawn reviewer with read-only tools:**
+
+```
+Task(
+  prompt="
+  <objective>
+  Analyze code from milestone {version} for structural issues.
+  Report findings only — do NOT make changes.
+  </objective>
+
+  <scope>
+  Files to analyze:
+  {CHANGED_FILES}
+  </scope>
+
+  <output>
+  Provide findings report with YAML summary block for parsing.
+  </output>
+  ",
+  subagent_type="{CODE_REVIEW}"
+)
+```
+
+**A2. Parse YAML findings from output:**
+
+Extract the `code_review:` YAML block from the reviewer's response.
+
+**A3. Add findings to MILESTONE-AUDIT.md:**
+
+Append to the YAML frontmatter:
+
+```yaml
+code_review:
+  agent: {CODE_REVIEW}
+  files_analyzed: {N}
+  findings_by_impact:
+    high: {X}
+    medium: {Y}
+    low: {Z}
+  findings: [...]
+
+tech_debt:
+  - source: code_review
+    items:
+      - "{issue}: {description} ({file})"
+```
+
+Add markdown section to report body:
+
+```markdown
+## Code Review Findings
+
+**Agent:** {CODE_REVIEW}
+**Files analyzed:** {N}
+
+{Include full findings report from reviewer}
+```
+
+**A4. Present binary decision:**
+
+```markdown
+## Code Review Complete
+
+**Findings:** {total} ({high} high, {medium} medium, {low} low)
+
+### Options
+
+**A. Create quality phase** — Add phase to address findings before completing milestone
+
+**B. Accept as tech debt** — Document findings, proceed to complete milestone
+
+---
+
+Which would you like to do?
+```
+
+Use AskUserQuestion with options A and B.
+
+**A5. Handle decision:**
+
+**If user chooses "Create quality phase":**
+
+1. Determine next phase number (append at end of current phases)
+2. Create phase directory: `.planning/phases/{NN}-code-quality/`
+3. Create `PHASE-FINDINGS.md` with full review findings
+4. Update ROADMAP.md with new phase:
+
+```markdown
+### Phase {N}: Code Quality (Generated)
+**Goal:** Address structural improvements from milestone code review
+
+**Findings to address:**
+[High impact items from review]
+
+Plans:
+- [ ] {N}-01: High impact structural fixes
+```
+
+5. Report:
+```markdown
+## Quality Phase Created
+
+**Phase {N}:** `.planning/phases/{NN}-code-quality/`
+**Findings documented:** `PHASE-FINDINGS.md`
+
+---
+
+## ▶ Next Up
+
+**Plan the quality phase**
+
+`/ms:plan-phase {N}`
+
+<sub>`/clear` first → fresh context window</sub>
+```
+
+**If user chooses "Accept as tech debt":**
+
+Mark `tech_debt` entries as `status: deferred` in MILESTONE-AUDIT.md and continue to offer_next section.
+
+---
+
+### Path B: Simplifier Agents (default)
+
+For agents without `mode: analyze-only` (e.g., `ms-code-simplifier`, `ms-flutter-simplifier`):
+
+**B1. Spawn code review agent:**
+
+```
+Task(
+  prompt="
+  <objective>
+  Review code from milestone {version}.
+  Focus on architectural patterns, cross-phase consistency, and structural improvements.
+  Preserve all functionality. Make changes that improve clarity and maintainability.
+  </objective>
+
+  <scope>
+  Files to analyze:
+  {CHANGED_FILES}
+  </scope>
+
+  <output>
+  After review, run static analysis and tests.
+  Report what was improved and verification results.
+  </output>
+  ",
+  subagent_type="{CODE_REVIEW}"
+)
+```
+
+**B2. Commit if changes made:**
+
+```bash
+git add [modified files]
+git commit -m "$(cat <<'EOF'
+refactor(milestone): code review improvements
+
+Reviewer: {agent_type}
+Files reviewed: {count}
+EOF
+)"
+```
 
 Report: "Milestone code review complete."
 
@@ -378,5 +520,8 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 - [ ] Integration checker spawned for cross-phase wiring
 - [ ] v{version}-MILESTONE-AUDIT.md created with assumptions section
 - [ ] Code review completed (or skipped if config says "skip")
+- [ ] If analyze-only reviewer: YAML findings parsed and added to report
+- [ ] If analyze-only reviewer: Binary decision presented (quality phase vs tech debt)
+- [ ] If quality phase chosen: Phase directory created with PHASE-FINDINGS.md
 - [ ] Results presented with actionable next steps
 </success_criteria>

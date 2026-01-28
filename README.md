@@ -59,6 +59,7 @@ Deterministic chores live in scripts; language models do what they’re good at:
 - **Research tooling**: `scripts/ms-lookup/` can be used standalone or inside workflows.
 - **Enhanced verification**: better UAT batching and debugging support when gaps are found.
 - **Automatic code review**: after phase execution (and optionally at milestone completion), a code review agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance) with generic fallback. Produces separate commit for easy review. See [Configuration](#configuration).
+- **Skills distribution**: bundled skills (like `flutter-senior-review`) are installed to `~/.claude/skills/` and provide domain-specific expertise for code reviews and audits.
 
 ---
 
@@ -307,6 +308,7 @@ After phase execution (and optionally at milestone completion), Mindsystem runs 
 |-------|----------|
 | `null` (default) | Uses `ms-code-simplifier` — generic reviewer for any language |
 | `"ms-flutter-simplifier"` | Flutter/Dart-specific reviewer with Riverpod and widget patterns |
+| `"ms-flutter-reviewer"` | Flutter/Dart structural analysis (reports only, does not modify code). When used at milestone level, offers binary choice: create quality phase or accept as tech debt. |
 | `"skip"` | Skip code review at this level |
 | `"my-custom-agent"` | Use any custom agent you've defined |
 

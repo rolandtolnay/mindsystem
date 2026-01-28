@@ -91,8 +91,9 @@ mindsystem/
 │   ├── ms-researcher.md     # Domain research
 │   ├── ms-roadmapper.md     # Creates ROADMAP.md
 │   ├── ms-designer.md       # UI/UX design specs
-│   ├── ms-code-simplifier.md    # Post-execution code review
+│   ├── ms-code-simplifier.md    # Post-execution code review (generic)
 │   ├── ms-flutter-simplifier.md # Flutter-specific simplification
+│   ├── ms-flutter-reviewer.md   # Flutter structural analysis (analyze-only)
 │   ├── ms-codebase-mapper.md    # Brownfield codebase analysis
 │   └── ...
 ├── commands/ms/         # Slash commands (/ms:*)
@@ -106,6 +107,11 @@ mindsystem/
 ├── mindsystem/          # Core system
 │   ├── workflows/            # Step-by-step procedures
 │   └── templates/            # Output structures (STATE.md, SUMMARY.md, etc.)
+├── skills/               # Domain expertise skills
+│   └── flutter-senior-review/   # Flutter code review principles
+│       ├── SKILL.md             # Skill definition
+│       ├── AGENTS.md            # Full compiled document for agents
+│       └── principles/          # 12 principle files
 └── scripts/              # Shell scripts for automation
     ├── generate-phase-patch.sh
     └── ms-lookup/            # Research tooling (Python)
@@ -143,7 +149,7 @@ Mindsystem creates `.planning/` directory in user projects:
 {
   "code_review": {
     "phase": "ms-flutter-simplifier",
-    "milestone": null
+    "milestone": "ms-flutter-reviewer"
   }
 }
 ```
@@ -154,9 +160,15 @@ Mindsystem creates `.planning/` directory in user projects:
 
 **Values for each level:**
 - `null` or omitted — Uses `ms-code-simplifier` (default)
-- `"ms-flutter-simplifier"` — Flutter/Dart-specific reviewer
-- `"ms-code-simplifier"` — Generic code reviewer
+- `"ms-flutter-simplifier"` — Flutter/Dart-specific reviewer (makes changes)
+- `"ms-flutter-reviewer"` — Flutter structural analysis (analyze-only, reports findings)
+- `"ms-code-simplifier"` — Generic code reviewer (makes changes)
 - `"skip"` — Skip code review at this level
+
+**Agent modes:**
+- Default agents (simplifiers) make changes and commit
+- Agents with `mode: analyze-only` in frontmatter report findings without modifying code
+- For analyze-only reviewers at milestone level, user gets binary choice: create quality phase or accept as tech debt
 </config_json>
 
 <core_workflow>
@@ -175,6 +187,10 @@ Mindsystem creates `.planning/` directory in user projects:
 **Design phase.** `/ms:design-phase` generates a UI/UX spec (flows, components, wireframes) before implementation. Use for UI-heavy work.
 
 **Automatic code review.** After phase execution (and optionally at milestone completion), a code review agent reviews code for clarity and maintainability. Stack-aware (Flutter gets specialized guidance via ms-flutter-simplifier) with generic fallback (ms-code-simplifier). Produces separate commit for easy review. Configure `code_review.phase` and `code_review.milestone` in config.json.
+
+**Analyze-only reviewers.** Agents with `mode: analyze-only` (like ms-flutter-reviewer) report structural findings without modifying code. At milestone level, these offer binary choice: create quality phase or accept as tech debt.
+
+**Skills distribution.** Bundled skills (like `flutter-senior-review`) provide domain-specific expertise. Installed to `~/.claude/skills/` and referenced by agents and workflows.
 
 **Research tooling.** `scripts/ms-lookup/` provides standalone research capabilities. Can be used inside workflows or directly.
 
@@ -267,6 +283,7 @@ Key locations (relative to repo root):
 |------|------|
 | Commands | `commands/ms/` |
 | Agents | `agents/` |
+| Skills | `skills/` |
 | Workflows | `mindsystem/workflows/` |
 | Templates | `mindsystem/templates/` |
 | Scripts | `scripts/` |
@@ -288,6 +305,7 @@ All in `agents/`:
 | ms-codebase-mapper | Analyze existing codebase structure | map-codebase |
 | ms-code-simplifier | Post-execution code review (generic) | execute-phase |
 | ms-flutter-simplifier | Post-execution code review (Flutter) | execute-phase |
+| ms-flutter-reviewer | Flutter structural analysis (analyze-only) | audit-milestone |
 | ms-plan-checker | Validate plans before execution | check-phase |
 | ms-milestone-auditor | Audit milestone completion | audit-milestone |
 | ms-integration-checker | Verify cross-phase integration | audit-milestone |

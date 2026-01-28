@@ -10,7 +10,8 @@
     "commands",
     "mindsystem",
     "agents",
-    "scripts"
+    "scripts",
+    "skills"
   ],
   "keywords": [
     "claude",
