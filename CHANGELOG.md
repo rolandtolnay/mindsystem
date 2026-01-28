@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-01-28
+
+### Added
+- **Adhoc code review configuration** — New `code_review.adhoc` field in config.json for `/ms:do-work` with cascade fallback (adhoc → phase → default)
+- **`ms-flutter-reviewer` structural analysis** — New analyze-only reviewer for Flutter projects that reports findings without modifying code. At milestone level, offers binary choice: create quality phase or accept as tech debt
+
+### Changed
+- **Milestone code review default** — `/ms:audit-milestone` now defaults to `ms-flutter-reviewer` instead of `ms-code-simplifier`
+- **Stack detection sets all code review fields** — `/ms:map-codebase` and `/ms:research-project` now configure all three levels (adhoc, phase, milestone) based on detected framework
+
 ## [3.4.0] - 2026-01-27
 
 ### Added
@@ -281,7 +291,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.4.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.5.0
 [3.4.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.4.0
 [3.3.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.3.0
 [3.2.3]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.2.3
