@@ -96,13 +96,19 @@ Write these documents to .planning/codebase/:
 - STACK.md - Languages, runtime, frameworks, dependencies, configuration
 - INTEGRATIONS.md - External APIs, databases, auth providers, webhooks
 
-After writing STACK.md, update config.json code_review.phase field with the appropriate agent name:
+After writing STACK.md, update config.json code_review fields with the appropriate agent names:
 1. Read STACK.md to detect primary framework
-2. Map framework to code review agent name:
-   - Flutter/Dart → "ms-flutter-simplifier"
-   - All others (React, Next.js, Node, Swift, Kotlin, etc.) → "ms-code-simplifier"
-3. If .planning/config.json exists: update the code_review.phase field
-   If not: note the recommended code review agent for later config creation
+2. Map framework to code review agent names:
+   - Flutter/Dart:
+     - adhoc: "ms-flutter-simplifier"
+     - phase: "ms-flutter-simplifier"
+     - milestone: "ms-flutter-reviewer"
+   - All others (React, Next.js, Node, Swift, Kotlin, etc.):
+     - adhoc: "ms-code-simplifier"
+     - phase: "ms-code-simplifier"
+     - milestone: (leave as null — runtime defaults to ms-flutter-reviewer)
+3. If .planning/config.json exists: update all three code_review fields
+   If not: note the recommended code review agents for later config creation
 
 Explore thoroughly. Write documents directly using templates. Return confirmation only.
 ```

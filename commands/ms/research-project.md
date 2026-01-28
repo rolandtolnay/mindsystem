@@ -299,11 +299,17 @@ Create SUMMARY.md with:
 - Confidence assessment
 - Gaps to address
 
-After creating SUMMARY.md, update config.json simplifier with agent name:
+After creating SUMMARY.md, update config.json code_review fields with agent names:
 1. Read recommended stack from STACK.md
-2. Map to simplifier agent name:
-   - Flutter/Dart → \"ms-flutter-simplifier\"
-   - All others → \"ms-code-simplifier\"
+2. Map to code review agent names:
+   - Flutter/Dart:
+     - adhoc: \"ms-flutter-simplifier\"
+     - phase: \"ms-flutter-simplifier\"
+     - milestone: \"ms-flutter-reviewer\"
+   - All others:
+     - adhoc: \"ms-code-simplifier\"
+     - phase: \"ms-code-simplifier\"
+     - milestone: (leave as null)
 3. Update .planning/config.json (create from template if needed)
 
 Then commit ALL research files together:

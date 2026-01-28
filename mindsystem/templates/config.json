@@ -13,6 +13,7 @@
     "always_confirm_external_services": true
   },
   "code_review": {
+    "adhoc": null,
     "phase": null,
     "milestone": null
   }

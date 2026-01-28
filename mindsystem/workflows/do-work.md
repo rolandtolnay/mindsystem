@@ -221,7 +221,7 @@ Keep verification focused on the specific changes made.
 Read code review agent from config:
 
 ```bash
-CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.phase // empty')
+CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.adhoc // .code_review.phase // empty')
 ```
 
 **If CODE_REVIEW = "skip":**

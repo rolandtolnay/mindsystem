@@ -203,7 +203,7 @@ Report: "Milestone code review skipped (config: skip)"
 Proceed to next steps.
 
 **If CODE_REVIEW = empty/null:**
-Use default: `CODE_REVIEW="ms-code-simplifier"`
+Use default: `CODE_REVIEW="ms-flutter-reviewer"`
 
 ### Step 8.1: Get Changed Files
 

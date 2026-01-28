@@ -58,7 +58,7 @@ Create .planning/adhoc/{timestamp}-{slug}-SUMMARY.md.
 </step>
 
 <step name="code_review">
-Read `code_review.phase` from config.json (default: `ms-code-simplifier`).
+Read `code_review.adhoc` from config.json (fallback: `code_review.phase`, default: `ms-code-simplifier`).
 If `"skip"`: proceed to update_state_and_commit.
 Spawn code review agent with modified files.
 Track if code review changes were applied for commit message.

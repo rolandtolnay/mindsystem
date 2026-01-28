@@ -148,6 +148,7 @@ Mindsystem creates `.planning/` directory in user projects:
 ```json
 {
   "code_review": {
+    "adhoc": "ms-flutter-simplifier",
     "phase": "ms-flutter-simplifier",
     "milestone": "ms-flutter-reviewer"
   }
@@ -155,11 +156,16 @@ Mindsystem creates `.planning/` directory in user projects:
 ```
 
 **Code review levels:**
+- `code_review.adhoc` — Runs after `/ms:do-work` (adhoc work review, falls back to `phase`)
 - `code_review.phase` — Runs after `/ms:execute-phase` (per-phase review)
 - `code_review.milestone` — Runs after `/ms:audit-milestone` (cross-phase review)
 
-**Values for each level:**
-- `null` or omitted — Uses `ms-code-simplifier` (default)
+**Default values:**
+- `adhoc` — Falls back to `phase` value, then `ms-code-simplifier`
+- `phase` — `ms-code-simplifier`
+- `milestone` — `ms-flutter-reviewer`
+
+**Available values:**
 - `"ms-flutter-simplifier"` — Flutter/Dart-specific reviewer (makes changes)
 - `"ms-flutter-reviewer"` — Flutter structural analysis (analyze-only, reports findings)
 - `"ms-code-simplifier"` — Generic code reviewer (makes changes)

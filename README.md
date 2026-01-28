@@ -289,6 +289,7 @@ After phase execution (and optionally at milestone completion), Mindsystem runs 
 ```json
 {
   "code_review": {
+    "adhoc": null,
     "phase": null,
     "milestone": null
   }
@@ -297,27 +298,30 @@ After phase execution (and optionally at milestone completion), Mindsystem runs 
 
 **Configuration levels:**
 
-| Level | When it runs | Config key |
-|-------|--------------|------------|
-| Phase | After `/ms:execute-phase` completes | `code_review.phase` |
-| Milestone | After `/ms:audit-milestone` completes | `code_review.milestone` |
+| Level | When it runs | Config key | Default |
+|-------|--------------|------------|---------|
+| Adhoc | After `/ms:do-work` completes | `code_review.adhoc` | Falls back to `phase`, then `ms-code-simplifier` |
+| Phase | After `/ms:execute-phase` completes | `code_review.phase` | `ms-code-simplifier` |
+| Milestone | After `/ms:audit-milestone` completes | `code_review.milestone` | `ms-flutter-reviewer` |
 
 **Available values for each level:**
 
 | Value | Behavior |
 |-------|----------|
-| `null` (default) | Uses `ms-code-simplifier` — generic reviewer for any language |
+| `null` (default) | Uses level-specific default (see table above) |
 | `"ms-flutter-simplifier"` | Flutter/Dart-specific reviewer with Riverpod and widget patterns |
 | `"ms-flutter-reviewer"` | Flutter/Dart structural analysis (reports only, does not modify code). When used at milestone level, offers binary choice: create quality phase or accept as tech debt. |
+| `"ms-code-simplifier"` | Generic code reviewer for any language |
 | `"skip"` | Skip code review at this level |
 | `"my-custom-agent"` | Use any custom agent you've defined |
 
-**Example: Flutter project with phase review only**
+**Example: Flutter project with separate adhoc and phase reviewers**
 ```json
 {
   "code_review": {
+    "adhoc": "ms-flutter-simplifier",
     "phase": "ms-flutter-simplifier",
-    "milestone": "skip"
+    "milestone": "ms-flutter-reviewer"
   }
 }
 ```
@@ -326,6 +330,7 @@ After phase execution (and optionally at milestone completion), Mindsystem runs 
 ```json
 {
   "code_review": {
+    "adhoc": "skip",
     "phase": "skip",
     "milestone": "skip"
   }
