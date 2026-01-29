@@ -1,161 +1,154 @@
-### Widget Structure
+---
+description: Review Flutter/Dart code for quality and pattern compliance
+argument-hint: <file-or-pattern>
+---
 
-- Extract complex nested widgets into private builder methods (`_buildHeader()`, `_buildContent()`)
+# Flutter Code Quality
+
+Review these files for compliance: $ARGUMENTS
+
+Read files, check against rules below. Output concise but comprehensive—sacrifice grammar for brevity. High signal-to-noise.
+
+## Rules
+
+## Widget Structure
+
+- Extract nested widgets into private builders: `_buildHeader()`, `_buildContent()`
 - Early return for empty states: `if (items.isEmpty) return const SizedBox.shrink();`
-- Keep build methods focused and readable by decomposing large widget trees
-- IMPORTANT: Move callbacks inside `build()` when they need 4+ parameters from local scope (hooks, refs, notifiers): define `void handleSubmit() { ... }` inside build rather than `_handleSubmit(ref, controller, user, state)` outside
+- Callbacks needing 4+ local scope params → define inside `build()`: `void handleSubmit() { ... }` not `_handleSubmit(ref, controller, user, state)`
+- Simple child widgets → named local variables: `final bar = Container(...);` not `_buildBar()`
+- Single-line guard clauses: `if (data == null) return const SizedBox(width: _kBarWidth);`
 
-### Model Conversions
+## State & Providers
 
-- Use factory constructors for domain-to-UI conversions: `WidgetState.fromDomainModel()`
-- Encapsulate conversion logic instead of manual property mapping
-- Prefer `.map()` with spread syntax for list conversions
+- Dedicated providers for discrete actions: `loginProvider`, `saveProvider` not methods on monolithic provider
+- Loading flags from provider state: `final isLoading = actionProvider.isLoading` not `useState<bool>(false)`
+- On-demand action providers: `FutureOr<T?> build() => null;`
+- Action outcomes via `ref.listen` + `whenOrNull`: `next.whenOrNull(data: (result) => ..., error: (e, _) => showError(e))`
+- Parallel async fetch: `final (a, b, c) = await (ref.watch(aProvider.future), ...).wait;`
+- Provider actions return `void`, never rethrow; use `AsyncValue.guard()`
+- Prefer `.value` over `.asData?.value`: `asyncValue.value ?? []`
+- Error handling: `ref.listenOnError(provider)` at screen level; let errors propagate
 
-### Defensive Programming
+## Sealed Classes
 
-- Make callbacks optional with nullable types: `final VoidCallback? onDismiss;`
-- IMPORTANT: Use null-safe invocation: `onDismiss?.call()` instead of direct calls
-- Use `firstWhereOrNull` with fallbacks: `items.firstWhereOrNull((x) => x.isSelected) ?? items.first`
-- Guard against empty collections at method entry points
+- Replace boolean flags with sealed variants: `sealed class State {}` with `Loading`, `Ready`, `Error`
+- Switch expressions for exhaustive handling: `return switch (state) { Loading() => ..., Ready(:final data) => ... };`
+- Shared params in base constructor: `sealed class Mode { const Mode({required this.id}); final String id; }`
 
-### Hook Usage
+## Domain & Business Logic
 
-- Prefer semantic project-specific hooks over generic ones: `useInitAsync()`, `useFormController()` instead of `useEffect()`
-- Use `useMemoized` for simple derived values over creating single-use providers: `useMemoized(() => items.any((e) => e.isExpansion), [items])`
+- Business rules in entity computed properties: `bool get canDelete => isOwner && !isArchived;`
+- Records for multiple related values: `({int? multiplier, int reward}) applyBonus(int base)`
+- Nullability as feature flag: check `bonus?.multiplier != null` not separate `isPremium` boolean
+- Magic numbers in domain extensions, not scattered in widgets
+- Presentation logic in domain extensions: `extension on Model { String get displayText => ... }`
+- Computed properties on enums: `enum SortOrder { ...; String get label => switch (this) { ... }; }`
+- Entity computed properties over comparisons: `where((e) => e.isActive)` not `where((e) => e.status == Status.active)`
 
-### Data Modeling
+## Collections
 
-- Use structured types over primitives for domain concepts: `Address` instead of `street: String, city: String`
-- Suffix data model classes consistently: `UserProfileData` for state containers
-- Use nullable Function types in copyWith for optional updates: `Address? Function()? address`
+- Immutable methods: `.sorted((a, b) => ...)` not `.toList()..sort()`
+- Import `package:collection/collection.dart` for `sorted()`, `firstWhereOrNull()`, `groupBy()`
+- `compactMap` over `map` + `whereType<T>()`
+- `.divide()` for spacing: `items.map((e) => Widget()).divide(const SizedBox(width: 8))`
+- `firstWhereOrNull` with fallback: `items.firstWhereOrNull((x) => x.isSelected) ?? items.first`
+- Map over `EnumType.values`: `SortOrder.values.map((e) => ChoiceChip(label: Text(e.label)))`
 
-### Input Handling
+## Forms & Input
 
-- YOU MUST sanitize text input on capture: `notifier.updateField(value: controller.text.trim())`
-- Simplify state setters without conditional logic: always set state regardless of value
-- Keep input controllers synchronized with state via useEffect listeners
+- Sanitize on capture: `notifier.updateField(value: controller.text.trim())`
+- Validation in Validator class: `validator.validateEmail(email)`
+- Feature-specific translation keys: `LocaleKeys.validation_email_required`
+- Label optional fields explicitly: `'Email (optional)'`
+- Semantic spacing: `Spacing.section` between major sections
+- Framework widgets over generic: `CustomSlider` not `Slider`
+- Clean placeholders: `'Acme Corp'` not `'e.g. Acme Corp'`
 
-### Form Design
+## Hooks
 
-- Use semantic spacing constants for hierarchy: `Spacing.section` between major sections
-- Label optional fields explicitly: `'Email (optional)'` instead of asterisks
-- Prefer framework-specific widgets: `CustomSlider` over generic `Slider` for design consistency
-- Simplify placeholder text without redundant prefixes: `'Acme Corp'` instead of `'e.g. Acme Corp'`
-- Apply consistent typography scales for form labels: `context.typography.heading` for section titles
+- Semantic project hooks: `useInitAsync()`, `useFormController()` not raw `useEffect()`
+- `useMemoized` for derived values: `useMemoized(() => items.any((e) => e.isExpansion), [items])`
+- `useIsMounted()` guard for async state updates
+- Disposable resources in `useRef`: `final controllerRef = useRef<Controller?>(null);`
 
-### Form Validation
+## Model & Data
 
-- YOU MUST centralize validation logic in Validator class methods: `validator.validateEmail(email)`
-- Use feature-specific translation keys for validation messages: `LocaleKeys.validation_email_required`
-- Extract complex validation conditions into named methods: `bool hasValidInput()`
+- Factory constructors for conversions: `WidgetState.fromDomainModel()`
+- Fallback factories: `DateModel.fallback()` for nullable dates
+- Nullable callbacks: `final VoidCallback? onDismiss;` with `onDismiss?.call()`
+- Structured types over primitives: `Address` not `street: String, city: String`
+- Nullable Function in copyWith: `Address? Function()? address`
+- Suffix data classes: `UserProfileData`
 
-### Factory Methods
+## Widget API
 
-- Provide fallback factory constructors for safe defaults: `DateModel.fallback()` when date might be null
-- Remove unnecessary state from data models: eliminate derived properties if computed from other state
+- Flexible styling with fallback chains: `iconColor ?? color ?? context.color.primary`
+- Pass domain-computed records: `bonus: user?.applyRewardBonus(baseReward)` not raw flags
+- Optional computed values for extensibility: `RewardModal({required int baseReward, int? boostedReward})`
+- Derive UI booleans from records in widgets: `final hasBonus = bonus?.multiplier != null;`
 
-### Business Logic & Domain Design
+## Animation
 
-- IMPORTANT: Encapsulate business rules in entity computed properties instead of scattering logic in UI/providers: `bool get canDelete => isOwner && !isArchived;`
-- IMPORTANT: Return records from domain methods when multiple related values must stay in sync: `({int? multiplier, int reward}) applyBonus(int base)` prevents drift between multiplier value and computed result
-- Use nullability as a feature flag in returned records: check `bonus?.multiplier != null` instead of separate `isPremium` boolean; enables future extension without API changes
-- Centralize magic numbers in domain extensions rather than scattering across widgets: define `const premiumMultiplier = 2` once in `applyRewardBonus()` not in 4 widget files
+- Single widget with optional animation: `Animation<double>?` with `animation?.value ?? 1.0`
+- `Listenable.merge()` over nested AnimatedBuilders
+- Modal/sheet widgets with static `show`: `static Future<void> show(BuildContext context) => showAppBottomSheet(builder: (_) => MyModal())`
 
-### Error Handling
+## Theme & Styling
 
-- IMPORTANT: Centralize error handling with `ref.listenOnError(provider)` at screen level; let providers use `AsyncValue.guard()` instead of manual try-catch in action methods
-- Keep API layer methods simple: only use try/catch when converting to domain-specific errors; omit error handling entirely when no special conversion is needed and let errors propagate to providers
+- App color constants: `context.color.gray400` not `const Color(0xFF9E9E9E)`
+- Theme classes with factory constructors: `PodiumTheme.fromRank(rank, brightness)`
+- Switch expressions for variants: `double get _height => switch (placement) { 1 => 192.0, 2 => 128.0, _ => 96.0 };`
+- Light/dark via factory: `factory Theme.fromType(type, context.brightness)`
 
-### Widget API Design
+## Extensions
 
-- Support flexible styling with fallback chains and both general/specific parameters: `iconColor ?? color ?? context.color.primary`
-- Pass domain-computed records to widgets instead of raw flags: `bonus: user?.applyRewardBonus(baseReward)` not `isPremium: user?.premium ?? false`; keeps calculation logic out of widgets
-- Design widget APIs with optional computed values for extensibility: `RewardModal({required int baseReward, int? boostedReward, int? multiplier})` allows future bonus types without breaking changes
+- Private extensions for file-local computations: `extension on UserEntity { ... }`
+- Styling methods on type extensions in same file: `extension on ButtonStyle { BoxDecoration buildDecoration(context) => ... }`
 
-### Code Organization
+## Project Structure
 
-- Extract complex widget trees into separate files when they exceed ~100 lines or contain multiple related widgets
-- Promote private widgets to public widgets in dedicated files: move `_DetailWidget` to `detail_widget.dart` with related components
+- Flat feature directories: `lib/home/home_screen.dart` not `lib/features/home/presentation/`
+- Consolidate constants: add to `app_constants.dart` not new single-value files
+- No barrel files that only re-export
+- Scoped provider names: `collectionExpansionVisibilityProvider` not generic `expansionVisibilityProvider`
+- Extract widgets >100 lines to separate files
 
-### Collection Operations
+## Localization
 
-- YOU MUST use immutable collection methods over mutation: `.sorted((a, b) => ...)` instead of `.toList()..sort((a, b) => ...)`
-- Import `package:collection/collection.dart` for functional collection utilities like `sorted()`, `firstWhereOrNull()`, `groupBy()`
-- Use `.divide()` extension to insert spacing between dynamically generated widgets: `items.map((e) => Widget()).divide(const SizedBox(width: 8))`
+- Translation placeholders for dynamic values: `"{multiplier}x Premium Bonus!"`
+- Remove unused keys when logic centralizes
 
-### Domain Property Usage
+## Anti-Patterns (flag these)
 
-- Use entity computed properties over direct comparisons: `where((e) => e.isActive)` instead of `where((e) => e.status == Status.active)`
-- IMPORTANT: Move presentation logic to domain extensions: `extension on Model { String get displayText => ... }` rather than private widget methods
-- Add computed display properties directly on enums: `enum SortOrder { ...; String get label => switch (this) { ... }; }` instead of hardcoding labels in widget builders
-- Map over `EnumType.values` to generate widgets dynamically: `SortOrder.values.map((e) => ChoiceChip(label: Text(e.label), ...))` instead of defining each widget individually
-- Derive UI booleans from returned records in widgets: `final hasBonus = bonus?.multiplier != null;` rather than passing separate boolean props alongside data
+- `useState<bool>` for loading states (use provider state)
+- Manual try-catch in provider actions (use `AsyncValue.guard()`)
+- `.toList()..sort()` (use `.sorted()`)
+- `_handleAction(ref, controller, user, state)` with 4+ params (move inside build)
+- Hardcoded hex colors (use `context.color.*`)
+- Deep feature directories `lib/features/x/presentation/`
+- Barrel files that only re-export
+- Boolean flags instead of sealed classes for complex state
+- Magic numbers scattered across widgets
+- `where((e) => e.status == Status.active)` (use computed property)
+- Generic `expansionVisibilityProvider` names
+- `.asData?.value` (use `.value`)
+- Separate `isPremium` boolean alongside `multiplier` data
 
-### Project Structure
+## Output Format
 
-- Prefer flat feature directories over deep nesting: `lib/home/home_screen.dart` instead of `lib/features/home/presentation/home_screen.dart`
-- Consolidate single-value constants into existing constant files: add to `app_constants.dart` instead of creating `payment_channel.dart`
-- Eliminate barrel files that only re-export: import `app_info_provider.dart` directly instead of through a `home_providers.dart` re-export layer
+Group by file. Use `file:line` format. Terse findings.
 
-### Provider Naming
+```text
+## lib/home/home_screen.dart
 
-- Prefix providers with feature scope when names could be ambiguous: `collectionExpansionVisibilityProvider` instead of generic `expansionVisibilityProvider`
+lib/home/home_screen.dart:42 - useState for loading state → use provider
+lib/home/home_screen.dart:67 - .toList()..sort() → .sorted()
+lib/home/home_screen.dart:89 - hardcoded Color(0xFF...) → context.color.*
 
-### Theme & Styling
+## lib/models/user.dart
 
-- YOU MUST use app color constants from `AppColors` instead of hardcoding hex values: `AppColors.gray400` not `const Color(0xFF9E9E9E)`; keeps colors centralized and maintains design consistency
-- Extract color schemes and visual variants into dedicated theme classes with factory constructors: `PodiumTheme.fromRank(rank, brightness)` instead of scattered color constants
-- Support light/dark modes in custom themes via factory methods accepting `Brightness`: `factory Theme.fromType(type, context.brightness)`
-- Use switch expressions for variant-specific computed properties: `double get _height => switch (placement) { 1 => 192.0, 2 => 128.0, _ => 96.0 };`
+✓ pass
+```
 
-### Widget Composition
-
-- For simple, non-reusable child widgets, create named local variables instead of builder methods: `final bar = Container(...); return Column(children: [avatar, bar]);`
-- Prefer concise single-line guard clauses in builder methods: `if (data == null) return const SizedBox(width: _kBarWidth);`
-- IMPORTANT: Define modal/bottom sheet widgets with a static `show` method that encapsulates display logic: `static Future<void> show(BuildContext context, {...}) => showAppBottomSheet(builder: (_) => MyModal(...))`
-
-### Animation Patterns
-
-- Consolidate static and animated widget variants into a single widget with optional animation parameters: use `Animation<double>?` with fallback defaults `animation?.value ?? 1.0` instead of separate `StaticWidget` and `AnimatedWidget` classes
-- Use `Listenable.merge()` to combine multiple animations into one AnimatedBuilder instead of nesting: `AnimatedBuilder(animation: Listenable.merge([anim1, anim2]), builder: ...)`
-
-### Async Provider Patterns
-
-- Use record destructuring with `.wait` to fetch multiple independent async values in parallel: `final (a, b, c) = await (ref.watch(aProvider.future), ref.watch(bProvider.future), ref.watch(cProvider.future)).wait;`
-- IMPORTANT: Provider action methods should return `void` and never rethrow state errors; use `AsyncValue.guard()` and let state hold the error
-- Prefer `.value` over `.asData?.value` for AsyncValue access: `asyncValue.value ?? []` instead of `asyncValue.asData?.value ?? []`
-
-### Single-Action Provider Pattern
-
-- IMPORTANT: Create dedicated providers for discrete async actions (`loginProvider`, `logoutProvider`, `saveProvider`) instead of adding methods to monolithic state providers; enables independent loading/error state per action
-- IMPORTANT: Derive loading flags from provider state: `final isLoading = actionProvider.isLoading` instead of `useState<bool>(false)` with manual toggle
-- Use `FutureOr<T?> build() => null;` for on-demand action providers so they only execute when explicitly triggered
-- Handle action outcomes with `ref.listen` and `whenOrNull`: `ref.listen(provider, (_, next) { next.whenOrNull(data: (result) { if (result == null) return; /* success */ }, error: (e, _) => showError(e)); });`
-- Avoid manual state transition detection (`didComplete = prev.isLoading && !next.isLoading`); let `whenOrNull` naturally fire only on data/error states
-
-### Collection Operations (Advanced)
-
-- Use `compactMap` instead of `map` + `whereType<T>()` for nullable transformations: `items.compactMap((e) => transform(e)).toList()` instead of `items.map((e) => nullable(e)).whereType<T>().toList()`
-
-### File-Scoped Extensions
-
-- Define private extensions for reusable computations local to a single file: `extension on Iterable<int> { int? get average => isNotEmpty ? reduce((a, b) => a + b) ~/ length : null; }`
-- IMPORTANT: Move widget styling methods to type extensions when they operate on a single parameter: `extension on ButtonStyle { BoxDecoration buildDecoration(BuildContext context) => switch (this) { ... }; }` instead of `_buildDecoration(ButtonStyle style)` as a widget method
-
-### State Modeling with Sealed Classes
-
-- IMPORTANT: Replace multiple boolean flags with sealed class variants: `sealed class State {}` with `Loading`, `Ready`, `Error` subclasses instead of `bool _isLoading, bool _hasError`
-- Use switch expressions for exhaustive state handling: `return switch (state) { Loading() => ..., Ready(:final data) => ..., Error(:final error) => ... };`
-- Include relevant data in each sealed class variant: `class Ready { final Controller controller; }` rather than keeping data separate from state
-- IMPORTANT: Define shared parameters in sealed class base constructor to avoid duplication: `sealed class Mode { const Mode({required this.id}); final String id; }` instead of declaring `id` in each subclass
-
-### Async Resource Hooks
-
-- Encapsulate async resource lifecycle in custom hooks: `useVideoPlayerController()` handles init, config, and disposal internally
-- Use `useIsMounted()` to guard state updates after async operations: `if (!isMounted()) return;` before each `state.value =` assignment
-- Store disposable resources in `useRef` for cleanup access: `final controllerRef = useRef<Controller?>(null);` with `useEffect(() => () => controllerRef.value?.dispose(), const []);`
-
-### Localization & Dynamic Content
-
-- Use translation placeholders for values that may change: `"{multiplier}x Premium Bonus!"` instead of hardcoded `"2x Premium Bonus!"`; enables future flexibility without translation file changes
-- Remove unused translation keys when centralizing logic: delete `premium_multiplier` key when multiplier display becomes dynamic from code
+State issue + location. Skip explanation unless fix non-obvious. No preamble.
