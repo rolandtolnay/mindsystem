@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-01-29
+
+### Added
+- **`flutter-code-simplification` skill** — Reusable Flutter code simplification principles extracted into standalone SKILL.md for both `ms-flutter-code-quality` and `ms-flutter-simplifier` agents
+- **`ms-flutter-code-quality` agent** — Three-pass code quality analysis (patterns, widgets, structure) with embedded guidelines and remote gist reference for fresh rules
+- **`flutter-code-quality` skill** — Code quality skill covering anti-patterns, widget organization, folder structure conventions
+- **Manifest-based file tracking** — Installer now tracks files with SHA-256 checksums in `.manifest.json` for automatic orphan cleanup when commands/agents are deleted
+- **Interactive conflict resolution** — `--force` flag to skip prompts for locally modified files during installation
+
+### Changed
+- **`ms-flutter-code-quality` agent behavior** — Shifted from conservative reviewer to autonomous refactorer: applies guidelines unless verification fails, with "Preserve Behavior" as first non-negotiable principle
+- **Simplified code quality output** — Removed "needs review" category; agent now makes binary decisions (fix when confident, leave unchanged when uncertain)
+- **Release process** — npm publish step removed (requires manual authentication)
+
 ## [3.5.0] - 2026-01-28
 
 ### Added
@@ -291,7 +305,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.5.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.6.0...HEAD
+[3.6.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.6.0
 [3.5.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.5.0
 [3.4.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.4.0
 [3.3.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.3.0
