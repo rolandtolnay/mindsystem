@@ -284,18 +284,10 @@ Result: Phase 17 deleted, phases 18-20 become 17-19
 
 ### Milestone Management
 
-**`/ms:discuss-milestone`**
-Figure out what you want to build in the next milestone.
-
-- Reviews what shipped in previous milestone
-- Helps you identify features to add, improve, or fix
-- Routes to /ms:new-milestone when ready
-
-Usage: `/ms:discuss-milestone`
-
 **`/ms:new-milestone <name>`**
 Create a new milestone with phases for an existing project.
 
+- Use when: you shipped a version and want to scope the next one (or you want guided discovery for what to build next).
 - Adds milestone section to ROADMAP.md
 - Creates phase directories
 - Updates STATE.md for new milestone
@@ -528,8 +520,7 @@ Common options:
 **Implementing a new feature after shipping (new milestone):**
 
 ```
-/ms:discuss-milestone                 # Clarify what’s next (optional but helpful)
-/ms:new-milestone "v1.1 New feature"  # Update PROJECT.md for the next milestone
+/ms:new-milestone "v1.1 New feature"  # Choose discovery mode if you want help scoping
 /ms:research-project                  # (optional) Domain / stack research
 /ms:define-requirements               # Re-scope v1/v2 for this milestone
 /ms:create-roadmap                    # New phases mapped to requirements
@@ -542,7 +533,6 @@ Common options:
 ```
 /ms:audit-milestone 1.0.0       # Verify before completing
 /ms:complete-milestone 1.0.0    # Archive and tag
-/ms:discuss-milestone           # Gather context for next
 /ms:new-milestone "v1.1 Features"
 ```
 
