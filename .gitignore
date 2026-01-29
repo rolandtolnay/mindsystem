@@ -11,3 +11,8 @@ TO-DOS.md
 .linear.json
 .envrc
 __pycache__/
+
+docs/supabase-postgres-best-practices/
+docs/vercel-react-best-practices/
+docs/composition-patterns/
+docs/web-design-guidelines/

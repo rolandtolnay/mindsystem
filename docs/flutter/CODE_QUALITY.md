@@ -3,6 +3,7 @@
 - Extract complex nested widgets into private builder methods (`_buildHeader()`, `_buildContent()`)
 - Early return for empty states: `if (items.isEmpty) return const SizedBox.shrink();`
 - Keep build methods focused and readable by decomposing large widget trees
+- IMPORTANT: Move callbacks inside `build()` when they need 4+ parameters from local scope (hooks, refs, notifiers): define `void handleSubmit() { ... }` inside build rather than `_handleSubmit(ref, controller, user, state)` outside
 
 ### Model Conversions
 
@@ -56,6 +57,9 @@
 ### Business Logic & Domain Design
 
 - IMPORTANT: Encapsulate business rules in entity computed properties instead of scattering logic in UI/providers: `bool get canDelete => isOwner && !isArchived;`
+- IMPORTANT: Return records from domain methods when multiple related values must stay in sync: `({int? multiplier, int reward}) applyBonus(int base)` prevents drift between multiplier value and computed result
+- Use nullability as a feature flag in returned records: check `bonus?.multiplier != null` instead of separate `isPremium` boolean; enables future extension without API changes
+- Centralize magic numbers in domain extensions rather than scattering across widgets: define `const premiumMultiplier = 2` once in `applyRewardBonus()` not in 4 widget files
 
 ### Error Handling
 
@@ -65,6 +69,8 @@
 ### Widget API Design
 
 - Support flexible styling with fallback chains and both general/specific parameters: `iconColor ?? color ?? context.color.primary`
+- Pass domain-computed records to widgets instead of raw flags: `bonus: user?.applyRewardBonus(baseReward)` not `isPremium: user?.premium ?? false`; keeps calculation logic out of widgets
+- Design widget APIs with optional computed values for extensibility: `RewardModal({required int baseReward, int? boostedReward, int? multiplier})` allows future bonus types without breaking changes
 
 ### Code Organization
 
@@ -83,6 +89,7 @@
 - IMPORTANT: Move presentation logic to domain extensions: `extension on Model { String get displayText => ... }` rather than private widget methods
 - Add computed display properties directly on enums: `enum SortOrder { ...; String get label => switch (this) { ... }; }` instead of hardcoding labels in widget builders
 - Map over `EnumType.values` to generate widgets dynamically: `SortOrder.values.map((e) => ChoiceChip(label: Text(e.label), ...))` instead of defining each widget individually
+- Derive UI booleans from returned records in widgets: `final hasBonus = bonus?.multiplier != null;` rather than passing separate boolean props alongside data
 
 ### Project Structure
 
@@ -96,6 +103,7 @@
 
 ### Theme & Styling
 
+- YOU MUST use app color constants from `AppColors` instead of hardcoding hex values: `AppColors.gray400` not `const Color(0xFF9E9E9E)`; keeps colors centralized and maintains design consistency
 - Extract color schemes and visual variants into dedicated theme classes with factory constructors: `PodiumTheme.fromRank(rank, brightness)` instead of scattered color constants
 - Support light/dark modes in custom themes via factory methods accepting `Brightness`: `factory Theme.fromType(type, context.brightness)`
 - Use switch expressions for variant-specific computed properties: `double get _height => switch (placement) { 1 => 192.0, 2 => 128.0, _ => 96.0 };`
@@ -123,6 +131,7 @@
 - IMPORTANT: Derive loading flags from provider state: `final isLoading = actionProvider.isLoading` instead of `useState<bool>(false)` with manual toggle
 - Use `FutureOr<T?> build() => null;` for on-demand action providers so they only execute when explicitly triggered
 - Handle action outcomes with `ref.listen` and `whenOrNull`: `ref.listen(provider, (_, next) { next.whenOrNull(data: (result) { if (result == null) return; /* success */ }, error: (e, _) => showError(e)); });`
+- Avoid manual state transition detection (`didComplete = prev.isLoading && !next.isLoading`); let `whenOrNull` naturally fire only on data/error states
 
 ### Collection Operations (Advanced)
 
@@ -131,15 +140,22 @@
 ### File-Scoped Extensions
 
 - Define private extensions for reusable computations local to a single file: `extension on Iterable<int> { int? get average => isNotEmpty ? reduce((a, b) => a + b) ~/ length : null; }`
+- IMPORTANT: Move widget styling methods to type extensions when they operate on a single parameter: `extension on ButtonStyle { BoxDecoration buildDecoration(BuildContext context) => switch (this) { ... }; }` instead of `_buildDecoration(ButtonStyle style)` as a widget method
 
 ### State Modeling with Sealed Classes
 
 - IMPORTANT: Replace multiple boolean flags with sealed class variants: `sealed class State {}` with `Loading`, `Ready`, `Error` subclasses instead of `bool _isLoading, bool _hasError`
 - Use switch expressions for exhaustive state handling: `return switch (state) { Loading() => ..., Ready(:final data) => ..., Error(:final error) => ... };`
 - Include relevant data in each sealed class variant: `class Ready { final Controller controller; }` rather than keeping data separate from state
+- IMPORTANT: Define shared parameters in sealed class base constructor to avoid duplication: `sealed class Mode { const Mode({required this.id}); final String id; }` instead of declaring `id` in each subclass
 
 ### Async Resource Hooks
 
 - Encapsulate async resource lifecycle in custom hooks: `useVideoPlayerController()` handles init, config, and disposal internally
 - Use `useIsMounted()` to guard state updates after async operations: `if (!isMounted()) return;` before each `state.value =` assignment
 - Store disposable resources in `useRef` for cleanup access: `final controllerRef = useRef<Controller?>(null);` with `useEffect(() => () => controllerRef.value?.dispose(), const []);`
+
+### Localization & Dynamic Content
+
+- Use translation placeholders for values that may change: `"{multiplier}x Premium Bonus!"` instead of hardcoded `"2x Premium Bonus!"`; enables future flexibility without translation file changes
+- Remove unused translation keys when centralizing logic: delete `premium_multiplier` key when multiplier display becomes dynamic from code
