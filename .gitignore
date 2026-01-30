@@ -12,7 +12,7 @@ TO-DOS.md
 .envrc
 __pycache__/
 
-docs/supabase-postgres-best-practices/
-docs/vercel-react-best-practices/
-docs/composition-patterns/
-docs/web-design-guidelines/
+references/supabase-postgres-best-practices/
+references/vercel-react-best-practices/
+references/composition-patterns/
+references/web-design-guidelines/
