@@ -129,29 +129,19 @@ After verification completes, route based on status:
 
 **Route A: Phase verified, more phases remain**
 
+1. Show phase completion summary:
 ```
 ## ✓ Phase {Z}: {Name} Complete
 
 All {Y} plans finished. Phase goal verified.
+```
 
----
+2. Read `~/.claude/mindsystem/references/next-phase-routing.md` and follow its instructions to present the "Next Up" section with pre-work context for Phase {Z+1}.
 
-## ▶ Next Up
-
-**Phase {Z+1}: {Name}** — {Goal from ROADMAP.md}
-
-`/ms:plan-phase {Z+1}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
+3. After the "Next Up" section, add:
+```
 **Also available:**
 - `/ms:verify-work {Z}` — manual acceptance testing before continuing
-- `/ms:discuss-phase {Z+1}` — gather context first
-- `/ms:research-phase {Z+1}` — investigate unknowns
-
----
 ```
 
 ---

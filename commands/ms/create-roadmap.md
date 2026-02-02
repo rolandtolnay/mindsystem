@@ -158,6 +158,8 @@ Requirements: [REQ-IDs]
 Success criteria:
 1. [criterion]
 2. [criterion]
+Pre-work: Research [Likely/Unlikely] | Discuss [Likely/Unlikely] | Design [Likely/Unlikely]
+{If any Likely: topics/focus on next line}
 
 **Phase 2: [Name]**
 Goal: [goal]
@@ -165,6 +167,8 @@ Requirements: [REQ-IDs]
 Success criteria:
 1. [criterion]
 2. [criterion]
+Pre-work: Research [Likely/Unlikely] | Discuss [Likely/Unlikely] | Design [Likely/Unlikely]
+{If any Likely: topics/focus on next line}
 
 [... continue for all phases ...]
 

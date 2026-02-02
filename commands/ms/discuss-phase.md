@@ -45,7 +45,7 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
    - Use AskUserQuestion to sharpen the core — what's essential for THIS phase
    - Use AskUserQuestion for decision gate (ready / ask more / let me add context)
    - Create CONTEXT.md capturing their vision
-5. Offer next steps (research or plan the phase)
+5. Present pre-work status: Read `~/.claude/mindsystem/references/prework-status.md` and show what's done vs still needed for this phase
 6. Update `.planning/STATE.md` Last Command field:
    - Format: `Last Command: ms:discuss-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
 

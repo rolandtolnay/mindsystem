@@ -66,6 +66,10 @@ Phase: $ARGUMENTS (optional)
 10. **Update last command**
     - Update `.planning/STATE.md` Last Command field
     - Format: `Last Command: ms:verify-work $ARGUMENTS | YYYY-MM-DD HH:MM`
+
+11. **Present next steps**
+    - If this was the last phase in milestone: suggest `/ms:audit-milestone`
+    - If more phases remain: Read `~/.claude/mindsystem/references/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase
 </process>
 
 <anti_patterns>

@@ -761,6 +761,12 @@ Patch file: .planning/phases/{phase_dir}/{phase}-uat-fixes.patch
 
 To review fixes: cat {patch_path}
 ```
+
+**7. Present next steps:**
+
+Check if more phases remain in ROADMAP.md:
+- If last phase in milestone: Suggest `/ms:audit-milestone` or `/ms:complete-milestone`
+- If more phases remain: Read `~/.claude/mindsystem/references/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase
 </step>
 
 </process>

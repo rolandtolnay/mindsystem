@@ -147,6 +147,83 @@ Options:
 
 </goal_backward_phases>
 
+<pre_work_analysis>
+
+## Pre-Work Recommendations
+
+For each phase, analyze whether pre-work would reduce risk before planning. Three types exist:
+
+| Pre-Work | Question It Answers | Command |
+|----------|---------------------|---------|
+| **Research** | "Do I know HOW to build this?" | `/ms:research-phase` |
+| **Discussion** | "Do I understand WHAT the user wants?" | `/ms:discuss-phase` |
+| **Design** | "Do I know what this should LOOK like?" | `/ms:design-phase` |
+
+All use binary Likely/Unlikely with parenthetical reason. These are hints to users, not mandates.
+
+### Research Indicators
+
+**Likely when ANY of:**
+- External APIs or services involved
+- New libraries/frameworks to learn
+- Architectural decisions not yet made
+- Technical approach unclear
+
+**Unlikely when ALL of:**
+- Using established internal patterns
+- CRUD operations with known stack
+- Well-documented conventions exist
+
+### Discussion Indicators
+
+**Problem it solves:** User's mental model isn't documented. Planning happens without understanding what's essential vs nice-to-have.
+
+**Likely when ANY of:**
+- Phase goal mentions "user can [verb]" without specifying HOW
+- Success criteria have multiple valid interpretations
+- Phase involves UX decisions (not just backend)
+- Requirements mention experiential qualities ("should feel", "intuitive")
+- Novel feature not based on existing patterns
+
+**Unlikely when ALL of:**
+- Requirements are specific and unambiguous
+- Backend/infrastructure only (APIs, database, CI/CD)
+- Follows clearly established patterns
+- Bug fix, performance, or technical debt work
+
+### Design Indicators
+
+**Problem it solves:** UI/UX ambiguity causes rework during implementation.
+
+**Likely when ANY of:**
+- Significant new UI work (forms, dashboards, multi-screen flows)
+- Novel interactions not in existing codebase
+- Success criteria reference visual elements
+- Cross-platform work with UI components
+
+**Unlikely when ALL of:**
+- No UI work in requirements
+- Backend/API only
+- Infrastructure, testing, deployment phases
+- Uses established UI patterns exclusively
+
+**Note:** Discussion and Design often overlap for UI-facing phases. This is intentional — they serve different purposes (vision vs specification) and a phase may benefit from both.
+
+### Output Format
+
+For each phase in ROADMAP.md:
+
+```markdown
+**Research**: Likely (external API) | Unlikely (established patterns)
+**Research topics**: [What needs investigating] (only if Likely)
+**Discuss**: Likely (ambiguous user flow) | Unlikely (clear requirements)
+**Discuss topics**: [What to clarify] (only if Likely)
+**Design**: Likely (significant new UI) | Unlikely (backend only)
+**Design focus**: [What to design] (only if Likely)
+```
+
+</pre_work_analysis>
+
 <phase_identification>
 
 ## Deriving Phases from Requirements
@@ -336,6 +413,22 @@ When presenting to user for approval:
 
 [... abbreviated for longer roadmaps ...]
 
+### Pre-Work Recommendations
+
+| Phase | Research | Discuss | Design |
+|-------|----------|---------|--------|
+| 1 - Setup | Unlikely | Unlikely | Unlikely |
+| 2 - Auth | Likely | Likely | Unlikely |
+| 3 - Content | Unlikely | Likely | Likely |
+
+**Phase 2 topics:**
+- Research: [external auth providers]
+- Discuss: [login flow preferences]
+
+**Phase 3 focus:**
+- Discuss: [content types, workflows]
+- Design: [editor UI, content cards]
+
 ### Coverage
 
 ✓ All [X] v1 requirements mapped
@@ -394,13 +487,19 @@ Apply phase identification methodology:
 3. Create phases that complete coherent capabilities
 4. Check depth setting for compression guidance
 
-## Step 5: Derive Success Criteria
+## Step 5: Derive Success Criteria and Pre-Work Flags
 
 For each phase, apply goal-backward:
 1. State phase goal (outcome, not task)
 2. Derive 2-5 observable truths (user perspective)
 3. Cross-check against requirements
 4. Flag any gaps
+
+Then derive pre-work recommendations using indicators from `<pre_work_analysis>`:
+5. Assess Research need (technical unknowns)
+6. Assess Discuss need (vision unknowns)
+7. Assess Design need (visual unknowns)
+8. Add topic/focus fields only when Likely
 
 ## Step 6: Validate Coverage
 
@@ -472,6 +571,15 @@ When files are written and returning to orchestrator:
 **Phase 2: {name}**
 1. {criterion}
 2. {criterion}
+
+### Pre-Work Recommendations
+
+| Phase | Research | Discuss | Design |
+|-------|----------|---------|--------|
+| 1 - {name} | {Likely/Unlikely} | {Likely/Unlikely} | {Likely/Unlikely} |
+| 2 - {name} | {Likely/Unlikely} | {Likely/Unlikely} | {Likely/Unlikely} |
+
+{For phases with Likely recommendations, include topics/focus}
 
 ### Files Ready for Review
 

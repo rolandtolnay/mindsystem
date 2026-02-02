@@ -139,7 +139,7 @@ Task(
 
 ## 5. Handle Agent Return
 
-**`## RESEARCH COMPLETE`:** Display summary, offer: Plan phase, Dig deeper, Review full, Done.
+**`## RESEARCH COMPLETE`:** Display summary, then read `~/.claude/mindsystem/references/prework-status.md` to show what's done vs still needed. Also offer: Dig deeper, Review full.
 
 **`## CHECKPOINT REACHED`:** Present to user, get response, spawn continuation.
 

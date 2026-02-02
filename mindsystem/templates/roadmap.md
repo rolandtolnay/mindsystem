@@ -35,6 +35,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. [Observable behavior from user perspective]
   3. [Observable behavior from user perspective]
 **Research**: Unlikely (established patterns)
+**Discuss**: Unlikely (clear requirements)
+**Design**: Unlikely (backend only)
 **Plans**: [Number of plans, e.g., "3 plans" or "TBD"]
 
 Plans:
@@ -51,6 +53,10 @@ Plans:
   2. [Observable behavior from user perspective]
 **Research**: Likely (new integration)
 **Research topics**: [What needs investigating]
+**Discuss**: Likely (ambiguous user flow)
+**Discuss topics**: [What to clarify]
+**Design**: Likely (significant new UI)
+**Design focus**: [What to design]
 **Plans**: [Number of plans]
 
 Plans:
@@ -77,6 +83,8 @@ Plans:
   3. [Observable behavior from user perspective]
 **Research**: Likely (external API)
 **Research topics**: [What needs investigating]
+**Discuss**: Unlikely (established patterns)
+**Design**: Unlikely (API only)
 **Plans**: [Number of plans]
 
 Plans:
@@ -91,6 +99,8 @@ Plans:
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
 **Research**: Unlikely (internal patterns)
+**Discuss**: Unlikely (clear requirements)
+**Design**: Unlikely (backend only)
 **Plans**: [Number of plans]
 
 Plans:
@@ -126,11 +136,13 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 - Verified by verify-phase after execution
 - Format: "User can [action]" or "[Thing] works/exists"
 
-**Research flags:**
-- `Research: Likely` - External APIs, new libraries, architectural decisions
-- `Research: Unlikely` - Internal patterns, CRUD operations, established conventions
-- Include `Research topics:` when Likely
-- Flags are hints, not mandates - validate at planning time
+**Pre-work indicators** (all use Likely/Unlikely with parenthetical reason):
+- `Research` - Technical unknowns: external APIs, new libraries, architectural decisions
+- `Discuss` - Vision unknowns: ambiguous requirements, UX decisions, novel features
+- `Design` - Visual unknowns: significant new UI, novel interactions, multi-screen flows
+- Include topic/focus fields only when Likely
+- Indicators are hints, not mandates - validate at planning time
+- UI-facing phases often need both Discuss and Design (this is intentional)
 
 **After milestones ship:**
 - Collapse completed milestones in `<details>` tags

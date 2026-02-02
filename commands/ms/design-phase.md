@@ -281,11 +281,11 @@ Display summary from agent response:
 - Screens designed
 - Key design decisions
 
-Then offer next steps:
-1. **Proceed to research** — `/ms:research-phase {phase}`
-2. **Refine design** — Discuss changes conversationally
-3. **View full design** — Display DESIGN.md
-4. **Done for now** — Exit
+Then present pre-work status: Read `~/.claude/mindsystem/references/prework-status.md` and show what's done vs still needed for this phase.
+
+Also offer:
+- **Refine design** — Discuss changes conversationally
+- **View full design** — Display DESIGN.md
 
 **`## DESIGN NEEDS CLARIFICATION`:**
 
