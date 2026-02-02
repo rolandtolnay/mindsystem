@@ -21,6 +21,12 @@ Output: {phase}-CONTEXT.md capturing the user's vision for the phase
 <context>
 Phase number: $ARGUMENTS (required)
 
+**Normalize phase number:**
+```bash
+PHASE_ARG="$ARGUMENTS"
+PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+```
+
 **Load project state first:**
 @.planning/STATE.md
 

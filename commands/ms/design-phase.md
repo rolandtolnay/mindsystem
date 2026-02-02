@@ -42,14 +42,15 @@ ls .planning/phases/${PHASE}-*/*DESIGN.md 2>/dev/null
 ## 1. Parse and Validate Phase
 
 ```bash
-# Extract phase number from arguments
+# Extract and normalize phase number from arguments
 PHASE_ARG="$ARGUMENTS"
+PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
 
 # Validate phase exists in roadmap
-grep -A5 "Phase ${PHASE_ARG}:" .planning/ROADMAP.md 2>/dev/null
+grep -A5 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
 ```
 
-**If not found:** Error and exit with message: "Phase ${PHASE_ARG} not found in ROADMAP.md"
+**If not found:** Error and exit with message: "Phase ${PHASE} not found in ROADMAP.md"
 
 **If found:** Extract phase number, name, description. Store for later use.
 
@@ -57,7 +58,7 @@ grep -A5 "Phase ${PHASE_ARG}:" .planning/ROADMAP.md 2>/dev/null
 
 ```bash
 # Check for existing DESIGN.md
-PHASE_DIR=$(ls -d .planning/phases/${PHASE_ARG}-* 2>/dev/null | head -1)
+PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
 ls "${PHASE_DIR}"/*-DESIGN.md 2>/dev/null
 ```
 
@@ -81,7 +82,7 @@ Load context in order of priority:
 cat .planning/PROJECT.md 2>/dev/null
 
 # Load ROADMAP.md for phase requirements
-grep -A30 "Phase ${PHASE_ARG}:" .planning/ROADMAP.md 2>/dev/null
+grep -A30 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
 ```
 
 Extract from PROJECT.md:
@@ -98,7 +99,7 @@ Extract from ROADMAP.md:
 **3b. Optional context - CONTEXT.md (from discuss-phase):**
 
 ```bash
-cat .planning/phases/${PHASE_ARG}-*/${PHASE_ARG}-CONTEXT.md 2>/dev/null
+cat .planning/phases/${PHASE}-*/${PHASE}-CONTEXT.md 2>/dev/null
 ```
 
 If exists, extract:
@@ -270,8 +271,8 @@ Task(
 Commit the design file:
 
 ```bash
-git add .planning/phases/${PHASE_ARG}-*/*-DESIGN.md
-git commit -m "docs: create design for phase ${PHASE_ARG}"
+git add .planning/phases/${PHASE}-*/*-DESIGN.md
+git commit -m "docs: create design for phase ${PHASE}"
 ```
 
 Display summary from agent response:

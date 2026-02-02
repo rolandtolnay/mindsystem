@@ -19,6 +19,12 @@ Research how to implement a phase. Spawns ms-researcher agent with phase context
 <context>
 Phase number: $ARGUMENTS (required)
 
+**Normalize phase number first:**
+```bash
+PHASE_ARG="$ARGUMENTS"
+PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+```
+
 Check for existing research:
 ```bash
 ls .planning/phases/${PHASE}-*/*RESEARCH.md 2>/dev/null

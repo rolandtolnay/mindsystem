@@ -30,6 +30,12 @@ Context budget: ~15% orchestrator, 100% fresh per subagent.
 <context>
 Phase: $ARGUMENTS
 
+**Normalize phase number:**
+```bash
+PHASE_ARG="$ARGUMENTS"
+PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+```
+
 @.planning/ROADMAP.md
 @.planning/STATE.md
 </context>

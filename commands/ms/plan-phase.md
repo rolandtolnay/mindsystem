@@ -38,6 +38,14 @@ When invoked with `--gaps`, plans address gaps identified by the verifier. Load 
 Phase number: $ARGUMENTS (optional - auto-detects next unplanned phase if not provided)
 Gap closure mode: `--gaps` flag triggers gap closure workflow
 
+**Normalize phase number if provided:**
+```bash
+PHASE_ARG=$(echo "$ARGUMENTS" | grep -oE '^[0-9]+' | head -1)
+if [ -n "$PHASE_ARG" ]; then
+  PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+fi
+```
+
 **Load project state first:**
 @.planning/STATE.md
 

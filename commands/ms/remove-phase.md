@@ -29,6 +29,17 @@ Parse the command arguments:
 - Example: `/ms:remove-phase 17` → phase = 17
 - Example: `/ms:remove-phase 16.1` → phase = 16.1
 
+**Normalize phase number:**
+```bash
+PHASE_ARG="$ARGUMENTS"
+# Handle both integers and decimals (17 → 17, 2 → 02, 16.1 → 16.1)
+if echo "$PHASE_ARG" | grep -qE '^\d+$'; then
+  PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+else
+  PHASE="$PHASE_ARG"  # Keep decimals as-is
+fi
+```
+
 If no argument provided:
 
 ```
