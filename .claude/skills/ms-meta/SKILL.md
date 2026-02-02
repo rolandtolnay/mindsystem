@@ -1,6 +1,6 @@
 ---
 name: ms-meta
-description: Instant Mindsystem expert for diagnosing, understanding, and planning Mindsystem framework changes. Use when working on Mindsystem itself or asking how it works.
+description: Instant Mindsystem expert. Use when working on Mindsystem, asking how it works, or describing/discussing improvements to commands, agents, workflows, or the framework itself.
 ---
 
 <objective>
