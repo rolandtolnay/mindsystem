@@ -23,6 +23,7 @@ This spawns ms-plan-checker to analyze your PLAN.md files against the phase goal
 4. **Key Links Planned** — Are artifacts wired together, not just created in isolation?
 5. **Scope Sanity** — Will plans complete within context budget (2-3 tasks per plan)?
 6. **Verification Derivation** — Are must_haves user-observable, not implementation-focused?
+7. **Context Compliance** — Do plans honor decisions from CONTEXT.md?
 </what_it_checks>
 
 <process>
@@ -75,8 +76,9 @@ Verify plans for phase $ARGUMENTS.
 
 1. Read .planning/ROADMAP.md to get the phase goal
 2. Read all *-PLAN.md files in the phase directory
-3. Run all 6 verification dimensions
-4. Return structured result
+3. Read CONTEXT.md if it exists in the phase directory
+4. Run all 7 verification dimensions (dimension 7 only if CONTEXT.md exists)
+5. Return structured result
 
 Phase directory: $PHASE_DIR
 """,
@@ -106,6 +108,7 @@ All checks passed:
 ✓ Key links planned
 ✓ Scope within budget
 ✓ Verification criteria derived
+✓ Context compliance verified (if CONTEXT.md exists)
 
 Ready to execute: /ms:execute-phase $ARGUMENTS
 ```

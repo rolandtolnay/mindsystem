@@ -149,7 +149,7 @@ Loop until "Create CONTEXT.md" selected.
 </step>
 
 <step name="write_context">
-Create CONTEXT.md capturing the user's vision.
+Create CONTEXT.md capturing the user's vision and decisions.
 
 Use template from ~/.claude/mindsystem/templates/context.md
 
@@ -160,12 +160,23 @@ Create it: `.planning/phases/${PHASE}-${SLUG}/`
 
 Use roadmap phase name for slug (lowercase, hyphens).
 
-Populate template sections with VISION context (not technical analysis):
+Populate template sections:
 
+**Vision context (what user imagines):**
 - `<vision>`: How the user imagines this working
 - `<essential>`: What must be nailed in this phase
 - `<specifics>`: Any particular look/feel/behavior mentioned
 - `<notes>`: Any other context gathered
+
+**Decision context (for downstream agents):**
+- `<decisions>`: Concrete choices made during discussion (locked)
+- `### Claude's Discretion`: Areas where user said "you decide" or didn't express preference
+- `<deferred>`: Ideas mentioned but explicitly out of scope
+
+**Scope guardrail:**
+- Phase boundary from ROADMAP.md is FIXED
+- Discussion clarifies HOW to implement, not WHETHER to add more
+- If user suggests new capabilities: "That sounds like its own phase. I'll note it in Deferred Ideas."
 
 Do NOT populate with your own technical analysis. That comes during research/planning.
 

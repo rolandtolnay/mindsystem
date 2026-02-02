@@ -50,6 +50,32 @@ Template for `.planning/phases/XX-name/{phase}-CONTEXT.md` - captures the user's
 
 </notes>
 
+<decisions>
+## Decisions (Locked)
+
+[Concrete implementation decisions made during discussion. These are NOT optional — plans must implement these exactly.]
+
+- [Decision 1]
+- [Decision 2]
+
+### Claude's Discretion
+
+[Areas where user explicitly said "you decide" or didn't express preference. Claude has freedom here.]
+
+- [Area 1]
+- [Area 2]
+
+</decisions>
+
+<deferred>
+## Deferred Ideas
+
+[Ideas mentioned during discussion but explicitly out of scope for this phase. Captured so they're not lost, but plans must NOT include these.]
+
+[If none: "None — discussion stayed within phase scope"]
+
+</deferred>
+
 ---
 
 *Phase: XX-name*
@@ -99,6 +125,29 @@ Priority is clarity over features. Better to show less and make it obvious than 
 
 </notes>
 
+<decisions>
+## Decisions (Locked)
+
+- Card layout for projects (not a list)
+- "Today" section at top showing urgent items
+- Dark mode support (already exists from Phase 2)
+
+### Claude's Discretion
+
+- Specific card dimensions and spacing
+- How to determine what's "urgent"
+- Animation/transition details
+
+</decisions>
+
+<deferred>
+## Deferred Ideas
+
+- Team dashboard view (user wants personal only for now)
+- Customizable widgets (keep it simple first)
+
+</deferred>
+
 ---
 
 *Phase: 03-user-dashboard*
@@ -107,7 +156,10 @@ Priority is clarity over features. Better to show less and make it obvious than 
 </good_examples>
 
 <guidelines>
-**This template captures VISION, not technical specs.**
+**This template serves dual purposes:**
+
+1. **Vision sections** (`<vision>`, `<essential>`, `<specifics>`, `<notes>`) — for human understanding
+2. **Decision sections** (`<decisions>`, `<deferred>`) — for downstream agent parsing
 
 The user is the visionary. They know:
 - How they imagine it working
@@ -121,11 +173,16 @@ The user does NOT know (and shouldn't be asked):
 - Implementation constraints (Claude figures out)
 - Success metrics (Claude infers from the work)
 
-**Content should read like:**
+**Vision content should read like:**
 - A founder describing their product vision
 - "When you use this, it should feel like..."
 - "The most important thing is..."
 - "I don't want it to be like X, I want it to feel like Y"
+
+**Decision content should be:**
+- Concrete choices (not vague preferences)
+- Checkable by downstream agents
+- Clear about what's locked vs discretionary
 
 **Content should NOT read like:**
 - A technical specification
@@ -137,4 +194,5 @@ The user does NOT know (and shouldn't be asked):
 - File lives in phase directory: `.planning/phases/XX-name/{phase}-CONTEXT.md`
 - Research phase adds technical context (patterns, risks, constraints)
 - Planning phase creates executable tasks informed by both vision AND research
+- Plan checker verifies plans honor locked decisions and exclude deferred items
 </guidelines>
