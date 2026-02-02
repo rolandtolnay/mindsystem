@@ -258,6 +258,13 @@ Roadmap created:
 ```
 </step>
 
+<step name="update_last_command">
+Update `.planning/STATE.md` Last Command field:
+- Find line starting with `Last Command:` in Current Position section
+- Replace with: `Last Command: ms:create-roadmap | YYYY-MM-DD HH:MM`
+- If line doesn't exist, add it after `Status:` line
+</step>
+
 </process>
 
 <success_criteria>

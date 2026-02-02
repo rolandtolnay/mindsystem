@@ -308,6 +308,14 @@ Skip research, define requirements from what you know, then create roadmap.
 
 </step>
 
+<step name="update_last_command">
+Update `.planning/STATE.md` Last Command field (if STATE.md exists):
+- Find line starting with `Last Command:` in Current Position section
+- Replace with: `Last Command: ms:new-project | YYYY-MM-DD HH:MM`
+- If line doesn't exist, add it after `Status:` line
+- Note: STATE.md may not exist yet if this is the first command
+</step>
+
 </process>
 
 <output>

@@ -101,6 +101,10 @@ Phase: $ARGUMENTS
 
 12. **Offer next steps**
     - Route to next action (see `<offer_next>`)
+
+13. **Update last command**
+    - Update `.planning/STATE.md` Last Command field
+    - Format: `Last Command: ms:execute-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
 </process>
 
 <offer_next>

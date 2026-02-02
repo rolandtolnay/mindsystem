@@ -325,6 +325,13 @@ Use the iteration template from `~/.claude/mindsystem/templates/design-iteration
    - Verify "what needs improvement" was addressed
    - Update design version in DESIGN.md frontmatter
 
+## 8. Update Last Command
+
+Update `.planning/STATE.md` Last Command field:
+- Find line starting with `Last Command:` in Current Position section
+- Replace with: `Last Command: ms:design-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
+- If line doesn't exist, add it after `Status:` line
+
 </process>
 
 <success_criteria>

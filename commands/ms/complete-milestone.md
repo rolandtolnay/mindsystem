@@ -130,6 +130,10 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 8. **Offer next steps:**
    - `/ms:new-milestone` — discover goals and update PROJECT.md (includes optional discovery mode)
 
+9. **Update last command**
+   - Update `.planning/STATE.md` Last Command field
+   - Format: `Last Command: ms:complete-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
+
 </process>
 
 <success_criteria>

@@ -167,32 +167,36 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
 10. **Route to next step:**
 
-   ```
-   Milestone v[X.Y] [Name] initialized.
+    ```
+    Milestone v[X.Y] [Name] initialized.
 
-   PROJECT.md updated with new goals.
-   Phases will start at: Phase $NEXT_PHASE
+    PROJECT.md updated with new goals.
+    Phases will start at: Phase $NEXT_PHASE
 
-   ---
+    ---
 
-   ## ▶ Next Up
+    ## ▶ Next Up
 
-   Choose your path:
+    Choose your path:
 
-   **Option A: Research first** (new domains/capabilities)
-   Research ecosystem before scoping. Discovers patterns, expected features, architecture approaches.
+    **Option A: Research first** (new domains/capabilities)
+    Research ecosystem before scoping. Discovers patterns, expected features, architecture approaches.
 
-   `/ms:research-project`
+    `/ms:research-project`
 
-   **Option B: Define requirements directly** (familiar territory)
-   Skip research, define requirements from what you know.
+    **Option B: Define requirements directly** (familiar territory)
+    Skip research, define requirements from what you know.
 
-   `/ms:define-requirements`
+    `/ms:define-requirements`
 
-   <sub>`/clear` first → fresh context window</sub>
+    <sub>`/clear` first → fresh context window</sub>
 
-   ---
-   ```
+    ---
+    ```
+
+11. **Update last command**
+    - Update `.planning/STATE.md` Last Command field
+    - Format: `Last Command: ms:new-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
 
 </process>
 

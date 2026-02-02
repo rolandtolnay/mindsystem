@@ -447,6 +447,13 @@ scope: [files/features reviewed]
 - Commit when satisfied: `git add . && git commit -m "design: apply review improvements"`
 ```
 
+## Phase 10: Update Last Command
+
+Update `.planning/STATE.md` Last Command field:
+- Find line starting with `Last Command:` in Current Position section
+- Replace with: `Last Command: ms:review-design $ARGUMENTS | YYYY-MM-DD HH:MM`
+- If line doesn't exist, add it after `Status:` line
+
 </process>
 
 <quality_forcing>

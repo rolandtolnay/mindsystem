@@ -21,6 +21,7 @@ See: .planning/PROJECT.md (updated [date])
 Phase: [X] of [Y] ([Phase name])
 Plan: [A] of [B] in current phase
 Status: [Ready to plan / Planning / Ready to execute / In progress / Phase complete]
+Last Command: [command] | [YYYY-MM-DD HH:MM]
 Last activity: [YYYY-MM-DD] — [What happened]
 
 Progress: [░░░░░░░░░░] 0%
@@ -114,6 +115,9 @@ STATE.md is the project's short-term memory spanning all phases and sessions.
 - do-work: After adhoc work completed
   - Add entry to "Recent Adhoc Work" section
   - Keep last 5 entries (older entries remain in .planning/adhoc/)
+- Any state-changing command: Update Last Command field
+  - Format: `ms:{command} {args} | YYYY-MM-DD HH:MM`
+  - Enables status line to show context without running /ms:progress
 
 </lifecycle>
 
@@ -132,6 +136,7 @@ Where we are right now:
 - Phase X of Y — which phase
 - Plan A of B — which plan within phase
 - Status — current state
+- Last Command — which Mindsystem command was last run (for status line display)
 - Last activity — what happened most recently
 - Progress bar — visual indicator of overall completion
 
@@ -196,6 +201,7 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 - After each plan execution (update position, note decisions, update issues/blockers)
 - After phase transitions (update progress bar, clear resolved blockers, refresh project reference)
 - After adhoc work via /ms:do-work (add entry to "Recent Adhoc Work")
+- After any state-changing command (update Last Command field)
 
 **Size management:**
 - Keep under 100 lines total

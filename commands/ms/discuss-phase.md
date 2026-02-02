@@ -40,6 +40,8 @@ Phase number: $ARGUMENTS (required)
    - Use AskUserQuestion for decision gate (ready / ask more / let me add context)
    - Create CONTEXT.md capturing their vision
 5. Offer next steps (research or plan the phase)
+6. Update `.planning/STATE.md` Last Command field:
+   - Format: `Last Command: ms:discuss-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
 
 **CRITICAL: ALL questions use AskUserQuestion. Never ask inline text questions.**
 

@@ -93,6 +93,10 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
    - Create tasks from gaps (each gap.missing item → task candidates)
    - Number plans sequentially after existing (if 01-03 exist, create 04, 05...)
    - Create PLAN.md file(s) focused on closing specific gaps
+
+6. **Update last command**
+   - Update `.planning/STATE.md` Last Command field
+   - Format: `Last Command: ms:plan-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
 </process>
 
 <success_criteria>

@@ -62,6 +62,10 @@ Phase: $ARGUMENTS (optional)
    - Generate UAT fixes patch
    - Restore user's pre-existing work (if stashed)
    - Commit UAT.md, present summary
+
+10. **Update last command**
+    - Update `.planning/STATE.md` Last Command field
+    - Format: `Last Command: ms:verify-work $ARGUMENTS | YYYY-MM-DD HH:MM`
 </process>
 
 <anti_patterns>

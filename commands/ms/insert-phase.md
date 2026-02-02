@@ -203,6 +203,13 @@ Project state updated: .planning/STATE.md
 ```
 </step>
 
+<step name="update_last_command">
+Update `.planning/STATE.md` Last Command field:
+- Find line starting with `Last Command:` in Current Position section
+- Replace with: `Last Command: ms:insert-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
+- If line doesn't exist, add it after `Status:` line
+</step>
+
 </process>
 
 <anti_patterns>
