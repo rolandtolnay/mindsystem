@@ -15,18 +15,20 @@ Decimal phases enable urgent work insertion without renumbering:
 <required_reading>
 **Read these files NOW:**
 
-1. ~/.claude/mindsystem/templates/phase-prompt.md
-2. ~/.claude/mindsystem/references/plan-format.md
-3. ~/.claude/mindsystem/references/scope-estimation.md
-4. ~/.claude/mindsystem/references/checkpoints.md
-5. ~/.claude/mindsystem/references/tdd.md
-6. .planning/ROADMAP.md
-7. .planning/PROJECT.md
+1. ~/.claude/mindsystem/references/checkpoint-detection.md
+2. ~/.claude/mindsystem/references/tdd.md
+3. .planning/ROADMAP.md
+4. .planning/PROJECT.md
 
+**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, checkpoints.md, goal-backward.md, plan-risk-assessment.md) are loaded by the ms-plan-writer subagent, not main context.
 </required_reading>
 
 <purpose>
 Create executable phase prompts (PLAN.md files) optimized for parallel execution.
+
+**Two-stage workflow:**
+1. **Main context:** Task identification (steps 1-8) - collaborative, keeps user in loop
+2. **Subagent (ms-plan-writer):** Plan writing (dependency graph, wave assignment, PLAN.md files, risk scoring) - autonomous, heavy lifting
 
 PLAN.md IS the prompt that Claude executes. Plans are grouped into execution waves based on dependencies - independent plans run in parallel, dependent plans wait for predecessors.
 </purpose>
@@ -317,7 +319,7 @@ Assess each pending todo - relevant to this phase? Natural to address now?
 - Q3: Are there concerns from "Next Phase Readiness" that apply?
 - Q4: Given all context, does the roadmap's description still make sense?
 
-**Track for PLAN.md context section:**
+**Track for handoff to ms-plan-writer:**
 - Which summaries were selected (for @context references)
 - Tech stack available (from frontmatter)
 - Established patterns (from frontmatter)
@@ -354,7 +356,7 @@ cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 
 **If RESEARCH.md exists:** Use standard_stack (these libraries), architecture_patterns (follow in task structure), dont_hand_roll (NEVER custom solutions for listed problems), common_pitfalls (inform verification), code_examples (reference in actions).
 
-**If CONTEXT.md exists:** Honor vision, prioritize essential, respect boundaries, incorporate specifics.
+**If CONTEXT.md exists:** Honor vision, prioritize essential, respect boundaries, incorporate specifics. Track that CONTEXT.md exists for risk scoring.
 
 **If DESIGN.md exists:**
 - Tasks reference specific screens/components from design
@@ -377,9 +379,9 @@ For each potential task, ask:
 - **Type**: auto, checkpoint:human-verify, checkpoint:decision (human-action rarely needed)
 - **Task name**: Clear, action-oriented
 - **Files**: Which files created/modified (for auto tasks)
-- **Action**: Specific implementation (including what to avoid and WHY)
-- **Verify**: How to prove it worked
-- **Done**: Acceptance criteria
+- **Action hint**: Brief implementation guidance
+- **Verify hint**: How to prove it worked
+- **Done hint**: Acceptance criteria
 
 **TDD detection:** For each potential task, evaluate TDD fit:
 
@@ -399,20 +401,16 @@ Standard tasks (remain in standard plans):
 - Simple CRUD with no business logic
 
 **Heuristic:** Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
-→ Yes: Create a dedicated TDD plan for this feature (one feature per TDD plan)
-→ No: Standard task in standard plan
+→ Yes: Mark as tdd_candidate=true
+→ No: Standard task
 
-**Why TDD gets its own plan:** TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. Embedded in a multi-task plan, TDD work consumes 50-60% of context alone, degrading quality for remaining tasks.
-
-**Test framework:** If project has no test setup and TDD plans are needed, the first TDD plan's RED phase handles framework setup as part of writing the first test.
-
-See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
+See `~/.claude/mindsystem/references/tdd.md` for TDD criteria.
 
 **Checkpoints:** Visual/functional verification → checkpoint:human-verify. Implementation choices → checkpoint:decision. Manual action (email, 2FA) → checkpoint:human-action (rare).
 
 **Critical:** If external resource has CLI/API (Vercel, Stripe, etc.), use type="auto" to automate. Only checkpoint for verification AFTER automation.
 
-See ~/.claude/mindsystem/references/checkpoints.md for checkpoint structure.
+See `~/.claude/mindsystem/references/checkpoint-detection.md` for detection rules.
 
 **User setup detection:** For tasks involving external services, identify human-required configuration:
 
@@ -422,408 +420,171 @@ External service indicators:
 - OAuth integration: Social login, third-party auth
 - API keys: Code referencing `process.env.SERVICE_*` patterns
 
-For each external service, determine:
-1. **Env vars needed** - What secrets must be retrieved from dashboards?
-2. **Account setup** - Does user need to create an account?
-3. **Dashboard config** - What must be configured in external UI?
-4. **Local dev** - Any CLI tools for local testing?
+Note external services for risk scoring.
 
-Record in `user_setup` frontmatter (see write_phase_prompt step).
+<output_format>
+**After task identification, produce structured task list for handoff:**
+
+```xml
+<task_list>
+  <task id="1">
+    <name>Create User model</name>
+    <type>auto</type>
+    <needs>nothing</needs>
+    <creates>src/models/user.ts</creates>
+    <checkpoint>false</checkpoint>
+    <tdd_candidate>false</tdd_candidate>
+    <action_hint>Define User type with id, email, createdAt</action_hint>
+    <verify_hint>tsc --noEmit passes</verify_hint>
+    <done_hint>User type exportable</done_hint>
+  </task>
+  <task id="2">
+    <name>Create login endpoint</name>
+    <type>auto</type>
+    <needs>src/models/user.ts</needs>
+    <creates>src/app/api/auth/login/route.ts</creates>
+    <checkpoint>false</checkpoint>
+    <tdd_candidate>true</tdd_candidate>
+    <action_hint>POST endpoint with bcrypt validation</action_hint>
+    <verify_hint>curl returns 200 with valid credentials</verify_hint>
+    <done_hint>Login works with valid credentials</done_hint>
+  </task>
+  <task id="3">
+    <name>Verify login flow</name>
+    <type>checkpoint:human-verify</type>
+    <needs>src/app/api/auth/login/route.ts</needs>
+    <creates>nothing</creates>
+    <checkpoint>true</checkpoint>
+    <tdd_candidate>false</tdd_candidate>
+    <action_hint>N/A</action_hint>
+    <verify_hint>User tests login manually</verify_hint>
+    <done_hint>User approves login flow</done_hint>
+  </task>
+</task_list>
+```
+
+Each task captures:
+- `id`: Sequential identifier
+- `name`: Action-oriented task name
+- `type`: auto, checkpoint:human-verify, checkpoint:decision, checkpoint:human-action
+- `needs`: Files/types this task requires (or "nothing")
+- `creates`: Files/types this task produces (or "nothing")
+- `checkpoint`: true if requires user interaction
+- `tdd_candidate`: true if should be TDD plan
+- `action_hint`: Brief implementation guidance (subagent expands)
+- `verify_hint`: How to verify completion
+- `done_hint`: Acceptance criteria
+</output_format>
 </step>
 
-<step name="build_dependency_graph">
-**Map task dependencies explicitly before grouping into plans.**
+<step name="handoff_to_writer">
+**Spawn ms-plan-writer subagent with task list and context.**
 
-**1. For each task identified, record:**
-- `needs`: What must exist before this task runs (files, types, prior task outputs)
-- `creates`: What this task produces (files, types, exports)
-- `has_checkpoint`: Does this task require user interaction?
+Assemble handoff payload:
 
-**2. Build the dependency graph:**
+```xml
+<task_list>
+  {tasks from break_into_tasks}
+</task_list>
+
+<phase_context>
+  <phase_number>{PHASE}</phase_number>
+  <phase_name>{PHASE_NAME}</phase_name>
+  <phase_dir>.planning/phases/{PHASE}-{PHASE_NAME}</phase_dir>
+  <phase_goal>{goal from ROADMAP}</phase_goal>
+  <requirements>{REQ-IDs from ROADMAP}</requirements>
+  <depth>{from config.json or "standard"}</depth>
+</phase_context>
+
+<project_refs>
+  <project_md>.planning/PROJECT.md</project_md>
+  <roadmap_md>.planning/ROADMAP.md</roadmap_md>
+  <state_md>.planning/STATE.md</state_md>
+  <context_md>{path if CONTEXT.md exists}</context_md>
+  <design_md>{path if DESIGN.md exists}</design_md>
+  <research_md>{path if RESEARCH.md exists}</research_md>
+  <prior_summaries>
+    {paths to selected relevant SUMMARYs}
+  </prior_summaries>
+  <codebase_docs>
+    {paths to relevant .planning/codebase/*.md files}
+  </codebase_docs>
+</project_refs>
+
+<external_services>
+  {list of services detected in task breakdown}
+</external_services>
+```
+
+**Spawn subagent:**
 
 ```
-Example phase with 6 tasks:
-
-Task A (User model): needs nothing, creates src/models/user.ts
-Task B (Product model): needs nothing, creates src/models/product.ts
-Task C (User API): needs Task A, creates src/api/users.ts
-Task D (Product API): needs Task B, creates src/api/products.ts
-Task E (Dashboard): needs Task C + D, creates src/components/Dashboard.tsx
-Task F (Verify UI): checkpoint:human-verify, needs Task E
-
-Dependency graph:
-  A ──→ C ──┐
-            ├──→ E ──→ F
-  B ──→ D ──┘
-
-Wave analysis:
-  Wave 1: A, B (independent roots)
-  Wave 2: C, D (depend only on Wave 1)
-  Wave 3: E (depends on Wave 2)
-  Wave 4: F (checkpoint, depends on Wave 3)
+Task(
+  subagent_type: "ms-plan-writer"
+  model: "sonnet"
+  description: "Write PLAN.md files for phase {PHASE}"
+  prompt: "{assembled handoff payload}"
+)
 ```
 
-**3. Identify parallelization opportunities:**
-
-| Pattern | Result |
-|---------|--------|
-| No dependencies | Wave 1 (parallel) |
-| Depends only on Wave 1 | Wave 2 (parallel) |
-| Has checkpoint | Runs in wave, but can pause/resume |
-| Shared file conflict | Must be sequential |
-
-**4. Detect and prefer vertical slices:**
-
-**Sequential (horizontal layers) - AVOID:**
-```
-Plan 01: Create User model, Product model, Order model
-Plan 02: Create User API, Product API, Order API
-Plan 03: Create User UI, Product UI, Order UI
-```
-Result: Fully sequential (02 needs 01, 03 needs 02)
-
-**Parallel (vertical slices) - PREFER:**
-```
-Plan 01: User feature (model + API + UI)
-Plan 02: Product feature (model + API + UI)
-Plan 03: Order feature (model + API + UI)
-```
-Result: All three can run in parallel (Wave 1)
-
-**When vertical slices work:**
-- Features are independent (no shared types/data)
-- Each slice is self-contained
-- No cross-feature dependencies
-
-**When horizontal layers are necessary:**
-- Shared foundation required (auth before protected features)
-- Genuine type dependencies (Order needs User type)
-- Infrastructure setup (database before all features)
-
-**5. Output: Dependency map for each plan**
-
-For each plan, determine:
-- `depends_on: []` - plan IDs this plan requires (empty = parallel candidate)
-- `files_modified: []` - files this plan touches (for conflict detection)
-- `autonomous: true|false` - has checkpoints requiring user interaction?
+The subagent handles:
+- Building dependency graph from needs/creates
+- Assigning wave numbers
+- Grouping tasks into plans (2-3 per plan)
+- Deriving must_haves (goal-backward)
+- Estimating scope, splitting if needed
+- Writing PLAN.md files
+- Git commit
+- Calculating risk score
 </step>
 
-<step name="assign_waves">
-**Compute wave numbers before writing plans.**
+<step name="receive_results">
+**Parse subagent return.**
 
-Wave assignment algorithm (run in memory before writing any files):
-
-```
-waves = {}  # plan_id -> wave_number
-
-for each plan in plan_order:
-  if plan.depends_on is empty:
-    plan.wave = 1
-  else:
-    # Wave = max wave of dependencies + 1
-    plan.wave = max(waves[dep] for dep in plan.depends_on) + 1
-
-  waves[plan.id] = plan.wave
-```
-
-**Example:**
-
-```
-Plan 01: depends_on: []           → wave: 1
-Plan 02: depends_on: []           → wave: 1
-Plan 03: depends_on: ["01"]       → wave: 2
-Plan 04: depends_on: ["02"]       → wave: 2
-Plan 05: depends_on: ["03", "04"] → wave: 3
-```
-
-Store wave number with each plan in memory. Write to frontmatter in next step.
-</step>
-
-<step name="group_into_plans">
-**Group tasks into plans based on dependency waves and autonomy.**
-
-**Grouping rules:**
-
-1. **Same-wave tasks with no file conflicts → can be in parallel plans**
-2. **Tasks with shared files → must be in same plan or sequential plans**
-3. **Checkpoint tasks → mark plan as `autonomous: false`**
-4. **Each plan: 2-3 tasks max, single concern, ~50% context target**
-
-**Plan assignment algorithm:**
-
-```
-1. Start with Wave 1 tasks (no dependencies)
-2. Group into plans by:
-   - Feature affinity (vertical slice)
-   - File ownership (no conflicts)
-   - Checkpoint presence (group checkpoints with related auto tasks)
-3. Move to Wave 2 tasks, repeat
-4. Continue until all tasks assigned
-```
-
-**Example grouping:**
-
-```
-Tasks identified:
-- A: User model (Wave 1, auto)
-- B: Product model (Wave 1, auto)
-- C: User API (Wave 2, auto)
-- D: Product API (Wave 2, auto)
-- E: Dashboard (Wave 3, auto)
-- F: Verify Dashboard (Wave 3, checkpoint)
-
-Grouping into plans:
-Plan 01: [A, C] - User feature (model + API)
-         depends_on: [], autonomous: true
-
-Plan 02: [B, D] - Product feature (model + API)
-         depends_on: [], autonomous: true
-
-Plan 03: [E, F] - Dashboard (build + verify)
-         depends_on: ["01", "02"], autonomous: false
-
-Wave structure:
-  Wave 1 (parallel): Plan 01, Plan 02
-  Wave 2: Plan 03 (has checkpoint, runs after Wave 1)
-```
-</step>
-
-<step name="estimate_scope">
-After grouping, verify each plan fits context budget.
-
-**Check depth setting:**
-```bash
-cat .planning/config.json 2>/dev/null | grep depth
-```
-
-<depth_aware_splitting>
-**Depth controls compression tolerance, not artificial inflation.**
-
-| Depth | Typical Plans/Phase | Tasks/Plan |
-|-------|---------------------|------------|
-| Quick | 1-3 | 2-3 |
-| Standard | 3-5 | 2-3 |
-| Comprehensive | 5-10 | 2-3 |
-
-**Key principle:** Derive plans from actual work. Depth determines how aggressively you combine things, not a target to hit.
-
-- Comprehensive auth phase = 8 plans (because auth genuinely has 8 concerns)
-- Comprehensive "add config file" phase = 1 plan (because that's all it is)
-
-For comprehensive depth:
-- Create MORE plans when the work warrants it, not bigger ones
-- If a phase has 15 tasks, that's 5-8 plans (not 3 plans with 5 tasks each)
-- Each plan stays focused: 2-3 tasks, single concern
-
-For quick depth:
-- Combine aggressively into fewer plans
-- 1-3 plans per phase is fine
-- Focus on critical path
-</depth_aware_splitting>
-
-**ALWAYS split if:** >3 tasks, multiple subsystems, >5 files in any task, complex domains (auth, payments).
-
-**Each plan must be:** 2-3 tasks max, ~50% context target, independently committable.
-
-See ~/.claude/mindsystem/references/scope-estimation.md for complete guidance.
-</step>
-
-<step name="confirm_breakdown">
-Auto-approve and proceed to write_phase_prompt.
-</step>
-
-<step name="write_phase_prompt">
-Use template from `~/.claude/mindsystem/templates/phase-prompt.md`.
-
-**Single plan:** Write to `.planning/phases/XX-name/{phase}-01-PLAN.md`
-
-**Multiple plans:** Write separate files ({phase}-01-PLAN.md, {phase}-02-PLAN.md, etc.)
-
-Each plan follows template structure with:
-- Frontmatter (phase, plan, type, depends_on, files_modified, autonomous, domain)
-- Objective (plan-specific goal, purpose, output)
-- Execution context (execute-plan.md, summary template, checkpoints.md if needed)
-- Context (@references to PROJECT, ROADMAP, STATE, codebase docs, RESEARCH/DISCOVERY/CONTEXT if exist, prior summaries, source files)
-- Tasks (XML format with types)
-- Verification, Success criteria, Output specification
-
-**Plan frontmatter:**
-
-```yaml
----
-phase: XX-name
-plan: NN
-type: execute
-wave: N                     # Execution wave (1, 2, 3...). Computed at plan time.
-depends_on: []              # Plan IDs this plan requires.
-files_modified: []          # Files this plan touches.
-autonomous: true            # false if plan has checkpoints requiring user interaction
-domain: [optional]
-user_setup: []              # Human-required setup (omit if empty)
----
-```
-
-**User setup frontmatter (when external services involved):**
-
-```yaml
-user_setup:
-  - service: stripe
-    why: "Payment processing"
-    env_vars:
-      - name: STRIPE_SECRET_KEY
-        source: "Stripe Dashboard → Developers → API keys → Secret key"
-      - name: STRIPE_WEBHOOK_SECRET
-        source: "Stripe Dashboard → Developers → Webhooks → Signing secret"
-    account_setup:
-      - url: "https://dashboard.stripe.com/register"
-        skip_if: "Already have Stripe account"
-    dashboard_config:
-      - task: "Create webhook endpoint"
-        location: "Stripe Dashboard → Developers → Webhooks → Add endpoint"
-        details: "URL: https://[your-domain]/api/webhooks/stripe, Events: checkout.session.completed"
-    local_dev:
-      - "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
-```
-
-**Automation-first rule:** Only include setup Claude literally cannot do:
-- Account creation (requires human signup)
-- Secret retrieval (requires dashboard access)
-- Dashboard configuration (requires human in browser)
-
-Do NOT include: npm install, code changes, file creation, CLI commands Claude can run.
-
-**Wave is pre-computed:** Wave numbers are assigned during planning (see `assign_waves` step). `/ms:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
-
-**Context section - parallel-aware:**
-
-Only include prior plan SUMMARY references if this plan genuinely needs decisions/outputs:
+The ms-plan-writer returns structured markdown:
 
 ```markdown
-<context>
-@.planning/PROJECT.md
-@.planning/ROADMAP.md
-@.planning/STATE.md
+## PLANS CREATED
 
-# Only reference prior plans if genuinely needed:
-# - This plan uses types/exports from prior plan
-# - This plan continues work from prior plan
-# - Prior plan made decision that affects this plan
-#
-# Do NOT reflexively chain: Plan 02 refs 01, Plan 03 refs 02...
-# Independent plans need no prior SUMMARY references.
+**Phase:** 03-authentication
+**Plans:** 3 plan(s) in 2 wave(s)
+**Commit:** a1b2c3d
 
-@path/to/relevant/source.ts
-</context>
+### Wave Structure
+| Wave | Plans | Dependency |
+|------|-------|------------|
+| 1 | 01, 02 | None (parallel) |
+| 2 | 03 | Waits for 01, 02 |
+
+### Risk Assessment
+**Score:** 45/100 (optional)
+**Top Factors:**
+- CONTEXT.md with locked decisions
+- Complex domain (auth)
+
+### Files Created
+- `.planning/phases/03-authentication/03-01-PLAN.md`
+- `.planning/phases/03-authentication/03-02-PLAN.md`
+- `.planning/phases/03-authentication/03-03-PLAN.md`
 ```
 
-**For plans with checkpoints:**
-
-Include checkpoint reference in execution_context:
-```markdown
-<execution_context>
-@~/.claude/mindsystem/workflows/execute-plan.md
-@~/.claude/mindsystem/templates/summary.md
-@~/.claude/mindsystem/references/checkpoints.md
-</execution_context>
-```
-
-Checkpoint plans can still run in parallel waves. When they hit a checkpoint, they pause and return to the orchestrator. User responds, orchestrator resumes the agent.
+Extract:
+- `plan_count`: Number of plans created
+- `wave_count`: Number of waves
+- `wave_structure`: Wave-to-plan mapping
+- `risk_score`: 0-100
+- `risk_tier`: "skip" | "optional" | "verify"
+- `risk_factors`: Top contributing factors
+- `plan_paths`: List of created PLAN.md files
+- `commit_hash`: Git commit reference
 </step>
 
-<step name="git_commit">
-Commit phase plan(s):
+<step name="risk_decision">
+**Present risk score and handle user choice.**
 
-```bash
-# Stage all PLAN.md files for this phase
-git add .planning/phases/${PHASE}-*/${PHASE}-*-PLAN.md
+**Skip this step if:** `--gaps` flag present (gap closure plans don't need risk assessment)
 
-# Also stage DISCOVERY.md if it was created during mandatory_discovery
-git add .planning/phases/${PHASE}-*/DISCOVERY.md 2>/dev/null
-
-git commit -m "$(cat <<'EOF'
-docs(${PHASE}): create phase plan
-
-Phase ${PHASE}: ${PHASE_NAME}
-- [N] plan(s) in [M] wave(s)
-- [X] parallel, [Y] sequential
-- Ready for execution
-EOF
-)"
-```
-
-Confirm: "Committed: docs(${PHASE}): create phase plan"
-</step>
-
-<step name="risk_assessment">
-**Calculate risk score and offer optional verification.**
-
-See `~/.claude/mindsystem/references/plan-risk-assessment.md` for factor weights, thresholds, and AskUserQuestion formats.
-
-**Skip this step if:**
-- `--gaps` flag present (gap closure plans don't need risk assessment)
-
-**1. Gather metrics from already-loaded context:**
-
-From plans just created:
-- `plan_count` — number of PLAN.md files created
-- `max_tasks` — highest task count in any single plan
-- `external_services` — services from user_setup frontmatter (Stripe, SendGrid, etc.)
-
-From earlier workflow steps:
-- `context_exists` — was CONTEXT.md loaded in gather_phase_context?
-- `cross_cutting_count` — files appearing in multiple plans' files_modified?
-- `new_deps_count` — new packages mentioned in task actions?
-- `phase_keywords` — does phase name/description match complex domains?
-
-**2. Calculate score:**
-
-```
-score = 0
-factors = []
-
-# Task count (4+ tasks in any plan)
-if max_tasks >= 4:
-  score += 15
-  factors.append(f"Plan has {max_tasks} tasks")
-
-# Plan count (5+ plans in phase)
-if plan_count >= 5:
-  score += 15
-  factors.append(f"{plan_count} plans in phase")
-
-# External services
-if external_services:
-  score += min(len(external_services) * 10, 20)
-  factors.append(f"External services: {', '.join(external_services)}")
-
-# CONTEXT.md exists (locked decisions)
-if context_exists:
-  score += 10
-  factors.append("CONTEXT.md with locked decisions")
-
-# Cross-cutting concerns (shared files)
-if cross_cutting_count > 0:
-  score += min(cross_cutting_count * 5, 15)
-  factors.append("Cross-cutting concerns detected")
-
-# New dependencies
-if new_deps_count > 0:
-  score += min(new_deps_count * 5, 15)
-  factors.append(f"{new_deps_count} new dependencies")
-
-# Complex domain keywords
-complex_domains = ["auth", "authentication", "payment", "billing", "migration",
-                   "security", "encryption", "oauth", "webhook", "real-time",
-                   "websocket", "distributed", "caching", "queue"]
-if any(kw in phase_text.lower() for kw in complex_domains):
-  score += 10
-  factors.append("Complex domain (auth/payments/etc)")
-
-score = min(score, 100)
-tier = "skip" if score < 40 else "optional" if score < 70 else "verify"
-```
-
-**3. Present via AskUserQuestion based on tier:**
+**Present via AskUserQuestion based on tier from subagent:**
 
 **Skip tier (0-39):**
 - header: "Plan Verification"
@@ -840,7 +601,7 @@ tier = "skip" if score < 40 else "optional" if score < 70 else "verify"
 - question: "Risk Score: {score}/100 — Higher complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n- {factor_3}\n\nVerification strongly recommended."
 - Options: "Verify first (Recommended)" (first), "Execute anyway", "Review plans manually"
 
-**4. Handle response:**
+**Handle response:**
 
 **"Execute now" / "Execute anyway":**
 Continue to offer_next.
@@ -921,7 +682,7 @@ Wave 2: {plan-03}
 
 If you can't specify Files + Action + Verify + Done, the task is too vague.
 
-**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, create a TDD plan for it. See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
+**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, mark as tdd_candidate=true. See `~/.claude/mindsystem/references/tdd.md` for TDD criteria.
 </task_quality>
 
 <anti_patterns>
@@ -938,15 +699,12 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] STATE.md read, project history absorbed
 - [ ] Mandatory discovery completed (Level 0-3)
 - [ ] Prior decisions, issues, concerns synthesized
-- [ ] Dependency graph built (needs/creates for each task)
-- [ ] Tasks grouped into plans by wave, not by sequence
-- [ ] PLAN file(s) exist with XML structure
+- [ ] Tasks identified with needs/creates dependencies
+- [ ] Task list handed off to ms-plan-writer
+- [ ] PLAN file(s) created by subagent with XML structure
 - [ ] Each plan: depends_on, files_modified, autonomous in frontmatter
-- [ ] Each plan: user_setup declared if external services involved
-- [ ] Each plan: Objective, context, tasks, verification, success criteria, output
+- [ ] Each plan: must_haves derived (truths, artifacts, key_links)
 - [ ] Each plan: 2-3 tasks (~50% context)
-- [ ] Each task: Type, Files (if auto), Action, Verify, Done
-- [ ] Checkpoints properly structured
 - [ ] Wave structure maximizes parallelism
 - [ ] PLAN file(s) committed to git
 - [ ] Risk assessment presented (score + top factors)
