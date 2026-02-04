@@ -185,6 +185,9 @@ Mindsystem creates `.planning/` directory in user projects:
 5. `/ms:discuss-phase N` (optional) → Gather context before planning
 6. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
 7. `/ms:plan-phase N` → Creates PLAN.md files (main context, with user)
+   - After planning: risk assessment (0-100 score) + optional verification via ms-plan-checker
+   - Risk factors: task count, plan count, external services, CONTEXT.md, cross-cutting, new deps, complex domains
+   - Skip `--gaps` mode skips risk assessment (gap closure plans don't need it)
 8. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
 9. `/ms:verify-work N` (optional) → UAT verification with inline fixing
 </core_workflow>
@@ -312,7 +315,7 @@ All in `agents/`:
 | ms-code-simplifier | Post-execution code review (generic) | execute-phase |
 | ms-flutter-simplifier | Post-execution code review (Flutter) | execute-phase |
 | ms-flutter-reviewer | Flutter structural analysis (analyze-only) | audit-milestone |
-| ms-plan-checker | Validate plans before execution | check-phase |
+| ms-plan-checker | Validate plans before execution | plan-phase (optional), check-phase |
 | ms-milestone-auditor | Audit milestone completion | audit-milestone |
 | ms-integration-checker | Verify cross-phase integration | audit-milestone |
 | ms-mock-generator | Generate mocks for UAT testing | verify-work |

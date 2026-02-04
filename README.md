@@ -344,7 +344,7 @@ Full docs live in `/ms:help` (same content as `commands/ms/help.md`).
 | `/ms:review-design [scope]`              | Audit and improve existing UI quality                         |
 | `/ms:research-phase <number>`            | Do deep research for niche phase domains                      |
 | `/ms:list-phase-assumptions <number>`    | Show what Mindsystem assumes before planning                  |
-| `/ms:plan-phase [number] [--gaps]`       | Create small, verifiable plans (or close gaps)                |
+| `/ms:plan-phase [number] [--gaps]`       | Create small, verifiable plans with optional risk-based verification |
 | `/ms:check-phase <number>`               | Sanity-check plans before execution                           |
 | `/ms:execute-phase <phase-number>`       | Run all unexecuted plans in fresh subagents                   |
 | `/ms:verify-work [number]`               | Batched manual UAT with inline fixes                          |

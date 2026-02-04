@@ -186,11 +186,16 @@ Usage: `/ms:list-phase-assumptions 3`
 **`/ms:plan-phase [number] [--gaps]`**
 Create detailed execution plan for a specific phase.
 
-- Use when: you’re about to start a phase, or you need additional plans (including verifier-driven gap closure via `--gaps`).
+- Use when: you're about to start a phase, or you need additional plans (including verifier-driven gap closure via `--gaps`).
 - Generates `.planning/phases/XX-phase-name/XX-YY-PLAN.md`
 - Breaks phase into concrete, actionable tasks
 - Includes verification criteria and success measures
 - Multiple plans per phase supported (XX-01, XX-02, etc.)
+- After planning: calculates risk score (0-100) and offers optional plan verification
+  - Skip tier (0-39): Low complexity, verification optional
+  - Optional tier (40-69): Moderate complexity, verification recommended
+  - Verify tier (70-100): Higher complexity, verification strongly recommended
+- Risk factors: task count, plan count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains
 
 Usage: `/ms:plan-phase 1`
 Usage: `/ms:plan-phase` (auto-detect next unplanned phase)

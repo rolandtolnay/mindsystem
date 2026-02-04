@@ -754,6 +754,132 @@ EOF
 Confirm: "Committed: docs(${PHASE}): create phase plan"
 </step>
 
+<step name="risk_assessment">
+**Calculate risk score and offer optional verification.**
+
+See `~/.claude/mindsystem/references/plan-risk-assessment.md` for factor weights, thresholds, and AskUserQuestion formats.
+
+**Skip this step if:**
+- `--gaps` flag present (gap closure plans don't need risk assessment)
+
+**1. Gather metrics from already-loaded context:**
+
+From plans just created:
+- `plan_count` — number of PLAN.md files created
+- `max_tasks` — highest task count in any single plan
+- `external_services` — services from user_setup frontmatter (Stripe, SendGrid, etc.)
+
+From earlier workflow steps:
+- `context_exists` — was CONTEXT.md loaded in gather_phase_context?
+- `cross_cutting_count` — files appearing in multiple plans' files_modified?
+- `new_deps_count` — new packages mentioned in task actions?
+- `phase_keywords` — does phase name/description match complex domains?
+
+**2. Calculate score:**
+
+```
+score = 0
+factors = []
+
+# Task count (4+ tasks in any plan)
+if max_tasks >= 4:
+  score += 15
+  factors.append(f"Plan has {max_tasks} tasks")
+
+# Plan count (5+ plans in phase)
+if plan_count >= 5:
+  score += 15
+  factors.append(f"{plan_count} plans in phase")
+
+# External services
+if external_services:
+  score += min(len(external_services) * 10, 20)
+  factors.append(f"External services: {', '.join(external_services)}")
+
+# CONTEXT.md exists (locked decisions)
+if context_exists:
+  score += 10
+  factors.append("CONTEXT.md with locked decisions")
+
+# Cross-cutting concerns (shared files)
+if cross_cutting_count > 0:
+  score += min(cross_cutting_count * 5, 15)
+  factors.append("Cross-cutting concerns detected")
+
+# New dependencies
+if new_deps_count > 0:
+  score += min(new_deps_count * 5, 15)
+  factors.append(f"{new_deps_count} new dependencies")
+
+# Complex domain keywords
+complex_domains = ["auth", "authentication", "payment", "billing", "migration",
+                   "security", "encryption", "oauth", "webhook", "real-time",
+                   "websocket", "distributed", "caching", "queue"]
+if any(kw in phase_text.lower() for kw in complex_domains):
+  score += 10
+  factors.append("Complex domain (auth/payments/etc)")
+
+score = min(score, 100)
+tier = "skip" if score < 40 else "optional" if score < 70 else "verify"
+```
+
+**3. Present via AskUserQuestion based on tier:**
+
+**Skip tier (0-39):**
+- header: "Plan Verification"
+- question: "Risk Score: {score}/100 — Low risk\n\nPlans look straightforward. Verification optional."
+- Options: "Execute now" (first), "Verify anyway"
+
+**Optional tier (40-69):**
+- header: "Plan Verification"
+- question: "Risk Score: {score}/100 — Moderate complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n\nVerification recommended but optional."
+- Options: "Verify first" (first), "Execute now", "Review plans manually"
+
+**Verify tier (70-100):**
+- header: "Plan Verification Recommended"
+- question: "Risk Score: {score}/100 — Higher complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n- {factor_3}\n\nVerification strongly recommended."
+- Options: "Verify first (Recommended)" (first), "Execute anyway", "Review plans manually"
+
+**4. Handle response:**
+
+**"Execute now" / "Execute anyway":**
+Continue to offer_next.
+
+**"Verify first" / "Verify anyway":**
+Spawn ms-plan-checker:
+
+```
+Task(
+  subagent_type: "ms-plan-checker"
+  model: "sonnet"
+  description: "Verify phase ${PHASE} plans"
+  prompt: """
+Verify plans for phase ${PHASE}.
+Phase directory: ${PHASE_DIR}
+
+1. Read .planning/ROADMAP.md for phase goal
+2. Read all *-PLAN.md files in ${PHASE_DIR}
+3. Read ${PHASE}-CONTEXT.md if exists (for dimension 7)
+4. Run all verification dimensions
+5. Return PASSED or ISSUES FOUND
+"""
+)
+```
+
+If **PASSED:** Continue to offer_next with "Plans verified ✓"
+
+If **ISSUES FOUND:** Present issues, then AskUserQuestion:
+- "Fix issues — I'll edit the plans"
+- "Execute anyway — proceed despite issues"
+- "Re-verify — check again after fixes"
+
+**"Review plans manually":**
+Show plan paths, wait for user response:
+- "looks good" / "proceed" → continue to offer_next
+- "run verification" → spawn ms-plan-checker
+- Describes changes → help edit plans
+</step>
+
 <step name="offer_next">
 ```
 Phase {X} planned: {N} plan(s) in {M} wave(s)
@@ -823,6 +949,8 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Checkpoints properly structured
 - [ ] Wave structure maximizes parallelism
 - [ ] PLAN file(s) committed to git
+- [ ] Risk assessment presented (score + top factors)
+- [ ] User chose verify/skip (or verified if chosen)
 - [ ] User knows next steps and wave structure
 
 **Gap closure mode (`--gaps`)** — Planning complete when:

@@ -11,6 +11,7 @@ allowed-tools:
   - AskUserQuestion
   - WebFetch
   - mcp__context7__*
+  - Task
 ---
 
 <objective>
@@ -32,6 +33,7 @@ When invoked with `--gaps`, plans address gaps identified by the verifier. Load 
 @~/.claude/mindsystem/references/checkpoints.md
 @~/.claude/mindsystem/references/tdd.md
 @~/.claude/mindsystem/references/goal-backward.md
+@~/.claude/mindsystem/references/plan-risk-assessment.md
 </execution_context>
 
 <context>
@@ -105,6 +107,13 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 6. **Update last command**
    - Update `.planning/STATE.md` Last Command field
    - Format: `Last Command: ms:plan-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
+
+7. **Risk assessment** (skip if `--gaps` flag present)
+   - Calculate risk score from context already loaded (task count, plan count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains)
+   - Present score + top factors via AskUserQuestion
+   - Tier-based recommendation: Skip (0-39), Optional (40-69), Verify (70+)
+   - If user chooses verify: spawn ms-plan-checker, surface results
+   - If user chooses skip: proceed to next steps
 </process>
 
 <success_criteria>
