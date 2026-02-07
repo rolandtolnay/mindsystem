@@ -1,6 +1,6 @@
 ---
 name: ms-code-simplifier
-description: Simplifies code for clarity, consistency, and maintainability. Technology-agnostic fallback simplifier spawned by execute-phase/do-work after code changes.
+description: Simplifies code for clarity, consistency, and maintainability. Technology-agnostic fallback simplifier spawned by execute-phase/adhoc after code changes.
 model: sonnet
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: cyan

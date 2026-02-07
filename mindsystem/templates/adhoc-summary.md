@@ -1,6 +1,6 @@
 # Adhoc Summary Template
 
-Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for small work items executed via `/ms:do-work`.
+Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for small work items executed via `/ms:adhoc`.
 
 ---
 
@@ -142,8 +142,8 @@ learnings:
 <guidelines>
 
 **When to create:**
-- After completing adhoc work via `/ms:do-work`
-- Required output from do-work workflow
+- After completing adhoc work via `/ms:adhoc`
+- Required output from adhoc workflow
 
 **Size:**
 - Keep brief — adhoc work is small by definition

@@ -140,7 +140,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 |----------|----------|
 | Setup | `new-project`, `research-project`, `define-requirements`, `create-roadmap`, `map-codebase` |
 | Planning | `discuss-phase`, `design-phase`, `plan-phase`, `check-phase` |
-| Execution | `execute-phase`, `do-work` |
+| Execution | `execute-phase`, `adhoc` |
 | Verification | `verify-work`, `review-design` |
 | Debugging | `debug` |
 | Milestones | `complete-milestone`, `discuss-milestone`, `new-milestone`, `audit-milestone`, `plan-milestone-gaps` |

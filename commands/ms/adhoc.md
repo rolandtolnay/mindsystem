@@ -1,5 +1,5 @@
 ---
-name: ms:do-work
+name: ms:adhoc
 description: Execute small discovered work without phase overhead (max 2 tasks)
 argument-hint: <description>
 allowed-tools:
@@ -26,7 +26,7 @@ Use when:
 </objective>
 
 <execution_context>
-@~/.claude/mindsystem/workflows/do-work.md
+@~/.claude/mindsystem/workflows/adhoc.md
 @.planning/STATE.md
 </execution_context>
 
@@ -81,7 +81,7 @@ Report what was done, show commit hash, file paths, and patch file path.
 <step name="update_last_command">
 Update `.planning/STATE.md` Last Command field:
 - Find line starting with `Last Command:` in Current Position section
-- Replace with: `Last Command: ms:do-work $ARGUMENTS | YYYY-MM-DD HH:MM`
+- Replace with: `Last Command: ms:adhoc $ARGUMENTS | YYYY-MM-DD HH:MM`
 - If line doesn't exist, add it after `Status:` line
 </step>
 

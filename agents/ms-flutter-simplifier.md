@@ -1,6 +1,6 @@
 ---
 name: ms-flutter-simplifier
-description: Simplifies Flutter/Dart code for clarity, consistency, and maintainability. Spawned by execute-phase/do-work after code changes.
+description: Simplifies Flutter/Dart code for clarity, consistency, and maintainability. Spawned by execute-phase/adhoc after code changes.
 model: sonnet
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: cyan

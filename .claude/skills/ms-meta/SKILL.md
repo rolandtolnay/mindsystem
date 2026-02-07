@@ -156,7 +156,7 @@ Mindsystem creates `.planning/` directory in user projects:
 ```
 
 **Code review levels:**
-- `code_review.adhoc` — Runs after `/ms:do-work` (adhoc work review, falls back to `phase`)
+- `code_review.adhoc` — Runs after `/ms:adhoc` (adhoc work review, falls back to `phase`)
 - `code_review.phase` — Runs after `/ms:execute-phase` (per-phase review)
 - `code_review.milestone` — Runs after `/ms:audit-milestone` (cross-phase review)
 

@@ -63,7 +63,7 @@ None yet.
 
 ### Recent Adhoc Work
 
-[Small work items executed via /ms:do-work]
+[Small work items executed via /ms:adhoc]
 
 None yet.
 
@@ -112,7 +112,7 @@ STATE.md is the project's short-term memory spanning all phases and sessions.
   - Update progress bar
   - Clear resolved blockers
   - Refresh Project Reference date
-- do-work: After adhoc work completed
+- adhoc: After adhoc work completed
   - Add entry to "Recent Adhoc Work" section
   - Keep last 5 entries (older entries remain in .planning/adhoc/)
 - Any state-changing command: Update Last Command field
@@ -160,7 +160,7 @@ Updated after each plan completion.
 - Reference to .planning/todos/pending/
 - Brief list if few, count if many (e.g., "5 pending todos — see /ms:check-todos")
 
-**Recent Adhoc Work:** Small fixes executed via /ms:do-work
+**Recent Adhoc Work:** Small fixes executed via /ms:adhoc
 - Last 5 adhoc work entries
 - Format: `- [date]: [description] (.planning/adhoc/[file]-SUMMARY.md)`
 - Full history remains in .planning/adhoc/ directory
@@ -200,7 +200,7 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 **When updated:**
 - After each plan execution (update position, note decisions, update issues/blockers)
 - After phase transitions (update progress bar, clear resolved blockers, refresh project reference)
-- After adhoc work via /ms:do-work (add entry to "Recent Adhoc Work")
+- After adhoc work via /ms:adhoc (add entry to "Recent Adhoc Work")
 - After any state-changing command (update Last Command field)
 
 **Size management:**

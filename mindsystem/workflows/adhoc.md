@@ -36,8 +36,8 @@ Parse the work description from $ARGUMENTS:
 ```bash
 if [ -z "$ARGUMENTS" ]; then
   echo "ERROR: Work description required"
-  echo "Usage: /ms:do-work <description>"
-  echo "Example: /ms:do-work Fix auth token not refreshing on 401"
+  echo "Usage: /ms:adhoc <description>"
+  echo "Example: /ms:adhoc Fix auth token not refreshing on 401"
   exit 1
 fi
 

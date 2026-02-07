@@ -77,7 +77,7 @@ Use existing area from step 2 if similar match exists.
 |---|---|
 | `ms:debug` | `debug` |
 | `ms:verify-work` | `verify-work` |
-| `ms:do-work` | `adhoc` |
+| `ms:adhoc` | `adhoc` |
 | `ms:audit-milestone` / `ms:plan-milestone-gaps` | `milestone-audit` |
 | anything else / no STATE.md | `user-idea` |
 

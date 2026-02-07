@@ -378,7 +378,7 @@ Usage: `/ms:check-todos api`
 
 ### Adhoc Work
 
-**`/ms:do-work <description>`**
+**`/ms:adhoc <description>`**
 Execute small discovered work without phase overhead (max 2 tasks).
 
 - Use when: you discover small work mid-session that needs to be done now but doesn't warrant a full phase.
@@ -388,7 +388,7 @@ Execute small discovered work without phase overhead (max 2 tasks).
 - Updates STATE.md with adhoc work entry
 - Single git commit with all changes
 
-Usage: `/ms:do-work Fix auth token not refreshing on 401`
+Usage: `/ms:adhoc Fix auth token not refreshing on 401`
 
 ### Utility Commands
 
@@ -428,7 +428,7 @@ Usage: `/ms:update`
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on
 │   └── done/             # Completed todos
-├── adhoc/                # Small work executed via /ms:do-work
+├── adhoc/                # Small work executed via /ms:adhoc
 │   ├── *-PLAN.md         # Lightweight plans
 │   └── *-SUMMARY.md      # Completion summaries
 ├── debug/                # Active debug sessions
@@ -501,7 +501,7 @@ Usage: `/ms:update`
 /ms:debug "form submission fails silently"    # Systematic investigation (persists across /clear)
 # Then decide where the fix belongs:
 # - If it's small (1-2 tasks) and needed now:
-/ms:do-work "Fix auth token refresh on 401"   # Quick fix with audit trail
+/ms:adhoc "Fix auth token refresh on 401"   # Quick fix with audit trail
 # - If it's required to satisfy the current phase goal: add more plans to the current phase
 /ms:plan-phase 5                              # (or: /ms:plan-phase 5 --gaps after verification)
 /ms:execute-phase 5

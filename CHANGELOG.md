@@ -23,7 +23,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [3.5.0] - 2026-01-28
 
 ### Added
-- **Adhoc code review configuration** — New `code_review.adhoc` field in config.json for `/ms:do-work` with cascade fallback (adhoc → phase → default)
+- **Adhoc code review configuration** — New `code_review.adhoc` field in config.json for `/ms:adhoc` with cascade fallback (adhoc → phase → default)
 - **`ms-flutter-reviewer` structural analysis** — New analyze-only reviewer for Flutter projects that reports findings without modifying code. At milestone level, offers binary choice: create quality phase or accept as tech debt
 
 ### Changed
@@ -42,8 +42,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **Decision consolidation on milestone completion** — New `ms-consolidator` agent extracts decisions from phase artifacts (PLAN.md, CONTEXT.md, RESEARCH.md, DESIGN.md) into `v{X.Y}-DECISIONS.md` during `/ms:complete-milestone`. Decisions grouped by category (Technical Stack, Architecture, Data Model, API Design, UI/UX, Security, Performance)
-- **Auto-simplification after phase execution** — Code simplifier agent runs automatically after `/ms:execute-phase` and `/ms:do-work`, reviewing changes for clarity and maintainability. Stack-aware: uses `ms-flutter-simplifier` for Flutter projects (configurable in `config.json`)
-- **Patch generation for do-work** — `/ms:do-work` now generates patches for complex discoveries, enabling execution in fresh context
+- **Auto-simplification after phase execution** — Code simplifier agent runs automatically after `/ms:execute-phase` and `/ms:adhoc`, reviewing changes for clarity and maintainability. Stack-aware: uses `ms-flutter-simplifier` for Flutter projects (configurable in `config.json`)
+- **Patch generation for adhoc** — `/ms:adhoc` now generates patches for complex discoveries, enabling execution in fresh context
 
 ### Changed
 - **`/ms:new-milestone` consolidates discuss-milestone** — Discovery mode now opt-in via decision gate ("I know what to build" / "Help me figure it out" / "Show previous decisions first"). Loads previous milestone's DECISIONS.md and AUDIT.md on-demand only when user chooses discovery
@@ -164,7 +164,7 @@ All commands change from `/gsd:*` to `/ms:*`
 ## [2.10.0] - 2026-01-20
 
 ### Added
-- **`/gsd:do-work` command** — Bridges gap between `/gsd:add-todo` (capture for later) and `/gsd:insert-phase` (full planning). Executes small adhoc work (max 2 tasks) with proper audit trail in `.planning/adhoc/` while keeping overhead proportional to work size
+- **`/gsd:adhoc` command** — Bridges gap between `/gsd:add-todo` (capture for later) and `/gsd:insert-phase` (full planning). Executes small adhoc work (max 2 tasks) with proper audit trail in `.planning/adhoc/` while keeping overhead proportional to work size
 - GSD patterns reference document
 
 ### Changed
