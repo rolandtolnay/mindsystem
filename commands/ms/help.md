@@ -72,7 +72,7 @@ Common deviations:
 - Existing repo: `/ms:map-codebase` before `/ms:new-project`
 - Plan looks wrong: `/ms:list-phase-assumptions <phase>` or `/ms:check-phase <phase>`
 - Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
-- UI-heavy phase: `/ms:design-phase <phase>` before `/ms:research-phase <phase>`
+- Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
 - Execution gaps: `/ms:plan-phase <phase> --gaps` then `/ms:execute-phase <phase>`
 - New urgent work: `/ms:insert-phase <after> "<desc>"`
 - New non-urgent work: `/ms:add-todo "<desc>"`
@@ -145,6 +145,7 @@ Usage: `/ms:discuss-phase 2`
 Create visual/UX design specifications for UI-heavy phases.
 
 - Produces DESIGN.md with layouts, components, flows, verification criteria
+- Optionally generates parallel HTML mockup variants for visual direction exploration
 - Applies quality-forcing patterns to prevent generic AI output
 - Checks for existing implement-ui skill and harmonizes with codebase
 - Use for phases with significant UI work, novel components, or cross-platform design
@@ -248,6 +249,7 @@ Audit milestone completion against original intent.
 - Use when: you think you’re “done” and want cross-phase integration + requirements coverage checked before archiving.
 - Reads phase VERIFICATION.md files and aggregates results
 - Spawns integration checker for cross-phase wiring
+- Maintains TECH-DEBT.md as single source of truth for debt items
 - Creates MILESTONE-AUDIT.md with gaps and tech debt
 
 Usage: `/ms:audit-milestone 1.0.0`
@@ -303,6 +305,7 @@ Usage: `/ms:new-milestone "v2.0 Features"`
 Archive completed milestone and prepare for next version.
 
 - Creates MILESTONES.md entry with stats
+- Extracts curated learnings for future milestone planning
 - Archives full details to milestones/ directory
 - Creates git tag for the release
 - Prepares workspace for next version

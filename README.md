@@ -61,6 +61,9 @@ The original GSD established the philosophy and core infrastructure. Mindsystem 
 - **Fast research via CLI.** `ms-lookup` searches APIs (Context7 docs, Perplexity) with caching and JSON output. Example: `ms-lookup docs react "useEffect cleanup"`.
 - **Lean milestone management.** Finishing a milestone consolidates decisions into `vX.Y-DECISIONS.md` and archives the rest, keeping `.planning/` tidy.
 - **Configurable code reviews.** Reviewers run after execution and at milestone audits, creating separate commits. Milestone reviews can be report-only — you decide what gets fixed.
+- **Design mockups.** `/ms:design-phase` generates parallel HTML/CSS mockup variants to explore visual directions before locking a design spec.
+- **Cross-milestone learnings.** Milestone completion extracts curated patterns into `LEARNINGS.md` so planning in future milestones starts smarter.
+- **Structured tech debt.** `/ms:audit-milestone` maintains `TECH-DEBT.md` — a single source of truth for debt items with severity, source, and suggested fixes.
 
 ---
 

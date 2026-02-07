@@ -93,8 +93,11 @@ mindsystem/
 │   ├── ms-researcher.md     # Domain research
 │   ├── ms-roadmapper.md     # Creates ROADMAP.md
 │   ├── ms-designer.md       # UI/UX design specs
+│   ├── ms-mockup-designer.md   # HTML/CSS mockup generation
+│   ├── ms-plan-writer.md       # PLAN.md generation from task breakdown
 │   ├── ms-code-simplifier.md    # Post-execution code review (generic)
 │   ├── ms-flutter-simplifier.md # Flutter-specific simplification
+│   ├── ms-flutter-code-quality.md # Flutter code quality enforcement
 │   ├── ms-flutter-reviewer.md   # Flutter structural analysis (analyze-only)
 │   ├── ms-codebase-mapper.md    # Brownfield codebase analysis
 │   └── ...
@@ -108,7 +111,14 @@ mindsystem/
 │   └── ...
 ├── mindsystem/          # Core system
 │   ├── workflows/            # Step-by-step procedures
-│   └── templates/            # Output structures (STATE.md, SUMMARY.md, etc.)
+│   ├── templates/            # Output structures (STATE.md, SUMMARY.md, etc.)
+│   │   ├── learnings.md, tech-debt.md    # Milestone artifacts
+│   │   └── mockup-mobile.md, mockup-web.md  # HTML mockup templates
+│   └── references/           # Deep-dive concept docs
+│       ├── routing/              # Context loading strategies
+│       ├── questioning.md        # Adaptive questioning patterns
+│       ├── design-directions.md  # Design direction evaluation
+│       └── plan-risk-assessment.md  # Risk scoring for plans
 ├── skills/               # Domain expertise skills
 │   └── flutter-senior-review/   # Flutter code review principles
 │       ├── SKILL.md             # Skill definition
@@ -116,6 +126,7 @@ mindsystem/
 │       └── principles/          # 12 principle files
 └── scripts/              # Shell scripts for automation
     ├── generate-phase-patch.sh
+    ├── generate-adhoc-patch.sh
     └── ms-lookup/            # Research tooling (Python)
 ```
 
@@ -187,6 +198,7 @@ Mindsystem creates `.planning/` directory in user projects:
 5. `/ms:discuss-phase N` (optional) → Gather context before planning
 6. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
 7. `/ms:plan-phase N` → Creates PLAN.md files (main context, with user)
+   - Plan writing delegates to ms-plan-writer subagent
    - After planning: risk assessment (0-100 score) + optional verification via ms-plan-checker
    - Risk factors: task count, plan count, external services, CONTEXT.md, cross-cutting, new deps, complex domains
    - Skip `--gaps` mode skips risk assessment (gap closure plans don't need it)
@@ -206,6 +218,12 @@ Mindsystem creates `.planning/` directory in user projects:
 **Research tooling.** `scripts/ms-lookup/` provides standalone research capabilities. Can be used inside workflows or directly.
 
 **Enhanced verification.** `/ms:verify-work` batches UAT items and can spawn subagents to investigate and fix issues found during manual testing.
+
+**Design mockups.** `/ms:design-phase` generates parallel HTML/CSS mockup variants for visual direction exploration before writing the design spec.
+
+**Cross-milestone learnings.** `/ms:complete-milestone` extracts curated patterns from phase work into `LEARNINGS.md`, which informs future planning.
+
+**Tech debt tracking.** `/ms:audit-milestone` maintains `TECH-DEBT.md` as a single source of truth for debt items across milestones.
 </fork_features>
 
 <task_types>
@@ -321,6 +339,9 @@ All in `agents/`:
 | ms-integration-checker | Verify cross-phase integration | audit-milestone |
 | ms-mock-generator | Generate mocks for UAT testing | verify-work |
 | ms-verify-fixer | Fix issues found during UAT | verify-work |
+| ms-mockup-designer | Generate HTML/CSS mockups for design exploration | design-phase |
+| ms-plan-writer | Generate PLAN.md files from task breakdown | plan-phase |
+| ms-flutter-code-quality | Flutter code quality enforcement | execute-phase |
 | ms-consolidator | Consolidate decisions during milestone completion | complete-milestone |
 </agents_index>
 
@@ -337,7 +358,9 @@ Key workflows in `mindsystem/workflows/`:
 | discovery-phase.md | Gather project context |
 | define-requirements.md | Scope requirements with checkboxes |
 | research-project.md | Domain research spawning |
-| research-phase.md | Phase-specific research |
+| mockup-generation.md | Generate HTML mockup variants for design direction exploration |
+| discuss-milestone.md | Milestone-scoped context gathering |
+| create-milestone.md | Create new milestone structure |
 | map-codebase.md | Brownfield codebase analysis |
 | debug.md | Systematic debugging workflow |
 | complete-milestone.md | Archive and prep next milestone |
