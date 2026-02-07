@@ -144,7 +144,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | Debugging | `debug` |
 | Milestones | `complete-milestone`, `discuss-milestone`, `new-milestone`, `audit-milestone`, `plan-milestone-gaps` |
 | Phase mgmt | `add-phase`, `insert-phase`, `remove-phase`, `research-phase`, `list-phase-assumptions` |
-| Utilities | `add-todo`, `check-todos`, `progress`, `help`, `update`, `whats-new` |
+| Utilities | `add-todo`, `check-todos`, `progress`, `help`, `release-notes` |
 
 ## Workflow Layer (`mindsystem/workflows/*.md`)
 

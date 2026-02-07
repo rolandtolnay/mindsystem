@@ -47,19 +47,13 @@ Output ONLY the reference content below. Do NOT add:
 Mindsystem evolves fast. Check for updates periodically:
 
 ```
-/ms:whats-new
+/ms:release-notes
 ```
 
-Shows what changed since your installed version. Update with:
+Shows full release notes with update status. Update with:
 
 ```bash
 npx mindsystem-cc@latest
-```
-
-Or inside Claude Code:
-
-```
-/ms:update
 ```
 
 ## Core Workflow
@@ -398,25 +392,14 @@ Usage: `/ms:adhoc Fix auth token not refreshing on 401`
 **`/ms:help`**
 Show this command reference.
 
-**`/ms:whats-new`**
-See what's changed since your installed version.
+**`/ms:release-notes`**
+Show full Mindsystem release notes with update status.
 
-- Shows installed vs latest version comparison
-- Displays changelog entries for versions you've missed
-- Highlights breaking changes
-- Provides update instructions when behind
+- Displays all versions from 2.0.0 onward in clean bullet format
+- Shows update status at the end (behind, current, or ahead)
+- Fetches latest from GitHub (falls back to local)
 
-Usage: `/ms:whats-new`
-
-**`/ms:update`**
-Update Mindsystem to latest version with changelog display.
-
-- Checks npm for latest version
-- Runs update if behind
-- Shows what changed between versions
-- Better UX than raw `npx mindsystem-cc`
-
-Usage: `/ms:update`
+Usage: `/ms:release-notes`
 
 ## Files & Structure
 

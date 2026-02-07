@@ -111,8 +111,7 @@ npx mindsystem-cc --local    # Install to ./.claude/
 Inside Claude Code:
 
 ```
-/ms:whats-new
-/ms:update
+/ms:release-notes
 ```
 
 Or via npm:
@@ -362,8 +361,7 @@ Full docs live in `/ms:help` (same content as `commands/ms/help.md`).
 | `/ms:plan-milestone-gaps`                | Turn audit gaps into fix phases                               |
 | `/ms:add-todo [description]`             | Capture a deferred task in `.planning/todos/`                 |
 | `/ms:check-todos [area]`                 | List pending todos and route into work                        |
-| `/ms:whats-new`                          | Show changes since your version                               |
-| `/ms:update`                             | Update Mindsystem and show changelog                          |
+| `/ms:release-notes`                      | Show full release notes with update status                    |
 
 ---
 

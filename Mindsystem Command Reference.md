@@ -8,7 +8,7 @@ Mindsystem is a meta-prompting, context engineering, and spec-driven development
 npx mindsystem-cc
 ```
 
-Verify with `/ms:help` inside Claude Code. Update with `/ms:update` or `npx mindsystem-cc@latest`.
+Verify with `/ms:help` inside Claude Code. Update with `npx mindsystem-cc@latest`.
 
 ## Start Here
 
@@ -90,8 +90,7 @@ Verify with `/ms:help` inside Claude Code. Update with `/ms:update` or `npx mind
 | `/ms:check-todos [area]` | List pending todos, select one to work on |
 | `/ms:debug [desc]`    | Systematic debugging with persistent state |
 | `/ms:help`            | Show all commands and usage guide          |
-| `/ms:update`          | Update GSD with changelog display          |
-| `/ms:whats-new`       | See changes since installed version        |
+| `/ms:release-notes`   | Show full release notes with update status |
 
 ---
 
@@ -441,27 +440,15 @@ List pending todos and select one to work on.
 
 Show all commands and usage guide.
 
-### /ms:whats-new
+### /ms:release-notes
 
-See what's changed since your installed version.
+Show full Mindsystem release notes with update status.
 
-- Shows installed vs latest version comparison
-- Displays changelog entries for versions you've missed
-- Highlights breaking changes
-- Provides update instructions when behind
+- Displays all versions from 2.0.0 onward in clean bullet format
+- Shows update status at the end (behind, current, or ahead)
+- Fetches latest from GitHub (falls back to local)
 
-**Usage:** `/ms:whats-new`
-
-### /ms:update
-
-Update Mindsystem to latest version with changelog display.
-
-- Checks npm for latest version
-- Runs update if behind
-- Shows what changed between versions
-- Better UX than raw `npx mindsystem-cc`
-
-**Usage:** `/ms:update`
+**Usage:** `/ms:release-notes`
 
 ---
 
