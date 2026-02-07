@@ -139,7 +139,16 @@ Task(
 
 ## 5. Handle Agent Return
 
-**`## RESEARCH COMPLETE`:** Display summary, then read `~/.claude/mindsystem/references/prework-status.md` to show what's done vs still needed. Also offer: Dig deeper, Review full.
+**`## RESEARCH COMPLETE`:**
+
+Commit the research file:
+
+```bash
+git add .planning/phases/${PHASE}-*/*-RESEARCH.md
+git commit -m "docs: complete research for phase ${PHASE}"
+```
+
+Display summary, then read `~/.claude/mindsystem/references/prework-status.md` to show what's done vs still needed. Also offer: Dig deeper, Review full.
 
 **`## CHECKPOINT REACHED`:** Present to user, get response, spawn continuation.
 
@@ -184,5 +193,6 @@ Update `.planning/STATE.md` Last Command field:
 - [ ] Existing research checked
 - [ ] ms-researcher spawned with context
 - [ ] Checkpoints handled correctly
+- [ ] RESEARCH.md committed on completion
 - [ ] User knows next steps
 </success_criteria>
