@@ -391,10 +391,8 @@ execute-phase Wave 1 → ms-executor (plan-01)
 
 **Hierarchical:**
 ```
-audit-milestone → ms-milestone-auditor
-                    ↓
-                  ms-verifier (per phase)
-                  ms-integration-checker
+audit-milestone → ms-integration-checker
+                → ms-code-simplifier (or configured reviewer)
 ```
 </spawning_patterns>
 

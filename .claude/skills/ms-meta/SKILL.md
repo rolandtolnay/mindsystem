@@ -316,7 +316,6 @@ All in `agents/`:
 | ms-flutter-simplifier | Post-execution code review (Flutter) | execute-phase |
 | ms-flutter-reviewer | Flutter structural analysis (analyze-only) | audit-milestone |
 | ms-plan-checker | Validate plans before execution | plan-phase (optional), check-phase |
-| ms-milestone-auditor | Audit milestone completion | audit-milestone |
 | ms-integration-checker | Verify cross-phase integration | audit-milestone |
 | ms-mock-generator | Generate mocks for UAT testing | verify-work |
 | ms-verify-fixer | Fix issues found during UAT | verify-work |

@@ -50,7 +50,6 @@ mindsystem/                              # Development repository
 │   ├── ms-code-simplifier.md       # Post-execution code review (generic)
 │   ├── ms-flutter-simplifier.md    # Post-execution code review (Flutter)
 │   ├── ms-plan-checker.md          # Validates plans before execution
-│   ├── ms-milestone-auditor.md     # Audits milestone completion
 │   ├── ms-integration-checker.md   # Verifies cross-phase integration
 │   ├── ms-mock-generator.md        # Generate mocks for UAT
 │   ├── ms-verify-fixer.md          # Fix UAT issues

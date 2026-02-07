@@ -241,9 +241,9 @@ All muscle memory commands change from `/gsd:*` to `/ms:*`
 - research-phase.md, research-project.md, resume-work.md, review-design.md
 - simplify-flutter.md, update.md, verify-work.md, whats-new.md
 
-**Agents (13 files):**
+**Agents (12 files):**
 - ms-codebase-mapper.md, ms-debugger.md, ms-designer.md, ms-executor.md
-- ms-integration-checker.md, ms-milestone-auditor.md, ms-mock-generator.md
+- ms-integration-checker.md, ms-mock-generator.md
 - ms-plan-checker.md, ms-research-synthesizer.md, ms-researcher.md
 - ms-roadmapper.md, ms-verifier.md, ms-verify-fixer.md
 
