@@ -27,8 +27,6 @@ When invoked with `--gaps`, plans address gaps identified by the verifier. Load 
 <execution_context>
 @~/.claude/mindsystem/references/principles.md
 @~/.claude/mindsystem/workflows/plan-phase.md
-@~/.claude/mindsystem/references/checkpoint-detection.md
-@~/.claude/mindsystem/references/tdd.md
 </execution_context>
 
 <context>

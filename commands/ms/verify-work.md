@@ -23,9 +23,7 @@ Output: {phase}-UAT.md tracking all test results. Fixes committed with `fix({pha
 
 <execution_context>
 @~/.claude/mindsystem/workflows/verify-work.md
-@~/.claude/mindsystem/workflows/generate-mocks.md
 @~/.claude/mindsystem/templates/UAT.md
-@~/.claude/mindsystem/references/mock-patterns.md
 </execution_context>
 
 <context>
@@ -45,6 +43,7 @@ Phase: $ARGUMENTS (optional)
 4. **Extract testable deliverables** from summaries
 5. **Classify tests by mock requirements** — Infer mock_type from test descriptions
 6. **Group into batches** — By mock type, max 4 per batch, no-mock tests first
+   - If any tests require mocks: Read `~/.claude/mindsystem/references/mock-patterns.md` and `~/.claude/mindsystem/workflows/generate-mocks.md` for mock generation guidance
 7. **For each batch:**
    - If mock needed: Generate mocks, present toggle instructions, wait for confirmation
    - Present tests via AskUserQuestion (Pass / Can't test / Skip / Other)

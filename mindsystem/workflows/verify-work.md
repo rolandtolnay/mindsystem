@@ -5,8 +5,7 @@ Complete verify-and-fix session: by session end, everything verified, issues fix
 </purpose>
 
 <execution_context>
-@~/.claude/mindsystem/workflows/generate-mocks.md
-@~/.claude/mindsystem/references/mock-patterns.md
+<!-- mock-patterns.md and generate-mocks.md loaded on demand when mocks are needed (see classify_tests step) -->
 </execution_context>
 
 <template>
@@ -185,6 +184,8 @@ tests:
 
 <step name="create_batches">
 **Group tests into batches:**
+
+**If any tests have mock_required=true:** Read `~/.claude/mindsystem/references/mock-patterns.md` and `~/.claude/mindsystem/workflows/generate-mocks.md` now for mock generation guidance.
 
 **Rules:**
 1. Group by mock_type (tests needing same mock state go together)

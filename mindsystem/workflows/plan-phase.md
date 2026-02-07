@@ -15,12 +15,10 @@ Decimal phases enable urgent work insertion without renumbering:
 <required_reading>
 **Read these files NOW:**
 
-1. ~/.claude/mindsystem/references/checkpoint-detection.md
-2. ~/.claude/mindsystem/references/tdd.md
-3. .planning/ROADMAP.md
-4. .planning/PROJECT.md
+1. .planning/ROADMAP.md
+2. .planning/PROJECT.md
 
-**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, checkpoints.md, goal-backward.md, plan-risk-assessment.md) are loaded by the ms-plan-writer subagent, not main context.
+**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, checkpoints.md, goal-backward.md, plan-risk-assessment.md) are loaded by the ms-plan-writer subagent, not main context. Lighter references (checkpoint-detection.md, tdd.md) are loaded on demand during task breakdown.
 </required_reading>
 
 <purpose>
@@ -480,13 +478,13 @@ Standard tasks (remain in standard plans):
 → Yes: Mark as tdd_candidate=true
 → No: Standard task
 
-See `~/.claude/mindsystem/references/tdd.md` for TDD criteria.
+Read `~/.claude/mindsystem/references/tdd.md` now for TDD criteria and plan structure.
 
 **Checkpoints:** Visual/functional verification → checkpoint:human-verify. Implementation choices → checkpoint:decision. Manual action (email, 2FA) → checkpoint:human-action (rare).
 
 **Critical:** If external resource has CLI/API (Vercel, Stripe, etc.), use type="auto" to automate. Only checkpoint for verification AFTER automation.
 
-See `~/.claude/mindsystem/references/checkpoint-detection.md` for detection rules.
+Read `~/.claude/mindsystem/references/checkpoint-detection.md` now for detection rules.
 
 **User setup detection:** For tasks involving external services, identify human-required configuration:
 
@@ -772,7 +770,7 @@ Wave 2: {plan-03}
 
 If you can't specify Files + Action + Verify + Done, the task is too vague.
 
-**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, mark as tdd_candidate=true. See `~/.claude/mindsystem/references/tdd.md` for TDD criteria.
+**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, mark as tdd_candidate=true. Refer to `~/.claude/mindsystem/references/tdd.md` (loaded during task breakdown) for TDD criteria.
 </task_quality>
 
 <anti_patterns>
