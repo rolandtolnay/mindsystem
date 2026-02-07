@@ -87,6 +87,12 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    ls .planning/milestones/v{{version}}-DECISIONS.md
    ```
 
+1.7. **Extract learnings:**
+
+   Scan debug resolutions, adhoc summaries, phase summaries, and completed todos.
+   Curate 4-8 reusable patterns into `.planning/LEARNINGS.md` (or skip gracefully if none found).
+   See workflow `extract_learnings` step for full process.
+
 2. **Gather stats:**
 
    - Count phases, plans, tasks
@@ -122,7 +128,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 7. **Commit and tag:**
 
-   - Stage: MILESTONES.md, PROJECT.md, ROADMAP.md, STATE.md, archive files
+   - Stage: MILESTONES.md, PROJECT.md, ROADMAP.md, STATE.md, LEARNINGS.md, archive files
    - Commit: `chore: archive v{{version}} milestone`
    - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
    - Ask about pushing tag
@@ -140,6 +146,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 - Decisions consolidated to `.planning/milestones/v{{version}}-DECISIONS.md`
 - Phase artifacts cleaned (PLAN, CONTEXT, RESEARCH, DESIGN deleted)
+- Learnings extracted to `.planning/LEARNINGS.md` (or gracefully skipped if none found)
 - Milestone archived to `.planning/milestones/v{{version}}-ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}-REQUIREMENTS.md`
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)

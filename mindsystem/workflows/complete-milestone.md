@@ -28,8 +28,9 @@ When a milestone completes, this workflow:
 4. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
 5. Updates ROADMAP.md to replace milestone details with one-line summary
 6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-7. Performs full PROJECT.md evolution review
-8. Routes to `/ms:new-milestone` for next milestone
+7. Extracts learnings into `.planning/LEARNINGS.md` (curated one-line patterns with source refs)
+8. Performs full PROJECT.md evolution review
+9. Routes to `/ms:new-milestone` for next milestone
 
 **Context Efficiency:**
 
@@ -141,6 +142,95 @@ ls .planning/milestones/v[X.Y]-DECISIONS.md
 ✓ Preserved: SUMMARY, VERIFICATION, UAT files
 
 Report: .planning/milestones/v[X.Y]-DECISIONS.md
+```
+
+Continue to extract_learnings step.
+
+</step>
+
+<step name="extract_learnings">
+
+Extract reusable patterns from milestone artifacts into `.planning/LEARNINGS.md`.
+
+**Runs in main context** (not subagent) — curation requires judgment.
+
+**Reference:** `~/.claude/mindsystem/templates/learnings.md`
+
+**1. Scan source artifacts:**
+
+All sources are PRESERVED by ms-consolidator (only PLAN, CONTEXT, RESEARCH, DESIGN are deleted).
+
+```bash
+# Debug resolutions — parse frontmatter for root_cause, resolution, subsystem, prevention
+ls .planning/debug/resolved/*.md 2>/dev/null
+```
+
+```bash
+# Adhoc summaries — parse frontmatter for learnings array, subsystem
+ls .planning/adhoc/*-SUMMARY.md 2>/dev/null
+```
+
+```bash
+# Phase summaries in milestone range — read Deviations/Issues sections, parse subsystem
+ls .planning/phases/{PHASE_START}*/{PHASE_START}*-SUMMARY.md .planning/phases/{PHASE_END}*/{PHASE_END}*-SUMMARY.md 2>/dev/null
+# (expand to all phases in milestone range)
+```
+
+```bash
+# Completed todos — scan for reusable patterns (lower priority)
+ls .planning/todos/done/*.md 2>/dev/null
+```
+
+For each source found, read frontmatter and relevant sections. Extract candidate learnings.
+
+**2. Curate entries:**
+
+- Select 4-8 entries max from candidates
+- Exclude: decisions (belong in DECISIONS.md), trivial fixes, one-time issues
+- Prefer prevention framing: "Always validate X before Y" over "We found a bug in X"
+- Deduplicate: if two sources surface the same pattern, keep the more prescriptive version
+
+**3. Group by subsystem:**
+
+```bash
+jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+```
+
+Group entries under subsystem headings from config.json vocabulary.
+
+**4. Write to LEARNINGS.md:**
+
+Format per entry:
+```
+- **{Brief title}**: {Prescriptive action} → `{source_ref}`
+```
+
+If `.planning/LEARNINGS.md` does not exist (first milestone):
+- Create file with header from template
+- Add milestone section
+
+If `.planning/LEARNINGS.md` exists (subsequent milestone):
+- Prepend new milestone section after header (reverse chronological)
+- Update "Last updated" footer
+
+**5. Handle "no learnings" gracefully:**
+
+If no meaningful patterns found across all sources:
+- Do NOT create or modify LEARNINGS.md
+- Present informational message:
+  ```
+  ℹ No reusable learnings found for v[X.Y]
+    Sources scanned: [N] debug docs, [N] adhoc summaries, [N] phase summaries, [N] completed todos
+    Skipping LEARNINGS.md update
+  ```
+
+**6. Present summary:**
+
+```
+✓ Learnings extracted: [N] entries across [M] subsystems
+  - [subsystem1]: [count] entries
+  - [subsystem2]: [count] entries
+  Written to: .planning/LEARNINGS.md
 ```
 
 Continue to gather_stats step.
@@ -654,6 +744,9 @@ git add .planning/milestones/v[X.Y]-ROADMAP.md
 git add .planning/milestones/v[X.Y]-REQUIREMENTS.md
 git add .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
 
+# Stage learnings (may not exist if no learnings found)
+git add .planning/LEARNINGS.md 2>/dev/null || true
+
 # Stage updated files
 git add .planning/MILESTONES.md
 git add .planning/PROJECT.md
@@ -683,6 +776,7 @@ Updated:
 - MILESTONES.md (new entry)
 - PROJECT.md (requirements → Validated)
 - STATE.md (reset for next milestone)
+- LEARNINGS.md (curated patterns, if any found)
 
 Tagged: v[X.Y]
 EOF
@@ -776,6 +870,7 @@ Milestone completion is successful when:
 
 - [ ] Decisions consolidated (milestones/v[X.Y]-DECISIONS.md created)
 - [ ] Phase artifacts cleaned (PLAN, CONTEXT, RESEARCH, DESIGN deleted)
+- [ ] Learnings extracted to .planning/LEARNINGS.md (or gracefully skipped if none found)
 - [ ] MILESTONES.md entry created with stats and accomplishments
 - [ ] PROJECT.md full evolution review completed
 - [ ] All shipped requirements moved to Validated in PROJECT.md
