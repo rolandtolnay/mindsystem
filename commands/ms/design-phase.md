@@ -161,6 +161,128 @@ Use AskUserQuestion to confirm:
 2. **Ask more questions** — Continue gathering context
 3. **Add context** — Let user provide additional information
 
+## 4b. Mockup Generation (Optional)
+
+After gathering context and closing gaps, assess whether this phase has significant new UI (new screens, novel flows, complex layouts — not minor tweaks to existing patterns).
+
+**If significant new UI detected:**
+
+Use AskUserQuestion:
+> "This phase involves [brief UI description]. Generate visual mockups to explore directions first?"
+> 1. **Yes, generate mockups** — Spawn 3 HTML mockup variants before DESIGN.md
+> 2. **No, go straight to design spec** — Proceed directly to ms-designer
+
+**If user selects "Yes":**
+
+**4b-1. Determine platform:**
+
+Infer from context chain (pubspec.yaml → mobile, package.json with React → web, PROJECT.md constraints). If ambiguous, use AskUserQuestion:
+> "Which platform should the mockups target?"
+> 1. Mobile (iPhone frame)
+> 2. Web (desktop viewport)
+
+**4b-2. Identify primary screen:**
+
+If the phase has a single primary screen/feature → use it.
+If multiple screens or ambiguous → use AskUserQuestion to confirm which screen to mock up.
+
+**4b-3. Derive design directions:**
+
+Read `~/.claude/mindsystem/references/design-directions.md`. Follow the 3-step derivation process:
+1. Identify primary design tension for this feature
+2. Pick most valuable exploration axes
+3. Generate 3 directions with name, philosophy, and concrete layout/component choices
+
+Present all 3 directions to user via AskUserQuestion:
+> "Here are 3 design directions for [screen]. Generate mockups for all 3?"
+>
+> **A: {Direction A name}** — {one-sentence philosophy}
+> **B: {Direction B name}** — {one-sentence philosophy}
+> **C: {Direction C name}** — {one-sentence philosophy}
+>
+> 1. **Generate mockups** — Spawn 3 parallel agents, one per direction
+> 2. **Tweak directions first** — Adjust before generating
+> 3. **Let me describe different directions** — Replace with your own
+
+If user picks option 2 or 3, incorporate their input, re-derive or adjust directions, and present again.
+
+**4b-4. Read platform template:**
+
+```bash
+# Read the mockup template for the selected platform
+cat ~/.claude/mindsystem/templates/mockup-{platform}.md
+```
+
+Extract the HTML template from the `<template>` block.
+
+**4b-5. Spawn 3 x ms-mockup-designer agents IN PARALLEL:**
+
+```bash
+# Ensure mockups directory exists
+PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
+mkdir -p "${PHASE_DIR}/mockups"
+```
+
+Spawn 3 agents simultaneously, each receiving:
+- `<product_context>` — From PROJECT.md
+- `<phase_context>` — From ROADMAP.md phase entry
+- `<design_direction>` — One of the 3 derived directions (name, philosophy, concrete choices)
+- `<platform>` — `mobile` or `web`
+- `<feature_grounding>` — The screen/feature being mocked
+- `<existing_aesthetic>` — Colors/fonts from implement-ui or codebase (if exists)
+- `<mockup_template>` — The HTML scaffold from the template file
+- Output path: `.planning/phases/{phase}-{slug}/mockups/variant-a.html` (b, c for others)
+
+```
+Task(prompt=assembled_context, subagent_type="ms-mockup-designer", description="Mockup variant A")
+Task(prompt=assembled_context, subagent_type="ms-mockup-designer", description="Mockup variant B")
+Task(prompt=assembled_context, subagent_type="ms-mockup-designer", description="Mockup variant C")
+```
+
+**4b-6. Present mockups to user:**
+
+After all 3 agents return, display file paths:
+
+```markdown
+3 mockup variants generated:
+
+- **A: {Direction A name}** — `.planning/phases/{phase}-{slug}/mockups/variant-a.html`
+- **B: {Direction B name}** — `.planning/phases/{phase}-{slug}/mockups/variant-b.html`
+- **C: {Direction C name}** — `.planning/phases/{phase}-{slug}/mockups/variant-c.html`
+
+Open these in your browser to compare.
+```
+
+Use AskUserQuestion:
+> "Which direction works best?"
+> 1. **A: {name}** — Use this direction
+> 2. **B: {name}** — Use this direction
+> 3. **C: {name}** — Use this direction
+> 4. **Combine A+B** / **Combine A+C** / **Combine B+C** — Merge two directions
+> (free text also accepted for: tweak requests, "more variants", or "skip mockups")
+
+**4b-7. Handle user response:**
+
+- **Single choice (A/B/C):** Read the chosen HTML file. Extract key CSS specs inline: color palette, layout structure, typography, spacing values. Assemble into a `<mockup_direction>` block for ms-designer.
+
+- **Combine:** Spawn one more ms-mockup-designer with a combined direction (elements from both chosen variants). Output to `variant-combined.html`. Present for confirmation, then extract specs.
+
+- **Tweak:** Spawn one more ms-mockup-designer with the chosen variant plus tweak instructions. Output to `variant-{letter}-tweaked.html`. Present for confirmation, then extract specs.
+
+- **More variants:** Loop back to step 4b-3. Derive 3 new directions (avoid repeating previous ones).
+
+- **Skip:** Proceed to step 5 without `<mockup_direction>` block.
+
+**Extracting `<mockup_direction>`:**
+
+Read the chosen HTML file. Extract from the inline CSS:
+- Direction name and description
+- Color palette (background, text, accent colors with hex values)
+- Layout structure (how content is arranged)
+- Typography (font sizes, weights used)
+- Spacing (padding, gaps used)
+- User preferences (any specific feedback from selection)
+
 ## 5. Spawn ms-designer Agent
 
 Assemble the design prompt from gathered context:
@@ -229,6 +351,30 @@ Discovered patterns from codebase:
 
 No existing aesthetic. Design fresh with platform conventions.
 </existing_aesthetic>
+
+<mockup_direction>
+[If mockups were generated in step 4b, include the extracted specs:]
+
+Direction: [chosen direction name]
+Philosophy: [direction one-sentence philosophy]
+
+Color palette:
+[Extracted hex values — background, text, accent, secondary, etc.]
+
+Layout structure:
+[How content is arranged — sidebar/topnav/stacked, grid/list, etc.]
+
+Typography:
+[Font sizes, weights, line-heights extracted from mockup CSS]
+
+Spacing:
+[Padding, gaps, margins extracted from mockup CSS]
+
+User preferences:
+[Any specific feedback from mockup selection — "I liked X but want Y changed"]
+
+[If mockups were NOT generated, omit this entire block.]
+</mockup_direction>
 
 <quality_expectation>
 Commercial benchmark: This design must look like a [benchmark] with intentional decisions, not defaults.
@@ -342,6 +488,8 @@ Update `.planning/STATE.md` Last Command field:
 - [ ] implement-ui skill loaded if exists
 - [ ] Codebase analyzed for existing patterns
 - [ ] Adaptive Q&A completed if gaps existed
+- [ ] Mockup generation offered if phase has significant new UI
+- [ ] Mockup direction extracted and passed to ms-designer (if generated)
 - [ ] ms-designer spawned with quality-forcing patterns
 - [ ] DESIGN.md created with all 7 sections
 - [ ] DESIGN.md committed

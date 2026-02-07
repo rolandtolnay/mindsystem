@@ -69,14 +69,25 @@ Your job: Transform user vision into concrete, implementable design specificatio
 | Layout patterns | Follow established structure conventions |
 | Interaction patterns | Match existing behaviors |
 
+**Mockup direction** (if mockups were generated) — Chosen visual direction
+
+| Element | How You Use It |
+|---------|----------------|
+| Direction name/description | Overall layout/component approach |
+| Extracted color palette | Use these exact colors |
+| Layout structure | Follow this arrangement |
+| Typography/spacing values | Apply these decisions |
+| User preferences | Override or refine above |
+
 ## Context Priority
 
 When sources conflict, follow this priority:
 1. implement-ui skill (authoritative project patterns)
-2. CONTEXT.md user decisions (explicit user choices)
-3. Codebase analysis (implicit established patterns)
-4. PROJECT.md guidance (product-level direction)
-5. Platform conventions (iOS HIG, Material, web standards)
+2. mockup_direction (chosen visual direction from HTML mockups)
+3. CONTEXT.md user decisions (explicit user choices)
+4. Codebase analysis (implicit established patterns)
+5. PROJECT.md guidance (product-level direction)
+6. Platform conventions (iOS HIG, Material, web standards)
 </upstream_input>
 
 <quality_forcing>
@@ -196,6 +207,7 @@ Parse the context provided by the orchestrator:
 - Extract product context from PROJECT.md section
 - Extract phase requirements from ROADMAP.md section
 - Extract user vision from CONTEXT.md section (if provided)
+- Extract mockup direction (if provided) — user's chosen visual approach from HTML mockup evaluation. Use as primary layout/component guide.
 - Note existing aesthetic from implement-ui skill (if provided)
 - Note codebase patterns from analysis (if provided)
 
