@@ -1,7 +1,7 @@
 # CE Analysis: Knowledge Compounding
 
 > Comparing Compound Engineering and Mindsystem approaches to making each unit of work improve future work.
-> Generated: 2026-02-07 | Updated: 2026-02-07 (design decisions finalized)
+> Generated: 2026-02-07 | Updated: 2026-02-07 (all questions resolved)
 
 ## Executive Summary
 
@@ -11,7 +11,11 @@ Mindsystem already creates rich artifacts (SUMMARY.md with 14-field frontmatter,
 
 **Core architectural decision:** Adopt **problem-scoped retrieval without problem-scoped storage**. Keep Mindsystem's phase-scoped artifacts (SUMMARY.md, debug docs, adhoc summaries) as the source of truth, but extend frontmatter and retrieval to enable cross-cutting knowledge discovery. No separate `docs/solutions/` directory. Add a thin `LEARNINGS.md` curated index for cross-milestone persistence, distinct from PROJECT.md (decisions) and STATE.md (session restoration).
 
-**Implementation approach:** Four high-impact changes — enrich debug doc frontmatter, add post-resolution learning capture, expand plan-phase retrieval to search all artifact types with a `<learnings>` handoff to ms-plan-writer, and create LEARNINGS.md as a curated cross-milestone index.
+**Subsystem vocabulary:** Project-scoped controlled vocabulary in config.json replaces free-form subsystem values. Seeded during project initialization, extended by executors when novel work emerges. No blocking validation gate — append and log. Enables reliable grep-based matching across all artifact types.
+
+**Artifact storage:** Debug docs and adhoc summaries remain centralized (`.planning/debug/` and `.planning/adhoc/`), not co-located with phases. Phase context is encoded in frontmatter fields (`phase`, `related_phase`), not directory structure. This enables single-glob cross-cutting searches, avoids orphan problems, and keeps artifacts immune to phase cleanup operations.
+
+**Implementation approach:** Four high-impact changes — enrich debug doc frontmatter, add post-resolution learning capture, expand plan-phase retrieval to search all artifact types with a `<learnings>` handoff to ms-plan-writer, and create LEARNINGS.md as a curated cross-milestone index. All artifacts draw subsystem values from the project's config.json vocabulary.
 
 ---
 
@@ -187,6 +191,61 @@ STATE.md stays under 100 lines. It does not reference LEARNINGS.md — that woul
 2. **At milestone completion**: ms-consolidator extracts new learnings section, appends to LEARNINGS.md
 3. **Next milestone**: LEARNINGS.md carries forward the curated cross-milestone index
 
+### Project-Scoped Subsystem Vocabulary (Not Global Enum)
+
+CE enforces a closed taxonomy of 60+ enum values validated by a blocking gate — Claude checks values against `schema.yaml` and refuses to proceed if they don't match. The schema is project-specific (components like `brief_system`, `email_processing` are tailored to one Rails app) but has no documented growth process. Adding a new category requires manual edits to 3 files (`schema.yaml`, `yaml-schema.md`, `learnings-researcher.md`).
+
+Mindsystem's subsystem field is currently free-form with suggested values (`auth, payments, ui, api, database, infra, testing, etc.`). The executor "uses best judgment" with no consistency mechanism. This means `"authentication"` vs `"auth"` vs `"auth-system"` all fail string matching silently during `read_project_history`.
+
+**Decision:** Project-scoped reference list in config.json, not a global enum baked into Mindsystem.
+
+**Why config.json:**
+- Already created during `/ms:new-project` (natural seeding point)
+- Already read by every workflow that needs it (execute-plan, execute-phase, plan-phase, create-milestone, transition)
+- Already parsed with `jq` (established pattern)
+- Single source of truth — no duplication (CE's schema is duplicated in 3 files)
+- Subsystem vocabulary IS project configuration
+
+**Structure:**
+```json
+{
+  "subsystems": ["auth", "api", "database", "ui", "payments"],
+  "depth": "standard",
+  ...
+}
+```
+
+**Seeding:** During `/ms:new-project`, after gathering the project description, derive initial subsystems from the project context. "An e-commerce app with Stripe" naturally yields `["auth", "products", "cart", "payments", "ui", "api", "database"]`. By the time config is written, Claude has the full project picture from the discovery conversation.
+
+**Growth mechanism:** When the executor encounters genuinely novel work that doesn't fit any existing subsystem: (1) add new value to config.json `subsystems` array, (2) use it in SUMMARY.md frontmatter, (3) log the addition in "Decisions Made" section. No blocking gate. No validation rejection. Append and log. Next time plan-phase runs, the new subsystem is part of the vocabulary.
+
+**Subsystem hints from planner:** Plan-phase adds a `<subsystem_hint>` to the handoff payload for ms-plan-writer. The planner has full context to determine which subsystem each plan belongs to, so the executor receives the assignment rather than guessing. This eliminates most inconsistency at the source — the planner selects from the known list, the executor uses it.
+
+**What this is NOT:**
+- Not a blocking validation gate (no friction for capture)
+- Not a global enum (each project has its own vocabulary)
+- Not a fixed list (grows as the project grows)
+- Not CE's schema.yaml (no separate file, no duplication across 3 locations)
+
+### Centralized Artifact Storage (Debug Docs and Adhoc Summaries)
+
+Debug docs live in `.planning/debug/` (active) and `.planning/debug/resolved/` (completed). Adhoc summaries live in `.planning/adhoc/`. The alternative — co-locating with phases (`.planning/phases/XX/debug/`, `.planning/phases/XX/adhoc/`) — was evaluated via second-order consequence tracing.
+
+**Decision:** Keep centralized storage for both artifact types. Encode phase context in frontmatter, not directory structure.
+
+**Why centralized wins:**
+
+- **Cross-cutting search uses one glob per type.** `.planning/debug/resolved/*.md` and `.planning/adhoc/*-SUMMARY.md` — simple, predictable. Phase-scoped storage requires nested globs (`.planning/phases/*/debug/resolved/*.md`) plus fallback directories for orphans.
+- **No orphan problem.** Cross-phase bugs (spans phases 2 and 3) and between-phase adhoc work (`related_phase: "none"`) have no natural phase directory. Centralized storage has no orphans by design.
+- **Immune to phase lifecycle operations.** ms-consolidator deletes PLAN.md, CONTEXT.md, RESEARCH.md, DESIGN.md from phase dirs. Centralized debug/adhoc directories are outside this blast radius. Phase-scoped storage would require explicit carve-outs in cleanup logic — a new failure mode.
+- **LEARNINGS.md extraction is cleaner.** At milestone completion, scan one directory per artifact type vs. scanning N phase directories plus fallback locations.
+- **Single source of truth for phase context.** Frontmatter `phase` field (debug docs) and `related_phase` field (adhoc summaries) are populated by agents with full context awareness. Path-based phase inference would create a second source of truth that can disagree with frontmatter.
+
+**What this means for the proposal:**
+- Debug docs gain a `phase: "XX-name"` frontmatter field (Recommendation #2) — explicit, grep-searchable, populated by ms-debugger from the current session context
+- Adhoc summaries already have `related_phase` in frontmatter — no structural change needed
+- `read_project_history` searches centralized directories with simple globs — no nested path traversal
+
 ### The `<learnings>` Handoff to ms-plan-writer
 
 During `read_project_history`, after scanning all sources, emit a `<learnings>` section in the handoff payload to ms-plan-writer. This section combines:
@@ -243,7 +302,7 @@ This gives the planner a unified view of "here's what we've learned that's relev
   trigger: "user description"
   created: ISO timestamp
   updated: ISO timestamp
-  subsystem: [same enum as SUMMARY.md: auth, payments, ui, api, database, infra, testing]
+  subsystem: [from .planning/config.json subsystems list]
   tags: [searchable keywords]
   symptoms: ["observable error 1", "observable error 2"]
   root_cause: "what caused it" (populated on resolution)
@@ -252,7 +311,7 @@ This gives the planner a unified view of "here's what we've learned that's relev
   ---
   ```
 
-  The `subsystem` and `tags` fields match SUMMARY.md's existing vocabulary, enabling unified grep searches. The `symptoms`, `root_cause`, and `resolution` fields are populated progressively as the debug session advances.
+  The `subsystem` field draws from the project's controlled vocabulary in config.json (see Design Decisions: Project-Scoped Subsystem Vocabulary), enabling unified grep searches across SUMMARY.md, debug docs, and adhoc summaries. The `symptoms`, `root_cause`, and `resolution` fields are populated progressively as the debug session advances.
 
 - **Cost**: **Low** — Template change + minor agent prompt update. Debug docs already have YAML frontmatter; this extends it.
 - **Benefit**: Debug sessions become searchable by the same mechanism as SUMMARY.md. "Last time we debugged a database issue, what was the root cause?" becomes answerable via grep.
@@ -346,7 +405,7 @@ This gives the planner a unified view of "here's what we've learned that's relev
   ```yaml
   ---
   title: "Clear problem statement"
-  subsystem: auth | payments | ui | api | database | infra | testing
+  subsystem: [from .planning/config.json subsystems list]
   tags: [searchable keywords]
   priority: p1 | p2 | p3
   source: debug | verify-work | adhoc | user-idea | milestone-audit
@@ -394,11 +453,11 @@ None. All recommendations extend existing artifacts and workflows. Existing proj
 
 ### Incremental Adoption Path
 
-**Phase 1 — Enrich sources (Recommendations #2, #3):**
-Add frontmatter to debug docs and learning capture to do-work/debug. This enriches the data before building retrieval. Low risk, immediate value for manual review.
+**Phase 1 — Subsystem vocabulary + enrich sources (Recommendations #2, #3):**
+Add `subsystems` field to config.json template. Update `/ms:new-project` to seed initial subsystems from project context. Add frontmatter to debug docs and learning capture to do-work/debug — all referencing config.json subsystems. Update execute-plan's `create_summary` to select from the list. This establishes the controlled vocabulary before building retrieval.
 
 **Phase 2 — Enable retrieval (Recommendation #1):**
-Expand plan-phase to search enriched sources. Add `<learnings>` section to ms-plan-writer handoff. This is the core compounding behavior — past work surfaces during future planning. Depends on Phase 1 for maximum value but provides partial value with existing SUMMARY.md data.
+Expand plan-phase to search enriched sources. Add `<subsystem_hint>` and `<learnings>` sections to ms-plan-writer handoff. This is the core compounding behavior — past work surfaces during future planning. Depends on Phase 1 for maximum value but provides partial value with existing SUMMARY.md data.
 
 **Phase 3 — Create cross-milestone index (Recommendation #4):**
 Add LEARNINGS.md template and extraction step to milestone completion. This bridges milestone boundaries with a curated index. Distinct from PROJECT.md decisions and STATE.md session state.
@@ -412,7 +471,7 @@ Structured todos, pattern tracking, auto-surfacing. Polish that builds on the co
 
 **CE's separate `docs/solutions/` directory.** Mindsystem already has a natural home for knowledge — `.planning/debug/`, `.planning/adhoc/`, and SUMMARY.md files. Creating a parallel knowledge store would fragment the information model. Instead, make existing stores searchable.
 
-**CE's enum-validated YAML schema.** A blocking validation gate that rejects documentation until YAML passes adds friction to a solo developer workflow. Mindsystem's approach of using consistent-but-flexible vocabulary (subsystem field in SUMMARY.md) is better suited. Let the frontmatter guide retrieval without blocking capture.
+**CE's blocking validation gate and global enum.** CE validates against a closed schema with 60+ values across 5 categories, blocking documentation until YAML passes. Mindsystem adopts a project-scoped controlled vocabulary (subsystems list in config.json) for grep reliability, but without a blocking gate — the executor appends new values when needed and logs the addition. No separate schema file, no duplication across 3 locations, no friction for capture. See Design Decisions: Project-Scoped Subsystem Vocabulary.
 
 **CE's `/deepen-plan` command.** Spawning a subagent per relevant learning to enrich plans is heavy. Mindsystem's plan-phase already has a collaborative planning model where the user participates. Surfacing relevant learnings as context (Recommendation #1) achieves the same goal without a separate command.
 
@@ -430,10 +489,8 @@ Structured todos, pattern tracking, auto-surfacing. Polish that builds on the co
 
 4. **Problem-scoped vs phase-scoped storage**: Keep phase-scoped storage. Add problem-scoped *retrieval* by enriching frontmatter (subsystem, tags, symptoms, root_cause) and expanding the sources searched during planning. No separate `docs/solutions/` directory.
 
-## Open Questions
+5. **Subsystem vocabulary**: Project-scoped reference list in config.json (not global enum, not free-form). Seeded during `/ms:new-project` from project context. Executor selects from list via `<subsystem_hint>` from planner; adds new values when genuinely novel work emerges. No blocking validation gate — append and log. All artifact types (SUMMARY.md, debug docs, adhoc summaries) draw from the same controlled vocabulary. See Design Decisions: Project-Scoped Subsystem Vocabulary.
 
-1. **Subsystem enum enforcement**: SUMMARY.md uses free-form subsystem values. Should plan-phase validate against a known list (like CE's enum), or remain flexible? Flexibility works for diverse projects but makes grep matching less reliable.
+6. **Debug doc lifecycle**: Keep centralized in `.planning/debug/resolved/`. Phase context encoded in frontmatter (`phase: "XX-name"`), not directory structure. Centralized storage enables single-glob cross-cutting searches, avoids orphan problems for cross-phase bugs, and is immune to phase directory cleanup operations. See Design Decisions: Centralized Artifact Storage.
 
-2. **Debug doc lifecycle**: Currently debug docs move to `resolved/` subdirectory. Should resolved debug docs be co-located with the phase they occurred in (`.planning/phases/XX/debug/`) for better phase-scoped retrieval? Or stay centralized in `.planning/debug/resolved/` for cross-phase searching?
-
-3. **Adhoc work integration**: Adhoc summaries in `.planning/adhoc/` are date-stamped but not phase-linked. Should they reference which phase was active when the work happened? This would enable "what adhoc fixes happened during phase 3?" queries.
+7. **Adhoc work integration**: Keep centralized in `.planning/adhoc/`. Adhoc summaries already have `related_phase` in frontmatter — this field already enables "what adhoc fixes happened during phase 3?" queries via grep. No structural change needed. The `related_phase` field is set to the current phase from STATE.md (or "none" if between phases). See Design Decisions: Centralized Artifact Storage.
