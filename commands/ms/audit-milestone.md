@@ -14,7 +14,7 @@ allowed-tools:
 <objective>
 Verify milestone achieved its definition of done. Check requirements coverage, cross-phase integration, and end-to-end flows.
 
-**This command IS the orchestrator.** Reads existing VERIFICATION.md files (phases already verified during execute-phase), aggregates tech debt and deferred gaps, then spawns integration checker for cross-phase wiring.
+**This command IS the orchestrator.** Reads existing VERIFICATION.md files (phases already verified during execute-phase), generates/updates `.planning/TECH-DEBT.md` as single source of truth for tech debt, then spawns integration checker for cross-phase wiring.
 </objective>
 
 <execution_context>
@@ -35,6 +35,9 @@ Version: $ARGUMENTS (optional — defaults to current milestone)
 **Completed Work:**
 Glob: .planning/phases/*/*-SUMMARY.md
 Glob: .planning/phases/*/*-VERIFICATION.md
+
+**Tech Debt:**
+@.planning/TECH-DEBT.md (if exists)
 </context>
 
 <process>
@@ -145,14 +148,7 @@ gaps:  # Critical blockers
   requirements: [...]
   integration: [...]
   flows: [...]
-tech_debt:  # Non-critical, deferred
-  - phase: 01-auth
-    items:
-      - "TODO: add rate limiting"
-      - "Warning: no password strength validation"
-  - phase: 03-dashboard
-    items:
-      - "Deferred: mobile responsive layout"
+tech_debt: see .planning/TECH-DEBT.md
 assumptions:  # Tests skipped during UAT
   count: [N]
   by_phase:
@@ -163,7 +159,7 @@ assumptions:  # Tests skipped during UAT
 ---
 ```
 
-Plus full markdown report with tables for requirements, phases, integration, tech debt, and assumptions.
+Plus full markdown report with tables for requirements, phases, integration, and assumptions. Tech debt tracked separately in `.planning/TECH-DEBT.md`.
 
 **Assumptions section in markdown report:**
 
@@ -269,11 +265,6 @@ code_review:
     medium: {Y}
     low: {Z}
   findings: [...]
-
-tech_debt:
-  - source: code_review
-    items:
-      - "{issue}: {description} ({file})"
 ```
 
 Add markdown section to report body:
@@ -286,6 +277,8 @@ Add markdown section to report body:
 
 {Include full findings report from reviewer}
 ```
+
+Code review findings flow into `.planning/TECH-DEBT.md` via Step 8.5 — do NOT add them to `tech_debt` YAML.
 
 **A4. Present binary decision:**
 
@@ -347,7 +340,7 @@ Plans:
 
 **If user chooses "Accept as tech debt":**
 
-Mark `tech_debt` entries as `status: deferred` in MILESTONE-AUDIT.md and continue to offer_next section.
+Findings are already tracked in `.planning/TECH-DEBT.md` via Step 8.5. Continue to offer_next section.
 
 ---
 
@@ -395,10 +388,24 @@ EOF
 
 Report: "Milestone code review complete."
 
+## 8.5. Generate/Update TECH-DEBT.md
+
+After code review (all sources now available), generate or update `.planning/TECH-DEBT.md`:
+
+1. **Read existing** `.planning/TECH-DEBT.md` (if exists) — parse active items and dismissed list, note highest `TD-{N}` ID
+2. **Read template** from `@~/.claude/mindsystem/templates/tech-debt.md`
+3. **Collect tech debt** from all sources:
+   - Phase VERIFICATION.md anti-patterns (severity: warning or info — blockers go to `gaps`)
+   - Non-critical gaps from phase verifications
+   - Code review findings (if analyze-only reviewer was used in Step 8)
+4. **De-duplicate** against existing active items AND dismissed items (match by location + description similarity)
+5. **Assign `TD-{N}` IDs** continuing from highest existing ID
+6. **Write/update** `.planning/TECH-DEBT.md` following the template format
+
 ## 9. Commit Audit Report
 
 ```bash
-git add .planning/v{version}-MILESTONE-AUDIT.md
+git add .planning/v{version}-MILESTONE-AUDIT.md .planning/TECH-DEBT.md
 git commit -m "$(cat <<'EOF'
 docs(milestone): complete v{version} audit
 
@@ -493,14 +500,11 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 All requirements met. No critical blockers. Accumulated tech debt needs review.
 
-### Tech Debt by Phase
+**Tech debt tracked:** .planning/TECH-DEBT.md ({N} active items)
 
-{For each phase with debt:}
-**Phase {X}: {name}**
-- {item 1}
-- {item 2}
-
-### Total: {N} items across {M} phases
+Address items using:
+- `/ms:adhoc` — for small fixes (1-2 tasks)
+- `/ms:insert-phase` — for larger remediation
 
 [If assumptions > 0:]
 ### Untested Assumptions: {N} items
@@ -528,7 +532,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 - [ ] Milestone scope identified
 - [ ] All phase VERIFICATION.md files read
 - [ ] All phase UAT.md files read for assumptions
-- [ ] Tech debt and deferred gaps aggregated
+- [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
 - [ ] Assumptions aggregated by phase
 - [ ] Integration checker spawned for cross-phase wiring
 - [ ] v{version}-MILESTONE-AUDIT.md created with assumptions section
