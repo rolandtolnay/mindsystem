@@ -86,7 +86,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 5. Follow plan-phase.md workflow:
    - Load project state and accumulated decisions
    - Perform mandatory discovery (Level 0-3 as appropriate)
-   - Read project history (prior decisions, issues, concerns)
+   - Read project history (prior decisions, issues, debug resolutions, adhoc learnings, cross-milestone patterns)
    - Break phase into tasks
    - Estimate scope and split into multiple plans if needed
    - Create PLAN.md file(s) with executable structure

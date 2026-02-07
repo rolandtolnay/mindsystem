@@ -17,6 +17,7 @@ Your job: Transform task lists into parallel-optimized PLAN.md files with proper
 - Task list with needs/creates/checkpoint/tdd_candidate flags
 - Phase context (number, name, goal, directory, requirements, depth)
 - Project references (paths to STATE, ROADMAP, CONTEXT, prior summaries)
+- Relevant learnings from past work (debug resolutions, adhoc insights, established patterns, prior decisions, curated cross-milestone learnings)
 
 **What you produce:**
 - PLAN.md files following phase-prompt template
@@ -76,6 +77,12 @@ The orchestrator provides structured XML:
     <summary>.planning/phases/02-foundation/02-01-SUMMARY.md</summary>
   </prior_summaries>
 </project_refs>
+
+<learnings>
+  <learning type="debug" source=".planning/debug/resolved/n-plus-one-queries.md">Missing eager loading on association chains — fix: Added includes() for all relationship traversals</learning>
+  <learning type="pattern" source=".planning/phases/02-foundation/02-01-SUMMARY.md">All API endpoints use Zod validation on input</learning>
+  <learning type="curated" source="phases/01-foundation/01-01-SUMMARY.md">CommonJS libraries fail silently in Edge runtime — verify ESM compat before choosing crypto/auth libraries</learning>
+</learnings>
 ```
 </input_format>
 
@@ -260,6 +267,7 @@ Output: {artifacts_created}
 @.planning/ROADMAP.md
 @.planning/STATE.md
 {Prior SUMMARYs only if genuinely needed}
+{If debug resolution directly relevant to a plan task: @.planning/debug/resolved/{slug}.md}
 {Relevant source files}
 </context>
 
@@ -291,6 +299,27 @@ After completion, create `.planning/phases/{phase_dir}/{phase}-{plan}-SUMMARY.md
   <done>{done_hint}</done>
 </task>
 ```
+
+**Learnings-aware expansion:** When expanding `action_hint` to full `<action>`, check `<learnings>` for entries relevant to this specific task:
+- Debug resolution whose domain matches task files or subsystem
+- Established pattern that applies to this task's implementation
+- Curated learning matching the task's technical area
+
+For each relevant learning, append a directive to `<action>`:
+
+```xml
+<action>
+  {expanded action_hint}
+
+  Based on prior learning ({source}): {actionable directive}
+</action>
+```
+
+Rules:
+- Maximum 2 learning directives per task (context budget)
+- Only include learnings that change what the executor would do
+- Phrase as imperative directives, not history
+- If no learnings match a task, add nothing
 
 **TDD plans:** Use `type: tdd` with feature structure instead of tasks.
 </step>

@@ -303,6 +303,58 @@ Only now open and read complete SUMMARY.md files for the selected relevant phase
 - "Issues Encountered" that might affect current phase
 - "Deviations from Plan" for patterns
 
+**6. Search additional knowledge sources (cross-cutting retrieval):**
+
+Use keywords already extracted: phase name, subsystem (from config.json), tags/tech terms from selected summaries.
+
+**6a. Resolved debug docs:**
+
+```bash
+for f in .planning/debug/resolved/*.md; do
+  sed -n '1,/^---$/p; /^---$/q' "$f" | head -20
+done 2>/dev/null
+```
+
+Select docs matching: same `subsystem`, overlapping `tags`, or `phase` in dependency chain.
+Extract: `root_cause` + `resolution` one-liners from frontmatter.
+
+**6b. Adhoc summaries:**
+
+```bash
+for f in .planning/adhoc/*-SUMMARY.md; do
+  sed -n '1,/^---$/p; /^---$/q' "$f" | head -20
+done 2>/dev/null
+```
+
+Select matching: same `subsystem`, overlapping `tags`, or `related_phase` in dependency chain.
+Extract: `learnings` array entries (skip if empty).
+
+**6c. Completed todos:**
+
+```bash
+ls .planning/todos/done/*.md 2>/dev/null
+```
+
+If exists, grep body content for phase keywords or subsystem. Extract brief description of resolved items.
+
+**6d. Milestone decisions:**
+
+```bash
+ls .planning/milestones/v*-DECISIONS.md 2>/dev/null
+```
+
+If exists, grep for entries matching current subsystem or phase keywords. Extract matched decision rows.
+
+**6e. LEARNINGS.md (cross-milestone index):**
+
+```bash
+cat .planning/LEARNINGS.md 2>/dev/null
+```
+
+If exists, grep for entries matching phase keywords, subsystem, or tech terms. Extract matched one-liner entries with source references.
+
+**Collect matched learnings for handoff** — assemble into flat list for `<learnings>` section.
+
 **From STATE.md:** Decisions → constrain approach. Pending todos → candidates. Blockers → may need to address.
 
 **From pending todos:**
@@ -327,6 +379,7 @@ Assess each pending todo - relevant to this phase? Natural to address now?
 - Applicable decisions (from frontmatter + full summary)
 - Todos being addressed (from pending todos)
 - Concerns being verified (from "Next Phase Readiness")
+- Matched learnings (from debug docs, adhoc summaries, patterns, decisions, LEARNINGS.md)
 </step>
 
 <step name="gather_phase_context">
@@ -482,6 +535,8 @@ Each task captures:
 
 **Subsystem determination:** Read config.json subsystems list via `jq -r '.subsystems[]' .planning/config.json`. Select best match for this phase based on phase goal and task analysis.
 
+**Learnings assembly:** Collect matched learnings from step 6 into `<learnings>` section. Omit section entirely if no matches. Include source paths for attribution.
+
 Assemble handoff payload:
 
 ```xml
@@ -517,6 +572,15 @@ Assemble handoff payload:
 <external_services>
   {list of services detected in task breakdown}
 </external_services>
+
+<learnings>
+  <!-- Flat list from read_project_history step 6. Omit if no matches found. -->
+  <learning type="debug" source=".planning/debug/resolved/{slug}.md">{root_cause} — fix: {resolution}</learning>
+  <learning type="adhoc" source=".planning/adhoc/{file}.md">{learnings entry}</learning>
+  <learning type="pattern" source=".planning/phases/{path}">{patterns-established entry}</learning>
+  <learning type="decision" source=".planning/milestones/{file}">{decision}: {rationale}</learning>
+  <learning type="curated" source="{source_ref from LEARNINGS.md}">{one-liner pattern}</learning>
+</learnings>
 ```
 
 **Spawn subagent:**
