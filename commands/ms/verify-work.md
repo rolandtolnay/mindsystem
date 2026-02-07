@@ -69,7 +69,7 @@ Phase: $ARGUMENTS (optional)
 
 11. **Present next steps**
     - If this was the last phase in milestone: suggest `/ms:audit-milestone`
-    - If more phases remain: Read `~/.claude/mindsystem/references/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase
+    - If more phases remain: Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase
 </process>
 
 <anti_patterns>

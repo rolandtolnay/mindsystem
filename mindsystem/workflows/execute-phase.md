@@ -559,7 +559,7 @@ Present next steps based on milestone status.
 
 **If more phases remain:**
 
-Read `~/.claude/mindsystem/references/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase.
+Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase.
 
 After the "Next Up" section, add:
 ```markdown
@@ -568,27 +568,8 @@ After the "Next Up" section, add:
 ```
 
 **If milestone complete:**
-```markdown
-MILESTONE COMPLETE!
 
-All {N} phases executed.
-
----
-
-## ▶ Next Up
-
-**Audit milestone** — verify requirements, cross-phase integration, E2E flows
-
-`/ms:audit-milestone`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:verify-work` — manual acceptance testing
-- `/ms:complete-milestone` — skip audit, archive directly
-```
+Read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and follow its instructions to present the milestone complete section.
 </step>
 
 </process>

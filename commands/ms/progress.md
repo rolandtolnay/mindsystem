@@ -229,26 +229,7 @@ Check if `{phase}-CONTEXT.md` exists in phase directory.
 
 **Route E: UAT gaps need fix plans**
 
-UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
-
-```
----
-
-## ⚠ UAT Gaps Found
-
-**{phase}-UAT.md** has {N} gaps requiring fixes.
-
-`/ms:plan-phase {phase} --gaps`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:verify-work {phase}` — run more UAT testing
-
----
-```
+UAT.md exists with gaps (diagnosed issues). Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow its instructions to present the gap closure section.
 
 ---
 
@@ -273,93 +254,25 @@ State: "Current phase is {X}. Milestone has {N} phases (highest: {Y})."
 
 **Route C: Phase complete, more phases remain**
 
-Read ROADMAP.md to get the next phase's name and goal.
+Show phase completion header, then read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase.
 
+After the "Next Up" section, add:
 ```
----
-
-## ✓ Phase {Z} Complete
-
-## ▶ Next Up
-
-**Phase {Z+1}: {Name}** — {Goal from ROADMAP.md}
-
-`/ms:plan-phase {Z+1}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
 **Also available:**
 - `/ms:verify-work {Z}` — user acceptance test before continuing
-- `/ms:discuss-phase {Z+1}` — gather context first
-- `/ms:design-phase {Z+1}` — create UI/UX specifications
-- `/ms:research-phase {Z+1}` — investigate unknowns
-
----
 ```
 
 ---
 
 **Route D: Milestone complete**
 
-```
----
-
-## 🎉 Milestone Complete
-
-All {N} phases finished!
-
-## ▶ Next Up
-
-**Complete Milestone** — archive and prepare for next
-
-`/ms:complete-milestone`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:verify-work` — user acceptance test before completing milestone
-
----
-```
+Read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and follow its instructions to present the milestone complete section.
 
 ---
 
 **Route F: Between milestones (ROADMAP.md missing, PROJECT.md exists)**
 
-A milestone was completed and archived. Ready to start the next milestone cycle.
-
-Read MILESTONES.md to find the last completed milestone version.
-
-```
----
-
-## ✓ Milestone v{X.Y} Complete
-
-Ready to plan the next milestone.
-
-## ▶ Next Up
-
-**Discuss Next Milestone** — figure out what to build next
-
-`/ms:discuss-milestone`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Next milestone flow:**
-1. `/ms:discuss-milestone` — thinking partner, creates context file
-2. `/ms:new-milestone` — update PROJECT.md with new goals
-3. `/ms:research-project` — (optional) research ecosystem
-4. `/ms:define-requirements` — scope what to build
-5. `/ms:create-roadmap` — plan how to build it
-
----
-```
+A milestone was completed and archived. Read `~/.claude/mindsystem/references/routing/between-milestones-routing.md` and follow its instructions to present the between-milestones section.
 
 </step>
 

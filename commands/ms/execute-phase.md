@@ -136,7 +136,7 @@ After verification completes, route based on status:
 All {Y} plans finished. Phase goal verified.
 ```
 
-2. Read `~/.claude/mindsystem/references/next-phase-routing.md` and follow its instructions to present the "Next Up" section with pre-work context for Phase {Z+1}.
+2. Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present the "Next Up" section with pre-work context for Phase {Z+1}.
 
 3. After the "Next Up" section, add:
 ```
@@ -148,72 +148,13 @@ All {Y} plans finished. Phase goal verified.
 
 **Route B: Phase verified, milestone complete**
 
-```
-🎉 ALL PHASES COMPLETE!
-
-## ✓ Phase {Z}: {Name} Complete
-
-All {N} phases finished. Phase goals verified.
-
----
-
-## ▶ Next Up
-
-**Audit milestone** — verify requirements, cross-phase integration, E2E flows
-
-`/ms:audit-milestone`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:verify-work` — manual acceptance testing
-- `/ms:complete-milestone` — skip audit, archive directly
-- `/ms:add-phase <description>` — add another phase first
-
----
-```
+Show phase completion summary, then read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and follow its instructions to present the milestone complete section.
 
 ---
 
 **Route C: Gaps found — need additional planning**
 
-```
-## ⚠ Phase {Z}: {Name} — Gaps Found
-
-**Score:** {N}/{M} must-haves verified
-**Report:** .planning/phases/{phase_dir}/{phase}-VERIFICATION.md
-
-### What's Missing
-
-{Extract gap summaries from VERIFICATION.md}
-
----
-
-## ▶ Next Up
-
-**Plan gap closure** — create additional plans to complete the phase
-
-`/ms:plan-phase {Z} --gaps`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `cat .planning/phases/{phase_dir}/{phase}-VERIFICATION.md` — see full report
-- `/ms:verify-work {Z}` — manual testing before planning
-
----
-```
-
-After user runs `/ms:plan-phase {Z} --gaps`:
-1. Planner reads VERIFICATION.md gaps
-2. Creates plans 04, 05, etc. to close gaps
-3. User runs `/ms:execute-phase {Z}` again
-4. Execute-phase runs incomplete plans (04, 05...)
-5. Verifier runs again → loop until passed
+Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow its instructions to present the gap closure section.
 </offer_next>
 
 <wave_execution>
