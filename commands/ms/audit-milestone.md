@@ -129,7 +129,7 @@ For each requirement in REQUIREMENTS.md mapped to this milestone:
 
 ## 6. Aggregate into v{version}-MILESTONE-AUDIT.md
 
-Create `.planning/v{version}-v{version}-MILESTONE-AUDIT.md` with:
+Create `.planning/v{version}-MILESTONE-AUDIT.md` with:
 
 ```yaml
 ---
@@ -395,6 +395,19 @@ EOF
 
 Report: "Milestone code review complete."
 
+## 9. Commit Audit Report
+
+```bash
+git add .planning/v{version}-MILESTONE-AUDIT.md
+git commit -m "$(cat <<'EOF'
+docs(milestone): complete v{version} audit
+
+Status: {status}
+Scores: Requirements {N}/{M} | Phases {N}/{M} | Integration {N}/{M} | Flows {N}/{M}
+EOF
+)"
+```
+
 </process>
 
 <offer_next>
@@ -523,5 +536,6 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 - [ ] If analyze-only reviewer: YAML findings parsed and added to report
 - [ ] If analyze-only reviewer: Binary decision presented (quality phase vs tech debt)
 - [ ] If quality phase chosen: Phase directory created with PHASE-FINDINGS.md
+- [ ] MILESTONE-AUDIT.md committed to git
 - [ ] Results presented with actionable next steps
 </success_criteria>
