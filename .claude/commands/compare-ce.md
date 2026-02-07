@@ -50,102 +50,62 @@ Ensure the exploration agents search broadly enough to capture everything releva
 
 Invoke the `ms-meta` skill to load deep knowledge about Mindsystem's architecture, patterns, and design philosophy. This ensures accurate comparison against Mindsystem's actual practices rather than assumptions.
 
-## Step 3: Deep Exploration — Compound Engineering (3 parallel agents)
+## Step 3: Deep Exploration — Compound Engineering
 
-Launch 3 Explore agents in parallel to fully map how CE handles the area. Each agent covers one architectural layer so it can read files completely rather than skimming.
+Map how CE handles the area by exploring 3 architectural layers simultaneously.
 
-### Agent CE-1: Orchestration Layer
-Prompt: "Explore references/compound-engineering/commands/ and references/compound-engineering/commands/workflows/ thoroughly for everything related to [AREA].
+**CRITICAL: Launch all 3 agents in a SINGLE message containing 3 parallel Task tool calls (subagent_type: Explore). Do NOT launch them one at a time.**
 
-Read every command file that touches this area — including the full file, not just frontmatter. I need to understand:
-1. What commands handle this area (list exact file paths)
-2. How the command is triggered and what arguments it accepts
-3. The full execution flow — what steps, what agents are spawned, what skills are referenced
-4. Post-completion routing (what options are offered to the user after the command finishes)
-5. Any notable patterns: auto-invoke triggers, preconditions XML, AskUserQuestion usage, parallel subagent orchestration
+| Agent | Layer | Search Paths |
+|-------|-------|-------------|
+| CE-1 | Orchestration | `references/compound-engineering/commands/`, `references/compound-engineering/commands/workflows/` |
+| CE-2 | Agents | `references/compound-engineering/agents/` and all subdirectories (`review/`, `research/`, `design/`, `workflow/`, `docs/`) |
+| CE-3 | Skills/Knowledge | `references/compound-engineering/skills/` and all subdirectories (`references/`, `templates/`, `scripts/`, `assets/`) |
 
-Return a structured analysis organized by command, with exact file paths and key excerpts."
+**Shared instructions for all 3 agents** — include in each prompt:
+- Thoroughness: very thorough
+- Read every file that touches [AREA] completely — full files, not just frontmatter
+- Return a structured analysis with exact file paths and key excerpts
+- Organize results by component (command, agent, or skill)
 
-### Agent CE-2: Agent Layer
-Prompt: "Explore references/compound-engineering/agents/ thoroughly for everything related to [AREA]. Check all subdirectories: review/, research/, design/, workflow/, docs/.
+**Per-agent focus — append to each prompt:**
 
-Read the full system prompt of every agent that touches this area. I need to understand:
-1. What agents handle this area (list exact file paths)
-2. Each agent's role, expertise, methodology, and output format
-3. How agents are specialized — what makes each one distinct from others in the same area
-4. What tools each agent has access to
-5. Any persona-based patterns (named reviewers, opinionated styles)
-6. How agent outputs are structured and consumed by commands
+**CE-1** — For each command: trigger/arguments, full execution flow (steps, agents spawned, skills referenced), post-completion routing, notable patterns (auto-invoke triggers, preconditions XML, parallel subagent orchestration).
 
-Return a structured analysis organized by agent, with exact file paths and key excerpts from their system prompts."
+**CE-2** — For each agent: role/expertise/methodology, what makes it distinct from others in the area, tools available, persona-based patterns (named reviewers, opinionated styles), output format and how commands consume it.
 
-### Agent CE-3: Skills/Knowledge Layer
-Prompt: "Explore references/compound-engineering/skills/ thoroughly for everything related to [AREA]. Each skill lives in its own directory with SKILL.md as the entry point.
+**CE-3** — For each skill: core concepts/principles, all supporting files in subdirectories (these contain the deep domain knowledge), invocation method (by commands, agents, or user), knowledge organization structure, any file-based systems maintained (e.g., `docs/solutions/`, `todos/`).
 
-IMPORTANT: For each relevant skill, also read files inside its subdirectories — references/, templates/, scripts/, assets/. These contain the deep domain knowledge that makes skills effective.
+**After dispatching all 3 agents in a single message, wait for all results before proceeding to Step 4. Do not start Step 4 until all 3 agents have returned.**
 
-I need to understand:
-1. What skills handle this area (list exact file paths including subdirectory files)
-2. The skill's core concepts and principles
-3. What reference files, templates, and scripts support it
-4. How the skill is invoked (by commands, by agents, or directly by the user)
-5. The knowledge structure — how information is organized within the skill
-6. Any file-based systems the skill creates or maintains (e.g., docs/solutions/, todos/)
+## Step 4: Deep Exploration — Mindsystem (informed by CE findings)
 
-Return a structured analysis organized by skill, with exact file paths for all files read."
+Using the CE findings from Step 3, explore Mindsystem's 3 architectural layers simultaneously. Each agent's prompt must reference specific CE patterns discovered in Step 3 to direct targeted search for MS equivalents, alternatives, or gaps.
 
-**Wait for all 3 CE agents to complete before proceeding.**
+**CRITICAL: Launch all 3 agents in a SINGLE message containing 3 parallel Task tool calls (subagent_type: Explore). Do NOT launch them one at a time.**
 
-## Step 4: Deep Exploration — Mindsystem (3 parallel agents, informed by CE findings)
+| Agent | Layer | Search Paths |
+|-------|-------|-------------|
+| MS-1 | Orchestration | `commands/ms/`, `mindsystem/workflows/` |
+| MS-2 | Agents | `agents/` and all subdirectories |
+| MS-3 | Knowledge | `mindsystem/templates/`, `mindsystem/references/`, `.claude/commands/`, `scripts/` |
 
-Using the CE findings from Step 3, launch 3 Explore agents in parallel. Each agent's prompt references specific CE patterns discovered, directing them to find MS equivalents, alternatives, or gaps.
+**Shared instructions for all 3 agents** — include in each prompt:
+- Thoroughness: very thorough
+- Read every file that touches [AREA] completely — full files, not just frontmatter
+- Return a structured analysis with exact file paths
+- Explicitly identify gaps: what aspects of the CE approach have no MS equivalent
+- **CE context for targeted search:** Include a summary of the specific CE patterns found in Step 3 relevant to this agent's layer, so it searches for equivalents rather than exploring generically
 
-### Agent MS-1: Orchestration Layer
-Prompt: "Explore commands/ms/ and mindsystem/workflows/ thoroughly for everything related to [AREA].
+**Per-agent focus — append to each prompt:**
 
-**CE context for targeted search:** [Insert specific CE commands and workflows found in Step 3 — e.g., 'CE uses /workflows:compound to capture solved problems, triggered by auto-invoke phrases like "that worked". Find everything in MS related to knowledge capture, learning workflows, or post-completion documentation.']
+**MS-1** — For each command/workflow: the command → workflow delegation chain, workflow structure (steps, priorities, bash examples), user interaction model (AskUserQuestion usage, checkpoint types), post-completion routing (next-up format).
 
-Read every command and workflow file that touches this area — full files, not just frontmatter. I need to understand:
-1. What commands and workflows handle this area (list exact file paths)
-2. The command → workflow delegation chain for each
-3. How the workflow is structured (steps, priorities, bash examples)
-4. User interaction model (AskUserQuestion usage, checkpoint types)
-5. Post-completion routing (next-up format, available options)
-6. Gaps: what aspects of the CE approach have no MS equivalent
+**MS-2** — For each agent: role section, required_reading, execution steps, model and tools used, which commands/workflows spawn it, output structure (SUMMARY.md, VERIFICATION.md, etc.).
 
-Return a structured analysis organized by command/workflow, with exact file paths."
+**MS-3** — For each template/reference/script: template structure and placeholders, reference principles and patterns, how they're consumed (which commands/workflows/agents reference them via @-paths), any project-specific commands in `.claude/commands/` related to the area.
 
-### Agent MS-2: Agent Layer
-Prompt: "Explore agents/ thoroughly for everything related to [AREA].
-
-**CE context for targeted search:** [Insert specific CE agents found in Step 3 — e.g., 'CE has 5 parallel research agents (framework-docs-researcher, best-practices-researcher, git-history-analyzer, learnings-researcher, repo-research-analyst). Find all MS agents that handle research, investigation, or knowledge gathering.']
-
-Read the full definition of every agent that touches this area. I need to understand:
-1. What agents handle this area (list exact file paths)
-2. Each agent's role section, required_reading, and execution steps
-3. What model and tools each agent uses
-4. How agents are spawned (by which commands/workflows)
-5. How agent outputs are structured (SUMMARY.md, VERIFICATION.md, etc.)
-6. Gaps: what CE agent capabilities have no MS equivalent
-
-Return a structured analysis organized by agent, with exact file paths."
-
-### Agent MS-3: Knowledge Layer
-Prompt: "Explore mindsystem/templates/, mindsystem/references/, .claude/commands/, and scripts/ thoroughly for everything related to [AREA].
-
-**CE context for targeted search:** [Insert specific CE skills and knowledge systems found in Step 3 — e.g., 'CE has a compound-docs skill that maintains docs/solutions/{category}/ with YAML frontmatter for institutional knowledge. Find all MS templates, references, and scripts related to knowledge capture, documentation, or learning.']
-
-I need to understand:
-1. What templates, references, and scripts handle this area (list exact file paths)
-2. Template structure — placeholders, expected output format
-3. Reference content — principles, patterns, guidelines
-4. How templates and references are consumed (which commands/workflows/agents reference them via @-paths)
-5. Any project-specific commands in .claude/commands/ related to this area
-6. Gaps: what CE knowledge structures have no MS equivalent
-
-Return a structured analysis organized by file type, with exact file paths."
-
-**Wait for all 3 MS agents to complete before proceeding.**
+**After dispatching all 3 agents in a single message, wait for all results before proceeding to Step 5. Do not start Step 5 until all 3 agents have returned.**
 
 ## Step 5: Synthesize Comparison
 
@@ -158,7 +118,7 @@ Using results from all 6 agents (3 CE + 3 MS) plus ms-meta knowledge, build a de
 - **Output artifacts**: What gets produced and how it's used downstream
 - **Extensibility**: How easy it is to modify or extend
 
-## Step 5: Pareto Evaluation
+## Step 6: Pareto Evaluation
 
 Apply the Pareto principle: identify the 20% of Compound Engineering patterns that would deliver 80% of the improvement value if adopted in Mindsystem.
 
@@ -175,7 +135,7 @@ For each candidate pattern, evaluate:
 - **Risk**: What could go wrong? What existing functionality might break?
 - **Dependencies**: Does this recommendation depend on other recommendations being adopted first?
 
-## Step 6: Write Proposal
+## Step 7: Write Proposal
 
 Create `proposals/ce-<area-slug>.md` with this structure:
 
@@ -257,7 +217,7 @@ Create `proposals/ce-<area-slug>.md` with this structure:
 [Anything that needs further discussion before implementation]
 ```
 
-## Step 7: Present Summary
+## Step 8: Present Summary
 
 Display a concise summary of the proposal:
 - File location
