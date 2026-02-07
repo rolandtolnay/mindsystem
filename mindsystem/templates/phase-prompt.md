@@ -17,7 +17,7 @@ wave: N                     # Execution wave (1, 2, 3...). Pre-computed at plan 
 depends_on: []              # Plan IDs this plan requires (e.g., ["01-01"]).
 files_modified: []          # Files this plan modifies.
 autonomous: true            # false if plan has checkpoints requiring user interaction
-subsystem_hint: []          # From planner, for executor SUMMARY.md
+subsystem_hint: ""          # From planner, for executor SUMMARY.md
 user_setup: []              # Human-required setup Claude cannot automate (see below)
 
 # Goal-backward verification (derived during planning, verified after execution)
