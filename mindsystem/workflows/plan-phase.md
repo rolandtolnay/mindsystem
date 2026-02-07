@@ -295,6 +295,17 @@ From selected phases' frontmatter, extract:
 - **Key files:** Union of all key-files (for @context references)
 - **Decisions:** Extract key-decisions from frontmatter
 
+**4b. Present established patterns to user:**
+
+If patterns-established entries were collected, display:
+
+```
+### Established Patterns to Maintain
+- [Pattern: description] (from phase XX)
+```
+
+If no patterns collected, skip.
+
 **5. Now read FULL summaries for selected phases:**
 
 Only now open and read complete SUMMARY.md files for the selected relevant phases. Extract:
@@ -317,6 +328,16 @@ done 2>/dev/null
 
 Select docs matching: same `subsystem`, overlapping `tags`, or `phase` in dependency chain.
 Extract: `root_cause` + `resolution` one-liners from frontmatter.
+
+**If matched debug docs found, present warning to user:**
+
+```
+### Previous Debug Sessions in This Area
+- **{slug}** ({subsystem}): {root_cause} — Fix: {resolution}
+```
+
+Awareness only — learnings still flow to `<learnings>` handoff.
+If no matches, skip.
 
 **6b. Adhoc summaries:**
 
@@ -422,6 +443,8 @@ cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 
 <step name="break_into_tasks">
 Decompose phase into tasks. **Think dependencies first, not sequence.**
+
+**Pattern consistency:** If established patterns were surfaced in step 4b, ensure tasks follow those patterns. Reference specific patterns in action_hints where relevant.
 
 For each potential task, ask:
 1. **What does this task NEED?** (files, types, APIs that must exist)

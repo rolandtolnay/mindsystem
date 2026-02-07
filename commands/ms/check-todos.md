@@ -1,7 +1,7 @@
 ---
 name: ms:check-todos
 description: List pending todos and select one to work on
-argument-hint: [area filter]
+argument-hint: [subsystem or priority filter]
 allowed-tools:
   - Read
   - Write
@@ -47,9 +47,10 @@ Exit.
 </step>
 
 <step name="parse_filter">
-Check for area filter in arguments:
+Support multi-field filtering:
 - `/ms:check-todos` → show all
-- `/ms:check-todos api` → filter to area:api only
+- `/ms:check-todos p1` → filter to priority:p1 only (matches `p[1-3]`)
+- `/ms:check-todos api` → filter to subsystem or area matching "api"
 </step>
 
 <step name="list_todos">
@@ -57,24 +58,39 @@ Check for area filter in arguments:
 for file in .planning/todos/pending/*.md; do
   created=$(grep "^created:" "$file" | cut -d' ' -f2)
   title=$(grep "^title:" "$file" | cut -d':' -f2- | xargs)
+  priority=$(grep "^priority:" "$file" | cut -d' ' -f2)
+  subsystem=$(grep "^subsystem:" "$file" | cut -d' ' -f2)
   area=$(grep "^area:" "$file" | cut -d' ' -f2)
-  echo "$created|$title|$area|$file"
+  echo "${priority:-p3}|${subsystem:-${area:-general}}|$created|$title|$file"
 done | sort
 ```
 
-Apply area filter if specified. Display as numbered list:
+Old-format todos (missing priority/subsystem) default to `p3`/`general`.
+
+Apply filter if specified:
+- Priority filter (`p1`-`p3`): match priority field
+- Subsystem/area filter: match either subsystem or area field
+
+Priority-grouped display with sequential numbering across groups. Omit empty groups. Use subsystem label (fall back to area, then "general"):
 
 ```
-Pending Todos:
+Pending Todos (N):
 
-1. Add auth token refresh (api, 2d ago)
-2. Fix modal z-index issue (ui, 1d ago)
-3. Refactor database connection pool (database, 5h ago)
+### p1 — Urgent
+  1. auth: Fix token refresh race condition (2d ago)
+  2. api: Handle rate limit 429 responses (1d ago)
+
+### p2 — Important
+  3. ui: Add loading states to dashboard (5h ago)
+
+### p3 — Ideas
+  4. general: Explore caching strategy (3d ago)
 
 ---
 
 Reply with a number to view details, or:
-- `/ms:check-todos [area]` to filter by area
+- `/ms:check-todos [subsystem]` to filter by subsystem
+- `/ms:check-todos p1` to filter by priority
 - `q` to exit
 ```
 
@@ -94,8 +110,10 @@ Read the todo file completely. Display:
 ```
 ## [title]
 
-**Area:** [area]
+**Subsystem:** [subsystem] | **Priority:** [priority] | **Source:** [source]
+**Phase Origin:** [phase_origin]
 **Created:** [date] ([relative time] ago)
+**Tags:** [tags or "None"]
 **Files:** [list or "None"]
 
 ### Problem
@@ -104,6 +122,8 @@ Read the todo file completely. Display:
 ### Solution
 [solution section content]
 ```
+
+Gracefully omit missing fields for old-format todos.
 
 If `files` field has entries, read and briefly summarize each.
 </step>
@@ -114,9 +134,10 @@ ls .planning/ROADMAP.md 2>/dev/null && echo "Roadmap exists"
 ```
 
 If roadmap exists:
-1. Check if todo's area matches an upcoming phase
+1. Check if todo's subsystem or area matches an upcoming phase
 2. Check if todo's files overlap with a phase's scope
-3. Note any match for action options
+3. Check if todo's tags match phase keywords
+4. Note any match for action options
 </step>
 
 <step name="offer_actions">
@@ -206,10 +227,12 @@ Confirm: "Committed: docs: start work on todo - [title]"
 </anti_patterns>
 
 <success_criteria>
-- [ ] All pending todos listed with title, area, age
-- [ ] Area filter applied if specified
-- [ ] Selected todo's full context loaded
-- [ ] Roadmap context checked for phase match
+- [ ] All pending todos listed grouped by priority (p1/p2/p3)
+- [ ] Subsystem label displayed (with area/general fallback for old todos)
+- [ ] Priority or subsystem filter applied if specified
+- [ ] Selected todo's full context loaded (subsystem, priority, source, phase, tags)
+- [ ] Old-format todos handled gracefully (missing fields omitted)
+- [ ] Roadmap context checked for phase match (subsystem, area, files, tags)
 - [ ] Appropriate actions offered
 - [ ] Selected action executed
 - [ ] STATE.md updated if todo count changed

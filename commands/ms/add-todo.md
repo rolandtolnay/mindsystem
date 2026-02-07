@@ -29,10 +29,10 @@ mkdir -p .planning/todos/pending .planning/todos/done
 
 <step name="check_existing_areas">
 ```bash
-ls .planning/todos/pending/*.md 2>/dev/null | xargs -I {} grep "^area:" {} 2>/dev/null | cut -d' ' -f2 | sort -u
+ls .planning/todos/pending/*.md 2>/dev/null | xargs -I {} grep "^area:\|^subsystem:\|^priority:" {} 2>/dev/null | sort -u
 ```
 
-Note existing areas for consistency in infer_area step.
+Note existing areas, subsystems, and priorities for consistency in infer_area step.
 </step>
 
 <step name="extract_content">
@@ -49,6 +49,7 @@ Formulate:
 - `problem`: What's wrong or why this is needed
 - `solution`: Approach hints or "TBD" if just an idea
 - `files`: Relevant paths with line numbers from conversation
+- `tags`: 2-5 searchable keywords from context (libraries, error types, concepts)
 </step>
 
 <step name="infer_area">
@@ -67,6 +68,30 @@ Infer area from file paths:
 | No files or unclear | `general` |
 
 Use existing area from step 2 if similar match exists.
+
+**Subsystem:** Read `jq -r '.subsystems[]' .planning/config.json 2>/dev/null`. Match against file paths and conversation context. Fall back to inferred `area` if no config.json or no match.
+
+**Source (auto-infer from Last Command in STATE.md):**
+
+| Last Command contains | Source |
+|---|---|
+| `ms:debug` | `debug` |
+| `ms:verify-work` | `verify-work` |
+| `ms:do-work` | `adhoc` |
+| `ms:audit-milestone` / `ms:plan-milestone-gaps` | `milestone-audit` |
+| anything else / no STATE.md | `user-idea` |
+
+**Priority (from conversation context + source-based defaults):**
+
+| Signal | Priority |
+|---|---|
+| Bug, crash, error, broken, failing, regression keywords | `p1` |
+| Enhancement, improvement, refactor, should, missing | `p2` |
+| Idea, explore, maybe, consider, nice-to-have | `p3` |
+
+Source-based fallbacks: debug → `p1`, verify-work → `p2`, others → `p3`.
+
+**Phase origin:** Parse current phase from STATE.md `Phase:` line. Use `"none"` if no active phase.
 </step>
 
 <step name="check_duplicates">
@@ -101,6 +126,11 @@ Write to `.planning/todos/pending/${date_prefix}-${slug}.md`:
 ---
 created: [timestamp]
 title: [title]
+subsystem: [from config.json or area fallback]
+tags: [searchable keywords]
+priority: p1 | p2 | p3
+source: debug | verify-work | adhoc | user-idea | milestone-audit
+phase_origin: [current phase or "none"]
 area: [area]
 files:
   - [file:lines]
@@ -132,7 +162,7 @@ git add .planning/todos/pending/[filename]
 git commit -m "$(cat <<'EOF'
 docs: capture todo - [title]
 
-Area: [area]
+Subsystem: [subsystem] | Priority: [priority] | Source: [source]
 EOF
 )"
 ```
@@ -145,7 +175,8 @@ Confirm: "Committed: docs: capture todo - [title]"
 Todo saved: .planning/todos/pending/[filename]
 
   [title]
-  Area: [area]
+  Subsystem: [subsystem] | Priority: [priority] | Source: [source]
+  Phase: [phase_origin]
   Files: [count] referenced
 
 ---
@@ -183,7 +214,10 @@ Update `.planning/STATE.md` Last Command field:
 - [ ] Todo file created with valid frontmatter
 - [ ] Problem section has enough context for future Claude
 - [ ] No duplicates (checked and resolved)
-- [ ] Area consistent with existing todos
+- [ ] Subsystem matches config.json vocabulary (or area fallback)
+- [ ] Priority auto-inferred from context
+- [ ] Source auto-inferred from Last Command
+- [ ] Phase origin populated from STATE.md
 - [ ] STATE.md updated if exists
 - [ ] Todo and state committed to git
 </success_criteria>
