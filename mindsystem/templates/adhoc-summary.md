@@ -13,11 +13,15 @@ description: [user's original description]
 completed: [ISO timestamp]
 duration: [X min]
 related_phase: [current phase from STATE.md, or "none"]
+subsystem: [from .planning/config.json subsystems list]
+tags: [searchable keywords]
 files_modified:
   - [path/to/file1.ts]
   - [path/to/file2.ts]
 commit: [git hash]
 patch_file: [path to .patch file, or empty if skipped]
+learnings:
+  - [optional: key insight from this work]
 ---
 
 # Adhoc: [Description]
@@ -44,7 +48,7 @@ patch_file: [path to .patch file, or empty if skipped]
 Adhoc summaries document small work items executed outside the normal phase workflow.
 
 **Differences from phase SUMMARY.md:**
-- Simplified frontmatter (no waves, depends_on, subsystem, tags)
+- Simplified frontmatter (no waves, depends_on, requires, provides, affects)
 - No dependency graph (adhoc work is isolated by design)
 - No "Next Phase Readiness" (not part of phase sequence)
 - No deviations section (adhoc work is already unplanned)
@@ -65,9 +69,12 @@ Adhoc summaries document small work items executed outside the normal phase work
 | completed | Yes | ISO timestamp when work completed |
 | duration | Yes | Time spent (e.g., "12 min") |
 | related_phase | Yes | Current phase from STATE.md, or "none" if between phases |
+| subsystem | Yes | From .planning/config.json subsystems list |
+| tags | No | Searchable keywords from work context |
 | files_modified | Yes | List of file paths changed |
 | commit | Yes | Git commit hash |
 | patch_file | No | Path to generated patch file (empty if no code changes) |
+| learnings | No | Key insights from this work (only for non-obvious discoveries) |
 
 </frontmatter_fields>
 
@@ -98,11 +105,15 @@ description: Fix auth token not refreshing on 401
 completed: 2026-01-20T14:32:00Z
 duration: 8 min
 related_phase: 03-user-dashboard
+subsystem: auth
+tags: [jwt, interceptor, token-refresh]
 files_modified:
   - src/lib/api-client.ts
   - src/hooks/useAuth.ts
 commit: abc123f
 patch_file: .planning/adhoc/2026-01-20-fix-auth-token-not-refreshing-on-401.patch
+learnings:
+  - "401 interceptors must queue concurrent requests during token refresh to avoid race conditions"
 ---
 
 # Adhoc: Fix auth token not refreshing on 401

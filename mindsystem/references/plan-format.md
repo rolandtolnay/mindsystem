@@ -34,6 +34,7 @@ autonomous: true            # false if plan has checkpoints
 | `depends_on` | Yes | Array of plan IDs this plan requires. |
 | `files_modified` | Yes | Files this plan touches. |
 | `autonomous` | Yes | `true` if no checkpoints, `false` if has checkpoints |
+| `subsystem_hint` | No | Subsystem from config.json, assigned by planner for executor to use in SUMMARY.md |
 
 **Wave is pre-computed:** `/ms:plan-phase` assigns wave numbers based on `depends_on`. `/ms:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
 

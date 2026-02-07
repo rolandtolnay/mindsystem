@@ -272,6 +272,9 @@ Create SUMMARY.md (see @~/.claude/mindsystem/templates/adhoc-summary.md for full
 
 ```bash
 summary_file=".planning/adhoc/${timestamp}-${slug}-SUMMARY.md"
+
+# Read subsystems for categorization
+jq -r '.subsystems[]' .planning/config.json 2>/dev/null
 ```
 
 ```markdown
@@ -281,10 +284,14 @@ description: [description]
 completed: [ISO timestamp]
 duration: [X min]
 related_phase: [phase or "none"]
+subsystem: [select from config.json subsystems based on work performed]
+tags: [searchable keywords from work context]
 files_modified:
   - [path/to/file1.ts]
   - [path/to/file2.ts]
 commit: [hash - filled after commit]
+learnings:
+  - [optional: include only when work revealed non-obvious insights. Skip for routine fixes.]
 ---
 
 # Adhoc: [Description]

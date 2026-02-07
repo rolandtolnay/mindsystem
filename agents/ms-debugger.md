@@ -741,6 +741,12 @@ status: gathering | investigating | fixing | verifying | resolved
 trigger: "[verbatim user input]"
 created: [ISO timestamp]
 updated: [ISO timestamp]
+subsystem: [from .planning/config.json subsystems list]
+tags: []
+symptoms: []
+root_cause: ""
+resolution: ""
+phase: [current phase from STATE.md, or "none"]
 ---
 
 ## Current Focus
@@ -782,6 +788,11 @@ root_cause: [empty until found]
 fix: [empty until applied]
 verification: [empty until verified]
 files_changed: []
+
+## Prevention
+<!-- OVERWRITE - populated during archive_session -->
+
+prevention: [how to avoid this in the future]
 ```
 
 ## Update Rules
@@ -790,11 +801,18 @@ files_changed: []
 |---------|------|------|
 | Frontmatter.status | OVERWRITE | Each phase transition |
 | Frontmatter.updated | OVERWRITE | Every file update |
+| Frontmatter.subsystem | IMMUTABLE | Set from config.json during creation |
+| Frontmatter.tags | APPEND | Add keywords as investigation proceeds |
+| Frontmatter.symptoms | OVERWRITE | Populated during gathering |
+| Frontmatter.root_cause | OVERWRITE | Promoted from Resolution body on archive |
+| Frontmatter.resolution | OVERWRITE | Promoted from Resolution body on archive |
+| Frontmatter.phase | IMMUTABLE | Set from STATE.md during creation |
 | Current Focus | OVERWRITE | Before every action |
 | Symptoms | IMMUTABLE | After gathering complete |
 | Eliminated | APPEND | When hypothesis disproved |
 | Evidence | APPEND | After each finding |
 | Resolution | OVERWRITE | As understanding evolves |
+| Prevention | OVERWRITE | Populated during archive_session |
 
 **CRITICAL:** Update the file BEFORE taking action, not after. If context resets mid-action, the file shows what was about to happen.
 
@@ -848,12 +866,25 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved
 
 1. Generate slug from user input (lowercase, hyphens, max 30 chars)
 2. `mkdir -p .planning/debug`
-3. Create file with initial state:
+3. Read project context for frontmatter:
+   ```bash
+   jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+   grep "^Phase:" .planning/STATE.md 2>/dev/null | head -1
+   ```
+4. Create file with initial state including all 10 frontmatter fields:
    - status: gathering
    - trigger: verbatim $ARGUMENTS
+   - created: ISO timestamp
+   - updated: ISO timestamp
+   - subsystem: best match from config.json based on trigger
+   - tags: []
+   - symptoms: []
+   - root_cause: ""
+   - resolution: ""
+   - phase: from STATE.md or "none"
    - Current Focus: next_action = "gather symptoms"
    - Symptoms: empty
-4. Proceed to symptom_gathering
+5. Proceed to symptom_gathering
 </step>
 
 <step name="symptom_gathering">
@@ -970,10 +1001,19 @@ Update status to "fixing".
 </step>
 
 <step name="archive_session">
-**Archive resolved debug session.**
+**Archive resolved debug session with learning capture.**
 
 Update status to "resolved".
 
+**1. Promote learnings to frontmatter:**
+Before moving to resolved/, capture structured learnings:
+- Promote `root_cause` from Resolution body to frontmatter (concise one-liner)
+- Promote `resolution` from Resolution body to frontmatter (concise one-liner)
+- Ensure `symptoms` frontmatter populated from Symptoms body section
+- Add final `tags` based on root cause domain
+- Populate `## Prevention` section with actionable one-liner
+
+**2. Move to resolved/ and commit:**
 ```bash
 mkdir -p .planning/debug/resolved
 mv .planning/debug/{slug}.md .planning/debug/resolved/

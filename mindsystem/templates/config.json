@@ -1,4 +1,5 @@
 {
+  "subsystems": [],
   "depth": "standard",
   "parallelization": {
     "enabled": true,

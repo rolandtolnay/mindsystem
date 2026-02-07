@@ -10,7 +10,7 @@ Template for `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md` - phase comple
 ---
 phase: XX-name
 plan: YY
-subsystem: [primary category: auth, payments, ui, api, database, infra, testing, etc.]
+subsystem: [from .planning/config.json subsystems list]
 tags: [searchable tech: jwt, stripe, react, postgres, prisma]
 
 # Dependency graph
@@ -134,7 +134,7 @@ None - no external service configuration required.
 
 **Dependency graph:** `requires`/`provides`/`affects` create explicit links between phases, enabling transitive closure for context selection.
 
-**Subsystem:** Primary categorization (auth, payments, ui, api, database, infra, testing) for detecting related phases.
+**Subsystem:** Primary categorization from `.planning/config.json` subsystems list. If work doesn't fit any existing subsystem, add a new value to config.json and use it.
 
 **Tags:** Searchable technical keywords (libraries, frameworks, tools) for tech stack awareness.
 

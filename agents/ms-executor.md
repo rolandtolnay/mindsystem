@@ -423,6 +423,11 @@ After all tasks complete, create `{phase}-{plan}-SUMMARY.md`.
 
 Follow the template's frontmatter structure exactly.
 
+**Subsystem selection:**
+- Check PLAN.md frontmatter for `subsystem_hint` field — use it if present
+- Otherwise read config.json subsystems via `jq -r '.subsystems[]' .planning/config.json` and select best match
+- If new subsystem needed: append to config.json, note in "Decisions Made"
+
 **One-liner must be SUBSTANTIVE:**
 
 - Good: "JWT auth with refresh rotation using jose library"

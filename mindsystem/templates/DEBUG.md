@@ -12,6 +12,12 @@ status: gathering | investigating | fixing | verifying | resolved
 trigger: "[verbatim user input]"
 created: [ISO timestamp]
 updated: [ISO timestamp]
+subsystem: [from .planning/config.json subsystems list]
+tags: []
+symptoms: []
+root_cause: ""
+resolution: ""
+phase: [current phase from STATE.md, or "none"]
 ---
 
 ## Current Focus
@@ -53,17 +59,28 @@ root_cause: [empty until found]
 fix: [empty until applied]
 verification: [empty until verified]
 files_changed: []
+
+## Prevention
+<!-- OVERWRITE - populated during archive_session -->
+
+prevention: [how to avoid this in the future]
 ```
 
 ---
 
 <section_rules>
 
-**Frontmatter (status, trigger, timestamps):**
+**Frontmatter (status, trigger, timestamps, metadata):**
 - `status`: OVERWRITE - reflects current phase
 - `trigger`: IMMUTABLE - verbatim user input, never changes
 - `created`: IMMUTABLE - set once
 - `updated`: OVERWRITE - update on every change
+- `subsystem`: IMMUTABLE - set from config.json during creation
+- `tags`: APPEND - add keywords as investigation proceeds
+- `symptoms`: OVERWRITE - populated during gathering
+- `root_cause`: OVERWRITE - promoted from Resolution body on archive
+- `resolution`: OVERWRITE - promoted from Resolution body on archive
+- `phase`: IMMUTABLE - set from STATE.md during creation
 
 **Current Focus:**
 - OVERWRITE entirely on each update
@@ -94,6 +111,10 @@ files_changed: []
 - May update multiple times as fixes are tried
 - Final state shows confirmed root cause and verified fix
 - Fields: root_cause, fix, verification, files_changed
+
+**Prevention:**
+- OVERWRITE - populated during archive_session
+- Actionable one-liner on how to avoid this in the future
 
 </section_rules>
 

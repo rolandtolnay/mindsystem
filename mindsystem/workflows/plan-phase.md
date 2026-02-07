@@ -480,6 +480,8 @@ Each task captures:
 <step name="handoff_to_writer">
 **Spawn ms-plan-writer subagent with task list and context.**
 
+**Subsystem determination:** Read config.json subsystems list via `jq -r '.subsystems[]' .planning/config.json`. Select best match for this phase based on phase goal and task analysis.
+
 Assemble handoff payload:
 
 ```xml
@@ -494,6 +496,7 @@ Assemble handoff payload:
   <phase_goal>{goal from ROADMAP}</phase_goal>
   <requirements>{REQ-IDs from ROADMAP}</requirements>
   <depth>{from config.json or "standard"}</depth>
+  <subsystem_hint>{best-match subsystem from config.json}</subsystem_hint>
 </phase_context>
 
 <project_refs>

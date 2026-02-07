@@ -1311,7 +1311,7 @@ Before writing summary content, populate frontmatter fields from execution conte
 1. **Basic identification:**
    - phase: From PLAN.md frontmatter
    - plan: From PLAN.md frontmatter
-   - subsystem: Categorize based on phase focus (auth, payments, ui, api, database, infra, testing, etc.)
+   - subsystem: Use `subsystem_hint` from PLAN.md frontmatter if present. Otherwise select from config.json subsystems list via `jq -r '.subsystems[]' .planning/config.json`. If novel work, append new value to config.json and log in "Decisions Made".
    - tags: Extract tech keywords (libraries, frameworks, tools used)
 
 2. **Dependency graph:**
@@ -1334,7 +1334,7 @@ Before writing summary content, populate frontmatter fields from execution conte
    - duration: From $DURATION variable
    - completed: From $PLAN_END_TIME (date only, format YYYY-MM-DD)
 
-Note: If subsystem/affects are unclear, use best judgment based on phase name and accomplishments. Can be refined later.
+Note: Subsystem must match config.json vocabulary (or extend it). If affects are unclear, use best judgment based on phase name and accomplishments.
 
 **Title format:** `# Phase [X] Plan [Y]: [Name] Summary`
 

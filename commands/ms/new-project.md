@@ -254,7 +254,16 @@ questions: [
 
 <step name="config">
 
-Create `.planning/config.json` with chosen depth and parallelization using `templates/config.json` structure.
+Create `.planning/config.json` with chosen depth, parallelization, and subsystems using `templates/config.json` structure.
+
+**Subsystems:** Derive 5-10 initial subsystems from the project context gathered during questioning. These are short, lowercase identifiers for the major functional areas of the project.
+
+Examples by project type:
+- E-commerce: `["auth", "products", "cart", "checkout", "payments", "orders", "ui", "api", "database"]`
+- SaaS: `["auth", "dashboard", "analytics", "billing", "notifications", "ui", "api", "database"]`
+- Mobile app: `["auth", "onboarding", "feed", "messaging", "profile", "media", "api", "storage"]`
+
+Place `subsystems` array as the first field in config.json (before `depth`). These values are used throughout the system for consistent categorization of summaries, debug docs, and adhoc work.
 
 </step>
 

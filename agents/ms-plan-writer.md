@@ -64,6 +64,7 @@ The orchestrator provides structured XML:
   <phase_goal>Users can securely access accounts</phase_goal>
   <requirements>AUTH-01, AUTH-02</requirements>
   <depth>standard</depth>
+  <subsystem_hint>auth</subsystem_hint>
 </phase_context>
 
 <project_refs>
@@ -226,6 +227,7 @@ wave: {wave_number}
 depends_on: [{plan_ids}]
 files_modified: [{files}]
 autonomous: {true if no checkpoints}
+subsystem_hint: {from phase_context, for executor SUMMARY.md}
 user_setup: []  # If external services needed
 
 must_haves:
