@@ -41,6 +41,20 @@ A vague PROJECT.md forces every downstream phase to guess. The cost compounds.
 
 </how_to_question>
 
+<highest_leverage>
+
+These three questions unlock the most downstream value. Everything else is nice-to-have context.
+
+1. **"What does done look like?"** — Without observable outcomes, every downstream phase guesses scope. Roadmap can't decompose, plans can't verify, execution can't stop.
+
+2. **"What's the core interaction?"** — The one thing the user does that makes the product valuable. This anchors architecture, prioritization, and what to build first.
+
+3. **"What already exists / what can't change?"** — Constraints and existing code prevent planning in a vacuum. Surfaces brownfield reality, API limitations, time pressure.
+
+If you only get three answers, get these three.
+
+</highest_leverage>
+
 <question_types>
 
 Use these as inspiration, not a checklist. Pick what's relevant to the thread.

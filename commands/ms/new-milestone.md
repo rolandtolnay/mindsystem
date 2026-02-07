@@ -39,85 +39,71 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    - Read MILESTONES.md (what shipped previously)
    - Read STATE.md (pending todos, blockers)
    - Calculate previous milestone version from MILESTONES.md (e.g., if last shipped was v1.0, previous=1.0)
-   - Note: Previous milestone files will be loaded on-demand based on user's choice in step 3
 
-   **Why only the last milestone?** We load DECISIONS.md and AUDIT.md from only the immediately preceding milestone. Older decisions that remain important should already be in PROJECT.md or visible in the codebase. Older untested assumptions that weren't addressed in subsequent milestones are intentionally skipped or no longer relevant. Loading all previous milestones would bloat context for diminishing returns.
+2. **Strategic assessment (internal — do not output this step):**
+   - Load PROJECT.md (vision, audience, USP, problem space)
+   - Load MILESTONES.md (what shipped)
+   - Load STATE.md (pending todos, blockers)
+   - Check for previous milestone artifacts using the version calculated in step 1:
+     - `.planning/milestones/v{VERSION}-DECISIONS.md` (if exists)
+     - `.planning/milestones/v{VERSION}-MILESTONE-AUDIT.md` (if exists)
+     - `.planning/TECH-DEBT.md` (if exists)
+   - Identify outstanding tech debt, unaddressed requirements, high-impact gaps
+   - This is background analysis — synthesize silently, surface through suggestions in step 3
 
-2. **Present what shipped (if MILESTONES.md exists):**
+3. **Present suggested directions:**
 
-   ```bash
-   cat .planning/MILESTONES.md 2>/dev/null
+   Output a brief markdown summary:
+
+   ```
+   ## Suggested Directions
+
+   - **[Direction 1]** — [brief rationale]
+   - **[Direction 2]** — [brief rationale]
+   - **[Direction 3]** — [brief rationale]
    ```
 
-   Format the presentation:
+   Sources for suggestions:
+   - High-impact tech debt from TECH-DEBT.md or MILESTONE-AUDIT.md
+   - Unaddressed requirements from previous milestones
+   - Strategic features inferred from PROJECT.md's problem/audience/USP
 
-   ```
-   ---
+   Evaluate each by impact on user engagement, revenue, or growth.
 
-   ## Previous Milestone
+   If no meaningful artifacts exist (first milestone after v1.0), base suggestions purely on PROJECT.md.
 
-   **Last milestone:** v[X.Y] [Name] (shipped [DATE])
+4. **Freeform opening:**
 
-   **Key accomplishments:**
-   - [From MILESTONES.md accomplishments]
-   - [From MILESTONES.md accomplishments]
+   Ask inline (freeform text, NOT AskUserQuestion):
 
-   **Validated requirements:**
-   - [From PROJECT.md Validated section]
+   "What do you want to build next?"
 
-   **Pending todos (if any):**
-   - [From STATE.md accumulated context]
+   The user can pick from suggestions, combine them, or go a completely different direction.
 
-   ---
-   ```
-
-3. **Decision gate:**
-
-   Use AskUserQuestion:
-   - header: "New Milestone"
-   - question: "How do you want to start?"
-   - options:
-     - "I know what to build" — proceed to goal gathering
-     - "Help me figure it out" — enter discovery mode with previous context
-     - "Show previous decisions first" — view DECISIONS.md and AUDIT.md, then decide
-
-4. **Gather milestone goals:**
-
-   **If "I know what to build":**
-   - Ask directly: "What do you want to build next?"
-   - Use AskUserQuestion to explore features
-   - Probe for priorities, constraints, scope
-
-   **If "Show previous decisions first":**
-   - Using the previous version calculated in step 1 (e.g., "1.0"):
-     - Check for and read `.planning/milestones/v1.0-DECISIONS.md` if exists
-     - Check for and read `.planning/milestones/v1.0-MILESTONE-AUDIT.md` if exists
-   - Present relevant context from these files
-   - Return to decision gate (without this option)
-
-   **If "Help me figure it out" (Discovery Mode):**
-   - Using the previous version calculated in step 1:
-     - Check for and read `.planning/milestones/v{VERSION}-DECISIONS.md` if exists
-     - Check for and read `.planning/milestones/v{VERSION}-MILESTONE-AUDIT.md` if exists
-   - Surface untested assumptions from AUDIT.md (if found):
-     ```
-     📋 Untested from v[previous]:
-     - Error state displays
-     - Empty state handling
-     - [etc. from assumptions section]
-     ```
-   - Follow questioning.md patterns for AskUserQuestion-based discovery:
-     - "What do you want to add, improve, or fix?"
-     - Options: Address untested assumptions, New features, Improvements, Bug fixes, Let me describe
-   - Follow up with probing questions
+5. **Follow threads:**
+   - Based on what the user said, ask follow-up questions using AskUserQuestion
+   - Challenge vagueness, make abstract concrete
+   - Consult `questioning.md` for techniques
+   - Weave in relevant previous context (tech debt, pending todos) as natural follow-ups when relevant, not as a wall of info upfront
    - Continue until clear goals emerge
 
-5. **Determine milestone version:**
+6. **Decision gate:**
+
+   Use AskUserQuestion:
+   - header: "Ready?"
+   - question: "I think I understand what you want to build. Ready to update PROJECT.md?"
+   - options:
+     - "Update PROJECT.md" — Let's move forward
+     - "Keep exploring" — I want to share more / ask me more
+
+   Loop until "Update PROJECT.md" selected.
+
+7. **Determine milestone version:**
    - Parse last version from MILESTONES.md
    - Suggest next version (v1.0 → v1.1, or v2.0 for major)
    - Confirm with user
 
-6. **Update PROJECT.md:**
+8. **Update PROJECT.md:**
 
    Add/update these sections:
 
@@ -136,7 +122,7 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
    Update "Last updated" footer.
 
-7. **Update STATE.md:**
+9. **Update STATE.md:**
 
    ```markdown
    ## Current Position
@@ -147,13 +133,13 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    Last activity: [today] — Milestone v[X.Y] started
    ```
 
-8. **Git commit:**
+10. **Git commit:**
    ```bash
    git add .planning/PROJECT.md .planning/STATE.md
    git commit -m "docs: start milestone v[X.Y] [Name]"
    ```
 
-9. **Calculate next phase for context:**
+11. **Calculate next phase for context:**
 
    ```bash
    LAST_PHASE=$(ls -d .planning/phases/[0-9]*-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+' | head -1)
@@ -165,7 +151,9 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
    echo "Next milestone phases will start at: Phase $NEXT_PHASE"
    ```
 
-10. **Route to next step:**
+12. **Route to next step:**
+
+    Based on the conversation, recommend ONE path. If unfamiliar domains or open technical questions surfaced, recommend `/ms:research-project`. Otherwise recommend `/ms:define-requirements`.
 
     ```
     Milestone v[X.Y] [Name] initialized.
@@ -177,24 +165,18 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
     ## ▶ Next Up
 
-    Choose your path:
+    **[Recommended command name]** — [one-line reason from conversation]
 
-    **Option A: Research first** (new domains/capabilities)
-    Research ecosystem before scoping. Discovers patterns, expected features, architecture approaches.
+    `/ms:[recommended-command]`
 
-    `/ms:research-project`
-
-    **Option B: Define requirements directly** (familiar territory)
-    Skip research, define requirements from what you know.
-
-    `/ms:define-requirements`
-
-    <sub>`/clear` first → fresh context window</sub>
+    `/clear` first — fresh context window
 
     ---
+
+    **Also available:** `/ms:[alternative-command]`
     ```
 
-11. **Update last command**
+13. **Update last command**
     - Update `.planning/STATE.md` Last Command field
     - Format: `Last Command: ms:new-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
 
