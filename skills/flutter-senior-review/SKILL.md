@@ -3,7 +3,7 @@ name: flutter-senior-review
 description: Senior engineering principles for Flutter/Dart code reviews. Apply when reviewing, refactoring, or writing Flutter code to identify structural improvements that make code evolvable, not just working.
 license: MIT
 metadata:
-  author: forgeblast
+  author: Roland Tolnay
   version: "1.0.0"
   date: January 2026
   abstract: Code review framework focused on structural improvements that typical reviews miss. Uses 3 core lenses (State Modeling, Responsibility Boundaries, Abstraction Timing) backed by 12 detailed principles organized into 4 categories. Each principle includes detection signals, smell examples, senior solutions, and Dart-specific patterns.

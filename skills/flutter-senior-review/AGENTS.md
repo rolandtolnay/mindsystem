@@ -1,7 +1,7 @@
 # Flutter Senior Review
 
 **Version 1.0.0**
-Forgeblast
+Roland Tolnay
 January 2026
 
 > This document is optimized for AI agents and LLMs. Principles are organized by category and prioritized by structural impact.

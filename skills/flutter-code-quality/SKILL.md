@@ -3,7 +3,7 @@ name: flutter-code-quality
 description: Flutter/Dart code quality, widget organization, and folder structure guidelines. Use when reviewing, refactoring, or cleaning up Flutter code after implementation.
 license: MIT
 metadata:
-  author: forgeblast
+  author: Roland Tolnay
   version: "1.0.0"
   date: January 2026
   argument-hint: <file-or-pattern>

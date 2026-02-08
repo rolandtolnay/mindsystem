@@ -3,7 +3,7 @@ name: flutter-code-simplification
 description: Flutter/Dart code simplification principles. Use when simplifying, refactoring, or cleaning up Flutter code for clarity and maintainability.
 license: MIT
 metadata:
-  author: forgeblast
+  author: Roland Tolnay
   version: "1.0.0"
   date: January 2026
   argument-hint: <file-or-pattern>
