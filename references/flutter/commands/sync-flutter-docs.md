@@ -33,17 +33,15 @@ for f in docs/*.md docs/patterns/*.md; do
   [ -f "$f" ] && echo "$(md5 -q "$f" 2>/dev/null || md5sum "$f" | cut -d' ' -f1) $f" >> "$CHECKSUMS"
 done
 
-# Discover files via GitHub API
-ROOT_FILES=$(curl -sf "$REPO_API" | jq -r '.[] | select(.type=="file" and (.name | endswith(".md")) and .name != "code_quality.md") | .name')
-PATTERN_FILES=$(curl -sf "$REPO_API/patterns" | jq -r '.[] | select(.type=="file" and (.name | endswith(".md"))) | .name')
-
-# Download root files
-for f in $ROOT_FILES; do
+# Discover and download root files (exclude code_quality.md — fetched from gist instead)
+curl -sf "$REPO_API" | jq -r '.[] | select(.type=="file" and (.name | endswith(".md")) and (.name | test("^code_quality") | not)) | .name' | while IFS= read -r f; do
+  [ -z "$f" ] && continue
   curl -sf "$RAW_BASE/$f" -o "docs/$f"
 done
 
-# Download pattern files
-for f in $PATTERN_FILES; do
+# Discover and download pattern files
+curl -sf "$REPO_API/patterns" | jq -r '.[] | select(.type=="file" and (.name | endswith(".md"))) | .name' | while IFS= read -r f; do
+  [ -z "$f" ] && continue
   curl -sf "$RAW_BASE/patterns/$f" -o "docs/patterns/$f"
 done
 
@@ -111,23 +109,27 @@ SKILLS_RAW="https://raw.githubusercontent.com/rolandtolnay/mindsystem/main/skill
 command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required. Install with: brew install jq"; exit 1; }
 
 NEW=0; UPDATED=0; UNCHANGED=0
+COUNTS=$(mktemp)
+echo "0 0 0" > "$COUNTS"
 
-download_file() {
+dl() {
   local url="$1" dest="$2"
   local old_hash=""
   [ -f "$dest" ] && old_hash=$(md5 -q "$dest" 2>/dev/null || md5sum "$dest" | cut -d' ' -f1)
   curl -sf "$url" -o "$dest"
   local new_hash=$(md5 -q "$dest" 2>/dev/null || md5sum "$dest" | cut -d' ' -f1)
+  read n u uc < "$COUNTS"
   if [ -z "$old_hash" ]; then
     echo "  + $dest (new)"
-    NEW=$((NEW + 1))
+    n=$((n + 1))
   elif [ "$old_hash" != "$new_hash" ]; then
     echo "  ~ $dest (updated)"
-    UPDATED=$((UPDATED + 1))
+    u=$((u + 1))
   else
     echo "  = $dest (unchanged)"
-    UNCHANGED=$((UNCHANGED + 1))
+    uc=$((uc + 1))
   fi
+  echo "$n $u $uc" > "$COUNTS"
 }
 
 # Discover Flutter skills
@@ -135,26 +137,34 @@ FLUTTER_SKILLS=$(curl -sf "$SKILLS_API" | jq -r '.[] | select(.type=="dir" and (
 
 if [ -z "$FLUTTER_SKILLS" ]; then
   echo "No Flutter skills found."
+  rm -f "$COUNTS"
   exit 0
 fi
 
-for skill in $FLUTTER_SKILLS; do
+while IFS= read -r skill; do
+  [ -z "$skill" ] && continue
   CONTENTS=$(curl -sf "$SKILLS_API/$skill")
   mkdir -p ".claude/skills/$skill"
 
   # Download root files
-  for f in $(echo "$CONTENTS" | jq -r '.[] | select(.type=="file") | .name'); do
-    download_file "$SKILLS_RAW/$skill/$f" ".claude/skills/$skill/$f"
+  echo "$CONTENTS" | jq -r '.[] | select(.type=="file") | .name' | while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    dl "$SKILLS_RAW/$skill/$f" ".claude/skills/$skill/$f"
   done
 
   # Download subdirectories (one level deep)
-  for subdir in $(echo "$CONTENTS" | jq -r '.[] | select(.type=="dir") | .name'); do
+  echo "$CONTENTS" | jq -r '.[] | select(.type=="dir") | .name' | while IFS= read -r subdir; do
+    [ -z "$subdir" ] && continue
     mkdir -p ".claude/skills/$skill/$subdir"
-    for f in $(curl -sf "$SKILLS_API/$skill/$subdir" | jq -r '.[] | select(.type=="file") | .name'); do
-      download_file "$SKILLS_RAW/$skill/$subdir/$f" ".claude/skills/$skill/$subdir/$f"
+    curl -sf "$SKILLS_API/$skill/$subdir" | jq -r '.[] | select(.type=="file") | .name' | while IFS= read -r f; do
+      [ -z "$f" ] && continue
+      dl "$SKILLS_RAW/$skill/$subdir/$f" ".claude/skills/$skill/$subdir/$f"
     done
   done
-done
+done <<< "$FLUTTER_SKILLS"
+
+read NEW UPDATED UNCHANGED < "$COUNTS"
+rm -f "$COUNTS"
 
 echo ""
 echo "Skills installed: $NEW new, $UPDATED updated, $UNCHANGED unchanged"
