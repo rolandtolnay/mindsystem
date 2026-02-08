@@ -150,36 +150,41 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
    - Bad: "Executing terrain generation plan"
    - Good: "Procedural terrain generator using Perlin noise — creates height maps, biome zones, and collision meshes. Required before vehicle physics can interact with ground."
 
-2. **Spawn all autonomous agents in wave simultaneously:**
+2. **Spawn executor agents:**
 
-   Use Task tool with multiple parallel calls. Each agent gets prompt from subagent-task-prompt template:
+   Pass paths only — executors read files themselves with their fresh 200k context.
+   This keeps orchestrator context lean (~10-15%).
 
    ```
-   <objective>
-   Execute plan {plan_number} of phase {phase_number}-{phase_name}.
+   Task(
+     subagent_type="ms-executor",
+     prompt="
+       <objective>
+       Execute plan {plan_number} of phase {phase_number}-{phase_name}.
+       Commit each task atomically. Create SUMMARY.md. Update STATE.md.
+       </objective>
 
-   Commit each task atomically. Create SUMMARY.md. Update STATE.md.
-   </objective>
+       <execution_context>
+       @~/.claude/mindsystem/workflows/execute-plan.md
+       @~/.claude/mindsystem/templates/summary.md
+       @~/.claude/mindsystem/references/checkpoints.md
+       @~/.claude/mindsystem/references/tdd.md
+       </execution_context>
 
-   <execution_context>
-   @~/.claude/mindsystem/workflows/execute-plan.md
-   @~/.claude/mindsystem/templates/summary.md
-   @~/.claude/mindsystem/references/checkpoints.md
-   @~/.claude/mindsystem/references/tdd.md
-   </execution_context>
+       <context>
+       Plan: @{plan_path}
+       Project state: @.planning/STATE.md
+       Config: @.planning/config.json (if exists)
+       </context>
 
-   <context>
-   Plan: @{plan_path}
-   Project state: @.planning/STATE.md
-   Config: @.planning/config.json (if exists)
-   </context>
-
-   <success_criteria>
-   - [ ] All tasks executed
-   - [ ] Each task committed individually
-   - [ ] SUMMARY.md created in plan directory
-   - [ ] STATE.md updated with position and decisions
-   </success_criteria>
+       <success_criteria>
+       - [ ] All tasks executed
+       - [ ] Each task committed individually
+       - [ ] SUMMARY.md created in plan directory
+       - [ ] STATE.md updated with position and decisions
+       </success_criteria>
+     "
+   )
    ```
 
 2. **Wait for all agents in wave to complete:**
