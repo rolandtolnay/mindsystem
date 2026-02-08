@@ -233,10 +233,10 @@ class ItemInfiniteList extends HookConsumerWidget {
 | `emptyBuilder` | `WidgetBuilder` | Yes | Empty state UI |
 | `separator` | `Widget?` | No | Separator between items |
 | `onRefresh` | `Future<void> Function()?` | No | Pull-to-refresh callback |
-| `padding` | `EdgeInsets` | No | List padding |
-| `centerEmpty` | `bool` | No | Center empty widget |
-| `centerLoading` | `bool` | No | Center loading widget |
-| `fetchThreshold` | `double` | No | Distance to bottom before fetching (default 200) |
+| `padding` | `EdgeInsets` | No | List padding (default `EdgeInsets.zero`) |
+| `centerEmpty` | `bool` | No | Center empty widget (default `false`) |
+| `centerLoading` | `bool` | No | Center loading widget (default `false`) |
+| `fetchThreshold` | `double` | No | Distance to bottom before fetching (default `200`) |
 
 ## Filter Integration
 
@@ -335,10 +335,11 @@ onRefresh: () async {
 - Accepts `pageSize` and `pageToken`
 - `hasReachedMax = response.length < pageSize`
 - Empty `nextPageToken` → `null`
+- DTO/proto to entity conversion in API layer
 
 ### Provider
 - `@Riverpod(keepAlive: true)`
-- `build()` watches dependencies for auto-refresh
+- `build()` fetches initial page, watches dependencies for auto-refresh
 - `loadMore()` guards: `isLoading`, `hasReachedMax`
 - `.retainPrevious(state, isRefresh: false)` for loading state
 - `AsyncValue.guard()` for error handling
@@ -346,8 +347,15 @@ onRefresh: () async {
 - `ref.read()` (not `watch`) in `loadMore()`
 
 ### Widget
-- Guard `state.value == null` for initial load
-- `useMemoized` for sorting
+- Guard `state.value == null` for initial loading/error
+- Pass `state.isLoading`, `state.hasError`, `state.value?.hasReachedMax` to `InfiniteList`
+- `useMemoized` for expensive transforms (sorting, filtering)
 - Error builder retries via `notifier.loadMore()`
 - Empty builder filter-aware when filters exist
 - `onRefresh` → `ref.invalidate(provider)`
+
+### Filters
+- Filter state extends `Equatable`
+- Filter provider has `clearAll()` method
+- List provider watches filter in `build()` for auto-refresh
+- Empty state shows "clear filters" when filters active

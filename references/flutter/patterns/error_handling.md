@@ -353,3 +353,12 @@ if (error.shouldReportToCrashlytics) {
   }
 }
 ```
+
+## Key Principles
+
+- Unique messages per exception type → debugging from user screenshots without logs
+- `ParsingException` captures context (endpoint, expected type, raw JSON) for remote debugging
+- `ResultError` = frontend bugs (assertions that failed at runtime)
+- `DomainException` = expected business states needing dedicated UI flows
+- Response parsing extensions keep API code lean while handling errors gracefully
+- List parsing continues on individual item failures, logs errors, returns valid items

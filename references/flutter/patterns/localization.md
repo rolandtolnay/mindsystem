@@ -110,12 +110,29 @@ abstract class LocaleKeys {
 
 Key path: `auth.welcome_back` → constant `auth_welcome_back`
 
+Generated `codegen_loader.g.dart` — embeds translations for zero-overhead runtime:
+
+```dart
+class CodegenLoader extends AssetLoader {
+  const CodegenLoader();
+
+  @override
+  Future<Map<String, dynamic>?> load(String path, Locale locale) {
+    return Future.value(mapLocales[locale.languageCode]);
+  }
+
+  static const Map<String, dynamic> _en = { "app_name": "My App", ... };
+  static const Map<String, dynamic> _es = { ... };
+  static const Map<String, Map<String, dynamic>> mapLocales = {"en": _en, "es": _es};
+}
+```
+
 ## App Initialization
 
 ```dart
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting();
+  await initializeDateFormatting(); // Required when using intl for dates
 
   EasyLocalization.logger.enableLevels = [
     LevelMessages.error,
@@ -161,7 +178,7 @@ import 'package:myapp/generated/translations/locale_keys.g.dart';
 
 | Operation | Code |
 |-----------|------|
-| Simple text | `tr(LocaleKeys.common_save)` |
+| Simple text | `tr(LocaleKeys.common_save)` or `LocaleKeys.common_save.tr()` |
 | Positional args | `tr(LocaleKeys.key, args: ['value'])` |
 | Named args | `tr(LocaleKeys.key, namedArgs: {'name': 'value'})` |
 | Pluralization | `plural(LocaleKeys.key, count)` |
