@@ -82,7 +82,7 @@ Options:
 
 ## 2. Assess and Confirm
 
-Read each file. For each, note: filename, line count, file type, expected strategy.
+Read each file. For each, classify by type and identify specific changes.
 
 **File type determines transformation strategy:**
 
@@ -93,24 +93,30 @@ Read each file. For each, note: filename, line count, file type, expected strate
 | Setup/config | Step-by-step with code blocks | Keep code and commands, trim explanatory text |
 | API reference | Tables, parameters, signatures | Keep tables and signatures, trim descriptions |
 
-Present a short assessment table, then confirm before any writes:
+Present a per-file change plan showing what will be removed, kept, and rewritten:
 
 ```
-| File | Lines | Type | Strategy |
-|------|-------|------|----------|
-| file.md | 120 | Rules | Aggressive compression |
+## [filename] (N lines, Type)
 
-Total: N files
+**Remove:**
+- [Section/content being deleted and why]
+
+**Compress:**
+- [Section] — rewrite from prose to terse bullets
+
+**Keep as-is:**
+- [Code blocks, tables, checklists that stay unchanged]
 ```
 
-Use AskUserQuestion:
+Then confirm before any writes. Use AskUserQuestion:
 ```
-Question: "Proceed with optimizing these N file(s)? You can review all changes via git diff afterward."
+Question: "Review the change plan above. Proceed? You can review all changes via git diff afterward."
 Header: "Confirm"
 Options:
 1. "Proceed" - Optimize all files
 2. "Skip some" - Let me exclude specific files
-3. "Cancel" - Don't make changes
+3. "Questions first" - I want to ask about specific sections
+4. "Cancel" - Don't make changes
 ```
 
 ## 3. Transform and Write
