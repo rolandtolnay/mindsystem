@@ -24,7 +24,7 @@ Mindsystem deliberately separates where work happens:
 | Main Context | Subagent Context |
 |--------------|------------------|
 | `/ms:new-project` | ms-executor |
-| `/ms:define-requirements` | ms-verifier |
+| `/ms:create-roadmap` | ms-verifier |
 | `/ms:plan-phase` | ms-researcher |
 | `/ms:discuss-phase` | ms-debugger |
 | `/ms:design-phase` | ms-codebase-mapper |

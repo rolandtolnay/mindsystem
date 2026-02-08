@@ -152,7 +152,6 @@ Replace `<N>` with the phase number you're working on.
 ```
 /ms:new-project
 /ms:research-project        # optional (recommended when domain is new)
-/ms:define-requirements
 /ms:create-roadmap
 /ms:plan-phase 1
 /ms:execute-phase 1
@@ -176,7 +175,6 @@ Replace `<N>` with the phase number you're working on.
 /ms:map-codebase
 /ms:new-project
 /ms:research-project        # optional (use for new domain areas)
-/ms:define-requirements
 /ms:create-roadmap
 /ms:plan-phase 1
 /ms:execute-phase 1
@@ -339,8 +337,7 @@ Full docs live in `/ms:help` (same content as `commands/ms/help.md`).
 | `/ms:new-project`                        | Initialize `.planning/` and capture intent                    |
 | `/ms:map-codebase`                       | Document existing repo's stack, structure, and conventions    |
 | `/ms:research-project`                   | Do domain research and save findings to `.planning/research/` |
-| `/ms:define-requirements`                | Turn intent into checkable v1/v2/out-of-scope requirements    |
-| `/ms:create-roadmap`                     | Convert requirements into phases and state                    |
+| `/ms:create-roadmap`                     | Define requirements and create phases mapped to them          |
 | `/ms:discuss-phase <number>`             | Lock intent and constraints before planning                   |
 | `/ms:design-phase <number>`              | Generate UI/UX spec for UI-heavy work                         |
 | `/ms:review-design [scope]`              | Audit and improve existing UI quality                         |

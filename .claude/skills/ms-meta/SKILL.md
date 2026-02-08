@@ -64,7 +64,6 @@ Mindsystem deliberately separates where work happens:
 
 **Main context (with user):**
 - Project discovery (`/ms:new-project`)
-- Requirements definition (`/ms:define-requirements`)
 - Phase discussion (`/ms:discuss-phase`)
 - Phase planning (`/ms:plan-phase`)
 - Design decisions (`/ms:design-phase`)
@@ -193,8 +192,7 @@ Mindsystem creates `.planning/` directory in user projects:
 <core_workflow>
 1. `/ms:new-project` → Questions → PROJECT.md
 2. `/ms:research-project` (optional) → .planning/research/
-3. `/ms:define-requirements` → REQUIREMENTS.md
-4. `/ms:create-roadmap` → ROADMAP.md + STATE.md
+3. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
 5. `/ms:discuss-phase N` (optional) → Gather context before planning
 6. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
 7. `/ms:plan-phase N` → Creates PLAN.md files (main context, with user)
@@ -329,7 +327,7 @@ All in `agents/`:
 | ms-debugger | Systematic debugging with persistent state | debug |
 | ms-researcher | Domain research with citations | research-project, research-phase |
 | ms-research-synthesizer | Combine parallel research outputs | research-project |
-| ms-roadmapper | Create ROADMAP.md from requirements | create-roadmap |
+| ms-roadmapper | Derive requirements and create ROADMAP.md | create-roadmap |
 | ms-designer | Create UI/UX design specifications | design-phase |
 | ms-codebase-mapper | Analyze existing codebase structure | map-codebase |
 | ms-code-simplifier | Post-execution code review (generic) | execute-phase |
@@ -356,7 +354,7 @@ Key workflows in `mindsystem/workflows/`:
 | verify-phase.md | Goal-backward verification protocol |
 | verify-work.md | UAT verification with inline fixing |
 | discovery-phase.md | Gather project context |
-| define-requirements.md | Scope requirements with checkboxes |
+| define-requirements.md | Requirements quality criteria (reference material) |
 | research-project.md | Domain research spawning |
 | mockup-generation.md | Generate HTML mockup variants for design direction exploration |
 | map-codebase.md | Brownfield codebase analysis |

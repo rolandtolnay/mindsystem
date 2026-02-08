@@ -646,7 +646,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
    ✅ REQUIREMENTS.md deleted (fresh one needed for next milestone)
    ```
 
-**Important:** The next milestone workflow starts with `/ms:define-requirements` to create a fresh REQUIREMENTS.md. PROJECT.md's Validated section carries the cumulative record across milestones.
+**Important:** The next milestone workflow starts with `/ms:create-roadmap` to create a fresh REQUIREMENTS.md. PROJECT.md's Validated section carries the cumulative record across milestones.
 
 </step>
 
@@ -837,8 +837,7 @@ Tag: v[X.Y]
 **Next milestone flow:**
 1. `/ms:new-milestone` — discover what to build, update PROJECT.md with goals
 2. `/ms:research-project` — (optional) research ecosystem
-3. `/ms:define-requirements` — scope what to build
-4. `/ms:create-roadmap` — plan how to build it
+3. `/ms:create-roadmap` — define requirements and plan how to build it
 
 ---
 ```

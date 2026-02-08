@@ -165,5 +165,5 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 - **Archive before deleting:** Always create archive files before updating/deleting originals
 - **One-line summary:** Collapsed milestone in ROADMAP.md should be single line with link
 - **Context efficiency:** Archive keeps ROADMAP.md and REQUIREMENTS.md constant size per milestone
-- **Fresh requirements:** Next milestone starts with `/ms:define-requirements`, not reusing old file
+- **Fresh requirements:** Next milestone starts with `/ms:create-roadmap`, not reusing old file
   </critical_rules>

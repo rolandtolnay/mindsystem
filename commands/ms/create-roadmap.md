@@ -1,6 +1,6 @@
 ---
 name: ms:create-roadmap
-description: Create roadmap with phases for the project
+description: Define requirements and create roadmap with phases
 allowed-tools:
   - Read
   - Write
@@ -11,17 +11,19 @@ allowed-tools:
 ---
 
 <objective>
-Create project roadmap with phase breakdown.
+Define project requirements and create roadmap with phase breakdown.
 
-Roadmaps define what work happens in what order. Phases map to requirements.
+Derives REQUIREMENTS.md from MILESTONE-CONTEXT.md (or through lightweight questioning for first milestones), then maps requirements to phases.
 
-Run after `/ms:define-requirements`.
+Run after `/ms:new-milestone` or `/ms:new-project` + optional `/ms:research-project`.
 
-**Improvement:** Spawns ms-roadmapper agent for heavy lifting, presents roadmap for approval before committing.
+**How it works:** Spawns ms-roadmapper agent which derives requirements AND creates roadmap in one pass, then presents combined results for approval.
 </objective>
 
 <execution_context>
 @~/.claude/mindsystem/references/principles.md
+@~/.claude/mindsystem/workflows/define-requirements.md
+@~/.claude/mindsystem/templates/requirements.md
 @~/.claude/mindsystem/templates/roadmap.md
 @~/.claude/mindsystem/templates/state.md
 @~/.claude/mindsystem/references/goal-backward.md
@@ -30,7 +32,8 @@ Run after `/ms:define-requirements`.
 <context>
 @.planning/PROJECT.md
 @.planning/config.json
-@.planning/REQUIREMENTS.md
+@.planning/MILESTONE-CONTEXT.md (if exists)
+@.planning/research/FEATURES.md (if exists)
 @.planning/research/SUMMARY.md (if exists)
 </context>
 
@@ -41,30 +44,56 @@ Run after `/ms:define-requirements`.
 # Verify project exists
 [ -f .planning/PROJECT.md ] || { echo "ERROR: No PROJECT.md found. Run /ms:new-project first."; exit 1; }
 
-# Verify requirements exist
-[ -f .planning/REQUIREMENTS.md ] || { echo "ERROR: No REQUIREMENTS.md found. Run /ms:define-requirements first."; exit 1; }
+# Detect available context
+[ -f .planning/MILESTONE-CONTEXT.md ] && echo "HAS_MILESTONE_CONTEXT" || echo "NO_MILESTONE_CONTEXT"
+[ -d .planning/research ] && echo "HAS_RESEARCH" || echo "NO_RESEARCH"
+[ -f .planning/REQUIREMENTS.md ] && echo "REQUIREMENTS_EXISTS" || echo "NO_REQUIREMENTS"
+[ -f .planning/ROADMAP.md ] && echo "ROADMAP_EXISTS" || echo "NO_ROADMAP"
 ```
 </step>
 
 <step name="check_existing">
-Check if roadmap already exists:
+Check if requirements or roadmap already exist:
 
-```bash
-[ -f .planning/ROADMAP.md ] && echo "ROADMAP_EXISTS" || echo "NO_ROADMAP"
-```
-
-**If ROADMAP_EXISTS:**
+**If REQUIREMENTS_EXISTS or ROADMAP_EXISTS:**
 Use AskUserQuestion:
-- header: "Roadmap exists"
-- question: "A roadmap already exists. What would you like to do?"
+- header: "Files exist"
+- question: "Existing planning files found. What would you like to do?"
 - options:
-  - "View existing" — Show current roadmap
-  - "Replace" — Create new roadmap (will overwrite)
-  - "Cancel" — Keep existing roadmap
+  - "View existing" — Show current files
+  - "Replace" — Define requirements and create roadmap fresh (will overwrite)
+  - "Cancel" — Keep existing files
 
-If "View existing": `cat .planning/ROADMAP.md` and exit
+If "View existing": Read and display existing files, then exit
 If "Cancel": Exit
 If "Replace": Continue
+</step>
+
+<step name="gather_context">
+**Thin path — only when no MILESTONE-CONTEXT.md and no research exist.**
+
+**If MILESTONE-CONTEXT.md exists:** Skip (context ready for agent).
+
+**If no MILESTONE-CONTEXT.md but HAS_RESEARCH:** Skip (research provides feature context).
+
+**If neither exists (first milestone, no research):**
+
+Lightweight questioning in main context to gather enough feature context for the agent:
+
+1. Read PROJECT.md for core value and stated requirements/constraints
+2. Ask inline: "What are the main things users need to do in v1?"
+3. For each capability mentioned, probe for specifics with AskUserQuestion
+4. Ask about scope boundaries: "Anything you explicitly want to exclude?"
+5. Ask about priorities: "What's most important to get right first?"
+
+Capture responses as gathered context to pass to the agent.
+
+Use AskUserQuestion before spawning:
+- header: "Ready?"
+- question: "Ready to generate requirements and roadmap from this context?"
+- options:
+  - "Generate" — Spawn agent with gathered context
+  - "Add more" — I want to share more details
 </step>
 
 <step name="spawn_roadmapper">
@@ -96,12 +125,14 @@ Task(
 **Project:**
 @.planning/PROJECT.md
 
-**Requirements:**
-@.planning/REQUIREMENTS.md
+**Milestone context:**
+{If MILESTONE-CONTEXT.md exists: @.planning/MILESTONE-CONTEXT.md}
+{If no MILESTONE-CONTEXT.md: gathered context from questioning step}
 
 **Starting phase number:** $START_PHASE
 
 **Research (if exists):**
+@.planning/research/FEATURES.md
 @.planning/research/SUMMARY.md
 
 **Config:**
@@ -110,19 +141,19 @@ Task(
 </planning_context>
 
 <instructions>
-Create roadmap:
-1. Derive phases from requirements (don't impose structure)
-2. **Start phase numbering at $START_PHASE** (not 1, unless this is the first milestone)
-3. Map every v1 requirement to exactly one phase
-4. Derive 2-5 success criteria per phase (observable user behaviors)
-5. Validate 100% coverage
-6. Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)
-7. Return ROADMAP CREATED with summary
+1. Derive REQUIREMENTS.md from milestone context (apply requirements_derivation process)
+2. Derive phases from those requirements (don't impose structure)
+3. **Start phase numbering at $START_PHASE** (not 1, unless this is the first milestone)
+4. Map every v1 requirement to exactly one phase
+5. Derive 2-5 success criteria per phase (observable user behaviors)
+6. Validate 100% coverage
+7. Write files immediately (REQUIREMENTS.md, ROADMAP.md, STATE.md)
+8. Return ROADMAP CREATED with combined requirements + roadmap summary
 
 Write files first, then return. This ensures artifacts persist even if context is lost.
 </instructions>
 """,
-  description="Create roadmap"
+  description="Derive requirements and create roadmap"
 )
 ```
 </step>
@@ -135,14 +166,31 @@ Write files first, then return. This ensures artifacts persist even if context i
 
 **If `## ROADMAP CREATED`:**
 
-Read the created ROADMAP.md and present it inline:
+Read the created REQUIREMENTS.md and ROADMAP.md and present both inline:
 
 ```
 ---
 
-## Proposed Roadmap
+## Requirements & Roadmap
 
-**[N] phases** | **[X] requirements mapped** | All v1 requirements covered ✓
+### v1 Requirements
+
+**{X} requirements** across {N} categories
+
+{For each category:}
+**{Category}**
+- [ ] **{REQ-ID}**: {description}
+- [ ] **{REQ-ID}**: {description}
+
+{If v2 requirements exist:}
+**v2 (deferred):** {count} requirements
+**Out of scope:** {count} exclusions
+
+---
+
+### Roadmap
+
+**{M} phases** | All v1 requirements covered ✓
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
@@ -153,15 +201,6 @@ Read the created ROADMAP.md and present it inline:
 ### Phase Details
 
 **Phase 1: [Name]**
-Goal: [goal]
-Requirements: [REQ-IDs]
-Success criteria:
-1. [criterion]
-2. [criterion]
-Pre-work: Research [Likely/Unlikely] | Discuss [Likely/Unlikely] | Design [Likely/Unlikely]
-{If any Likely: topics/focus on next line}
-
-**Phase 2: [Name]**
 Goal: [goal]
 Requirements: [REQ-IDs]
 Success criteria:
@@ -181,13 +220,39 @@ Pre-work: Research [Likely/Unlikely] | Discuss [Likely/Unlikely] | Design [Likel
 
 Use AskUserQuestion:
 - header: "Roadmap"
-- question: "Does this roadmap structure work for you?"
+- question: "Do these requirements and roadmap work for you?"
 - options:
   - "Approve" — Commit and continue
-  - "Adjust phases" — Tell me what to change
-  - "Review full file" — Show raw ROADMAP.md
+  - "Adjust requirements" — Change what's in/out of scope
+  - "Adjust phases" — Change phase structure
+  - "Review full files" — Show raw REQUIREMENTS.md and ROADMAP.md
 
 **If "Approve":** Continue to commit step.
+
+**If "Adjust requirements":**
+- Get user's adjustment notes (ask inline what they want to change)
+- Re-spawn roadmapper with revision context:
+  ```
+  Task(
+    subagent_type="ms-roadmapper",
+    prompt="""
+<revision>
+User feedback on requirements:
+[user's notes]
+
+Current REQUIREMENTS.md: @.planning/REQUIREMENTS.md
+Current ROADMAP.md: @.planning/ROADMAP.md
+
+Update requirements based on feedback, then re-derive phases if needed.
+Edit files in place.
+Return ROADMAP REVISED with changes made.
+</revision>
+""",
+    description="Revise requirements and roadmap"
+  )
+  ```
+- Present revised output
+- Loop until user approves
 
 **If "Adjust phases":**
 - Get user's adjustment notes (ask inline what they want to change)
@@ -197,9 +262,10 @@ Use AskUserQuestion:
     subagent_type="ms-roadmapper",
     prompt="""
 <revision>
-User feedback on roadmap:
+User feedback on roadmap phases:
 [user's notes]
 
+Current REQUIREMENTS.md: @.planning/REQUIREMENTS.md
 Current ROADMAP.md: @.planning/ROADMAP.md
 
 Update the roadmap based on feedback. Edit files in place.
@@ -212,16 +278,19 @@ Return ROADMAP REVISED with changes made.
 - Present revised roadmap
 - Loop until user approves
 
-**If "Review full file":** Display raw `cat .planning/ROADMAP.md`, then re-ask approval.
+**If "Review full files":** Display raw REQUIREMENTS.md and ROADMAP.md, then re-ask approval.
 </step>
 
 <step name="commit">
 After user approval:
 
 ```bash
-git add .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
+git add .planning/REQUIREMENTS.md .planning/ROADMAP.md .planning/STATE.md
 git commit -m "$(cat <<'EOF'
-docs: create roadmap ([N] phases)
+docs: define requirements and create roadmap
+
+[X] v1 requirements across [N] categories.
+[M] phases mapped to requirements.
 
 Phases:
 1. [phase-name]: [requirements covered]
@@ -236,11 +305,12 @@ EOF
 
 <step name="done">
 ```
-Roadmap created:
+Requirements and roadmap created:
 
+- Requirements: .planning/REQUIREMENTS.md
 - Roadmap: .planning/ROADMAP.md
 - State: .planning/STATE.md
-- [N] phases defined
+- [X] v1 requirements, [M] phases defined
 
 ---
 
@@ -273,12 +343,12 @@ Update `.planning/STATE.md` Last Command field:
 
 <success_criteria>
 - [ ] PROJECT.md validated
-- [ ] REQUIREMENTS.md validated
+- [ ] Context gathered (from MILESTONE-CONTEXT.md, research, or questioning)
 - [ ] ms-roadmapper spawned with context
+- [ ] REQUIREMENTS.md created with REQ-IDs and scope classification
 - [ ] All v1 requirements mapped to phases (no orphans)
 - [ ] Success criteria derived for each phase (2-5 observable behaviors)
-- [ ] Roadmap presented to user for approval
+- [ ] Requirements and roadmap presented to user for approval
 - [ ] User feedback incorporated (if any)
-- [ ] ROADMAP.md, STATE.md committed after approval
-- [ ] REQUIREMENTS.md traceability section updated
+- [ ] REQUIREMENTS.md, ROADMAP.md, STATE.md committed after approval
 </success_criteria>

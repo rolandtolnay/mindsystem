@@ -150,7 +150,7 @@ IMPORTANT for subsequent milestones:
 </project_context>
 
 <downstream_consumer>
-Your FEATURES.md feeds into /ms:define-requirements. Categorize clearly:
+Your FEATURES.md feeds into /ms:create-roadmap. Categorize clearly:
 - Table stakes (must have or users leave)
 - Differentiators (competitive advantage)
 - Anti-features (things to deliberately NOT build)
@@ -336,7 +336,7 @@ Key findings:
 
 ---
 ## > Next Up
-**Define requirements** - `/ms:define-requirements`
+**Define requirements and create roadmap** - `/ms:create-roadmap`
 <sub>`/clear` first</sub>
 ---
 ```

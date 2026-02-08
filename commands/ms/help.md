@@ -31,16 +31,15 @@ Output ONLY the reference content below. Do NOT add:
 
 1. `/ms:new-project` - Initialize project with brief
 2. `/ms:research-project` - (optional) Research domain ecosystem
-3. `/ms:define-requirements` - Scope v1/v2/out of scope
-4. `/ms:create-roadmap` - Create roadmap and phases
-5. `/ms:plan-phase 1` - Create detailed plan for first phase
-6. `/ms:execute-phase 1` - Execute with parallel agents
+3. `/ms:create-roadmap` - Define requirements and create roadmap
+4. `/ms:plan-phase 1` - Create detailed plan for first phase
+5. `/ms:execute-phase 1` - Execute with parallel agents
 
 ### Brownfield (existing codebase)
 
 1. `/ms:map-codebase` - Analyze existing code first
 2. `/ms:new-project` - Questions focus on what you’re adding/changing
-3. Continue with steps 2-6 above (codebase docs load automatically)
+3. Continue with steps 2-5 above (codebase docs load automatically)
 
 ## Staying Updated
 
@@ -59,7 +58,7 @@ npx mindsystem-cc@latest
 ## Core Workflow
 
 ```
-Initialize → (Optional Research) → Requirements → Roadmap → Plan → Execute → Verify → Milestone
+Initialize → (Optional Research) → Roadmap → Plan → Execute → Verify → Milestone
 ```
 
 Common deviations:
@@ -93,20 +92,12 @@ Research domain ecosystem before creating roadmap.
 
 Usage: `/ms:research-project`
 
-**`/ms:define-requirements`**
-Define what "done" looks like with checkable requirements.
-
-- Use when: you’re ready to lock v1 scope (and explicitly defer v2/out-of-scope).
-- Scopes features as v1, v2, or out of scope
-- Works with or without prior research
-- Creates `.planning/REQUIREMENTS.md` with traceability
-
-Usage: `/ms:define-requirements`
-
 **`/ms:create-roadmap`**
-Create roadmap and state tracking for initialized project.
+Define requirements and create roadmap with phases.
 
-- Use when: requirements are defined and you want phases mapped to them.
+- Use when: project is initialized and you want to scope requirements and map them to phases.
+- Derives REQUIREMENTS.md from MILESTONE-CONTEXT.md (or through questioning)
+- Creates `.planning/REQUIREMENTS.md` (scoped requirements)
 - Creates `.planning/ROADMAP.md` (phase breakdown)
 - Creates `.planning/STATE.md` (project memory)
 - Creates `.planning/phases/` directories
@@ -449,8 +440,7 @@ Usage: `/ms:release-notes`
 ```
 /ms:new-project                 # Extract your idea through questions
 /ms:research-project            # (recommended) Research domain ecosystem
-/ms:define-requirements         # Scope v1/v2/out of scope
-/ms:create-roadmap              # Create phases mapped to requirements
+/ms:create-roadmap              # Define requirements and create phases
 /ms:plan-phase 1                # Create detailed plan
 /ms:execute-phase 1             # Execute with parallel agents
 ```
@@ -461,8 +451,7 @@ Usage: `/ms:release-notes`
 /ms:map-codebase                # Step 1: Analyze existing code
 /ms:new-project                 # Step 2: Questions focus on what you're adding/changing
 /ms:research-project            # (optional) Research new domain areas
-/ms:define-requirements         # Scope what's changing
-/ms:create-roadmap              # Create roadmap
+/ms:create-roadmap              # Define requirements and create roadmap
 /ms:plan-phase 1                # Codebase docs load automatically
 /ms:execute-phase 1             # Claude knows your patterns & conventions
 ```
@@ -509,7 +498,7 @@ Common options:
 - Add work later: `/ms:add-phase "…"`
 - Insert urgent work before the next phase: `/ms:insert-phase <after> "…"`
 - Cut future work: `/ms:remove-phase <phase>`
-- Re-scope v1/v2/out-of-scope: `/ms:define-requirements` (choose Replace) → `/ms:create-roadmap` (choose Replace)
+- Re-scope v1/v2/out-of-scope: `/ms:create-roadmap` (choose Replace)
 
 **Implementing a new feature after shipping (new milestone):**
 

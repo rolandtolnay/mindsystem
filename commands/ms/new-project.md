@@ -305,10 +305,10 @@ Research ecosystem → define requirements → create roadmap. Discovers standar
 
 `/ms:research-project`
 
-**Option B: Define requirements directly** (familiar domains)
-Skip research, define requirements from what you know, then create roadmap.
+**Option B: Define requirements and roadmap directly** (familiar domains)
+Skip research, define requirements and create roadmap from what you know.
 
-`/ms:define-requirements`
+`/ms:create-roadmap`
 
 <sub>`/clear` first → fresh context window</sub>
 

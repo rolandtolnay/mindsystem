@@ -13,7 +13,6 @@ Mindsystem deliberately separates collaborative work from autonomous execution:
 | Activity | Command/Workflow |
 |----------|-----------------|
 | Project discovery | `/ms:new-project` |
-| Requirements definition | `/ms:define-requirements` |
 | Phase discussion | `/ms:discuss-phase` |
 | Phase planning | `/ms:plan-phase` |
 | Design decisions | `/ms:design-phase` |
@@ -57,7 +56,6 @@ mindsystem/                              # Development repository
 │
 ├── commands/ms/                 # Slash commands
 │   ├── new-project.md               # /ms:new-project
-│   ├── define-requirements.md       # /ms:define-requirements
 │   ├── create-roadmap.md            # /ms:create-roadmap
 │   ├── plan-phase.md                # /ms:plan-phase
 │   ├── execute-phase.md             # /ms:execute-phase
@@ -74,7 +72,7 @@ mindsystem/                              # Development repository
 │   │   ├── execute-plan.md             # Single plan execution
 │   │   ├── plan-phase.md               # Creates plans from roadmap
 │   │   ├── discovery-phase.md          # Gathers project context
-│   │   ├── define-requirements.md      # Requirements workflow
+│   │   ├── define-requirements.md      # Requirements quality criteria (reference)
 │   │   ├── research-project.md         # Domain research
 │   │   ├── research-phase.md           # Phase-specific research
 │   │   ├── verify-phase.md             # Verification protocol
@@ -137,7 +135,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 
 | Category | Commands |
 |----------|----------|
-| Setup | `new-project`, `research-project`, `define-requirements`, `create-roadmap`, `map-codebase` |
+| Setup | `new-project`, `research-project`, `create-roadmap`, `map-codebase` |
 | Planning | `discuss-phase`, `design-phase`, `plan-phase`, `check-phase` |
 | Execution | `execute-phase`, `adhoc` |
 | Verification | `verify-work`, `review-design` |
@@ -158,7 +156,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | `execute-plan.md` | Subagent (ms-executor) | SUMMARY.md, commits |
 | `plan-phase.md` | Main | PLAN.md files |
 | `discovery-phase.md` | Main | PROJECT.md |
-| `define-requirements.md` | Main | REQUIREMENTS.md |
+| `define-requirements.md` | Reference | Quality criteria for requirements |
 | `research-project.md` | Main (spawns) | .planning/research/ via 4× ms-researcher |
 | `map-codebase.md` | Main (spawns) | .planning/codebase/ via 4× ms-codebase-mapper |
 | `verify-work.md` | Main | UAT results, spawns ms-verify-fixer |
@@ -172,7 +170,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | Template | Creates | When |
 |----------|---------|------|
 | `project.md` | PROJECT.md | After discovery |
-| `requirements.md` | REQUIREMENTS.md | After define-requirements |
+| `requirements.md` | REQUIREMENTS.md | After create-roadmap (derived by ms-roadmapper) |
 | `roadmap.md` | ROADMAP.md | After create-roadmap |
 | `state.md` | STATE.md | With roadmap, updated constantly |
 | `summary.md` | *-SUMMARY.md | After each plan execution |
@@ -205,7 +203,7 @@ color: yellow  # Terminal output color
 | `ms-codebase-mapper` | map-codebase | Analyze existing code |
 | `ms-code-simplifier` | execute-phase, audit-milestone | Post-execution code review (generic) |
 | `ms-flutter-simplifier` | execute-phase, audit-milestone | Post-execution code review (Flutter) |
-| `ms-roadmapper` | create-roadmap | Generate roadmap from requirements |
+| `ms-roadmapper` | create-roadmap | Derive requirements and generate roadmap |
 </layer_purposes>
 
 <data_flow>
@@ -224,17 +222,11 @@ color: yellow  # Terminal output color
     ↓
   Creates: .planning/research/{STACK,FEATURES,ARCHITECTURE,PITFALLS,SUMMARY}.md
     ↓
-/ms:define-requirements (main context)
-    ↓
-  define-requirements.md workflow
-    ↓
-  Creates: .planning/REQUIREMENTS.md
-    ↓
 /ms:create-roadmap (main context, spawns agent)
     ↓
   Spawns: ms-roadmapper
     ↓
-  Creates: .planning/ROADMAP.md, .planning/STATE.md
+  Creates: .planning/REQUIREMENTS.md, .planning/ROADMAP.md, .planning/STATE.md
     ↓
 /ms:plan-phase N (main context — collaboration)
     ↓
