@@ -1,12 +1,10 @@
-# App Search Provider Guide
+# Entity Search
 
-Client-side filtering for lists and picker sheets using `AppSearch` provider.
+Client-side filtering using `AppSearch` provider with `Searchable` interface.
 
-## Quick Start
+## Make Entity Searchable
 
-### 1. Make Your Entity Searchable
-
-Implement the `Searchable` interface with a `queryMatch` method:
+Implement `Searchable` with `queryMatch` returning relevance score (0 = no match, higher = shown first):
 
 ```dart
 class CustomerEntity extends Searchable {
@@ -15,30 +13,38 @@ class CustomerEntity extends Searchable {
 
   @override
   int queryMatch(String query) {
-    if (query.isEmpty) return 0;  // Return 0 when no query
+    if (query.isEmpty) return 0;
 
     final q = query.toLowerCase();
     var result = 0;
-    
-    // Higher score = better match (shown first)
+
     if (name.toLowerCase().startsWith(q)) result = max(result, 4);
     if (email?.toLowerCase().startsWith(q) ?? false) result = max(result, 3);
     if (name.toLowerCase().contains(q)) result = max(result, 1);
-    
-    return result;  // 0 = no match (filtered out)
+
+    return result;
   }
 }
 ```
 
-### 2. Use in Widget
+## Match Scores
+
+| Score | Meaning |
+|-------|---------|
+| 0 | No match (filtered out) |
+| 1 | Weak (contains query) |
+| 2-3 | Medium (field starts with query) |
+| 4+ | Strong (primary field match) |
+
+Use `max(result, score)` to accumulate best match across fields.
+
+## Widget Usage
 
 ```dart
 class MyListWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = [...];  // Your list of Searchable items
-    
-    // Create provider instance with your items
+    final items = [...];
     final searchProvider = appSearchProvider(items);
     final filtered = ref.watch(searchProvider).items.cast<MyEntity>();
 
@@ -58,30 +64,14 @@ class MyListWidget extends HookConsumerWidget {
 }
 ```
 
-## Match Score System
-
-Return values indicate relevance (higher = shown first):
-
-| Score | Meaning | Example |
-|-------|---------|---------|
-| 0 | No match | Filtered out |
-| 1 | Weak match | Contains query |
-| 2-3 | Medium match | Prefix starts with query |
-| 4+ | Strong match | Exact match or primary field |
-
-**Tip:** Use `max(result, score)` to accumulate the best match across multiple fields.
-
-## Common Patterns
+## Patterns
 
 ### Bottom Sheet Picker
-
-For picker sheets where search is always active:
 
 ```dart
 final searchProvider = appSearchProvider(countryList);
 final filtered = ref.watch(searchProvider).items.cast<PhoneCountry>();
 
-// Input triggers immediate filtering
 ShadInput(
   autofocus: true,
   onChanged: (input) {
@@ -92,8 +82,6 @@ ShadInput(
 
 ### Searchable List with Toggle
 
-For lists where search is optional:
-
 ```dart
 final searchProvider = appSearchProvider(customers);
 final filtered = ref.watch(searchProvider).items.cast<CustomerEntity>();
@@ -101,7 +89,6 @@ final filtered = ref.watch(searchProvider).items.cast<CustomerEntity>();
 final searchController = useTextEditingController();
 final searching = useState(false);
 
-// Sync controller with provider
 useAsyncEffectDisposing(() async {
   void updateQuery() {
     ref.read(searchProvider.notifier).filterInput(searchController.text);
@@ -110,7 +97,6 @@ useAsyncEffectDisposing(() async {
   return () => searchController.removeListener(updateQuery);
 });
 
-// Show filtered or full list based on search state
 InfiniteList(
   itemCount: searching.value ? filtered.length : customers.length,
   itemBuilder: (_, index) {
@@ -120,13 +106,11 @@ InfiniteList(
 )
 ```
 
-## Implementation Checklist
+## Checklist
 
-- [ ] Entity `extends Searchable` or `implements Searchable`
-- [ ] `queryMatch` returns 0 for empty query (shows all items)
-- [ ] `queryMatch` returns 0 for non-matches (filters out)
-- [ ] `queryMatch` returns higher values for better matches
-- [ ] Query is lowercased and trimmed before comparison
-- [ ] Use `ref.watch(searchProvider)` for reactive updates
-- [ ] Use `ref.read(searchProvider.notifier).filterInput()` to update filter
-
+- Entity implements `Searchable`
+- `queryMatch` returns 0 for empty query and non-matches
+- Higher scores for better matches
+- Query lowercased before comparison
+- `ref.watch(searchProvider)` for reactive updates
+- `ref.read(searchProvider.notifier).filterInput()` to update filter

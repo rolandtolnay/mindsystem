@@ -1,10 +1,8 @@
-# Flutter Error Handling Architecture Reference
+# Error Handling
 
-A structured approach to error handling in Flutter apps using Dio.
+## Core Principle
 
-## Core Principle: Unique Messages for Debugging
-
-Every exception type must have **distinct localized title and message**. When users report issues via screenshots, unique error messages allow immediate identification of the error type and code path without requiring logs or reproduction steps.
+Every exception type has **distinct localized title and message** — user screenshots identify the error type and code path without logs.
 
 ## Exception Hierarchy
 
@@ -26,39 +24,31 @@ Exception
     └── [Feature]Exception
 ```
 
-## Exception Types Overview
-
-| Exception | When | Crashlytics | Example |
-|-----------|------|-------------|---------|
-| `ApiException` | Server error response | ✅ Report | 500 error, 4xx errors |
-| `NoInternetException` | No connectivity | ❌ Expected | SocketException |
-| `NetworkException` | Timeouts, gateway | ❌ Expected | 504 timeout |
-| `ParsingException` | Contract mismatch | ✅ Report | Null response, wrong JSON structure |
-| `ResultError` | Frontend bug | ✅ Report | Invalid state that shouldn't occur |
-| `DomainException` | Expected business state | ❌ Expected | No active booking |
+| Exception | When | Crashlytics |
+|-----------|------|-------------|
+| `ApiException` | Server error response (4xx/5xx) | Report |
+| `NoInternetException` | No connectivity (SocketException) | Skip |
+| `NetworkException` | Timeouts, bad gateway | Skip |
+| `ParsingException` | Null response, wrong JSON structure | Report |
+| `ResultError` | Invalid frontend state | Report |
+| `DomainException` | Expected business state | Skip |
 
 ## Base Interfaces
 
 ```dart
-/// Interface for exceptions that can be displayed in UI.
-/// Implement this to provide user-friendly error messages.
 abstract class LocalizedException implements Exception {
-  /// Optional title for the error. Return null for single-line errors (e.g., toasts).
   String? get localizedTitle;
   String get localizedMessage;
 }
 
-/// Marker interface for expected errors that should NOT be reported to Crashlytics.
-/// Use for known error states (no internet, domain validation failures).
 class ExpectedException implements Exception {}
 ```
 
-## Infrastructure Exceptions (Network Layer)
+## Network Exceptions
 
-These wrap Dio errors and are created by the API error interceptor:
+Wrap Dio errors, created by `ApiErrorInterceptor`:
 
 ```dart
-/// Base class for network exceptions. Wraps DioException for cleaner inheritance.
 abstract class AppDioException extends DioException {
   AppDioException(DioException? exception)
       : super(
@@ -70,9 +60,8 @@ abstract class AppDioException extends DioException {
         );
 }
 
-/// Server returned an error response (4xx/5xx). Reports to Crashlytics.
 class ApiException extends AppDioException implements LocalizedException {
-  ApiException({this.apiResponse, this.dioResponse, DioException? exception}) 
+  ApiException({this.apiResponse, this.dioResponse, DioException? exception})
       : super(exception);
 
   final ApiErrorResponse? apiResponse;
@@ -80,43 +69,36 @@ class ApiException extends AppDioException implements LocalizedException {
 
   @override
   String get localizedTitle => tr(LocaleKeys.common_errors_server_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.common_errors_server_subtitle);
 }
 
-/// No network connectivity. Expected error - not reported to Crashlytics.
-class NoInternetException extends AppDioException 
+class NoInternetException extends AppDioException
     implements LocalizedException, ExpectedException {
   NoInternetException({DioException? exception}) : super(exception);
 
   @override
   String get localizedTitle => tr(LocaleKeys.common_errors_no_internet_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.common_errors_no_internet_description);
 }
 
-/// Network issues (timeouts, bad gateway). Expected error - not reported to Crashlytics.
-class NetworkException extends AppDioException 
+class NetworkException extends AppDioException
     implements LocalizedException, ExpectedException {
   NetworkException({DioException? exception}) : super(exception);
 
   @override
   String get localizedTitle => tr(LocaleKeys.common_errors_network_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.common_errors_network_subtitle);
 }
 ```
 
-## Parsing Exception (Contract Mismatch)
+## ParsingException
 
-Thrown when JSON parsing fails due to backend/frontend contract mismatch. **Always reported to Crashlytics** for investigation.
+Thrown on JSON contract mismatch. Captures context for Crashlytics debugging.
 
 ```dart
-/// Exception thrown when JSON parsing fails.
-/// Captures context for remote debugging via Crashlytics.
 class ParsingException implements LocalizedException {
   const ParsingException({
     required this.message,
@@ -127,17 +109,16 @@ class ParsingException implements LocalizedException {
   });
 
   final String message;
-  final String? endpoint;       // API endpoint that returned the response
-  final String? expectedType;   // Expected DTO/Entity type
-  final dynamic rawJson;        // Raw JSON that failed to parse
-  final Object? innerError;     // Underlying FormatException/TypeError
+  final String? endpoint;
+  final String? expectedType;
+  final dynamic rawJson;
+  final Object? innerError;
 
   @override
   String get localizedTitle => tr(LocaleKeys.common_errors_parsing_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.common_errors_parsing_subtitle);
-  
+
   @override
   String toString() => 'ParsingException: $message'
       '${endpoint != null ? ' [endpoint: $endpoint]' : ''}'
@@ -146,18 +127,13 @@ class ParsingException implements LocalizedException {
 }
 ```
 
-**When to throw:**
-- Response body is null when object expected
-- JSON structure doesn't match DTO
-- Required field missing or wrong type
+Throw when: response body null, JSON structure mismatch, required field missing/wrong type.
 
-## Result Error (Frontend Bug)
+## ResultError
 
-Thrown when frontend code reaches an invalid state that shouldn't occur if implementation is correct. **Always reported to Crashlytics** as these are bugs to fix.
+Frontend bugs — invalid state that shouldn't occur. Always reported to Crashlytics.
 
 ```dart
-/// Exception for frontend bugs - assertions that failed at runtime.
-/// Use for invalid states that indicate implementation errors.
 class ResultError implements LocalizedException {
   const ResultError(this.message);
 
@@ -165,31 +141,23 @@ class ResultError implements LocalizedException {
 
   @override
   String get localizedTitle => tr(LocaleKeys.common_errors_unexpected_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.common_errors_unexpected_subtitle);
-  
+
   @override
   String toString() => 'ResultError: $message';
 }
 ```
 
-**When to throw:**
-- Operation failed that should always succeed (e.g., `if (!success) throw ResultError(...)`)
-- Required property is null when it shouldn't be (e.g., `if (url == null) throw ResultError(...)`)
-- Invalid frontend state (e.g., `'No stored access token found'`)
+- Throw for: operations that should always succeed, required properties unexpectedly null, invalid frontend state
+- Don't use for: API response issues → `ParsingException`, expected business states → `DomainException`
 
-**Don't use for:**
-- API response issues → use `ParsingException`
-- Expected business states → use `DomainException`
+## Response Parsing Extensions
 
-## Safe Response Parsing
-
-Extensions to keep API implementations lean while handling parsing errors gracefully.
+Keep API implementations lean while handling parsing errors:
 
 ```dart
 extension ResponseParsingEx<T> on Response<T> {
-  /// Parse single object. Throws ParsingException if null or parsing fails.
   E parseSingle<Dto, E>({
     required Dto Function(Map<String, dynamic>) fromJson,
     required E Function(Dto) toEntity,
@@ -216,8 +184,7 @@ extension ResponseParsingEx<T> on Response<T> {
     }
   }
 
-  /// Parse list. Logs failures for individual items but continues parsing.
-  /// Returns only successfully parsed items.
+  /// Logs individual item failures but continues parsing. Returns valid items only.
   List<E> parseList<Dto, E>({
     required Dto Function(Map<String, dynamic>) fromJson,
     required E Function(Dto) toEntity,
@@ -226,7 +193,7 @@ extension ResponseParsingEx<T> on Response<T> {
   }) {
     final list = data as List<dynamic>?;
     if (list == null) return [];
-    
+
     final results = <E>[];
     for (final item in list) {
       try {
@@ -248,7 +215,7 @@ extension ResponseParsingEx<T> on Response<T> {
 }
 ```
 
-**API implementation stays lean:**
+API usage:
 
 ```dart
 class BookingApiImpl implements BookingApi {
@@ -277,80 +244,49 @@ class BookingApiImpl implements BookingApi {
 }
 ```
 
-## Domain Exceptions (Business Logic)
+## DomainException
 
-### When to Create Domain Exceptions
+Expected business logic errors. Implements both `LocalizedException` and `ExpectedException` (skips Crashlytics).
 
-Create a `DomainException` subclass when you need to:
-
-1. **Handle errors differently** - Trigger specific UI flows (e.g., redirect to booking screen when no booking exists)
-2. **Show contextual messages** - Display feature-specific error copy instead of generic messages
-3. **Track specific failures** - Identify business rule violations in user screenshots
-
-**Don't create domain exceptions** for errors that should use generic handling - let them propagate as `ApiException` for accurate Crashlytics reporting.
-
-### DomainException Base Class
+Create when: specific UI flow needed, feature-specific error copy, business rule violation tracking from screenshots. Don't create for errors that should use generic `ApiException` handling.
 
 ```dart
-/// Base class for all domain/business logic exceptions.
-/// 
-/// - Implements [LocalizedException] for UI display
-/// - Implements [ExpectedException] to skip Crashlytics (domain errors are expected states)
-/// - Override [localizedTitle] and [localizedMessage] for feature-specific messages
 abstract class DomainException implements LocalizedException, ExpectedException {
   const DomainException();
-  
+
   @override
   String? get localizedTitle => tr(LocaleKeys.common_errors_unexpected_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.common_errors_unexpected_subtitle);
 }
-```
 
-### Feature Exception Examples
-
-```dart
 class NoActiveBookingException extends DomainException {
   final String? details;
   const NoActiveBookingException([this.details]);
-  
+
   @override
   String? get localizedTitle => tr(LocaleKeys.booking_no_active_title);
-  
   @override
   String get localizedMessage => tr(LocaleKeys.booking_no_active_message);
-  
+
   @override
   String toString() => 'No active booking${details != null ? ': $details' : ''}';
-}
-
-class PhotoAccessDeniedException extends DomainException {
-  const PhotoAccessDeniedException();
-  
-  @override
-  String? get localizedTitle => tr(LocaleKeys.photo_access_denied_title);
-  
-  @override
-  String get localizedMessage => tr(LocaleKeys.photo_access_denied_message);
 }
 ```
 
 ## API Error Interceptor
 
-Intercepts all Dio errors and transforms them to typed exceptions. Place as the **last interceptor** in the chain:
+Place as **last interceptor** in Dio chain:
 
 ```dart
 class ApiErrorInterceptor extends Interceptor {
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
-    // 1. No internet
     if (err.error is SocketException) {
       handler.reject(NoInternetException(exception: err));
       return;
     }
 
-    // 2. Network issues (timeouts, gateway errors)
     switch (err.response?.statusCode) {
       case HttpStatus.requestTimeout:
       case HttpStatus.badGateway:
@@ -359,7 +295,6 @@ class ApiErrorInterceptor extends Interceptor {
         return;
     }
 
-    // 3. API error - parse response if available
     try {
       final errorJson = err.response?.data as Map<String, dynamic>;
       final apiErrorResponse = ApiErrorResponse.fromJson(errorJson);
@@ -371,39 +306,32 @@ class ApiErrorInterceptor extends Interceptor {
 }
 ```
 
-## UI Error Display Guidelines
-
-All error display components should check for `LocalizedException` and extract localized title/message, falling back to generic error copy for unknown exceptions:
+## UI Error Display
 
 ```dart
 final localized = error is LocalizedException ? error : null;
 final title = localized?.localizedTitle ?? tr(LocaleKeys.common_errors_uncaught_title);
 final message = localized?.localizedMessage ?? tr(LocaleKeys.common_errors_uncaught_subtitle);
-
-// For single-line displays (e.g., toasts), use message only:
-final toastText = localized?.localizedMessage ?? tr(LocaleKeys.common_errors_uncaught_subtitle);
 ```
 
-**When to use each pattern:**
-- **Error widgets** (e.g., `ErrorCard`): For errors during page initialization where the entire content failed to load. Include a retry button that re-triggers the data fetch.
-- **Toasts**: For errors during user-initiated actions (button taps) where the action can be retried via the same UI element.
-- **Popups/Dialogs**: For errors requiring user acknowledgment before continuing, or when additional context/actions are needed.
+- **Error widgets** (`ErrorCard`): page initialization failures, include retry button
+- **Toasts**: user-initiated action failures, retryable via same UI element
+- **Dialogs**: errors requiring acknowledgment or additional context
 
-## Crashlytics Integration
+## Crashlytics
 
 ```dart
 extension ExceptionConvenience on Object {
-  bool get shouldReportToCrashlytics => 
+  bool get shouldReportToCrashlytics =>
       !isRequestCancelled && this is! ExpectedException;
 }
 
-// In logging/error handling:
 if (error.shouldReportToCrashlytics) {
   crashlytics.recordError(error, stackTrace);
 }
 ```
 
-## Localization Keys Structure
+## Localization Keys
 
 ```json
 {
@@ -425,22 +353,3 @@ if (error.shouldReportToCrashlytics) {
   }
 }
 ```
-
-## Summary
-
-| Exception | Purpose | Crashlytics |
-|-----------|---------|-------------|
-| `ApiException` | Server error (4xx/5xx) | ✅ Report |
-| `NoInternetException` | No connectivity | ❌ Expected |
-| `NetworkException` | Timeouts, gateway errors | ❌ Expected |
-| `ParsingException` | JSON contract mismatch | ✅ Report |
-| `ResultError` | Frontend bug/invalid state | ✅ Report |
-| `DomainException` | Expected business state | ❌ Expected |
-
-**Key principles:**
-1. **Unique messages** for each exception type enable debugging from user screenshots
-2. **ParsingException** captures context (endpoint, expected type, raw JSON) for remote debugging
-3. **ResultError** is for frontend bugs that shouldn't happen - assertions that failed
-4. **DomainException** is for expected business states that need dedicated UI flows
-5. **Response parsing extensions** keep API code lean while handling errors gracefully
-6. **List parsing** continues on individual item failures, logging errors but returning valid items

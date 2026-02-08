@@ -1,86 +1,51 @@
-# Flutter Hooks Usage Guide
+# Flutter Hooks
 
-This guide documents how we use `flutter_hooks` in a production Flutter app, including a few “style rules” and helper hooks that reduce common bugs (frame timing issues, stale closures, leaked listeners). It’s written to be reusable in other projects regardless of folder structure.
+## Widget Types
 
-## TL;DR for LLM Agents
+- `HookWidget`: hooks, no Riverpod
+- `HookConsumerWidget`: hooks + Riverpod `WidgetRef` (default for screens)
+- `HookBuilder`: hooks in a small subtree (incremental migration)
 
-When migrating `StatefulWidget` / `ConsumerStatefulWidget` to hooks:
+## Hook Rules
 
-1. Convert widget type → `HookWidget` / `HookConsumerWidget`.
-2. Delete the `State` class.
-3. Replace `initState` → `useInit()` or `useInitAsync()` (preferred) or `useEffect(..., const [])`.
-4. Replace `dispose` → `useEffect` cleanup return.
-5. Replace `setState` → `useState` (UI state) or `useRef` (non-UI state).
-6. Replace controllers/focus/scroll/page/animation `late final` → `use*Controller()` / `useFocusNode()` / etc.
-7. If you read `controller.text` in UI, add `useListenable(controller)`.
-8. Always trim user-entered strings at capture time (`controller.text.trim()`).
+- Call hooks unconditionally at top of `build()` — no `if`, loops, early returns
+- Keep hook call order stable across rebuilds
+- Never call hooks inside callbacks (`onPressed`, `onTap`, builder lambdas)
 
-## Setup
+## Conventions
 
-- Add `flutter_hooks` to `pubspec.yaml`.
-- If you use Riverpod, add `hooks_riverpod` and prefer `HookConsumerWidget` for screens.
+- Group `use*` calls at top of `build()`, then callbacks, then return widgets
+- Always supply dependencies for `useEffect`/`useMemoized` — avoid "runs every build"
+- `const []` for "run once" effects
+- Controllers always from `use*Controller` hooks
+- Listeners always have cleanup return
+- Sanitize input at capture: `controller.text.trim()`
+- Keep temporary UI state local — don't promote to providers unless multiple screens need it
+- Business logic in providers/services, not in `build()`
 
-Imports:
+## Migration: StatefulWidget → Hooks
 
-```dart
-import 'package:flutter_hooks/flutter_hooks.dart';
-// If using Riverpod:
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-```
+| StatefulWidget | Hook replacement |
+|---|---|
+| `StatefulWidget` | `HookWidget` |
+| `ConsumerStatefulWidget` | `HookConsumerWidget` |
+| `late final TextEditingController` | `useTextEditingController()` |
+| `late final AnimationController` | `useAnimationController(duration: ...)` |
+| `late final FocusNode` | `useFocusNode()` |
+| `late final ScrollController` | `useScrollController()` |
+| `late final PageController` | `usePageController()` |
+| `bool flag` + `setState` | `useState(false)` |
+| Mutable non-visual state | `useRef<T>(initial)` |
+| `initState()` sync | `useInit(() { ... })` |
+| `initState()` async | `useInitAsync(() async { ... })` |
+| `dispose()` | `useEffect` cleanup return |
+| `didUpdateWidget()` | `useEffect` keyed by changed inputs |
+| `addListener` in `initState` | `useEffect` returning cleanup |
+| `GlobalKey` / expensive objects | `useMemoized(...)` |
 
-## Widget Type Selection
+## Project Helper Hooks
 
-- `HookWidget`: hooks, no Riverpod `ref`.
-- `HookConsumerWidget`: hooks + Riverpod `WidgetRef` (default for screens).
-- `HookBuilder`: use hooks in a small subtree (nice for incremental migration).
-
-## Hook Rules (Non-Negotiable)
-
-- Call hooks unconditionally at the top of `build` (no `if`, loops, early returns).
-- Keep hook call order stable across rebuilds.
-- Never call hooks inside callbacks (`onPressed`, `onTap`, builder lambdas, etc.).
-
-## Conventions We Follow (Style Guidelines)
-
-- **Keep `build` mostly pure**: UI composition + hook wiring + calling providers. Put business logic in providers/services.
-- **Declare hooks first**: group `use*` calls at the top of `build`, then define callbacks, then return widgets.
-- **Dependencies are explicit**: always supply dependencies for `useEffect`/`useMemoized` (avoid “runs every build”).
-- **Prefer `const []`** for “run once” effects to make intent obvious.
-- **Memoize unstable objects**: `GlobalKey`, `Tween`, expensive derived lists, and callbacks that should not change each rebuild.
-- **Controllers are owned by hooks**: if a controller is created in `build`, it should come from a `use*Controller` hook.
-- **Listeners always have cleanup**: any `addListener`/subscription must be paired with a cleanup return.
-- **Input capture is sanitized**: `controller.text.trim()` (and other normalization) happens at the point of submission.
-- **UI local state stays local**: don’t promote temporary UI state into global providers unless multiple screens need it.
-
-## Migration Checklist (StatefulWidget → Hooks)
-
-1. Convert `StatefulWidget` → `HookWidget` (or `ConsumerStatefulWidget` → `HookConsumerWidget`).
-2. Move `initState` logic:
-   - Sync “run once” setup → `useInit`.
-   - Async “run once” setup → `useInitAsync` (preferred in this codebase).
-3. Move `didUpdateWidget` logic → `useEffect` keyed on changed inputs.
-4. Replace `setState`:
-   - UI state → `useState<T>()`.
-   - Mutable, non-visual state → `useRef<T>()`.
-5. Replace manual disposal:
-   - `TextEditingController` → `useTextEditingController`.
-   - `AnimationController` → `useAnimationController`.
-   - `ScrollController` → `useScrollController`.
-   - `PageController` → `usePageController`.
-   - `FocusNode` → `useFocusNode`.
-6. Replace listeners:
-   - `addListener` in `initState` → `useEffect` that returns cleanup.
-7. Add memoization where needed:
-   - `GlobalKey<FormState>` / `GlobalKey<NavigatorState>` → `useMemoized`.
-   - Expensive transforms (sorting/filtering) → `useMemoized` keyed by inputs.
-
-## Project Helper Hooks (Recommended to Keep)
-
-These wrappers are used throughout the app. If you’re starting a new project, keep them (or equivalent) because they encode good defaults.
-
-### `useInit`
-
-Runs a callback synchronously once on mount.
+### `useInit` — sync run-once
 
 ```dart
 useInit(() {
@@ -88,12 +53,7 @@ useInit(() {
 });
 ```
 
-Use when:
-- You need “run once” setup that is safe to do synchronously.
-
-### `useInitAsync`
-
-Runs a callback once on mount, scheduled asynchronously (e.g., via `Future.microtask`).
+### `useInitAsync` — async run-once (avoids frame timing issues)
 
 ```dart
 useInitAsync(() async {
@@ -101,14 +61,9 @@ useInitAsync(() async {
 });
 ```
 
-Use when:
-- You need to set controller values / state after first build.
-- You want to avoid “setState during build” / frame timing issues.
-- You’re calling provider notifiers that may synchronously emit state.
+Use when setting controller values after first build or calling notifiers that synchronously emit state.
 
-### `useAsyncEffect`
-
-An async-friendly effect that re-runs when dependencies change.
+### `useAsyncEffect` — async effect with dependencies
 
 ```dart
 useAsyncEffect(() async {
@@ -117,12 +72,7 @@ useAsyncEffect(() async {
 }, [customer]);
 ```
 
-Use when:
-- You must `await` inside the effect, or you want an explicit “async effect” abstraction.
-
-### `useAsyncEffectDisposing`
-
-Async effect that supports returning a cleanup function (including async setup that needs sync cleanup).
+### `useAsyncEffectDisposing` — async effect with cleanup
 
 ```dart
 useAsyncEffectDisposing(() async {
@@ -132,19 +82,15 @@ useAsyncEffectDisposing(() async {
 }, [controller]);
 ```
 
-Use when:
-- You set up listeners/subscriptions and want a single pattern for async setup + cleanup.
+## Standard Hooks
 
-## Standard Hooks We Use Most
+- Local state: `useState`, `useRef`, `useValueNotifier`
+- Owned resources: `useTextEditingController`, `useFocusNode`, `useScrollController`, `usePageController`, `useAnimationController`
+- Lifecycle: `useEffect`, `useInit`, `useInitAsync`
+- Rebuild on changes: `useListenable`, `useValueListenable`
+- Stable instances: `useMemoized`
 
-Most widgets only need:
-- Local state: `useState`, `useRef`, `useValueNotifier`.
-- Owned resources: `useTextEditingController`, `useFocusNode`, `useScrollController`, `usePageController`, `useAnimationController`.
-- Lifecycle: `useEffect` (plus `useInit` / `useInitAsync` for “run once”).
-- Rebuild on changes: `useListenable` / `useValueListenable`.
-- Stable instances: `useMemoized`.
-
-Typical structure (hooks first, then callbacks, then UI):
+## Typical Structure
 
 ```dart
 class Example extends HookConsumerWidget {
@@ -186,11 +132,10 @@ class Example extends HookConsumerWidget {
 }
 ```
 
-## Riverpod + Hooks (If Applicable)
+## Riverpod + Hooks
 
-- `ref.watch`/`ref.read`/`ref.listen` work the same in `HookConsumerWidget`.
-- Keep side-effects (toasts, navigation, analytics) in one place via `ref.listen` (or a project helper like `ref.listenOnError` / `ref.listenForCondition` if available).
-- When syncing provider values into controllers, use an effect keyed by the provider value.
+- `ref.watch`/`ref.read`/`ref.listen` work the same in `HookConsumerWidget`
+- Sync provider values into controllers via keyed effect:
 
 ```dart
 final customer = ref.watch(customerProvider(id)).value;
@@ -202,15 +147,7 @@ useEffect(() {
 }, [customer]);
 ```
 
-### Centralized Error Handling
-
-Preferred (if your project defines it):
-
-```dart
-ref.listenOnError(createPaymentProvider);
-```
-
-Generic Riverpod fallback:
+- Centralized error handling: `ref.listenOnError(provider)` or fallback:
 
 ```dart
 ref.listen(createPaymentProvider, (prev, next) {
@@ -220,19 +157,7 @@ ref.listen(createPaymentProvider, (prev, next) {
 });
 ```
 
-### Condition-Based Actions (Navigation, Toasts)
-
-Preferred (if your project defines it):
-
-```dart
-ref.listenForCondition(
-  createCustomerProvider,
-  (state) => state.hasValue && state.value != null,
-  (_) => Navigator.of(context).maybePop(),
-);
-```
-
-Generic Riverpod fallback:
+- Condition-based actions: `ref.listenForCondition(provider, condition, action)` or fallback:
 
 ```dart
 ref.listen(createCustomerProvider, (prev, next) {
@@ -242,14 +167,14 @@ ref.listen(createCustomerProvider, (prev, next) {
 });
 ```
 
-## Patterns by Category (Short Templates)
+## Pattern Templates
 
 ### Forms
 
-- Use `useListenable(controller)` if button enabled-state reads `controller.text`.
-- Use `useMemoized` for `GlobalKey`.
-- Use `useInitAsync` for async prefill.
-- Always `.trim()` on submit.
+- `useListenable(controller)` if button state reads `controller.text`
+- `useMemoized` for `GlobalKey`
+- `useInitAsync` for async prefill
+- `.trim()` on submit
 
 ### Animations
 
@@ -258,11 +183,9 @@ final controller = useAnimationController(duration: const Duration(milliseconds:
 useInitAsync(() async => controller.forward());
 ```
 
-If you add listeners, always return cleanup from `useEffect`.
+Listeners always return cleanup from `useEffect`.
 
-### Lists (Derived Sorting/Filtering)
-
-Prefer non-mutating transforms (don’t `..sort()` shared lists). If you have a `.sorted(...)` extension, use it:
+### Lists (Sorting/Filtering)
 
 ```dart
 final items = ref.watch(paymentListProvider).value ?? const <Payment>[];
@@ -290,8 +213,6 @@ useAsyncEffect(() async {
 
 ### Filter Toggles
 
-Avoid mutating sets/lists in place; assign a new instance:
-
 ```dart
 final filters = useState<Set<FilterType>>({...initialFilters});
 void toggle(FilterType t) {
@@ -301,12 +222,11 @@ void toggle(FilterType t) {
 }
 ```
 
-### Search Input (Clear Button + Optional External Focus)
+### Search Input
 
 ```dart
 final controller = useTextEditingController();
 final focusNode = widgetFocusNode ?? useFocusNode();
-
 useListenable(controller);
 
 return TextField(
@@ -320,18 +240,17 @@ return TextField(
 );
 ```
 
-### Expand/Collapse Synced With an Input
+### Sync External State
 
 ```dart
 final expanded = useState(widgetExpanded);
-
 useEffect(() {
   expanded.value = widgetExpanded;
   return null;
 }, [widgetExpanded]);
 ```
 
-### Keep State Alive in Tabs/Pages
+### Keep Alive in Tabs
 
 ```dart
 HookBuilder(
@@ -342,9 +261,9 @@ HookBuilder(
 );
 ```
 
-## Creating Custom Hooks
+## Custom Hooks
 
-Prefer function-based custom hooks (composition of existing hooks):
+Function-based composition preferred:
 
 ```dart
 T? usePrevious<T>(T value) {
@@ -357,27 +276,12 @@ T? usePrevious<T>(T value) {
 }
 ```
 
-Use class-based `Hook`/`HookState` only when you must create/dispose a resource with custom semantics.
+Class-based `Hook`/`HookState` only when custom resource create/dispose semantics required.
 
-## Anti-Patterns to Avoid
+## Anti-Patterns (flag these)
 
-- Conditional hook calls, hooks in callbacks, or changing hook order.
-- Missing dependencies in `useEffect`/`useMemoized` (stale closures).
-- Adding listeners/subscriptions without cleanup returns.
-- Recreating `GlobalKey`/`Tween`/expensive objects every rebuild (use `useMemoized`).
-- Mutating collections in place when using `useState` (assign a new instance).
-
-## Quick Reference Table
-
-| StatefulWidget pattern | Hook replacement |
-|---|---|
-| `late final TextEditingController c;` | `final c = useTextEditingController();` |
-| `late final AnimationController c;` | `final c = useAnimationController(duration: ...);` |
-| `late final FocusNode f;` | `final f = useFocusNode();` |
-| `late final ScrollController s;` | `final s = useScrollController();` |
-| `late final PageController p;` | `final p = usePageController();` |
-| `bool flag = false;` + `setState` | `final flag = useState(false);` |
-| “mutable but not visual” | `final x = useRef<T>(initial);` |
-| `initState()` | `useInit()` / `useInitAsync()` / `useEffect(..., const [])` |
-| `dispose()` | `useEffect` cleanup return |
-| `didUpdateWidget()` | `useEffect` keyed by changed inputs |
+- Conditional hook calls, hooks in callbacks, changing hook order
+- Missing dependencies in `useEffect`/`useMemoized` (stale closures)
+- Listeners without cleanup returns
+- Recreating `GlobalKey`/`Tween`/expensive objects every build (use `useMemoized`)
+- Mutating collections in place with `useState` (assign new instance)
