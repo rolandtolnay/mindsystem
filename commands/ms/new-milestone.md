@@ -1,29 +1,32 @@
 ---
 name: ms:new-milestone
-description: Start a new milestone cycle — update PROJECT.md and route to requirements
+description: Start a new milestone — discover what to build, update PROJECT.md, create context for downstream
 argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
 allowed-tools:
   - Read
   - Write
   - Bash
+  - Glob
+  - Grep
   - AskUserQuestion
 ---
 
 <objective>
-Start a new milestone by updating PROJECT.md with new goals, then routing to the requirements → roadmap cycle.
+Start a new milestone by helping the user discover what to build next, then updating PROJECT.md and creating MILESTONE-CONTEXT.md for downstream consumption.
 
-This is the brownfield equivalent of new-project. The project exists, PROJECT.md has history. This command gathers "what's next" and updates PROJECT.md to reflect the new milestone's goals.
+Self-contained command — three phases: Orient (load context, present directions), Deepen (collaborative discovery), Commit (update files, route forward).
 
-Output: Updated PROJECT.md, routes to research-project or define-requirements
+Output: Updated PROJECT.md, new MILESTONE-CONTEXT.md, routes to create-roadmap or research-project
 </objective>
 
 <execution_context>
 @~/.claude/mindsystem/references/questioning.md
 @~/.claude/mindsystem/templates/project.md
+@~/.claude/mindsystem/templates/milestone-context.md
 </execution_context>
 
 <context>
-Milestone name: $ARGUMENTS (optional - will prompt if not provided)
+Milestone name: $ARGUMENTS (optional — will emerge during discovery if not provided)
 
 **Load project context:**
 @.planning/PROJECT.md
@@ -34,149 +37,249 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
 <process>
 
+## Phase 1: Orient
+
 1. **Load context:**
-   - Read PROJECT.md (existing project, Validated requirements, decisions)
+   - Read PROJECT.md (existing project, validated requirements, decisions)
    - Read MILESTONES.md (what shipped previously)
    - Read STATE.md (pending todos, blockers)
+   - Read config.json (project settings)
    - Calculate previous milestone version from MILESTONES.md (e.g., if last shipped was v1.0, previous=1.0)
 
-2. **Strategic assessment (internal — do not output this step):**
-   - Load PROJECT.md (vision, audience, USP, problem space)
-   - Load MILESTONES.md (what shipped)
-   - Load STATE.md (pending todos, blockers)
-   - Check for previous milestone artifacts using the version calculated in step 1:
+2. **Check for active milestone:**
+
+   If STATE.md or ROADMAP.md indicates a milestone is in progress:
+
+   Use AskUserQuestion:
+   - header: "Active milestone"
+   - question: "There's a milestone in progress (v[X.Y]). What do you want to do?"
+   - options:
+     - "Complete it first" — run /ms:complete-milestone
+     - "Add phases to it" — run /ms:add-phase
+     - "Continue anyway" — discuss next milestone scope
+
+   If "Complete it first" or "Add phases to it": present the relevant command and stop.
+   If "Continue anyway": proceed.
+
+3. **Strategic assessment (silent — do not output this step):**
+   - Check for previous milestone artifacts using calculated version:
      - `.planning/milestones/v{VERSION}-DECISIONS.md` (if exists)
      - `.planning/milestones/v{VERSION}-MILESTONE-AUDIT.md` (if exists)
      - `.planning/TECH-DEBT.md` (if exists)
-   - Identify outstanding tech debt, unaddressed requirements, high-impact gaps
-   - This is background analysis — synthesize silently, surface through suggestions in step 3
+     - `.planning/LEARNINGS.md` (if exists)
+   - Identify: outstanding tech debt, untested assumptions, high-impact gaps, unaddressed requirements
+   - This is background analysis — synthesize silently, surface through suggestions in step 4
 
-3. **Present suggested directions:**
-
-   Output a brief markdown summary:
+4. **Present brief context and suggested directions:**
 
    ```
+   ## Last Milestone
+
+   v[X.Y] [Name] — [key accomplishments, 1-2 lines]
+
    ## Suggested Directions
 
-   - **[Direction 1]** — [brief rationale]
+   - **[Direction 1]** — [brief rationale from tech debt, audit, or strategic gaps]
    - **[Direction 2]** — [brief rationale]
    - **[Direction 3]** — [brief rationale]
    ```
 
    Sources for suggestions:
    - High-impact tech debt from TECH-DEBT.md or MILESTONE-AUDIT.md
+   - Untested assumptions from previous audit
    - Unaddressed requirements from previous milestones
    - Strategic features inferred from PROJECT.md's problem/audience/USP
-
-   Evaluate each by impact on user engagement, revenue, or growth.
+   - Pending todos from STATE.md
 
    If no meaningful artifacts exist (first milestone after v1.0), base suggestions purely on PROJECT.md.
 
-4. **Freeform opening:**
+5. **Freeform opening:**
 
    Ask inline (freeform text, NOT AskUserQuestion):
 
    "What do you want to build next?"
 
-   The user can pick from suggestions, combine them, or go a completely different direction.
+   The user can pick a suggestion, combine them, describe their own idea, share external context (specs, docs, analytics), or ask for help thinking it through.
 
-5. **Follow threads:**
-   - Based on what the user said, ask follow-up questions using AskUserQuestion
-   - Challenge vagueness, make abstract concrete
-   - Consult `questioning.md` for techniques
-   - Weave in relevant previous context (tech debt, pending todos) as natural follow-ups when relevant, not as a wall of info upfront
-   - Continue until clear goals emerge
+## Phase 2: Deepen
 
-6. **Decision gate:**
+6. **Adaptive depth based on response clarity:**
 
-   Use AskUserQuestion:
-   - header: "Ready?"
-   - question: "I think I understand what you want to build. Ready to update PROJECT.md?"
-   - options:
-     - "Update PROJECT.md" — Let's move forward
-     - "Keep exploring" — I want to share more / ask me more
+   - **Clear, detailed response** → brief confirmation ("Sounds like you want X, Y, Z — let me confirm a few things"), then move toward Phase 3 quickly
+   - **Vague response** → probe with AskUserQuestion, explore features, challenge vagueness
+   - **External context shared** → integrate it, clarify implications, ask follow-ups
 
-   Loop until "Update PROJECT.md" selected.
+7. **Follow the thread:**
+   - Dig into what they said before switching topics
+   - Challenge vagueness, make abstract concrete (questioning.md techniques)
+   - "When you say X, do you mean A or B?"
+   - "Walk me through what that looks like"
+   - "What's the simplest version of this that would be useful?"
 
-7. **Determine milestone version:**
-   - Parse last version from MILESTONES.md
-   - Suggest next version (v1.0 → v1.1, or v2.0 for major)
-   - Confirm with user
+8. **Probe for edges:**
+   - Simplest useful version vs full vision
+   - MVP vs complete — what can wait?
+   - Constraints: technical, time, dependencies
+   - What's explicitly NOT part of this milestone?
 
-8. **Update PROJECT.md:**
+9. **Surface previous context organically:**
+   - When relevant to what the user described, weave in tech debt, untested assumptions, pending todos
+   - NOT as a wall of info upfront — only when it connects to their stated direction
+   - "That relates to [tech debt item] from last milestone — want to address that too?"
 
-   Add/update these sections:
+10. **Synthesize periodically:**
 
-   ```markdown
-   ## Current Milestone: v[X.Y] [Name]
+    When you have a clear picture forming:
 
-   **Goal:** [One sentence describing milestone focus]
+    ```
+    Here's what I'm hearing:
 
-   **Target features:**
-   - [Feature 1]
-   - [Feature 2]
-   - [Feature 3]
-   ```
+    **Features:**
+    - [Feature 1]: [brief description]
+    - [Feature 2]: [brief description]
 
-   Update Active requirements section with new goals.
+    **Priority:** [what matters most]
+    **Scope boundary:** [what's NOT included]
+    ```
 
-   Update "Last updated" footer.
+11. **Decision gate:**
 
-9. **Update STATE.md:**
+    Use AskUserQuestion:
+    - header: "Ready?"
+    - question: "Ready to create the milestone?"
+    - options:
+      - "Create milestone" — update PROJECT.md and generate context
+      - "Keep exploring" — I want to share more or ask me more
+      - "Let me add context" — I have specs/docs/details to share
 
-   ```markdown
-   ## Current Position
+    If "Keep exploring" or "Let me add context" → loop back to step 6.
+    Loop until "Create milestone" selected.
 
-   Phase: Not started (run /ms:create-roadmap)
-   Plan: —
-   Status: Defining requirements
-   Last activity: [today] — Milestone v[X.Y] started
-   ```
+## Phase 3: Commit
 
-10. **Git commit:**
-   ```bash
-   git add .planning/PROJECT.md .planning/STATE.md
-   git commit -m "docs: start milestone v[X.Y] [Name]"
-   ```
+12. **Determine milestone version:**
+    - Parse last version from MILESTONES.md
+    - Suggest next version (v1.0 → v1.1, or v2.0 for major shifts)
+    - Confirm with user via AskUserQuestion
 
-11. **Calculate next phase for context:**
+13. **Present milestone summary:**
 
-   ```bash
-   LAST_PHASE=$(ls -d .planning/phases/[0-9]*-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+' | head -1)
-   if [ -n "$LAST_PHASE" ]; then
-     NEXT_PHASE=$((10#$LAST_PHASE + 1))
-   else
-     NEXT_PHASE=1
-   fi
-   echo "Next milestone phases will start at: Phase $NEXT_PHASE"
-   ```
+    ```
+    ## Milestone Summary
 
-12. **Route to next step:**
+    **Version:** v[X.Y] [Name]
+    **Goal:** [One sentence]
+    **Target features:**
+    - [Feature 1]
+    - [Feature 2]
+    - [Feature 3]
+    ```
 
-    Based on the conversation, recommend ONE path. If unfamiliar domains or open technical questions surfaced, recommend `/ms:research-project`. Otherwise recommend `/ms:define-requirements`.
+    Use AskUserQuestion:
+    - header: "Confirm"
+    - question: "Look good?"
+    - options:
+      - "Looks good" — proceed
+      - "Adjust" — let me change something
+
+    If "Adjust" → ask what to change, update, re-confirm.
+
+14. **Update PROJECT.md:**
+
+    Add/update these sections:
+
+    ```markdown
+    ## Current Milestone: v[X.Y] [Name]
+
+    **Goal:** [One sentence describing milestone focus]
+
+    **Target features:**
+    - [Feature 1]
+    - [Feature 2]
+    - [Feature 3]
+    ```
+
+    Update Active requirements section with new goals.
+    Update "Last updated" footer.
+
+15. **Write MILESTONE-CONTEXT.md:**
+
+    Create `.planning/MILESTONE-CONTEXT.md` using template from `~/.claude/mindsystem/templates/milestone-context.md`.
+
+    Populate from the conversation:
+    - Vision — the "why" in user's words
+    - Features — with rationale and scope notes
+    - External context — any specs, docs, or references shared
+    - Scope boundaries — what's explicitly excluded
+    - Priorities — must-have vs nice-to-have
+    - Open questions — things needing research
+
+16. **Update STATE.md:**
+
+    ```markdown
+    ## Current Position
+
+    Phase: Not started (run /ms:create-roadmap)
+    Plan: —
+    Status: Defining requirements
+    Last activity: [today] — Milestone v[X.Y] started
+
+    Progress: ░░░░░░░░░░ 0%
+    ```
+
+    Keep Accumulated Context (decisions, blockers) from previous milestone.
+
+17. **Git commit:**
+
+    ```bash
+    git add .planning/PROJECT.md .planning/STATE.md .planning/MILESTONE-CONTEXT.md
+    git commit -m "$(cat <<'EOF'
+    docs: start milestone v[X.Y] [Name]
+    EOF
+    )"
+    ```
+
+18. **Calculate next phase number:**
+
+    ```bash
+    LAST_PHASE=$(ls -d .planning/phases/[0-9]*-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+' | head -1)
+    if [ -n "$LAST_PHASE" ]; then
+      NEXT_PHASE=$((10#$LAST_PHASE + 1))
+    else
+      NEXT_PHASE=1
+    fi
+    echo "Next milestone phases will start at: Phase $NEXT_PHASE"
+    ```
+
+19. **Route to next step:**
+
+    Based on the conversation, recommend ONE path. If unfamiliar domains or open questions surfaced during discovery, recommend `/ms:research-project`. Otherwise recommend `/ms:create-roadmap`.
 
     ```
     Milestone v[X.Y] [Name] initialized.
 
     PROJECT.md updated with new goals.
+    Context saved to MILESTONE-CONTEXT.md
     Phases will start at: Phase $NEXT_PHASE
 
     ---
 
     ## ▶ Next Up
 
-    **[Recommended command name]** — [one-line reason from conversation]
+    **[Recommended command]** — [one-line reason from conversation]
 
     `/ms:[recommended-command]`
 
-    `/clear` first — fresh context window
+    <sub>`/clear` first → fresh context window</sub>
 
     ---
 
     **Also available:** `/ms:[alternative-command]`
+
+    ---
     ```
 
-13. **Update last command**
+20. **Update last command:**
     - Update `.planning/STATE.md` Last Command field
     - Format: `Last Command: ms:new-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
 
@@ -185,7 +288,8 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 <success_criteria>
 - PROJECT.md updated with Current Milestone section
 - Active requirements reflect new milestone goals
+- MILESTONE-CONTEXT.md created with vision, features, scope, priorities
 - STATE.md reset for new milestone
 - Git commit made
-- User routed to define-requirements (or research-project)
+- User routed to create-roadmap (or research-project if unknowns surfaced)
 </success_criteria>

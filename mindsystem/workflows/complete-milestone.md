@@ -26,11 +26,12 @@ When a milestone completes, this workflow:
 2. Cleans up phase artifacts (PLAN, CONTEXT, RESEARCH, DESIGN files deleted)
 3. Extracts full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
 4. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
-5. Updates ROADMAP.md to replace milestone details with one-line summary
-6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-7. Extracts learnings into `.planning/LEARNINGS.md` (curated one-line patterns with source refs)
-8. Performs full PROJECT.md evolution review
-9. Routes to `/ms:new-milestone` for next milestone
+5. Archives milestone context to `.planning/milestones/v[X.Y]-CONTEXT.md`
+6. Updates ROADMAP.md to replace milestone details with one-line summary
+7. Deletes REQUIREMENTS.md (fresh one created for next milestone)
+8. Extracts learnings into `.planning/LEARNINGS.md` (curated one-line patterns with source refs)
+9. Performs full PROJECT.md evolution review
+10. Routes to `/ms:new-milestone` for next milestone
 
 **Context Efficiency:**
 
@@ -667,6 +668,23 @@ Confirm:
 
 </step>
 
+<step name="archive_context">
+
+Archive the milestone context file (if it exists):
+
+```bash
+[ -f .planning/MILESTONE-CONTEXT.md ] && mv .planning/MILESTONE-CONTEXT.md .planning/milestones/v[X.Y]-CONTEXT.md
+```
+
+If archived:
+```
+✅ Context archived to milestones/v[X.Y]-CONTEXT.md
+```
+
+(Skip silently if no context file exists)
+
+</step>
+
 <step name="update_state">
 
 Update STATE.md to reflect milestone completion.
@@ -743,6 +761,7 @@ git add .planning/milestones/v[X.Y]-DECISIONS.md
 git add .planning/milestones/v[X.Y]-ROADMAP.md
 git add .planning/milestones/v[X.Y]-REQUIREMENTS.md
 git add .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
+git add .planning/milestones/v[X.Y]-CONTEXT.md 2>/dev/null || true
 
 # Stage learnings (may not exist if no learnings found)
 git add .planning/LEARNINGS.md 2>/dev/null || true
@@ -882,6 +901,7 @@ Milestone completion is successful when:
 - [ ] STATE.md updated with fresh project reference
 - [ ] Git tag created (v[X.Y])
 - [ ] Milestone commit made (includes archive files and deletion)
+- [ ] Context archive created if MILESTONE-CONTEXT.md existed
 - [ ] User knows next steps (starting with /ms:new-milestone)
 
 </success_criteria>

@@ -359,8 +359,6 @@ Key workflows in `mindsystem/workflows/`:
 | define-requirements.md | Scope requirements with checkboxes |
 | research-project.md | Domain research spawning |
 | mockup-generation.md | Generate HTML mockup variants for design direction exploration |
-| discuss-milestone.md | Milestone-scoped context gathering |
-| create-milestone.md | Create new milestone structure |
 | map-codebase.md | Brownfield codebase analysis |
 | debug.md | Systematic debugging workflow |
 | complete-milestone.md | Archive and prep next milestone |

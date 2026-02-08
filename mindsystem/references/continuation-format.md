@@ -167,16 +167,15 @@ All 4 phases shipped
 
 ## ▶ Next Up
 
-**Plan v1.1** — Enhanced features and optimizations
+**Start v1.1** — discover what to build next
 
-`/ms:discuss-milestone`
+`/ms:new-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- `/ms:new-milestone` — create directly if scope is clear
 - Review accomplishments before moving on
 
 ---

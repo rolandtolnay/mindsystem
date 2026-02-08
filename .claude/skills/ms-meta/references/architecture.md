@@ -142,7 +142,7 @@ allowed-tools: [Read, Write, Bash, Glob, Grep, AskUserQuestion]
 | Execution | `execute-phase`, `adhoc` |
 | Verification | `verify-work`, `review-design` |
 | Debugging | `debug` |
-| Milestones | `complete-milestone`, `discuss-milestone`, `new-milestone`, `audit-milestone`, `plan-milestone-gaps` |
+| Milestones | `complete-milestone`, `new-milestone`, `audit-milestone`, `plan-milestone-gaps` |
 | Phase mgmt | `add-phase`, `insert-phase`, `remove-phase`, `research-phase`, `list-phase-assumptions` |
 | Utilities | `add-todo`, `check-todos`, `progress`, `help`, `release-notes` |
 

@@ -28,20 +28,18 @@ Ready to plan the next milestone.
 
 ## ▶ Next Up
 
-**Discuss Next Milestone** — figure out what to build next
+**Start Next Milestone** — discover what to build, update PROJECT.md
 
-`/ms:discuss-milestone`
+`/ms:new-milestone`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Next milestone flow:**
-1. `/ms:discuss-milestone` — thinking partner, creates context file
-2. `/ms:new-milestone` — update PROJECT.md with new goals
-3. `/ms:research-project` — (optional) research ecosystem
-4. `/ms:define-requirements` — scope what to build
-5. `/ms:create-roadmap` — plan how to build it
+1. `/ms:new-milestone` — discover what to build, update PROJECT.md
+2. `/ms:research-project` — (optional) research ecosystem
+3. `/ms:create-roadmap` — plan how to build it
 
 ---
 ```
