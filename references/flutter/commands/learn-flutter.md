@@ -1,7 +1,7 @@
 ---
 description: Extract Flutter/Dart coding principles from code changes and update the remote gist
 argument-hint: [focus_instructions] [number] [commit_sha]
-allowed-tools: Bash, Read, Grep, Glob, WebFetch, Write
+allowed-tools: Bash, Read, Grep, Glob, Write
 ---
 
 <objective>
@@ -24,7 +24,7 @@ $( git diff --stat 2>/dev/null | tail -5 )
 <gist_details>
 - Gist ID: `edf9ea7d5adf218f45accb3411f0627c`
 - File name: `flutter-code-quality-guidelines.md`
-- Raw URL: `https://gist.githubusercontent.com/rolandtolnay/edf9ea7d5adf218f45accb3411f0627c/raw/flutter-code-quality-guidelines.md`
+- Always use `gh api` for gist operations — never WebFetch (it summarizes instead of returning raw content)
 </gist_details>
 
 <categories>
@@ -114,7 +114,12 @@ Examples:
 <step name="fetch_current_gist">
 ## 3. Fetch Current Gist
 
-Use WebFetch to get the current gist content from the raw URL.
+Fetch the gist content using `gh api` (NOT WebFetch — it summarizes instead of returning raw content):
+
+```bash
+gh api /gists/edf9ea7d5adf218f45accb3411f0627c \
+  --jq '.files["flutter-code-quality-guidelines.md"].content'
+```
 
 Parse the content to:
 1. Identify existing categories and their rules
@@ -193,23 +198,31 @@ Match to the closest existing category from the gist.
 <step name="update_gist">
 ## 8. Update Gist
 
-1. Write the complete updated gist content to a temp file
-2. Use `gh api` to PATCH the gist:
+1. Write the complete updated gist content to a temp file (e.g., `/tmp/flutter-gist-update.md`)
+2. Build a JSON payload with `jq` and pipe to `gh api` via `--input -`:
 
 ```bash
-gh api -X PATCH /gists/edf9ea7d5adf218f45accb3411f0627c \
-  -f "files[flutter-code-quality-guidelines.md][content]=@/path/to/temp/file"
+jq -n --rawfile content /tmp/flutter-gist-update.md \
+  '{"files":{"flutter-code-quality-guidelines.md":{"content":$content}}}' | \
+  gh api -X PATCH /gists/edf9ea7d5adf218f45accb3411f0627c --input -
 ```
+
+**Do NOT use** `-f "files[...][content]=@/path"` — the `@` file reference does not expand with `gh api -f` and uploads the literal string `@/path` instead.
 
 Insert new principles under their matching category sections.
 If a principle doesn't fit existing categories, add to the closest match.
+3. Clean up: `rm /tmp/flutter-gist-update.md`
 </step>
 
 <step name="verify_update">
 ## 9. Verify Update
 
-1. Re-fetch the gist via WebFetch
-2. Confirm new principles are present
+1. Re-fetch the gist content via `gh api`:
+   ```bash
+   gh api /gists/edf9ea7d5adf218f45accb3411f0627c \
+     --jq '.files["flutter-code-quality-guidelines.md"].content'
+   ```
+2. Grep the output for a distinctive keyword from each new principle to confirm presence
 3. Report what was added:
    - Number of principles added
    - Which categories were updated
@@ -220,11 +233,12 @@ If a principle doesn't fit existing categories, add to the closest match.
 <success_criteria>
 - [ ] gh auth verified before proceeding
 - [ ] Arguments parsed correctly (SHA, count, focus)
-- [ ] Current gist fetched for duplicate detection
+- [ ] Current gist fetched via `gh api --jq` (not WebFetch)
 - [ ] Principles extracted from code changes
 - [ ] No duplicate principles added
 - [ ] Format follows LLM-optimized rules (terse, inline code, no emphasis markers)
-- [ ] Gist updated via gh api PATCH
-- [ ] Update verified by re-fetching
+- [ ] Gist updated via `jq --rawfile` piped to `gh api --input -`
+- [ ] Temp file cleaned up
+- [ ] Update verified by re-fetching via `gh api --jq` and grepping for new content
 - [ ] Summary reported to user
 </success_criteria>
