@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.10.1] - 2026-02-08
+
+### Added
+- **Flutter command references** — `heal-docs` and `extract-pattern` reference documentation for Flutter skills
+- **Flutter key principles** — Senior review principles and key coding guidelines in Flutter references
+
+### Changed
+- **Consolidated requirements into roadmap** — `/ms:define-requirements` merged into `/ms:create-roadmap` command
+- **Consolidated milestone workflow** — `/ms:new-milestone` refined for collaborative discovery scope
+- **Flutter reference reorganization** — Skills consolidated into main directory, pattern docs condensed, file naming normalized to hyphens
+
+### Fixed
+- **Execute-phase wave spawn** — Explicitly specifies `subagent_type="ms-executor"` preventing incorrect agent dispatch
+
 ## [3.10.0] - 2026-02-08
 
 ### Added
@@ -338,7 +352,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.1...HEAD
+[3.10.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.0...v3.10.1
 [3.10.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.6.0...v3.10.0
 [3.6.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.6.0
 [3.5.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.5.0
