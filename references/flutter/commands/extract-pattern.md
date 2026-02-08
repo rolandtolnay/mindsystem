@@ -7,7 +7,7 @@ allowed-tools: [Task, AskUserQuestion, Glob, Grep, Read, Write, Bash]
 <objective>
 Extract implementation patterns from a specific project area (e.g., error handling, authentication, navigation, pagination) into a standalone LLM-optimized pattern file.
 
-Output: a `.md` file in `references/flutter/patterns/` (or user-specified location) that follows LLM documentation principles — terse rules, inline code, flat hierarchy, anti-patterns section, no prose filler.
+Output: a `.md` file in `docs/patterns/` (or user-specified location) that follows LLM documentation principles — terse rules, inline code, flat hierarchy, anti-patterns section, no prose filler.
 
 The output is designed to be portable across Flutter projects as a reference for refactoring existing code or implementing new features correctly.
 </objective>
@@ -64,6 +64,15 @@ One-line description of what this pattern covers.
 ```
 </output_format_spec>
 
+<context_efficiency>
+Write the pattern file directly — user reviews in their editor or via `git diff`, not by reading full content in conversation.
+
+- No "present draft in conversation" step — write the file, then ask for feedback
+- User's editor provides better review (syntax highlighting, scrolling) than CLI output
+- Iterate via targeted edits, not full rewrites
+- Git is the safety net for reverting
+</context_efficiency>
+
 <process>
 
 ## 1. Parse and Clarify Pattern Area
@@ -87,7 +96,7 @@ Do not proceed until you have a clear, unambiguous understanding of what to extr
 ## 2. Check Existing Patterns
 
 ```bash
-ls references/flutter/patterns/ 2>/dev/null
+ls docs/patterns/ 2>/dev/null
 ```
 
 If a pattern file for this area already exists, use AskUserQuestion:
@@ -163,23 +172,13 @@ Options:
 
 Thoroughness is more important than speed. Ask as many questions as needed to achieve complete clarity.
 
-## 5. Determine Output Location
+## 5. Write Pattern File
 
-Use AskUserQuestion:
+Default output path: `docs/patterns/[slug].md`. If this directory doesn't exist in the project, ask the user where to save.
 
-```
-Question: "Where should the pattern file be saved?"
-Header: "Output Path"
-Options:
-1. "references/flutter/patterns/[slug].md (Recommended)" - Standard pattern location
-2. "Custom path" - Let me specify
-```
+Synthesize agent findings into the LLM-optimized format and write the file directly:
 
-## 6. Draft Pattern File
-
-Synthesize agent findings into the LLM-optimized format:
-
-1. **Start with the title and one-line description**
+1. **Title and one-line description**
 2. **Group by functional area** — each area becomes an H2 section
 3. **Rules as terse bullets** with inline code
 4. **Code blocks for templates** — complete, copy-pasteable implementations
@@ -188,38 +187,28 @@ Synthesize agent findings into the LLM-optimized format:
 7. **Checklist section** — verification items for implementers
 8. **Anti-Patterns section** — concrete bad patterns with fixes
 
-Apply these checks during drafting:
+Quality checks before writing:
 - Every rule has inline code or a code block
 - No sentences starting with "You should", "It is recommended", "Make sure to"
 - No `---` horizontal rules between sections
 - No explanatory paragraphs — compress to single-line rules
 - Code blocks include enough context to be copy-pasteable
-
-## 7. Present and Iterate
-
-Present the complete draft to the user. Use AskUserQuestion:
-
-```
-Question: "Review the pattern file above. What changes are needed?"
-Header: "Pattern Review"
-Options:
-1. "Looks good - save it" - Write the file
-2. "Missing patterns" - I'll describe what's missing
-3. "Needs corrections" - Some patterns are wrong or unclear
-4. "Too verbose" - Trim it further
-```
-
-Iterate until the user approves. Then write the file.
-
-## 8. Verify Output
-
-After writing, verify:
-- File exists at the specified path
 - All code blocks use ```dart fencing
 - No placeholder text remains
-- File follows the flat hierarchy (H1 title, H2 sections, H3 only for subsections within code-heavy sections)
 
-Report the final file path, line count, and section summary.
+After writing, report the file path, line count, and section list. Then use AskUserQuestion:
+
+```
+Question: "Pattern file written. Open it in your editor to review. What's next?"
+Header: "Review"
+Options:
+1. "Looks good" - Done
+2. "Missing patterns" - I'll describe what to add
+3. "Needs corrections" - I'll describe what's wrong
+4. "Too verbose" - Compress further
+```
+
+If changes needed, apply targeted edits to the file (not full rewrites).
 
 </process>
 
@@ -247,6 +236,6 @@ Thoroughness over speed. This command extracts reusable documentation that will 
 - All contradictions and ambiguities resolved with user
 - Output file follows LLM-optimized format (terse rules, inline code, anti-patterns)
 - Code blocks are complete and copy-pasteable
-- User reviewed and approved the final output
-- File written and verified
+- File written directly (no draft-in-conversation step)
+- User reviewed in editor and approved
 </success_criteria>
