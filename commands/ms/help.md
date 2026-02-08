@@ -285,14 +285,17 @@ Result: Phase 17 deleted, phases 18-20 become 17-19
 
 ### Milestone Management
 
-**`/ms:new-milestone <name>`**
-Create a new milestone with phases for an existing project.
+**`/ms:new-milestone [name]`**
+Discover what to build next and start a new milestone.
 
-- Use when: you shipped a version and want to scope the next one (or you want guided discovery for what to build next).
-- Adds milestone section to ROADMAP.md
-- Creates phase directories
-- Updates STATE.md for new milestone
+- Use when: you shipped a version and want to figure out what's next — or you already know and want to make it official.
+- Loads previous milestone context and suggests directions
+- Collaborative discovery through adaptive questioning
+- Updates PROJECT.md with new goals
+- Creates MILESTONE-CONTEXT.md for downstream consumption (roadmap, planning)
+- Routes to create-roadmap or research-project
 
+Usage: `/ms:new-milestone`
 Usage: `/ms:new-milestone "v2.0 Features"`
 
 **`/ms:complete-milestone <version>`**
@@ -511,9 +514,8 @@ Common options:
 **Implementing a new feature after shipping (new milestone):**
 
 ```
-/ms:new-milestone "v1.1 New feature"  # Choose discovery mode if you want help scoping
+/ms:new-milestone                     # Discover what to build, update PROJECT.md
 /ms:research-project                  # (optional) Domain / stack research
-/ms:define-requirements               # Re-scope v1/v2 for this milestone
 /ms:create-roadmap                    # New phases mapped to requirements
 /ms:plan-phase                        # Auto-detect next unplanned phase
 /ms:execute-phase <phase>
@@ -524,7 +526,7 @@ Common options:
 ```
 /ms:audit-milestone 1.0.0       # Verify before completing
 /ms:complete-milestone 1.0.0    # Archive and tag
-/ms:new-milestone "v1.1 Features"
+/ms:new-milestone               # Discover and start next milestone
 ```
 
 **Closing gaps from audit:**
