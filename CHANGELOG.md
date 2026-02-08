@@ -6,6 +6,39 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.10.0] - 2026-02-08
+
+### Added
+- **`/ms:release-notes` command** — Renamed from `/ms:whats-new` and `/ms:update` for clarity
+- **`mockup-designer` agent** — Dedicated agent for HTML mockup generation extracted from design-phase
+- **Design direction workflow** — Extracted mockup generation to dedicated workflow for design-phase
+- **Subsystem metadata tagging** — `subsystem_hint` field on debug, adhoc, and phase artifacts for cross-cutting traceability
+- **CE knowledge compounding** — Enhanced todo frontmatter and pattern surfacing for Compound Engineering integration
+- **Curated learning extraction** — `/ms:complete-milestone` now extracts learnings during milestone completion
+- **Plan risk assessment** — `/ms:plan-phase` adds risk assessment and verification step before plan approval
+- **Context compliance verification** — Decision sections with compliance checks in context workflow
+- **Discuss/design recommendations in roadmap** — Roadmap routing now suggests discuss/design phases
+- **Last command tracking** — All `ms` commands track the last executed command in STATE.md
+- **Phase number normalization** — All phase commands normalize phase numbers consistently
+- **Progressive disclosure reference** — Context loading strategies guide for @-reference patterns
+
+### Changed
+- **New milestone discovery flow** — Refactored for collaborative goal exploration instead of prescriptive questioning
+- **Audit milestone redesign** — Standalone `TECH-DEBT.md` as single source of truth for tech debt tracking
+- **`/ms:do-work` renamed to `/ms:adhoc`** — Clearer naming for small adhoc work
+- **Plan-phase lazy loading** — Branch-specific references loaded on-demand instead of eagerly
+- **Verify-work lazy loading** — Branch-specific references loaded on-demand
+- **Routing blocks extracted to reference files** — On-demand reference files for routing logic
+- **Plan-phase delegation** — Plan-writing extracted to `ms-plan-writer` subagent for better context management
+
+### Fixed
+- **Audit milestone** — Added missing commit step and fixed filename typo
+- **Research-phase** — Added missing git commit step for RESEARCH.md artifact
+
+### Removed
+- **`ms-milestone-auditor` agent** — Dead agent deleted with references cleaned up
+- **`/ms:do-work` command name** — Renamed to `/ms:adhoc`
+
 ## [3.6.0] - 2026-01-29
 
 ### Added
@@ -305,7 +338,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.0...HEAD
+[3.10.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.6.0...v3.10.0
 [3.6.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.6.0
 [3.5.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.5.0
 [3.4.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.4.0
