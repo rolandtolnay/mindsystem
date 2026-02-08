@@ -48,6 +48,15 @@ Test: if removing a line would force the reader to reverse-engineer the answer f
 </critical>
 </preservation_rules>
 
+<context_efficiency>
+Git is the safety net. Write files directly — user reviews via `git diff` and reverts with `git checkout` if needed.
+
+- No draft files, no intermediate copies
+- No full-content previews in conversation — write and summarize
+- Process files sequentially: read one → transform → write → next
+- Confirm once before batch, not per file
+</context_efficiency>
+
 <process>
 
 ## 1. Determine Scope
@@ -71,9 +80,9 @@ Options:
 3. "Preview first" - Show me the file list
 ```
 
-## 2. Analyze Each File
+## 2. Assess and Confirm
 
-For each file, read it fully, then classify:
+Read each file. For each, note: filename, line count, file type, expected strategy.
 
 **File type determines transformation strategy:**
 
@@ -84,14 +93,38 @@ For each file, read it fully, then classify:
 | Setup/config | Step-by-step with code blocks | Keep code and commands, trim explanatory text |
 | API reference | Tables, parameters, signatures | Keep tables and signatures, trim descriptions |
 
-## 3. Transform
+Present a short assessment table, then confirm before any writes:
 
-For each file, apply transformations in this order:
+```
+| File | Lines | Type | Strategy |
+|------|-------|------|----------|
+| file.md | 120 | Rules | Aggressive compression |
+
+Total: N files
+```
+
+Use AskUserQuestion:
+```
+Question: "Proceed with optimizing these N file(s)? You can review all changes via git diff afterward."
+Header: "Confirm"
+Options:
+1. "Proceed" - Optimize all files
+2. "Skip some" - Let me exclude specific files
+3. "Cancel" - Don't make changes
+```
+
+## 3. Transform and Write
+
+Process each file sequentially. For each file:
+
+**Read → Transform → Write → Report one-liner.** Do not hold multiple files in memory.
+
+Apply transformations in this order:
 
 **Pass 1 — Delete**
 - Introductory paragraphs ("This document describes...", "Use these rules when...")
 - "Why" explanations and rationale paragraphs
-- Duplicate summary/recap sections at the end
+- Duplicate summary/recap sections that restate rules already covered
 - `---` horizontal rules between sections
 - Filler words and noise prefixes
 
@@ -108,7 +141,7 @@ For each file, apply transformations in this order:
 - Move violations/bad patterns to Anti-Patterns section (create if missing, only when file has rule-like content)
 - Ensure code blocks use language-specific fencing (```dart, ```yaml, etc.)
 
-**Pass 4 — Verify preservation**
+**Pass 4 — Verify completeness** (before writing)
 - Every checklist item still present (compressed, not deleted)
 - Every decision framework still present (terse, not deleted)
 - Every code block still present and complete
@@ -116,71 +149,34 @@ For each file, apply transformations in this order:
 - Default values and parameter behavior preserved
 - Alternative syntax variants preserved
 
-## 4. Present Changes
-
-For each file, present a summary:
-
+After writing each file, output a single summary line:
 ```
-## [filename]
-
-**Before:** N lines
-**After:** N lines (X% reduction)
-
-**Changes:**
-- [Category]: [what changed]
-- [Category]: [what changed]
-
-**Preserved:**
-- N code blocks unchanged
-- N table(s) with all rows
-- Checklist: N items (compressed from N lines)
+✓ file.md — 120 → 85 lines (29% reduction)
 ```
 
-If processing multiple files, present all summaries, then use AskUserQuestion:
+## 4. Final Report
 
-```
-Question: "Review the proposed changes. How should I proceed?"
-Header: "Apply Changes"
-Options:
-1. "Apply all" - Write all transformed files
-2. "Show me [filename]" - Preview a specific file before writing
-3. "Skip [filename]" - Exclude specific files
-4. "Cancel" - Don't write any changes
-```
-
-For a single file, show the full transformed content directly, then ask:
-
-```
-Question: "Review the transformed file above. Should I apply it?"
-Header: "Apply"
-Options:
-1. "Apply" - Write the file
-2. "Needs adjustments" - I'll describe what to change
-3. "Too aggressive" - Preserve more content
-4. "Cancel" - Keep original
-```
-
-## 5. Apply and Report
-
-Write each approved file. Report:
+After all files are written:
 
 ```
 Optimized N file(s):
 
 | File | Before | After | Reduction |
 |------|--------|-------|-----------|
-| filename.md | X lines | Y lines | Z% |
+| file.md | X lines | Y lines | Z% |
 
-All code blocks, checklists, tables, and decision frameworks preserved.
+Review changes: `git diff`
+Revert all: `git checkout -- <path>`
 ```
 
 </process>
 
 <success_criteria>
 - All target files read and classified by type
+- User confirmed before any writes
 - Transformations applied following the correct strategy per file type
 - Preservation rules verified — no checklists, code blocks, tables, or decision frameworks removed
-- User reviewed and approved changes before writing
-- Files written and line count reported
+- Files written directly (no drafts)
+- Final report with line counts and git commands
 - No placeholder text or broken markdown in output
 </success_criteria>
