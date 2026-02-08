@@ -1,0 +1,40 @@
+{
+  "backends/rest": {
+    "version": "0.1.0",
+    "description": "Production-ready REST API patterns with Dio, Riverpod, and comprehensive error handling",
+    "status": "extracted",
+    "files": [
+      "SKILL.md",
+      "references/api-infrastructure.md",
+      "references/dto-entity.md",
+      "references/error-handling.md"
+    ],
+    "extracted_from": "forgeblast",
+    "extraction_date": "2026-01-17",
+    "dependencies": [
+      "dio",
+      "riverpod_annotation",
+      "flutter_riverpod",
+      "json_annotation",
+      "json_serializable",
+      "equatable",
+      "easy_localization",
+      "flutter_secure_storage",
+      "logging"
+    ],
+    "patterns_included": [
+      "Dio configuration with interceptor chain",
+      "Auth token injection and 401 handling",
+      "Abstract API interface with mock support",
+      "Response parsing extensions (single, wrapped, list)",
+      "Exception hierarchy with localization",
+      "Network error classification interceptor",
+      "Provider error listener extension",
+      "json_serializable with Equatable",
+      "Enum with @JsonValue",
+      "Pagination response DTOs",
+      "AsyncValue.guard provider pattern",
+      "Provider failure observer for crash reporting"
+    ]
+  }
+}
