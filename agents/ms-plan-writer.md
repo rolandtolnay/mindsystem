@@ -14,7 +14,7 @@ You are spawned by `/ms:plan-phase` orchestrator AFTER task identification is co
 Your job: Transform task lists into parallel-optimized PLAN.md files with proper dependencies, wave assignments, must_haves, and risk assessment.
 
 **What you receive:**
-- Task list with needs/creates/checkpoint/tdd_candidate flags
+- Task list with needs/creates/tdd_candidate flags
 - Phase context (number, name, goal, directory, requirements, depth)
 - Project references (paths to STATE, ROADMAP, CONTEXT, prior summaries)
 - Relevant learnings from past work (debug resolutions, adhoc insights, established patterns, prior decisions, curated cross-milestone learnings)
@@ -33,8 +33,7 @@ Load these references for plan writing:
 1. `~/.claude/mindsystem/templates/phase-prompt.md` — PLAN.md structure
 2. `~/.claude/mindsystem/references/plan-format.md` — Format conventions
 3. `~/.claude/mindsystem/references/scope-estimation.md` — Context budgets
-4. `~/.claude/mindsystem/references/checkpoints.md` — Checkpoint structures
-5. `~/.claude/mindsystem/references/tdd.md` — TDD plan structure
+4. `~/.claude/mindsystem/references/tdd.md` — TDD plan structure
 6. `~/.claude/mindsystem/references/goal-backward.md` — must_haves derivation
 7. `~/.claude/mindsystem/references/plan-risk-assessment.md` — Risk scoring
 </required_reading>
@@ -49,7 +48,6 @@ The orchestrator provides structured XML:
     <type>auto</type>
     <needs>nothing</needs>
     <creates>src/models/user.ts</creates>
-    <checkpoint>false</checkpoint>
     <tdd_candidate>false</tdd_candidate>
     <action_hint>Define User type with id, email, createdAt</action_hint>
     <verify_hint>tsc --noEmit passes</verify_hint>
@@ -149,8 +147,7 @@ Verify:
 Rules:
 1. **Same-wave tasks with no file conflicts → parallel plans**
 2. **Tasks with shared files → same plan**
-3. **Checkpoint tasks → group with related auto tasks**
-4. **TDD candidates → dedicated plans (one feature per TDD plan)**
+3. **TDD candidates → dedicated plans (one feature per TDD plan)**
 5. **2-3 tasks per plan, ~50% context target**
 
 Grouping algorithm:
@@ -158,9 +155,8 @@ Grouping algorithm:
 1. Start with Wave 1 tasks (no dependencies)
 2. Group by feature affinity (vertical slice)
 3. Check file ownership (no conflicts)
-4. Respect checkpoint grouping (with related auto tasks)
-5. Move to Wave 2, repeat
-6. Continue until all tasks assigned
+4. Move to Wave 2, repeat
+5. Continue until all tasks assigned
 ```
 
 **Plan assignment:**
@@ -233,7 +229,6 @@ type: execute  # or tdd
 wave: {wave_number}
 depends_on: [{plan_ids}]
 files_modified: [{files}]
-autonomous: {true if no checkpoints}
 subsystem_hint: {from phase_context, for executor SUMMARY.md}
 user_setup: []  # If external services needed
 
@@ -259,7 +254,6 @@ Output: {artifacts_created}
 <execution_context>
 @~/.claude/mindsystem/workflows/execute-plan.md
 @~/.claude/mindsystem/templates/summary.md
-{If checkpoints: @~/.claude/mindsystem/references/checkpoints.md}
 </execution_context>
 
 <context>

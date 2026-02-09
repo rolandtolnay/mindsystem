@@ -15,7 +15,7 @@ Context is consumed at read time, not at file-exist time. A file on disk costs n
 ```markdown
 <execution_context>
 @~/.claude/mindsystem/workflows/execute-phase.md
-@~/.claude/mindsystem/references/checkpoints.md    <!-- always loaded -->
+@~/.claude/mindsystem/templates/summary.md          <!-- always loaded -->
 </execution_context>
 ```
 

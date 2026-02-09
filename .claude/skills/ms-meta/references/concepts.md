@@ -86,73 +86,6 @@ What to build and why
 **The test:** Can Claude read the plan and start implementing without asking clarifying questions? If not, task is too vague.
 </plans_as_prompts>
 
-<checkpoint_system>
-## Checkpoint System
-
-**Core principle:** Claude automates everything with CLI/API. Checkpoints are for verification and decisions, not manual work.
-
-**Checkpoint types (by frequency):**
-
-| Type | Usage | Purpose |
-|------|-------|---------|
-| `checkpoint:human-verify` | 90% | Human confirms visual/UX after Claude built it |
-| `checkpoint:decision` | 9% | Human makes architecture/technology choice |
-| `checkpoint:human-action` | 1% | Truly unavoidable manual (email links, 2FA codes) |
-
-**Human-verify example:**
-```xml
-<task type="auto">
-  <name>Deploy to Vercel</name>
-  <action>Run `vercel --yes`. Capture URL.</action>
-  <verify>vercel ls shows deployment, curl returns 200</verify>
-</task>
-
-<task type="checkpoint:human-verify" gate="blocking">
-  <what-built>Deployed to https://myapp.vercel.app</what-built>
-  <how-to-verify>
-    Visit URL. Confirm:
-    - Homepage loads
-    - No console errors
-    - Navigation works
-  </how-to-verify>
-  <resume-signal>Type "approved" or describe issues</resume-signal>
-</task>
-```
-
-**Decision example:**
-```xml
-<task type="checkpoint:decision" gate="blocking">
-  <decision>Select authentication provider</decision>
-  <context>Need user auth. Three options with different tradeoffs.</context>
-  <options>
-    <option id="supabase">
-      <name>Supabase Auth</name>
-      <pros>Built-in, free tier</pros>
-      <cons>Less customizable</cons>
-    </option>
-    <!-- more options -->
-  </options>
-  <resume-signal>Select: supabase, clerk, or nextauth</resume-signal>
-</task>
-```
-
-**Authentication gates:**
-
-When Claude hits auth error during automation:
-1. STOP (don't retry repeatedly)
-2. Create checkpoint:human-action dynamically
-3. User authenticates
-4. Claude retries
-5. Continues
-
-This is NOT a failure — it's expected flow for first-time tool use.
-
-**Anti-patterns:**
-- Asking human to deploy (use CLI)
-- Asking human to create .env (use Write tool)
-- Checkpoint after every task (verification fatigue)
-</checkpoint_system>
-
 <deviation_rules>
 ## Deviation Rules
 
@@ -176,7 +109,7 @@ While executing, Claude discovers unplanned work. Rules determine what to do aut
 
 **Rule 4: Ask about architectural changes**
 - Trigger: Fix requires significant structural change (new tables, new services, changing patterns)
-- Action: STOP, return checkpoint, wait for decision
+- Action: STOP, report to orchestrator via AskUserQuestion
 - User decision required
 
 **Priority:** If Rule 4 applies, STOP. Otherwise auto-fix with Rules 1-3.
@@ -212,7 +145,7 @@ depends_on: []
 - Plans with no dependencies → Wave 1
 - Plans depending on wave 1 plans → Wave 2
 - Plans depending on wave 2 plans → Wave 3
-- Plans with `autonomous: false` → Normal wave but pause at checkpoints
+- Wave number = max(dependency wave numbers) + 1
 
 **Benefits:**
 - Independent work runs in parallel

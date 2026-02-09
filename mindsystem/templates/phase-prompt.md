@@ -16,7 +16,6 @@ type: execute
 wave: N                     # Execution wave (1, 2, 3...). Pre-computed at plan time.
 depends_on: []              # Plan IDs this plan requires (e.g., ["01-01"]).
 files_modified: []          # Files this plan modifies.
-autonomous: true            # false if plan has checkpoints requiring user interaction
 subsystem_hint: ""          # From planner, for executor SUMMARY.md
 user_setup: []              # Human-required setup Claude cannot automate (see below)
 
@@ -37,8 +36,6 @@ Output: [What artifacts will be created]
 <execution_context>
 @~/.claude/mindsystem/workflows/execute-plan.md
 @~/.claude/mindsystem/templates/summary.md
-[If plan contains checkpoint tasks (type="checkpoint:*"), add:]
-@~/.claude/mindsystem/references/checkpoints.md
 </execution_context>
 
 <context>
@@ -71,35 +68,6 @@ Output: [What artifacts will be created]
   <action>[Specific implementation]</action>
   <verify>[Command or check]</verify>
   <done>[Acceptance criteria]</done>
-</task>
-
-<task type="checkpoint:decision" gate="blocking">
-  <decision>[What needs deciding]</decision>
-  <context>[Why this decision matters]</context>
-  <options>
-    <option id="option-a">
-      <name>[Option name]</name>
-      <pros>[Benefits and advantages]</pros>
-      <cons>[Tradeoffs and limitations]</cons>
-    </option>
-    <option id="option-b">
-      <name>[Option name]</name>
-      <pros>[Benefits and advantages]</pros>
-      <cons>[Tradeoffs and limitations]</cons>
-    </option>
-  </options>
-  <resume-signal>[How to indicate choice - "Select: option-a or option-b"]</resume-signal>
-</task>
-
-<task type="checkpoint:human-verify" gate="blocking">
-  <what-built>[What Claude just built that needs verification]</what-built>
-  <how-to-verify>
-    1. Run: [command to start dev server/app]
-    2. Visit: [URL to check]
-    3. Test: [Specific interactions]
-    4. Confirm: [Expected behaviors]
-  </how-to-verify>
-  <resume-signal>Type "approved" to continue, or describe issues to fix</resume-signal>
 </task>
 
 </tasks>
@@ -136,7 +104,6 @@ After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 | `wave` | Yes | Execution wave number (1, 2, 3...). Pre-computed at plan time. |
 | `depends_on` | Yes | Array of plan IDs this plan requires. |
 | `files_modified` | Yes | Files this plan touches. |
-| `autonomous` | Yes | `true` if no checkpoints, `false` if has checkpoints |
 | `subsystem_hint` | No | Subsystem from config.json, assigned by planner for executor to use in SUMMARY.md |
 | `user_setup` | No | Array of human-required setup items (external services) |
 | `must_haves` | Yes | Goal-backward verification criteria (see below) |
@@ -158,19 +125,16 @@ After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 wave: 1
 depends_on: []
 files_modified: [src/models/user.ts, src/api/users.ts]
-autonomous: true
 
 # Plan 02 - Product feature (no overlap with Plan 01)
 wave: 1
 depends_on: []
 files_modified: [src/models/product.ts, src/api/products.ts]
-autonomous: true
 
 # Plan 03 - Order feature (no overlap)
 wave: 1
 depends_on: []
 files_modified: [src/models/order.ts, src/api/orders.ts]
-autonomous: true
 ```
 
 All three run in parallel (Wave 1) - no dependencies, no file conflicts.
@@ -182,28 +146,15 @@ All three run in parallel (Wave 1) - no dependencies, no file conflicts.
 wave: 1
 depends_on: []
 files_modified: [src/lib/auth.ts, src/middleware/auth.ts]
-autonomous: true
 
 # Plan 02 - Protected features (needs auth)
 wave: 2
 depends_on: ["01"]
 files_modified: [src/features/dashboard.ts]
-autonomous: true
 ```
 
 Plan 02 in Wave 2 waits for Plan 01 in Wave 1 - genuine dependency on auth types/middleware.
 
-**Checkpoint plan:**
-
-```yaml
-# Plan 03 - UI with verification
-wave: 3
-depends_on: ["01", "02"]
-files_modified: [src/components/Dashboard.tsx]
-autonomous: false  # Has checkpoint:human-verify
-```
-
-Wave 3 runs after Waves 1 and 2. Pauses at checkpoint, orchestrator presents to user, resumes on approval.
 
 </parallel_examples>
 
@@ -283,19 +234,12 @@ See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 
 ## Task Types
 
-| Type | Use For | Autonomy |
-|------|---------|----------|
-| `auto` | Everything Claude can do independently | Fully autonomous |
-| `checkpoint:human-verify` | Visual/functional verification | Pauses, returns to orchestrator |
-| `checkpoint:decision` | Implementation choices | Pauses, returns to orchestrator |
-| `checkpoint:human-action` | Truly unavoidable manual steps (rare) | Pauses, returns to orchestrator |
+| Type | Use For |
+|------|---------|
+| `auto` | Everything Claude can do independently (default) |
+| `tdd` | TDD features with RED → GREEN → REFACTOR cycle |
 
-**Checkpoint behavior in parallel execution:**
-- Plan runs until checkpoint
-- Agent returns with checkpoint details + agent_id
-- Orchestrator presents to user
-- User responds
-- Orchestrator resumes agent with `resume: agent_id`
+**Decisions:** Resolve during planning via AskUserQuestion, not during execution. For purely technical choices, make the decision and document it in the plan's objective.
 
 ---
 
@@ -311,7 +255,6 @@ type: execute
 wave: 1
 depends_on: []
 files_modified: [src/features/user/model.ts, src/features/user/api.ts, src/features/user/UserList.tsx]
-autonomous: true
 ---
 
 <objective>
@@ -360,76 +303,6 @@ After completion, create `.planning/phases/03-features/03-01-SUMMARY.md`
 </output>
 ```
 
-**Plan with checkpoint (non-autonomous):**
-
-```markdown
----
-phase: 03-features
-plan: 03
-type: execute
-wave: 2
-depends_on: ["03-01", "03-02"]
-files_modified: [src/components/Dashboard.tsx]
-autonomous: false
----
-
-<objective>
-Build dashboard with visual verification.
-
-Purpose: Integrate user and product features into unified view.
-Output: Working dashboard component.
-</objective>
-
-<execution_context>
-@~/.claude/mindsystem/workflows/execute-plan.md
-@~/.claude/mindsystem/templates/summary.md
-@~/.claude/mindsystem/references/checkpoints.md
-</execution_context>
-
-<context>
-@.planning/PROJECT.md
-@.planning/ROADMAP.md
-@.planning/phases/03-features/03-01-SUMMARY.md
-@.planning/phases/03-features/03-02-SUMMARY.md
-</context>
-
-<tasks>
-<task type="auto">
-  <name>Task 1: Build Dashboard layout</name>
-  <files>src/components/Dashboard.tsx</files>
-  <action>Create responsive grid with UserList and ProductList components. Use Tailwind for styling.</action>
-  <verify>npm run build succeeds</verify>
-  <done>Dashboard renders without errors</done>
-</task>
-
-<task type="checkpoint:human-verify" gate="blocking">
-  <what-built>Responsive dashboard with user and product sections</what-built>
-  <how-to-verify>
-    1. Run: npm run dev
-    2. Visit: http://localhost:3000/dashboard
-    3. Desktop: Verify two-column grid
-    4. Mobile: Verify stacked layout
-    5. Check: No layout shift, no scroll issues
-  </how-to-verify>
-  <resume-signal>Type "approved" or describe issues</resume-signal>
-</task>
-</tasks>
-
-<verification>
-- [ ] npm run build succeeds
-- [ ] Visual verification passed
-</verification>
-
-<success_criteria>
-- All tasks completed
-- User approved visual layout
-</success_criteria>
-
-<output>
-After completion, create `.planning/phases/03-features/03-03-SUMMARY.md`
-</output>
-```
-
 ---
 
 ## Anti-Patterns
@@ -446,14 +319,6 @@ Plan 02: All APIs (depends on 01)
 Plan 03: All UIs (depends on 02)
 ```
 
-**Bad: Missing autonomy flag**
-```yaml
-# Has checkpoint but no autonomous: false
-depends_on: []
-files_modified: [...]
-# autonomous: ???  <- Missing!
-```
-
 **Bad: Vague tasks**
 ```xml
 <task type="auto">
@@ -467,10 +332,9 @@ files_modified: [...]
 ## Guidelines
 
 - Always use XML structure for Claude parsing
-- Include `wave`, `depends_on`, `files_modified`, `autonomous` in every plan
+- Include `wave`, `depends_on`, `files_modified` in every plan
 - Prefer vertical slices over horizontal layers
 - Only reference prior SUMMARYs when genuinely needed
-- Group checkpoints with related auto tasks in same plan
 - 2-3 tasks per plan, ~50% context max
 
 ---

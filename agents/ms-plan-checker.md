@@ -101,7 +101,6 @@ issue:
 | Type | Files | Action | Verify | Done |
 |------|-------|--------|--------|------|
 | `auto` | Required | Required | Required | Required |
-| `checkpoint:*` | N/A | N/A | N/A | N/A |
 | `tdd` | Required | Behavior + Implementation | Test commands | Expected outcomes |
 
 **Red flags:**
@@ -330,7 +329,7 @@ done
 ```
 
 **Parse from each plan:**
-- Frontmatter (phase, plan, wave, depends_on, files_modified, autonomous, must_haves)
+- Frontmatter (phase, plan, wave, depends_on, files_modified, must_haves)
 - Objective
 - Tasks (type, name, files, action, verify, done)
 - Verification criteria
@@ -389,7 +388,7 @@ grep -B5 "</task>" "$PHASE_DIR"/*-PLAN.md | grep -v "<verify>"
 ```
 
 **Check:**
-- Task type is valid (auto, checkpoint:*, tdd)
+- Task type is valid (auto, tdd)
 - Auto tasks have: files, action, verify, done
 - Action is specific (not "implement auth")
 - Verify is runnable (command or check)

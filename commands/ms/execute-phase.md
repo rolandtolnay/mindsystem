@@ -173,15 +173,6 @@ All three run in parallel. Task tool blocks until all complete.
 **No polling.** No background agents. No TaskOutput loops.
 </wave_execution>
 
-<checkpoint_handling>
-Plans with `autonomous: false` have checkpoints. The execute-phase.md workflow handles the full checkpoint flow:
-- Subagent pauses at checkpoint, returns structured state
-- Orchestrator presents to user, collects response
-- Spawns fresh continuation agent (not resume)
-
-See `@~/.claude/mindsystem/workflows/execute-phase.md` step `checkpoint_handling` for complete details.
-</checkpoint_handling>
-
 <deviation_rules>
 During execution, handle discoveries automatically:
 

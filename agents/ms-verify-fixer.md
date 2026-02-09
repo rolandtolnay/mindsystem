@@ -109,7 +109,7 @@ Use the `{phase}-uat` scope so patches can find UAT fixes later.
 
 <constraints>
 - Do NOT modify mock code (it's stashed)
-- Do NOT make architectural changes (return checkpoint instead)
+- Do NOT make architectural changes (stop and report the issue)
 - Do NOT fix unrelated issues you discover (note them for later)
 - Do commit your fix before returning
 - Do use `fix({phase}-uat):` commit message format

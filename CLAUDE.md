@@ -128,7 +128,6 @@ Typically use outer XML containers related to filename, but structure varies.
 
 Examples:
 - `principles.md` → `<principles>...</principles>`
-- `checkpoints.md` → `<overview>` then `<checkpoint_types>`
 - `plan-format.md` → `<overview>` then `<core_principle>`
 
 Internal organization varies — semantic sub-containers, markdown headers within XML, code examples.
@@ -175,32 +174,8 @@ Build authentication system
 ```
 
 **Task types:**
-- `type="auto"` — Claude executes autonomously
-- `type="checkpoint:human-verify"` — User must verify
-- `type="checkpoint:decision"` — User must choose
-
-### Checkpoint Structure
-
-```xml
-<task type="checkpoint:human-verify" gate="blocking">
-  <what-built>Description of what was built</what-built>
-  <how-to-verify>Numbered steps for user</how-to-verify>
-  <resume-signal>Text telling user how to continue</resume-signal>
-</task>
-
-<task type="checkpoint:decision" gate="blocking">
-  <decision>What needs deciding</decision>
-  <context>Why this matters</context>
-  <options>
-    <option id="identifier">
-      <name>Option Name</name>
-      <pros>Benefits</pros>
-      <cons>Tradeoffs</cons>
-    </option>
-  </options>
-  <resume-signal>Selection instruction</resume-signal>
-</task>
-```
+- `type="auto"` — Claude executes autonomously (default)
+- `type="tdd"` — TDD features with RED → GREEN → REFACTOR cycle
 
 ---
 

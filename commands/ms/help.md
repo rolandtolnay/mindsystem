@@ -194,7 +194,6 @@ Execute all unexecuted plans in a phase with wave-based parallelization.
 
 - Use when: the phase has PLAN.md files and you want Mindsystem to run them (including verification and possible gap-closure loop).
 - Spawns parallel agents for independent plans
-- Handles checkpoints with user interaction
 - Resumes automatically from interrupted execution
 - Creates SUMMARY.md for each completed plan
 - Respects max_concurrent_agents from config.json
@@ -203,7 +202,6 @@ Usage: `/ms:execute-phase 5`
 
 Options (via `.planning/config.json` parallelization section):
 - `max_concurrent_agents`: Limit parallel agents (default: 3)
-- `skip_checkpoints`: Skip human checkpoints in background (default: true)
 - `min_plans_for_parallel`: Minimum plans to trigger parallelization (default: 2)
 
 ### Verification

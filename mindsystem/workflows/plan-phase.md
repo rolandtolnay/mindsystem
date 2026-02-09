@@ -18,7 +18,7 @@ Decimal phases enable urgent work insertion without renumbering:
 1. .planning/ROADMAP.md
 2. .planning/PROJECT.md
 
-**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, checkpoints.md, goal-backward.md, plan-risk-assessment.md) are loaded by the ms-plan-writer subagent, not main context. Lighter references (checkpoint-detection.md, tdd.md) are loaded on demand during task breakdown.
+**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, goal-backward.md, plan-risk-assessment.md) are loaded by the ms-plan-writer subagent, not main context. Lighter references (tdd.md) are loaded on demand during task breakdown.
 </required_reading>
 
 <purpose>
@@ -184,7 +184,6 @@ type: execute
 wave: 1               # Gap closures typically single wave
 depends_on: []        # Usually independent of each other
 files_modified: [...]
-autonomous: true
 gap_closure: true     # Flag for tracking
 ---
 ```
@@ -450,9 +449,9 @@ For each potential task, ask:
 3. **Can this run independently?** (no dependencies = Wave 1 candidate)
 
 **Standard tasks need:**
-- **Type**: auto, checkpoint:human-verify, checkpoint:decision (human-action rarely needed)
+- **Type**: auto
 - **Task name**: Clear, action-oriented
-- **Files**: Which files created/modified (for auto tasks)
+- **Files**: Which files created/modified
 - **Action hint**: Brief implementation guidance
 - **Verify hint**: How to prove it worked
 - **Done hint**: Acceptance criteria
@@ -480,11 +479,9 @@ Standard tasks (remain in standard plans):
 
 Read `~/.claude/mindsystem/references/tdd.md` now for TDD criteria and plan structure.
 
-**Checkpoints:** Visual/functional verification → checkpoint:human-verify. Implementation choices → checkpoint:decision. Manual action (email, 2FA) → checkpoint:human-action (rare).
+**Decisions:** If you identify a task that requires choosing between approaches (which auth provider, which database, etc.), use AskUserQuestion to resolve it now. Don't defer decisions to execution. For purely technical choices where the user hasn't expressed preference, make the decision and document it in the plan's objective.
 
-**Critical:** If external resource has CLI/API (Vercel, Stripe, etc.), use type="auto" to automate. Only checkpoint for verification AFTER automation.
-
-Read `~/.claude/mindsystem/references/checkpoint-detection.md` now for detection rules.
+**Critical:** If external resource has CLI/API (Vercel, Stripe, etc.), use type="auto" to automate.
 
 **User setup detection:** For tasks involving external services, identify human-required configuration:
 
@@ -506,7 +503,6 @@ Note external services for risk scoring.
     <type>auto</type>
     <needs>nothing</needs>
     <creates>src/models/user.ts</creates>
-    <checkpoint>false</checkpoint>
     <tdd_candidate>false</tdd_candidate>
     <action_hint>Define User type with id, email, createdAt</action_hint>
     <verify_hint>tsc --noEmit passes</verify_hint>
@@ -517,22 +513,10 @@ Note external services for risk scoring.
     <type>auto</type>
     <needs>src/models/user.ts</needs>
     <creates>src/app/api/auth/login/route.ts</creates>
-    <checkpoint>false</checkpoint>
     <tdd_candidate>true</tdd_candidate>
     <action_hint>POST endpoint with bcrypt validation</action_hint>
     <verify_hint>curl returns 200 with valid credentials</verify_hint>
     <done_hint>Login works with valid credentials</done_hint>
-  </task>
-  <task id="3">
-    <name>Verify login flow</name>
-    <type>checkpoint:human-verify</type>
-    <needs>src/app/api/auth/login/route.ts</needs>
-    <creates>nothing</creates>
-    <checkpoint>true</checkpoint>
-    <tdd_candidate>false</tdd_candidate>
-    <action_hint>N/A</action_hint>
-    <verify_hint>User tests login manually</verify_hint>
-    <done_hint>User approves login flow</done_hint>
   </task>
 </task_list>
 ```
@@ -540,10 +524,9 @@ Note external services for risk scoring.
 Each task captures:
 - `id`: Sequential identifier
 - `name`: Action-oriented task name
-- `type`: auto, checkpoint:human-verify, checkpoint:decision, checkpoint:human-action
+- `type`: auto
 - `needs`: Files/types this task requires (or "nothing")
 - `creates`: Files/types this task produces (or "nothing")
-- `checkpoint`: true if requires user interaction
 - `tdd_candidate`: true if should be TDD plan
 - `action_hint`: Brief implementation guidance (subagent expands)
 - `verify_hint`: How to verify completion
@@ -790,7 +773,7 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Tasks identified with needs/creates dependencies
 - [ ] Task list handed off to ms-plan-writer
 - [ ] PLAN file(s) created by subagent with XML structure
-- [ ] Each plan: depends_on, files_modified, autonomous in frontmatter
+- [ ] Each plan: depends_on, files_modified in frontmatter
 - [ ] Each plan: must_haves derived (truths, artifacts, key_links)
 - [ ] Each plan: 2-3 tasks (~50% context)
 - [ ] Wave structure maximizes parallelism

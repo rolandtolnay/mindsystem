@@ -41,7 +41,7 @@ This philosophy resonated. GSD proved that spec-driven development could be simp
 
 Mindsystem takes that foundation and optimizes it for a specific kind of user: **Claude Code power users who ship production code**. You're not vibe coding. You want speed, but you also want control, reviewable diffs, and quality gates. You care about what the output code looks like.
 
-Where GSD went broad, Mindsystem goes deep - more verification, more review checkpoints, more ways to inspect and override. Less magic, more engineering.
+Where GSD went broad, Mindsystem goes deep — more verification, more quality gates, more ways to inspect and override. Less magic, more engineering.
 
 ### What you get
 

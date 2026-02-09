@@ -280,11 +280,10 @@ Mindsystem creates `.planning/` directory in user projects:
 
 <task_types>
 ```xml
-<task type="auto">           <!-- Claude executes autonomously -->
-<task type="checkpoint:human-verify">  <!-- Human confirms visual/UX -->
-<task type="checkpoint:decision">      <!-- Human makes choice -->
-<task type="checkpoint:human-action">  <!-- Truly unavoidable manual (rare) -->
+<task type="auto">           <!-- Claude executes autonomously (default) -->
 ```
+
+Decisions are resolved during planning via AskUserQuestion, not during execution.
 </task_types>
 
 <plan_anatomy>
@@ -296,7 +295,6 @@ type: execute
 wave: N           # Execution wave (pre-computed)
 depends_on: []    # Prior plans this requires
 files_modified: []
-autonomous: true  # false if has checkpoints
 ---
 ```
 
@@ -331,7 +329,7 @@ Executor handles unplanned discoveries automatically:
 - **Rule 1:** Auto-fix bugs (no permission needed)
 - **Rule 2:** Auto-add missing critical functionality (security, validation)
 - **Rule 3:** Auto-fix blocking issues (missing deps, wrong types)
-- **Rule 4:** Ask about architectural changes (stop, return checkpoint)
+- **Rule 4:** Ask about architectural changes (stop, report to orchestrator)
 </deviation_rules>
 
 <file_conventions>
@@ -421,7 +419,7 @@ Skill references in `.claude/skills/ms-meta/references/`:
 
 | Reference | Purpose |
 |-----------|---------|
-| concepts.md | Plans as prompts, checkpoints, deviation rules, wave execution, state management, SUMMARY system, atomic commits, TDD |
+| concepts.md | Plans as prompts, deviation rules, wave execution, state management, SUMMARY system, atomic commits, TDD |
 | architecture.md | System architecture and component relationships |
 | execution-model.md | How plan execution works in detail |
 | verification-deep.md | Goal-backward verification patterns |

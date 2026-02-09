@@ -21,7 +21,6 @@ type: execute
 wave: N                     # Execution wave (1, 2, 3...). Pre-computed at plan time.
 depends_on: []              # Plan IDs this plan requires (e.g., ["01-01"])
 files_modified: []          # Files this plan modifies
-autonomous: true            # false if plan has checkpoints
 ---
 ```
 
@@ -33,12 +32,9 @@ autonomous: true            # false if plan has checkpoints
 | `wave` | Yes | Execution wave number (1, 2, 3...). Pre-computed during planning. |
 | `depends_on` | Yes | Array of plan IDs this plan requires. |
 | `files_modified` | Yes | Files this plan touches. |
-| `autonomous` | Yes | `true` if no checkpoints, `false` if has checkpoints |
 | `subsystem_hint` | No | Subsystem from config.json, assigned by planner for executor to use in SUMMARY.md |
 
 **Wave is pre-computed:** `/ms:plan-phase` assigns wave numbers based on `depends_on`. `/ms:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
-
-**Checkpoint handling:** Plans with `autonomous: false` require user interaction. They run in their assigned wave but pause at checkpoints.
 </frontmatter>
 
 <prompt_structure>
@@ -52,7 +48,6 @@ type: execute
 wave: N
 depends_on: []
 files_modified: [path/to/file.ts]
-autonomous: true
 ---
 
 <objective>
@@ -64,8 +59,6 @@ Output: [...]
 <execution_context>
 @~/.claude/mindsystem/workflows/execute-plan.md
 @~/.claude/mindsystem/templates/summary.md
-[If checkpoints exist:]
-@~/.claude/mindsystem/references/checkpoints.md
 </execution_context>
 
 <context>
@@ -86,21 +79,6 @@ Output: [...]
   <done>[criteria]</done>
 </task>
 
-<task type="checkpoint:human-verify" gate="blocking">
-  <what-built>[what Claude automated]</what-built>
-  <how-to-verify>[numbered verification steps]</how-to-verify>
-  <resume-signal>[how to continue - "approved" or describe issues]</resume-signal>
-</task>
-
-<task type="checkpoint:decision" gate="blocking">
-  <decision>[what needs deciding]</decision>
-  <context>[why this matters]</context>
-  <options>
-    <option id="option-a"><name>[Name]</name><pros>[pros]</pros><cons>[cons]</cons></option>
-    <option id="option-b"><name>[Name]</name><pros>[pros]</pros><cons>[cons]</cons></option>
-  </options>
-  <resume-signal>[how to indicate choice]</resume-signal>
-</task>
 </tasks>
 
 <verification>
@@ -186,114 +164,9 @@ Tasks have a `type` attribute that determines how they execute:
 Use for: Everything Claude can do independently (code, tests, builds, file operations).
 </type>
 
-<type name="checkpoint:human-action">
-**RARELY USED** - Only for actions with NO CLI/API. Claude automates everything possible first.
+**Golden rule:** If Claude CAN automate it, Claude MUST automate it. All tasks use `type="auto"`.
 
-**Structure:**
-
-```xml
-<task type="checkpoint:human-action" gate="blocking">
-  <action>[Unavoidable manual step - email link, 2FA code]</action>
-  <instructions>
-    [What Claude already automated]
-    [The ONE thing requiring human action]
-  </instructions>
-  <verification>[What Claude can check afterward]</verification>
-  <resume-signal>[How to continue]</resume-signal>
-</task>
-```
-
-Use ONLY for: Email verification links, SMS 2FA codes, manual approvals with no API, 3D Secure payment flows.
-
-Do NOT use for: Anything with a CLI (Vercel, Stripe, Upstash, Railway, GitHub), builds, tests, file creation, deployments.
-
-**Execution:** Claude automates everything with CLI/API, stops only for truly unavoidable manual steps.
-</type>
-
-<type name="checkpoint:human-verify">
-**Human must verify Claude's work** - Visual checks, UX testing.
-
-**Structure:**
-
-```xml
-<task type="checkpoint:human-verify" gate="blocking">
-  <what-built>Responsive dashboard layout</what-built>
-  <how-to-verify>
-    1. Run: npm run dev
-    2. Visit: http://localhost:3000/dashboard
-    3. Desktop (>1024px): Verify sidebar left, content right
-    4. Tablet (768px): Verify sidebar collapses to hamburger
-    5. Mobile (375px): Verify single column, bottom nav
-    6. Check: No layout shift, no horizontal scroll
-  </how-to-verify>
-  <resume-signal>Type "approved" or describe issues</resume-signal>
-</task>
-```
-
-Use for: UI/UX verification, visual design checks, animation smoothness, accessibility testing.
-
-**Execution:** Claude builds the feature, stops, provides testing instructions, waits for approval/feedback.
-</type>
-
-<type name="checkpoint:decision">
-**Human must make implementation choice** - Direction-setting decisions.
-
-**Structure:**
-
-```xml
-<task type="checkpoint:decision" gate="blocking">
-  <decision>Select authentication provider</decision>
-  <context>We need user authentication. Three approaches with different tradeoffs:</context>
-  <options>
-    <option id="supabase">
-      <name>Supabase Auth</name>
-      <pros>Built-in with Supabase, generous free tier</pros>
-      <cons>Less customizable UI, tied to ecosystem</cons>
-    </option>
-    <option id="clerk">
-      <name>Clerk</name>
-      <pros>Beautiful pre-built UI, best DX</pros>
-      <cons>Paid after 10k MAU</cons>
-    </option>
-    <option id="nextauth">
-      <name>NextAuth.js</name>
-      <pros>Free, self-hosted, maximum control</pros>
-      <cons>More setup, you manage security</cons>
-    </option>
-  </options>
-  <resume-signal>Select: supabase, clerk, or nextauth</resume-signal>
-</task>
-```
-
-Use for: Technology selection, architecture decisions, design choices, feature prioritization.
-
-**Execution:** Claude presents options with balanced pros/cons, waits for decision, proceeds with chosen direction.
-</type>
-
-**When to use checkpoints:**
-
-- Visual/UX verification (after Claude builds) → `checkpoint:human-verify`
-- Implementation direction choice → `checkpoint:decision`
-- Truly unavoidable manual actions (email links, 2FA) → `checkpoint:human-action` (rare)
-
-**When NOT to use checkpoints:**
-
-- Anything with CLI/API (Claude automates it) → `type="auto"`
-- Deployments (Vercel, Railway, Fly) → `type="auto"` with CLI
-- Creating resources (Upstash, Stripe, GitHub) → `type="auto"` with CLI/API
-- File operations, tests, builds → `type="auto"`
-
-**Golden rule:** If Claude CAN automate it, Claude MUST automate it.
-
-**Checkpoint impact on parallelization:**
-- Plans with checkpoints set `autonomous: false` in frontmatter
-- Non-autonomous plans execute after parallel wave or in main context
-- Subagent pauses at checkpoint, returns to orchestrator
-- Orchestrator presents checkpoint to user
-- User responds
-- Orchestrator resumes agent with `resume: agent_id`
-
-See `./checkpoints.md` for comprehensive checkpoint guidance.
+**Decisions:** Resolve during planning via AskUserQuestion, not during execution. For purely technical choices, make the decision and document it in the plan's objective.
 </task_types>
 
 <tdd_plans>

@@ -70,12 +70,12 @@ Plans declare dependencies explicitly via frontmatter:
 # Independent plan (Wave 1 candidate)
 depends_on: []
 files_modified: [src/features/user/model.ts, src/features/user/api.ts]
-autonomous: true
+
 
 # Dependent plan (later wave)
 depends_on: ["03-01"]
 files_modified: [src/integration/stripe.ts]
-autonomous: true
+
 ```
 
 **Wave assignment rules:**

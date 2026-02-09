@@ -31,7 +31,6 @@ The orchestrator (execute-phase workflow) runs in **main context**. Its job is *
 - Discovers plans in phase directory
 - Groups plans by pre-computed wave number
 - Spawns subagents (ms-executor) in parallel per wave
-- Handles checkpoints between waves
 - Collects results and updates state
 - Runs verification after completion
 - Optionally runs code simplification
@@ -67,7 +66,6 @@ type: execute
 wave: 1           # Pre-computed: no dependencies
 depends_on: []
 files_modified: [src/features/user/model.ts, src/features/user/api.ts]
-autonomous: true  # No checkpoints
 ---
 ```
 </wave_computation>
@@ -144,100 +142,6 @@ Config: @.planning/config.json (if exists)
 - Each agent is self-contained
 </subagent_prompt>
 
-<checkpoint_in_parallel>
-## Checkpoints in Parallel Context
-
-Plans with `autonomous: false` have checkpoints requiring user interaction.
-
-**Execution flow:**
-1. Spawn agent as normal (even in parallel wave)
-2. Agent runs until checkpoint
-3. Agent returns with structured checkpoint state
-4. Other parallel agents may complete while waiting
-5. Orchestrator presents checkpoint to user
-6. User responds
-7. **Fresh agent** spawned with user response (NOT resume)
-8. Continuation agent verifies prior commits exist
-9. Agent continues from checkpoint
-10. May hit more checkpoints (repeat)
-11. Eventually completes
-
-**Why fresh agent instead of resume:**
-- Resume relies on serialization that breaks with parallel tool calls
-- Fresh agents with explicit state are more reliable
-- Continuation template captures all needed context
-</checkpoint_in_parallel>
-
-<checkpoint_return_format>
-## Checkpoint Return Structure
-
-When executor hits checkpoint, it returns structured state:
-
-```markdown
-## Checkpoint: {type}
-
-### Completed Tasks
-| # | Task | Commit | Files |
-|---|------|--------|-------|
-| 1 | Create user model | abc123f | src/models/user.ts |
-| 2 | Add API endpoints | def456g | src/api/users.ts |
-
-### Current Task
-- **Number:** 3
-- **Name:** Verify deployment
-- **Status:** Blocked on checkpoint
-
-### Checkpoint Details
-{what-built / decision / action details}
-
-### Awaiting
-{resume-signal from plan}
-```
-
-Orchestrator extracts this and presents to user.
-</checkpoint_return_format>
-
-<continuation_prompt>
-## Continuation Prompt Template
-
-For continuing after checkpoint:
-
-```xml
-<objective>
-Continue execution of plan {plan_number} from task {resume_task_number}.
-</objective>
-
-<execution_context>
-@~/.claude/mindsystem/workflows/execute-plan.md
-@~/.claude/mindsystem/templates/summary.md
-</execution_context>
-
-<context>
-Plan: @{plan_path}
-State: @.planning/STATE.md
-</context>
-
-<completed_tasks>
-{completed_tasks_table}
-</completed_tasks>
-
-<resume_from>
-Task {resume_task_number}: {resume_task_name}
-</resume_from>
-
-<user_response>
-{user_response}
-</user_response>
-
-<resume_instructions>
-{based on checkpoint type:}
-- human-verify: "User approved. Continue to next task."
-- decision: "User selected {choice}. Implement accordingly."
-- human-action: "User completed action. Verify and continue."
-</resume_instructions>
-```
-</continuation_prompt>
-
 <code_review>
 ## Post-Execution Code Review
 
@@ -283,10 +187,6 @@ After `/ms:audit-milestone`, a similar code review can run using `code_review.mi
 - Stop execution
 - Report for investigation
 
-**Checkpoint fails to resolve:**
-- User can't approve or has repeated issues
-- Options: "Skip plan?" or "Abort execution?"
-- Partial progress recorded in STATE.md
 </failure_handling>
 
 <resumption>
@@ -303,7 +203,7 @@ If phase execution was interrupted:
 **STATE.md tracks:**
 - Last completed plan
 - Current wave
-- Pending checkpoints
+- Any blockers discovered
 </resumption>
 
 <verification_after_execution>
