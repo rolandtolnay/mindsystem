@@ -12,7 +12,7 @@ allowed-tools:
 <objective>
 Create design specifications for a phase. Spawns ms-designer agent with phase context.
 
-**Orchestrator role:** Parse phase, validate against roadmap, check existing design, gather context chain (CONTEXT.md → implement-ui → codebase), adaptive Q&A if gaps, spawn designer agent, enable conversational refinement.
+**Orchestrator role:** Parse phase, validate against roadmap, check existing design, gather context chain (CONTEXT.md → project UI skill → codebase), adaptive Q&A if gaps, spawn designer agent, enable conversational refinement.
 
 **Why subagent:** Design requires focused attention with quality-forcing patterns. Fresh 200k context for design generation. Main context reserved for user refinement conversation.
 
@@ -107,14 +107,16 @@ If exists, extract:
 - What Must Be Nailed (essentials)
 - Specific Ideas (references to products)
 
-**3c. Optional context - implement-ui skill:**
+**3c. Optional context — project UI skill:**
 
+Discover project-level skills:
 ```bash
-# Check for implement-ui skill
-ls .claude/skills/*implement-ui* 2>/dev/null
+ls .claude/skills/*/SKILL.md 2>/dev/null
 ```
 
-If exists, load it as the authoritative source of existing patterns.
+If skills found, read the YAML frontmatter (name + description) of each SKILL.md. Identify any skill whose description indicates it provides UI implementation patterns (screens, widgets, components, theming, spacing, visual patterns).
+
+If a UI skill is found, read its full content. Extract aesthetic patterns (colors, components, spacing, typography) for the `<existing_aesthetic>` block passed to ms-designer.
 
 **3d. Optional context - codebase analysis:**
 
@@ -140,7 +142,7 @@ Document discovered patterns for the designer.
 
 Assess context coverage:
 - Can platform be inferred? (from codebase or PROJECT.md)
-- Can visual style be inferred? (from implement-ui or codebase)
+- Can visual style be inferred? (from project UI skill or codebase)
 - Can design priorities be inferred? (from CONTEXT.md or phase requirements)
 
 **If everything can be inferred:** Skip to step 5.
@@ -240,15 +242,15 @@ Reference products: [From Q&A if asked, or "None specified"]
 </user_vision>
 
 <existing_aesthetic>
-[If implement-ui skill exists:]
+[If project UI skill exists:]
 
-Authoritative patterns from implement-ui skill:
+Authoritative patterns from project UI skill:
 - Color palette: [exact values]
 - Typography: [font families, sizes]
 - Spacing system: [scale values]
 - Component library: [named components]
 
-[If no skill, from codebase analysis:]
+[If no UI skill, from codebase analysis:]
 
 Discovered patterns from codebase:
 - Colors found: [hex values from theme/styles]
@@ -393,7 +395,7 @@ Update `.planning/STATE.md` Last Command field:
 - [ ] Phase validated against roadmap
 - [ ] Existing design checked and handled appropriately
 - [ ] Context chain loaded (PROJECT.md, ROADMAP.md, CONTEXT.md if exists)
-- [ ] implement-ui skill loaded if exists
+- [ ] Project UI skill discovered and loaded if exists
 - [ ] Codebase analyzed for existing patterns
 - [ ] Adaptive Q&A completed if gaps existed
 - [ ] Mockup generation offered if phase has significant new UI

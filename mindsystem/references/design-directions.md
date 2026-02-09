@@ -93,7 +93,7 @@ Rule: If you can only tell variants apart by squinting at colors, they are not d
 
 <existing_aesthetic_constraint>
 
-When the project has an existing visual aesthetic (implement-ui skill, established codebase patterns):
+When the project has an existing visual aesthetic (project UI skill, established codebase patterns):
 
 **ALL variants use the same colors, fonts, and component shapes.** Directions differ ONLY in:
 - Layout and spatial organization

@@ -75,7 +75,7 @@ Spawn 3 ms-mockup-designer agents IN PARALLEL, each receiving:
 - `<design_direction>` — One of the 3 derived directions (name, philosophy, concrete choices)
 - `<platform>` — `mobile` or `web`
 - `<feature_grounding>` — The screen/feature being mocked
-- `<existing_aesthetic>` — Colors/fonts from implement-ui or codebase (if exists)
+- `<existing_aesthetic>` — Colors/fonts from project UI skill or codebase (if exists)
 - `<mockup_template>` — The HTML scaffold from the template file
 - Output path: `.planning/phases/{phase}-{slug}/mockups/variant-a.html` (b, c for others)
 

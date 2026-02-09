@@ -132,7 +132,7 @@ Create visual/UX design specifications for UI-heavy phases.
 - Produces DESIGN.md with layouts, components, flows, verification criteria
 - Optionally generates parallel HTML mockup variants for visual direction exploration
 - Applies quality-forcing patterns to prevent generic AI output
-- Checks for existing implement-ui skill and harmonizes with codebase
+- Discovers project UI skill dynamically and harmonizes with codebase
 - Use for phases with significant UI work, novel components, or cross-platform design
 
 Usage: `/ms:design-phase 3`

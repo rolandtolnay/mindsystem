@@ -117,12 +117,16 @@ ls .planning/phases/${PHASE_ARG}-*/*-DESIGN.md 2>/dev/null
 
 ### Step 2.3: Optional Context
 
-**implement-ui skill (if exists):**
+**Project UI skill (if exists):**
+
+Discover project-level skills:
 ```bash
-ls .claude/skills/*implement-ui* 2>/dev/null
+ls .claude/skills/*/SKILL.md 2>/dev/null
 ```
 
-If exists, load as authoritative source for existing patterns.
+If skills found, read the YAML frontmatter (name + description) of each SKILL.md. Identify any skill whose description indicates it provides UI implementation patterns (screens, widgets, components, theming, spacing, visual patterns).
+
+If a UI skill is found, load as authoritative source for existing patterns.
 
 **Codebase analysis:**
 - Detect platform (Flutter, React, etc.)
@@ -192,7 +196,7 @@ Apply quality-forcing patterns from `ai-driven-ui-design-system.md`:
 
 ### 3.5: Pattern Alignment
 
-If implement-ui skill or codebase patterns exist:
+If project UI skill or codebase patterns exist:
 - Check for consistent color usage
 - Check for consistent component patterns
 - Check for consistent spacing scale
@@ -478,7 +482,7 @@ Apply these patterns throughout the review:
 
 <success_criteria>
 - [ ] Target code scope clarified (via arguments or AskUserQuestion)
-- [ ] Context chain loaded (PROJECT.md, DESIGN.md if exists, implement-ui skill)
+- [ ] Context chain loaded (PROJECT.md, DESIGN.md if exists, project UI skill)
 - [ ] Code analyzed across all quality dimensions
 - [ ] Retroactive DESIGN.md created if missing
 - [ ] Improvements presented with benefits AND trade-offs
