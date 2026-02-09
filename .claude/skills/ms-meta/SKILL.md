@@ -37,6 +37,13 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 </what_mindsystem_is>
 
 <philosophy>
+
+**North Star: Quality × Speed.** Mindsystem's purpose is producing output that matches the user's vision completely in the shortest time possible. The ideal: user articulates their vision, Mindsystem extracts all missing context through questions, then generates perfect output on the first try. Every workflow step exists on a spectrum between two poles:
+- **Quality gates** — Steps that meaningfully improve output (code review catches real bugs, verification catches real mismatches). Worth their latency cost.
+- **Engineering noise** — Steps that add overhead without meaningfully influencing output (overly complicated prompts, redundant checks, ceremony that wastes tokens). Must be eliminated.
+
+The critical judgment when evaluating any Mindsystem feature: **does this step's quality improvement justify its time cost?** If a step doesn't measurably increase the chance of correct output, it's noise — remove it regardless of how reasonable it sounds in theory. Conversely, if removing a step causes regressions, it's a quality gate — keep it even if it adds latency.
+
 **Solo developer + Claude workflow.** No enterprise patterns (sprint ceremonies, RACI matrices, stakeholder management). User is the visionary. Claude is the builder.
 
 **Modularity over bundling.** Commands stay small, explicit, and composable. Avoid mega-flows. Users pick the depth they need (quick fix vs. new feature vs. UI-heavy system). Each command has a clear purpose — no consulting documentation to understand which to use.
@@ -52,12 +59,59 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 
 **Plans ARE prompts.** PLAN.md is not a document that gets transformed — it IS the executable prompt containing objective, context, tasks, and verification.
 
-**Claude automates everything.** If it has CLI/API, Claude does it. Checkpoints are for verification (human confirms visual/UX) and decisions (human chooses direction), not manual work.
+**Claude automates everything.** If it has CLI/API, Claude does it. Human interaction points exist only for verification (human confirms visual/UX), decisions (human chooses direction), and unavoidable manual steps (no API exists). These are handled dynamically at runtime, not pre-planned into execution.
 
 **Goal-backward planning.** Don't ask "what should we build?" — ask "what must be TRUE for the goal to be achieved?" This produces verifiable requirements, not vague task lists.
 
 **Dream extraction, not requirements gathering.** Project initialization is collaborative thinking to help users discover and articulate what they want. Follow the thread, challenge vagueness, make abstract concrete.
 </philosophy>
+
+<context_engineering>
+**The primary constraint is context quality.** LLM output quality correlates directly with input quality. In a perfect system, every token in context is high-signal: the most relevant context, the most precise instructions, zero noise. This is the ideal Mindsystem constantly iterates toward.
+
+**Context rot is the enemy.** As context fills, output degrades. Every unnecessary token — verbose instructions, inline scripts, redundant explanations — accelerates that degradation. The goal: complete work before quality drops.
+
+**Decision principle: minimize context at equal output.** When two approaches produce equivalent results, choose the one consuming less context. Fewer instructions, fewer words, less noise. This applies to everything: prompt design, workflow steps, feature scope, and whether a feature should be extended or simplified.
+
+**This framework governs all Mindsystem decisions:**
+- Whether a workflow step is a quality gate or engineering noise
+- Whether to inline logic or extract it to a script
+- How many instructions a prompt actually needs
+- Whether a feature justifies its context cost
+- How to achieve outcomes using different tools and patterns
+
+### Context Efficiency Tactics
+
+**1. Subagent delegation.**
+Fresh 200k-token context at peak quality. Trade-off: increased latency from agent spinup and re-reading files already available in the parent context. Worth it when the task is large enough that doing it in the main context would fill the window and degrade downstream output. Not worth it for small tasks where the spinup cost exceeds the context savings.
+
+**2. Script extraction.**
+Move deterministic logic from prompts into shell/Python scripts. The prompt contains one line ("run this script"); the script contains 10-15 lines of mechanical operations. Net context savings: significant. The LLM never sees the implementation — it just calls the script. Examples: patch generation (`scripts/generate-phase-patch.sh`), research tooling (`scripts/ms-lookup/`). Direction: extract all remaining inline bash from prompts into reusable scripts in `scripts/`.
+
+**3. CLI tool wrapping.**
+Build standalone CLI tools for API interactions, then teach the LLM to use them. The LLM loads usage knowledge (small) instead of API integration logic (large). Example: Linear skill uses a Python CLI for the Linear API; the skill prompt teaches effective CLI usage, not API mechanics. This pattern applies anywhere Mindsystem interacts with external services.
+
+**4. Progressive disclosure.**
+Load only what's needed for the current step. Commands are thin wrappers that delegate to workflows. Workflows reference templates and references. Information flows through layers — command → workflow → template → reference — each answering different depth questions. Not every layer needs loading for every task.
+
+**5. Eager vs. lazy file loading.**
+@-references in Claude Code are **eagerly loaded** — all referenced file content is injected into context upfront when the prompt is processed. This means every @-reference costs context immediately, whether or not the content is needed for the current execution path.
+
+For **lazy loading**, instruct Claude to read a file path during execution (e.g., "Read `.planning/DESIGN.md` if it exists"). The file is only loaded when Claude reaches that instruction, and conditional reads can skip files entirely. Use this for files that are only sometimes relevant.
+
+**Rule of thumb:** @-reference files that are always essential. Use read instructions for files that are conditionally needed. Every eagerly loaded file that isn't used for the current task is wasted context.
+
+### Latency-Quality Spectrum
+
+Every tactic trades latency for context preservation:
+
+| Tactic | Context saved | Latency cost | Use when |
+|--------|--------------|--------------|----------|
+| Subagent delegation | High (fresh 200k) | High (spinup + re-reads) | Task would fill >30% of parent context |
+| Script extraction | Medium (prompt shrinks) | Low (script execution) | Logic is deterministic and reusable |
+| CLI tool wrapping | High (API logic externalized) | Medium (tool development) | Repeated API interactions across sessions |
+| Progressive disclosure | Medium (defer loading) | None | Always — default approach |
+</context_engineering>
 
 <context_split>
 Mindsystem deliberately separates where work happens:

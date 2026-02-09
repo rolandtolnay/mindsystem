@@ -217,7 +217,7 @@ Build authentication system
 @.planning/DISCOVERY.md (if exists)
 ```
 
-**@-references are lazy loading signals.** They tell Claude what to read, not pre-loaded content.
+**@-references are eagerly loaded.** All referenced file content is injected into context upfront when the prompt is processed. For lazy loading, instruct Claude to read a file path during execution (e.g., "Read `.planning/DESIGN.md` if it exists"). Use @-references for files that are always essential; use read instructions for files that are conditionally needed.
 
 ---
 
@@ -358,7 +358,7 @@ Each layer answers different questions:
 ## Summary: Core Meta-Patterns
 
 1. **XML for semantic structure, Markdown for content**
-2. **@-references are lazy loading signals**
+2. **@-references are eagerly loaded** — use read instructions for conditional files
 3. **Commands delegate to workflows**
 4. **Progressive disclosure hierarchy**
 5. **Imperative, brief, technical** — no filler, no sycophancy
