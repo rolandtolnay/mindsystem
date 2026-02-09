@@ -112,8 +112,82 @@ Common mock types and what they enable:
 | `empty_response` | Empty states, placeholder UI, "no results" | `forceEmpty` |
 | `loading_state` | Loading spinners, skeleton screens | `forceLoading`, `mockLoadingDelay` |
 | `offline` | Offline UI, cached data, sync indicators | `forceOffline` |
+| `transient_state` | Brief async states (loading skeletons, transitions) | `forceTransient`, `mockTransientDelay` |
+| `external_data` | Features depending on API data that may not exist locally | `forceMockData`, `mockDataSet` |
 
 </mock_types>
+
+<transient_state_patterns>
+
+**Transient states are UI states that appear briefly during async operations.** Loading skeletons, shimmer effects, transition animations — they resolve too fast to observe and test manually.
+
+**Two mock strategies:**
+
+**1. Extended delay strategy (default):**
+
+Add a configurable delay before the real data returns. The transient state stays visible long enough to test.
+
+```dart
+// Flutter — Completer-based delay
+Future<List<Recipe>> getRecipes() async {
+  // TEST OVERRIDE - Extend loading state for testing
+  if (TestOverrides.forceTransientState) {
+    await Future.delayed(TestOverrides.mockTransientDelay); // default 5s
+  }
+  // Real implementation continues...
+  final response = await _api.get('/recipes');
+  return response.data.map((j) => Recipe.fromJson(j)).toList();
+}
+```
+
+```typescript
+// React/Next.js — Promise delay
+async function getRecipes(): Promise<Recipe[]> {
+  // TEST OVERRIDE - Extend loading state for testing
+  if (testOverrides.forceTransientState) {
+    await new Promise(resolve => setTimeout(resolve, testOverrides.mockTransientDelayMs));
+  }
+  // Real implementation continues...
+  const response = await fetch('/api/recipes');
+  return response.json();
+}
+```
+
+**When to use:** Testing that the loading UI (skeleton, spinner) displays correctly while waiting.
+
+**2. Never-resolve strategy:**
+
+The async call never completes. The transient state stays permanently visible.
+
+```dart
+// Flutter — Completer that never completes
+Future<List<Recipe>> getRecipes() async {
+  // TEST OVERRIDE - Never resolve, keep loading state visible
+  if (TestOverrides.forceTransientState && TestOverrides.mockTransientDelay == Duration.zero) {
+    await Completer<void>().future; // Never completes
+  }
+  // Real implementation continues...
+}
+```
+
+```typescript
+// JS — Promise that never resolves
+async function getRecipes(): Promise<Recipe[]> {
+  // TEST OVERRIDE - Never resolve, keep loading state visible
+  if (testOverrides.forceTransientState && testOverrides.mockTransientDelayMs === 0) {
+    await new Promise(() => {}); // Never resolves
+  }
+  // Real implementation continues...
+}
+```
+
+**When to use:** Testing that the loading UI itself is correct (layout, styling, animation) without it disappearing.
+
+**Choosing between strategies:**
+- Testing the transition (loading → loaded): Use extended delay (5s default)
+- Testing the loading UI appearance: Use never-resolve (set delay to 0)
+
+</transient_state_patterns>
 
 <toggle_instructions_template>
 

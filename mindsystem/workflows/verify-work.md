@@ -139,25 +139,68 @@ Skip internal/non-observable items (refactors, type changes, etc.).
 </step>
 
 <step name="classify_tests">
-**Classify all tests by mock requirements:**
+**Classify all tests by mock requirements using three-tier analysis:**
 
-For each test, analyze the expected behavior to determine:
+For each test, determine:
 1. **mock_required**: Does this need special backend state?
-2. **mock_type**: Freeform string describing needed state (e.g., "error_state", "premium_user", "empty_response")
+2. **mock_type**: Classification (e.g., "transient_state", "external_data", "error_state", "premium_user", "empty_response")
 3. **dependencies**: Other tests this depends on (infer from descriptions)
 
-**Classification heuristics:**
+**Tier 1: SUMMARY.md mock_hints (primary)**
+
+Check if SUMMARY.md files contain mock_hints frontmatter:
+```bash
+grep -l "mock_hints:" "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
+```
+
+If found, parse mock_hints and match tests against hints:
+- Test relates to a `transient_states` entry → `mock_type: "transient_state"`, `mock_reason: "[from hint]"`
+- Test relates to an `external_data` entry → `mock_type: "external_data"`, `needs_user_confirmation: true`
+- Test doesn't match any hint → continue to keyword heuristics (Tier 3 fallback)
+
+**Tier 2: ms-mock-analyzer subagent (fallback)**
+
+When no mock_hints found in any SUMMARY.md:
+```
+Task(
+  prompt="""
+  Analyze mock requirements for UAT testing.
+
+  Phase: {phase_name}
+  Phase directory: {phase_dir}
+  SUMMARY files: {list}
+
+  Tests to classify:
+  {test list with expected behaviors}
+
+  Read the SUMMARY files and relevant source code. For each test, determine:
+  1. Is the observable state transient? (async loading, animation, transition)
+  2. Does the test depend on external data? (API calls, backend data)
+  3. Does it match known mock types? (error, premium, empty, offline)
+
+  Return structured analysis with test_classifications.
+  """,
+  subagent_type="ms-mock-analyzer",
+  model="haiku",
+  description="Analyze mock requirements"
+)
+```
+Parse analyzer output and use `test_classifications` for batching.
+
+**Tier 3: Keyword heuristics (last resort)**
+
+Built into the analyzer's fallback logic. Also used as safety net in main context if analyzer returns incomplete results or if mock_hints covered some but not all tests.
 
 | Expected behavior contains | Likely mock_type |
 |---------------------------|------------------|
-| "error", "fails", "invalid" | error_state |
+| "error", "fails", "invalid", "retry" | error_state |
 | "premium", "pro", "paid", "subscription" | premium_user |
 | "empty", "no results", "placeholder" | empty_response |
-| "loading", "spinner", "skeleton" | loading_state |
+| "loading", "spinner", "skeleton" | transient_state |
 | "offline", "no connection" | offline_state |
 | Normal happy path | no mock needed |
 
-**Dependency inference:**
+**Dependency inference (all tiers):**
 - "Reply to comment" depends on "View comments"
 - "Delete account" depends on "Login"
 - Tests mentioning prior state depend on tests that create that state
@@ -173,12 +216,21 @@ tests:
   - name: "Login error message"
     mock_required: true
     mock_type: "error_state"
+    mock_reason: "error response from auth endpoint"
     dependencies: ["login_flow"]
 
-  - name: "Premium badge display"
+  - name: "Recipe list loading skeleton"
     mock_required: true
-    mock_type: "premium_user"
-    dependencies: ["login_flow"]
+    mock_type: "transient_state"
+    mock_reason: "loading skeleton during recipe fetch — async, resolves in <1s"
+    dependencies: []
+
+  - name: "View recipe list"
+    mock_required: true
+    mock_type: "external_data"
+    mock_reason: "recipe items from /api/recipes"
+    needs_user_confirmation: true
+    dependencies: []
 ```
 </step>
 
@@ -189,10 +241,33 @@ tests:
 
 **Rules:**
 1. Group by mock_type (tests needing same mock state go together)
-2. Respect dependencies (if B depends on A, A must be in same or earlier batch)
-3. Max 4 tests per batch (AskUserQuestion limit)
-4. No-mock tests first (run before any mock setup)
-5. Order mock states logically: success → error → empty → loading
+2. **User confirmation for external_data tests:** Before batching, collect all tests with `needs_user_confirmation: true`, grouped by data source. Present via AskUserQuestion:
+
+```
+questions:
+  - question: "Do you have [data_type] data from [source] locally?"
+    header: "[data_type]"
+    options:
+      - label: "Yes, data exists"
+        description: "I have [data_type] in my local environment"
+      - label: "No, needs mock"
+        description: "I need this data mocked for testing"
+      - label: "Skip these tests"
+        description: "Log as assumptions and move on"
+    multiSelect: false
+```
+
+Handle responses:
+- "Yes, data exists" → reclassify affected tests as `mock_required: false`
+- "No, needs mock" → keep as `mock_required: true`, `mock_type: "external_data"`
+- "Skip these tests" → mark all affected tests as `skipped`
+
+Group by data source (not per-test) to stay within AskUserQuestion's 4-question limit.
+
+3. **Separate transient_state batch:** Transient states use a different mock strategy (delay/force) than data mocks. Give them their own batch.
+4. Respect dependencies (if B depends on A, A must be in same or earlier batch)
+5. Max 4 tests per batch (AskUserQuestion limit)
+6. Batch ordering: no-mock → external_data → error_state → empty_response → transient_state → premium_user → offline_state
 
 **Batch structure:**
 ```yaml
@@ -203,14 +278,24 @@ batches:
     tests: [1, 2, 3]
 
   - batch: 2
-    name: "Error States"
-    mock_type: "error_state"
-    tests: [4, 5, 6, 7]
+    name: "External Data"
+    mock_type: "external_data"
+    tests: [4, 5]
 
   - batch: 3
+    name: "Error States"
+    mock_type: "error_state"
+    tests: [6, 7, 8]
+
+  - batch: 4
+    name: "Transient States"
+    mock_type: "transient_state"
+    tests: [9, 10]
+
+  - batch: 5
     name: "Premium Features"
     mock_type: "premium_user"
-    tests: [8, 9, 10]
+    tests: [11, 12]
 ```
 </step>
 

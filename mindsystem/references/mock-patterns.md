@@ -16,6 +16,48 @@ Without mocks, testing "error message display" requires actually triggering serv
 4. **Removable** — Delete file + remove imports = clean
 </philosophy>
 
+<classification_framework>
+
+**Two-question framework for mock classification:**
+
+For each test, ask two questions in order:
+
+1. **Is the observable state transient?**
+   - Does it appear briefly during async operations? (loading skeleton, spinner, transition animation)
+   - Does it require precise timing to observe? (appears for <1s before real data loads)
+   - If YES → `mock_type: "transient_state"` — needs delay/force mock strategy
+
+2. **Does the test depend on external data?**
+   - Does the feature fetch from an API, database, or external service?
+   - Would the test fail without specific data existing locally?
+   - If YES → `mock_type: "external_data"` — confirm data availability with user first
+
+**Three-tier classification priority:**
+
+| Priority | Source | When used |
+|----------|--------|-----------|
+| 1 | SUMMARY.md `mock_hints` | Executor captured hints at build time |
+| 2 | ms-mock-analyzer subagent | No mock_hints found — analyzer reads codebase |
+| 3 | Keyword heuristics | Fallback for tests not covered by tiers 1-2 |
+
+**Why keyword matching alone fails:**
+
+Domain terms don't map reliably to mock types. "View recipe list" needs external_data mocks but contains no keywords. "Loading skeleton" is transient_state but keyword matching might miss the underlying async dependency. The two-question framework traces UI elements to their data sources instead of pattern-matching descriptions.
+
+**Category examples:**
+
+| Test | Classification | Reasoning |
+|------|---------------|-----------|
+| "Recipe list loading skeleton" | transient_state | Brief UI state during async fetch — resolves in <1s |
+| "View recipe list" | external_data | Fetches from /api/recipes — data may not exist locally |
+| "Login error message" | error_state | Error response from auth endpoint |
+| "Empty favorites placeholder" | empty_response | Requires zero items in collection |
+| "Premium badge display" | premium_user | Requires premium subscription state |
+| "Offline sync indicator" | offline_state | Requires network disconnection |
+| "Tap login button" | no mock needed | Happy path with available test credentials |
+
+</classification_framework>
+
 <git_stash_lifecycle>
 
 **Why stash?**
@@ -95,10 +137,12 @@ class TestOverrides {
   static bool forceErrorState = false;
   static bool forceEmptyResponse = false;
   static bool forceLoadingState = false;
+  static bool forceTransientState = false;
 
   // === MOCK DATA ===
   static String mockErrorMessage = 'Simulated error for testing';
   static Duration mockLoadingDelay = const Duration(seconds: 3);
+  static Duration mockTransientDelay = const Duration(seconds: 5);
 
   static Map<String, dynamic> mockPremiumUser = {
     'id': 'test-user-001',
@@ -113,6 +157,7 @@ class TestOverrides {
     forceErrorState = false;
     forceEmptyResponse = false;
     forceLoadingState = false;
+    forceTransientState = false;
   }
 }
 ```
@@ -141,6 +186,10 @@ class UserService {
     }
     if (TestOverrides.forceErrorState) {
       throw Exception(TestOverrides.mockErrorMessage);
+    }
+    // TEST OVERRIDE - Extend transient state (loading skeleton stays visible)
+    if (TestOverrides.forceTransientState) {
+      await Future.delayed(TestOverrides.mockTransientDelay);
     }
 
     // Real implementation

@@ -820,7 +820,12 @@ Before writing summary content, populate frontmatter fields from execution conte
 5. **Decisions:**
    - key-decisions: Extract from "Decisions Made" section
 
-6. **Metrics:**
+6. **Verification hints (optional):**
+   - mock_hints.transient_states: Reflect on what you built. Any UI with async loading, animations, or transitions that produce brief intermediate states? List each with component file and trigger.
+   - mock_hints.external_data: Any feature that fetches from an API? List the source, data type, and rendering components.
+   - Skip entirely if no UI work, no async operations, no external data.
+
+7. **Metrics:**
    - duration: From $DURATION variable
    - completed: From $PLAN_END_TIME (date only, format YYYY-MM-DD)
 

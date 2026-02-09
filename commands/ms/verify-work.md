@@ -41,7 +41,8 @@ Phase: $ARGUMENTS (optional)
 2. **Check for active UAT sessions** — Resume or start new
 3. **Find SUMMARY.md files** for the phase
 4. **Extract testable deliverables** from summaries
-5. **Classify tests by mock requirements** — Infer mock_type from test descriptions
+5. **Classify tests by mock requirements** — Use SUMMARY.md mock_hints when available; spawn ms-mock-analyzer for codebase analysis when hints missing. Confirm data availability with user before batching.
+   - If no mock_hints in SUMMARY: Spawn ms-mock-analyzer subagent for codebase analysis
 6. **Group into batches** — By mock type, max 4 per batch, no-mock tests first
    - If any tests require mocks: Read `~/.claude/mindsystem/references/mock-patterns.md` and `~/.claude/mindsystem/workflows/generate-mocks.md` for mock generation guidance
 7. **For each batch:**

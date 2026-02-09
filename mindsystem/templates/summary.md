@@ -38,6 +38,17 @@ patterns-established:
   - "Pattern 1: description"
   - "Pattern 2: description"
 
+# Verification hints (optional — aids verify-work mock classification)
+mock_hints:
+  transient_states:
+    - state: "[description of transient UI state]"
+      component: "[file path]"
+      trigger: "[async call | animation | timer]"
+  external_data:
+    - source: "[API endpoint or data source]"
+      data_type: "[what kind of data]"
+      components: ["[file1]", "[file2]"]
+
 # Metrics
 duration: Xmin
 completed: YYYY-MM-DD
@@ -75,6 +86,17 @@ _Note: TDD tasks may have multiple commits (test → feat → refactor)_
 ## Files Created/Modified
 - `path/to/file.ts` - What it does
 - `path/to/another.ts` - What it does
+
+## Verification Hints
+
+[If phase built UI with transient states or external data dependencies, list them.
+If not applicable: "None — no transient states or external data dependencies."]
+
+**Transient states:** [States that appear briefly during async operations]
+- [state description] in `[component]` — triggered by [what]
+
+**External data:** [Features that fetch specific data from APIs]
+- [data type] from [source] — used by `[component1]`, `[component2]`
 
 ## Decisions Made
 [Key decisions with brief rationale, or "None - followed plan as specified"]
@@ -143,6 +165,8 @@ None - no external service configuration required.
 **Patterns:** Established conventions future phases should maintain.
 
 **Population:** Frontmatter is populated during summary creation in execute-plan.md. See `<step name="create_summary">` for field-by-field guidance.
+
+**Mock hints (optional):** Captures verification-relevant knowledge about transient UI states and external data dependencies. Transient states are UI states that appear briefly (loading skeletons, animations, transitions) — verify-work needs these to generate mocks that force/extend the state. External data entries identify features depending on API data — verify-work uses these to ask the user whether test data exists locally. Populate only when the phase builds UI with these characteristics.
 </frontmatter_guidance>
 
 <one_liner_rules>
