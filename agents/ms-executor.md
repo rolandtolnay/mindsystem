@@ -273,8 +273,8 @@ After all tasks complete, create `{phase}-{plan}-SUMMARY.md`.
 
 Follow the template's frontmatter structure exactly.
 
-**Mock hints (optional):**
-Reflect on what you built. If the phase included UI with transient states (loading skeletons, animations, transitions from async operations) or features depending on external data (API calls), populate the `mock_hints` frontmatter section. ~5 lines, directly improves verify-work mock classification. Skip if purely backend or no async/external-data UI.
+**Mock hints (required):**
+Reflect on what you built. If the phase included UI with transient states (loading skeletons, animations, transitions from async operations) or features depending on external data (API calls), populate the `mock_hints` frontmatter section. ~5 lines, directly improves verify-work mock classification. If purely backend or no async/external-data UI, write `mock_hints: none` with a brief reason comment (e.g., `mock_hints: none  # no transient states or external data dependencies`). Always populate — `none` is a valid value that tells verify-work to skip mock analysis.
 
 **Subsystem selection:**
 - Check PLAN.md frontmatter for `subsystem_hint` field — use it if present

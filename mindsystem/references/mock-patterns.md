@@ -32,13 +32,12 @@ For each test, ask two questions in order:
    - Would the test fail without specific data existing locally?
    - If YES → `mock_type: "external_data"` — confirm data availability with user first
 
-**Three-tier classification priority:**
+**Two-tier classification priority:**
 
 | Priority | Source | When used |
 |----------|--------|-----------|
-| 1 | SUMMARY.md `mock_hints` | Executor captured hints at build time |
-| 2 | ms-mock-analyzer subagent | No mock_hints found — analyzer reads codebase |
-| 3 | Keyword heuristics | Fallback for tests not covered by tiers 1-2 |
+| 1 | SUMMARY.md `mock_hints` | Executor captured hints at build time (including `none` for explicit no-mock) |
+| 2 | Inline classification + keyword heuristics | No `mock_hints` key (legacy summaries) — classify in main context using two-question framework + keywords |
 
 **Why keyword matching alone fails:**
 

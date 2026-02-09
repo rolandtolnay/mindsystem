@@ -139,7 +139,7 @@ Skip internal/non-observable items (refactors, type changes, etc.).
 </step>
 
 <step name="classify_tests">
-**Classify all tests by mock requirements using three-tier analysis:**
+**Classify all tests by mock requirements using two-tier analysis:**
 
 For each test, determine:
 1. **mock_required**: Does this need special backend state?
@@ -153,43 +153,26 @@ Check if SUMMARY.md files contain mock_hints frontmatter:
 grep -l "mock_hints:" "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
 ```
 
-If found, parse mock_hints and match tests against hints:
-- Test relates to a `transient_states` entry → `mock_type: "transient_state"`, `mock_reason: "[from hint]"`
-- Test relates to an `external_data` entry → `mock_type: "external_data"`, `needs_user_confirmation: true`
-- Test doesn't match any hint → continue to keyword heuristics (Tier 3 fallback)
+If found, check the value:
 
-**Tier 2: ms-mock-analyzer subagent (fallback)**
+- **`mock_hints: none`** → Short-circuit: all tests start as `mock_required: false`. Apply keyword heuristics only as safety net (scan test descriptions for obvious mock signals like "error", "loading", "empty").
 
-When no mock_hints found in any SUMMARY.md:
-```
-Task(
-  prompt="""
-  Analyze mock requirements for UAT testing.
+- **`mock_hints` with content** → Parse and match tests against hints:
+  - Test relates to a `transient_states` entry → `mock_type: "transient_state"`, `mock_reason: "[from hint]"`
+  - Test relates to an `external_data` entry → `mock_type: "external_data"`, `needs_user_confirmation: true`
+  - Test doesn't match any hint → apply keyword heuristics below
 
-  Phase: {phase_name}
-  Phase directory: {phase_dir}
-  SUMMARY files: {list}
+**Tier 2: Inline classification (fallback for legacy summaries)**
 
-  Tests to classify:
-  {test list with expected behaviors}
+When no `mock_hints` key found in any SUMMARY.md (legacy summaries written before executor populated this field):
 
-  Read the SUMMARY files and relevant source code. For each test, determine:
-  1. Is the observable state transient? (async loading, animation, transition)
-  2. Does the test depend on external data? (API calls, backend data)
-  3. Does it match known mock types? (error, premium, empty, offline)
+Classify in main context using the two-question framework:
 
-  Return structured analysis with test_classifications.
-  """,
-  subagent_type="ms-mock-analyzer",
-  model="haiku",
-  description="Analyze mock requirements"
-)
-```
-Parse analyzer output and use `test_classifications` for batching.
+1. **Is the observable state transient?** — Does it appear briefly during async operations? (loading skeleton, spinner, transition animation). If YES → `mock_type: "transient_state"`
 
-**Tier 3: Keyword heuristics (last resort)**
+2. **Does the test depend on external data?** — Does the feature fetch from an API, database, or external service? Would the test fail without specific data existing? If YES → `mock_type: "external_data"`, `needs_user_confirmation: true`
 
-Built into the analyzer's fallback logic. Also used as safety net in main context if analyzer returns incomplete results or if mock_hints covered some but not all tests.
+Reason over SUMMARY.md content (accomplishments, files created/modified, decisions) to answer these questions. Supplement with keyword heuristics:
 
 | Expected behavior contains | Likely mock_type |
 |---------------------------|------------------|
@@ -200,7 +183,19 @@ Built into the analyzer's fallback logic. Also used as safety net in main contex
 | "offline", "no connection" | offline_state |
 | Normal happy path | no mock needed |
 
-**Dependency inference (all tiers):**
+For tests that remain genuinely uncertain after both the two-question framework and keyword heuristics, present them via AskUserQuestion grouped by uncertainty:
+```
+questions:
+  - question: "Does [test name] require mock data or a special app state to test?"
+    header: "Mock needed?"
+    options:
+      - label: "No mock needed"
+        description: "Can test with real/local data"
+      - label: "Needs mock"
+        description: "Requires simulated state or data"
+```
+
+**Dependency inference (both tiers):**
 - "Reply to comment" depends on "View comments"
 - "Delete account" depends on "Login"
 - Tests mentioning prior state depend on tests that create that state

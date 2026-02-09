@@ -38,7 +38,7 @@ patterns-established:
   - "Pattern 1: description"
   - "Pattern 2: description"
 
-# Verification hints (optional — aids verify-work mock classification)
+# Verification hints (required — aids verify-work mock classification, use `none` if not applicable)
 mock_hints:
   transient_states:
     - state: "[description of transient UI state]"
@@ -166,7 +166,7 @@ None - no external service configuration required.
 
 **Population:** Frontmatter is populated during summary creation in execute-plan.md. See `<step name="create_summary">` for field-by-field guidance.
 
-**Mock hints (optional):** Captures verification-relevant knowledge about transient UI states and external data dependencies. Transient states are UI states that appear briefly (loading skeletons, animations, transitions) — verify-work needs these to generate mocks that force/extend the state. External data entries identify features depending on API data — verify-work uses these to ask the user whether test data exists locally. Populate only when the phase builds UI with these characteristics.
+**Mock hints (required):** Captures verification-relevant knowledge about transient UI states and external data dependencies. Transient states are UI states that appear briefly (loading skeletons, animations, transitions) — verify-work needs these to generate mocks that force/extend the state. External data entries identify features depending on API data — verify-work uses these to ask the user whether test data exists locally. Populate when the phase builds UI with these characteristics. When a phase has no transient states or external data dependencies, write `mock_hints: none` (with optional comment, e.g., `mock_hints: none  # purely backend, no async UI`). Always populate — `none` is a valid value that tells verify-work to skip mock analysis.
 </frontmatter_guidance>
 
 <one_liner_rules>

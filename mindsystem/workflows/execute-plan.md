@@ -820,10 +820,10 @@ Before writing summary content, populate frontmatter fields from execution conte
 5. **Decisions:**
    - key-decisions: Extract from "Decisions Made" section
 
-6. **Verification hints (optional):**
+6. **Verification hints (required):**
    - mock_hints.transient_states: Reflect on what you built. Any UI with async loading, animations, or transitions that produce brief intermediate states? List each with component file and trigger.
    - mock_hints.external_data: Any feature that fetches from an API? List the source, data type, and rendering components.
-   - Skip entirely if no UI work, no async operations, no external data.
+   - If no UI work, no async operations, no external data: write `mock_hints: none` with a brief reason comment (e.g., `mock_hints: none  # no transient states or external data dependencies`). Always populate — `none` tells verify-work to skip mock analysis.
 
 7. **Metrics:**
    - duration: From $DURATION variable
