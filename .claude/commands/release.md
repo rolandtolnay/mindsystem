@@ -125,6 +125,7 @@ Read commits since last version and generate changelog entries.
 - Write from user perspective, not implementation details
 - Include scope context where helpful
 - Skip empty sections
+- Consolidate iterative commits on the same feature into one entry reflecting the **final state** (e.g., if a feat adds X and a later refactor simplifies X, write one entry describing what shipped)
 </step>
 
 <step name="update_changelog">
