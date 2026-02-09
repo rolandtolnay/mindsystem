@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-02-09
+
+### Added
+- **Mock identification in verify-work** — Two-tier classification for test mocks: `mock_hints` frontmatter (populated during execution with `transient_states` and `external_data`) with keyword heuristics fallback [MIN-79]
+
+### Changed
+- **Dynamic UI skill discovery** — Design-phase and review-design commands discover project UI skills by reading SKILL.md frontmatter instead of hardcoded filename globs [MIN-75]
+- **Removed checkpoint system** — Consolidated execution model into pure autonomous+orchestrator pattern; decisions move to planning phase via AskUserQuestion
+- **Context engineering documentation** — Distinguished eager loading (@-references) vs lazy loading (read instructions), added context efficiency strategies and philosophy section
+
+### Fixed
+- **Stale checkpoint references** — Removed dangling references to removed checkpoint system across skill workflows and guidelines
+- **`learn-flutter` gist operations** — Replaced WebFetch with `gh api` for reliable raw content retrieval; fixed gist update to use `jq --rawfile`
+
 ## [3.10.1] - 2026-02-08
 
 ### Added
@@ -352,7 +366,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.11.0...HEAD
+[3.11.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.1...v3.11.0
 [3.10.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.0...v3.10.1
 [3.10.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.6.0...v3.10.0
 [3.6.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v3.6.0
