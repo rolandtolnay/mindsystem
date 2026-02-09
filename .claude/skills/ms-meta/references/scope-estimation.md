@@ -19,7 +19,7 @@
 - More than 3 tasks (even if tasks seem small)
 - Multiple subsystems (DB + API + UI = separate plans)
 - Any task with >5 file modifications
-- Checkpoint + implementation work (separate plans)
+- Discovery + verification in separate plans (don't mix exploratory and implementation work)
 - Discovery + implementation (DISCOVERY.md in one plan, implementation in another)
 
 **Consider splitting:**

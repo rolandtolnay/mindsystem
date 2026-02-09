@@ -65,7 +65,7 @@ See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 - **More than 3 tasks** - Even if tasks seem small
 - **Multiple subsystems** - DB + API + UI = separate plans
 - **Any task with >5 file modifications** - Split by file groups
-- **Checkpoint + implementation work** - Checkpoints in one plan, implementation after in separate plan
+- **Discovery + verification in separate plans** - Don't mix exploratory and implementation work
 - **Discovery + implementation** - DISCOVERY.md in one plan, implementation in another
 </always_split>
 

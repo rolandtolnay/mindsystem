@@ -18,7 +18,6 @@ Systematically investigate why something in Mindsystem isn't working as expected
 | Plan execution issue | Tasks fail, wrong commits, no SUMMARY | `mindsystem/workflows/execute-plan.md`, `agents/ms-executor.md` |
 | Wave execution issue | Plans not parallel, wrong order | `mindsystem/workflows/execute-phase.md`, plan frontmatter |
 | Verification gaps | Verifier reports gaps that exist | `agents/ms-verifier.md` |
-| Checkpoint handling | Checkpoints not pausing, wrong format | Executor agent |
 | State corruption | STATE.md wrong, position incorrect | `mindsystem/templates/state.md`, workflow state updates |
 | Template wrong | Output file has wrong structure | `mindsystem/templates/*.md` |
 | Planning issue | Plans malformed, wrong dependencies | `mindsystem/workflows/plan-phase.md` |
@@ -134,18 +133,6 @@ Based on gap:
 - **Check:** Phase/plan tracking logic
 - **Check:** SUMMARY.md parsing for completion
 - **Fix:** Update position calculation
-
-### Checkpoint Issues
-
-**"Checkpoints not pausing execution"**
-- **Check:** Task has `type="checkpoint:*"` attribute
-- **Check:** Executor checkpoint handling in agent
-- **Fix:** Ensure checkpoint detection in executor
-
-**"Continuation after checkpoint fails"**
-- **Check:** Continuation prompt template
-- **Check:** Orchestrator fills template correctly
-- **Fix:** Update continuation handling
 
 ### Code Review Issues
 

@@ -343,7 +343,7 @@ Each layer answers different questions:
 9. **Plans ARE prompts** — executable, not documents
 10. **Atomic commits** — Git history as context source
 11. **AskUserQuestion for all exploration** — always options
-12. **Checkpoints post-automation** — automate first, verify after
+12. **Verify after automation** — automate first, verify after
 13. **Deviation rules are automatic** — no permission for bugs/critical
 14. **Depth controls compression** — derive from actual work
 15. **TDD gets dedicated plans** — cycle too heavy to embed

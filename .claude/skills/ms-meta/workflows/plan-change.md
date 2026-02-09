@@ -120,7 +120,6 @@ Mindsystem has consistency rules that must be maintained:
 - [ ] STATE.md structure?
 - [ ] SUMMARY.md frontmatter?
 - [ ] Wave execution logic?
-- [ ] Checkpoint handling?
 - [ ] config.json options?
 - [ ] The context split (main vs subagent)?
 
@@ -240,7 +239,7 @@ set -euo pipefail
 - **Don't add human time estimates** (hours, days)
 - **Don't use generic XML tags** (`<section>`, `<item>`)
 - **Don't break existing commands** without updating all consumers
-- **Don't add checkpoints for automatable work**
+- **Don't add manual gates for automatable work**
 - **Don't skip consistency updates** (help.md, related files)
 - **Don't create mega-flows** that bundle unrelated commands
 - **Don't hide key decisions in subagents** — keep collaboration in main context
