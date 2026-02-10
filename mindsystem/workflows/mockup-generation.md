@@ -87,16 +87,22 @@ Task(prompt=assembled_context, subagent_type="ms-mockup-designer", description="
 </step>
 
 <step name="present_mockups">
-After all 3 agents return, display file paths:
+After all 3 agents return, generate comparison page and open it:
+
+```bash
+uv run ~/.claude/mindsystem/scripts/compare_mockups.py "${PHASE_DIR}/mockups"
+open "${PHASE_DIR}/mockups/comparison.html"
+```
+
+Display summary:
 
 ```markdown
-3 mockup variants generated:
+3 mockup variants generated — comparison page opened in browser.
 
+Individual variants for reference:
 - **A: {Direction A name}** — `.planning/phases/{phase}-{slug}/mockups/variant-a.html`
 - **B: {Direction B name}** — `.planning/phases/{phase}-{slug}/mockups/variant-b.html`
 - **C: {Direction C name}** — `.planning/phases/{phase}-{slug}/mockups/variant-c.html`
-
-Open these in your browser to compare.
 ```
 
 Use AskUserQuestion:

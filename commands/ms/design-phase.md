@@ -185,7 +185,7 @@ Follow mockup-generation workflow:
 4. Present directions to user for approval/tweaking
 5. Read platform template (mobile or web)
 6. Spawn 3 x ms-mockup-designer agents in parallel
-7. Present mockup file paths — user opens in browser
+7. Generate comparison page, open in browser, and present to user
 8. Handle selection (single pick, combine, tweak, more variants, or skip)
 9. Extract CSS specs from chosen variant into `<mockup_direction>` block
 
