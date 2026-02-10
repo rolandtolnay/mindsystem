@@ -109,14 +109,7 @@ If exists, extract:
 
 **3c. Optional context — project UI skill:**
 
-Discover project-level skills:
-```bash
-ls .claude/skills/*/SKILL.md 2>/dev/null
-```
-
-If skills found, read the YAML frontmatter (name + description) of each SKILL.md. Identify any skill whose description indicates it provides UI implementation patterns (screens, widgets, components, theming, spacing, visual patterns).
-
-If a UI skill is found, read its full content. Extract aesthetic patterns (colors, components, spacing, typography) for the `<existing_aesthetic>` block passed to ms-designer.
+Before proceeding, check your available skills for one that provides domain expertise relevant to this project's UI implementation patterns. If found, invoke it via the Skill tool and extract aesthetic patterns (colors, components, spacing, typography) for the `<existing_aesthetic>` block passed to ms-designer.
 
 **3d. Optional context - codebase analysis:**
 
