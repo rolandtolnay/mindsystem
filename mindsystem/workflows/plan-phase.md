@@ -494,43 +494,16 @@ External service indicators:
 Note external services for risk scoring.
 
 <output_format>
-**After task identification, produce structured task list for handoff:**
+**Present a concise numbered task summary for the user:**
 
-```xml
-<task_list>
-  <task id="1">
-    <name>Create User model</name>
-    <type>auto</type>
-    <needs>nothing</needs>
-    <creates>src/models/user.ts</creates>
-    <tdd_candidate>false</tdd_candidate>
-    <action_hint>Define User type with id, email, createdAt</action_hint>
-    <verify_hint>tsc --noEmit passes</verify_hint>
-    <done_hint>User type exportable</done_hint>
-  </task>
-  <task id="2">
-    <name>Create login endpoint</name>
-    <type>auto</type>
-    <needs>src/models/user.ts</needs>
-    <creates>src/app/api/auth/login/route.ts</creates>
-    <tdd_candidate>true</tdd_candidate>
-    <action_hint>POST endpoint with bcrypt validation</action_hint>
-    <verify_hint>curl returns 200 with valid credentials</verify_hint>
-    <done_hint>Login works with valid credentials</done_hint>
-  </task>
-</task_list>
-```
+### Tasks Identified
 
-Each task captures:
-- `id`: Sequential identifier
-- `name`: Action-oriented task name
-- `type`: auto
-- `needs`: Files/types this task requires (or "nothing")
-- `creates`: Files/types this task produces (or "nothing")
-- `tdd_candidate`: true if should be TDD plan
-- `action_hint`: Brief implementation guidance (subagent expands)
-- `verify_hint`: How to verify completion
-- `done_hint`: Acceptance criteria
+1. **Create User model** → `src/models/user.ts` (no dependencies)
+2. **Create login endpoint** → `src/app/api/auth/login/route.ts` (needs: Task 1) [TDD]
+
+Format: numbered list with task name, key files, dependency hint, and `[TDD]` flag if applicable. No XML.
+
+**Retain full task details internally.** For each task, maintain in your analysis: id, name, type, needs, creates, tdd_candidate, action_hint, verify_hint, done_hint. These are needed for the handoff step — they just don't need to be displayed.
 </output_format>
 </step>
 
@@ -545,7 +518,7 @@ Assemble handoff payload:
 
 ```xml
 <task_list>
-  {tasks from break_into_tasks}
+  {Construct full task XML from your analysis. Each task needs: id, name, type, needs, creates, tdd_candidate, action_hint, verify_hint, done_hint. Use the same XML schema the plan-writer expects.}
 </task_list>
 
 <phase_context>
