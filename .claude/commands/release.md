@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - AskUserQuestion
 ---
 
 <objective>
@@ -126,6 +127,16 @@ Read commits since last version and generate changelog entries.
 - Include scope context where helpful
 - Skip empty sections
 - Consolidate iterative commits on the same feature into one entry reflecting the **final state** (e.g., if a feat adds X and a later refactor simplifies X, write one entry describing what shipped)
+</step>
+
+<step name="confirm_changelog">
+Present the generated changelog to the user for approval via AskUserQuestion. Display the full markdown section that will be inserted into CHANGELOG.md.
+
+Options:
+- **Approve** — Proceed to write the changelog and continue the release
+- **Edit** — User provides corrections; regenerate and re-confirm
+
+Do NOT write to CHANGELOG.md until the user approves.
 </step>
 
 <step name="update_changelog">
