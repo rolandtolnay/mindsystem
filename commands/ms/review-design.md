@@ -119,14 +119,7 @@ ls .planning/phases/${PHASE_ARG}-*/*-DESIGN.md 2>/dev/null
 
 **Project UI skill (if exists):**
 
-Discover project-level skills:
-```bash
-ls .claude/skills/*/SKILL.md 2>/dev/null
-```
-
-If skills found, read the YAML frontmatter (name + description) of each SKILL.md. Identify any skill whose description indicates it provides UI implementation patterns (screens, widgets, components, theming, spacing, visual patterns).
-
-If a UI skill is found, load as authoritative source for existing patterns.
+Check your available skills for one that provides domain expertise relevant to this project's UI implementation patterns. If found, invoke it via the Skill tool and use as authoritative source for existing patterns.
 
 **Codebase analysis:**
 - Detect platform (Flutter, React, etc.)
