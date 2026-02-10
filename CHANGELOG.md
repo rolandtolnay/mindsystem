@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.12.0] - 2026-02-10
+
+### Added
+- **Mockup comparison page** — Design-phase auto-generates a side-by-side comparison page from mockup variants [MIN-81]
+
+### Changed
+- **Simplified configuration** — Removed depth, parallelization, and safety config flags; config.json reduced to subsystems + code_review only [MIN-77]
+- **System context UI skill discovery** — Design-phase and review-design use system context for skill lookup instead of file-based globbing
+- **Consolidated ms-meta references** — Merged discrete reference docs into conventions.md; removed separate architecture, concepts, and execution-model files
+- **Plan-phase task summary** — Task breakdown displays a scannable numbered list instead of verbose XML output [MIN-80]
+
 ## [3.11.0] - 2026-02-09
 
 ### Added
@@ -366,7 +377,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.11.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.12.0...HEAD
+[3.12.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.11.0...v3.12.0
 [3.11.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.1...v3.11.0
 [3.10.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.0...v3.10.1
 [3.10.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.6.0...v3.10.0
