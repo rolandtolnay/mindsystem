@@ -50,14 +50,6 @@ ls .planning/phases/XX-current/*-SUMMARY.md 2>/dev/null | sort
 - If counts match: all plans complete
 - If counts don't match: incomplete
 
-<config-check>
-
-```bash
-cat .planning/config.json 2>/dev/null
-```
-
-</config-check>
-
 **If all plans complete:**
 
 ```
@@ -71,8 +63,7 @@ Proceed directly to cleanup_handoff step.
 
 **If plans incomplete:**
 
-**SAFETY RAIL: always_confirm_destructive applies here.**
-Skipping incomplete plans is destructive — ALWAYS prompt regardless of mode.
+**SAFETY RAIL: Skipping incomplete plans is destructive — always confirm.**
 
 Present:
 

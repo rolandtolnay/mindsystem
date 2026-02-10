@@ -196,13 +196,8 @@ Execute all unexecuted plans in a phase with wave-based parallelization.
 - Spawns parallel agents for independent plans
 - Resumes automatically from interrupted execution
 - Creates SUMMARY.md for each completed plan
-- Respects max_concurrent_agents from config.json
 
 Usage: `/ms:execute-phase 5`
-
-Options (via `.planning/config.json` parallelization section):
-- `max_concurrent_agents`: Limit parallel agents (default: 3)
-- `min_plans_for_parallel`: Minimum plans to trigger parallelization (default: 2)
 
 ### Verification
 

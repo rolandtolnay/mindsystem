@@ -215,46 +215,9 @@ Do not compress. Capture everything gathered.
 
 </step>
 
-<step name="workflow_preferences">
-
-Ask workflow preferences in a single AskUserQuestion call (2 questions):
-
-Use AskUserQuestion with questions array:
-
-```
-questions: [
-  {
-    header: "Depth",
-    question: "How thorough should planning be?",
-    multiSelect: false,
-    options: [
-      { label: "Quick", description: "Ship fast (3-5 phases, 1-3 plans each)" },
-      { label: "Standard (Recommended)", description: "Balanced scope and speed (5-8 phases, 3-5 plans each)" },
-      { label: "Comprehensive", description: "Thorough coverage (8-12 phases, 5-10 plans each)" }
-    ]
-  },
-  {
-    header: "Execution",
-    question: "Run plans in parallel?",
-    multiSelect: false,
-    options: [
-      { label: "Parallel (Recommended)", description: "Independent plans run simultaneously" },
-      { label: "Sequential", description: "One plan at a time" }
-    ]
-  }
-]
-```
-
-**Notes:**
-- Depth controls compression tolerance, not artificial inflation
-- Parallelization spawns multiple agents for independent plans
-- All settings can be changed later in config.json
-
-</step>
-
 <step name="config">
 
-Create `.planning/config.json` with chosen depth, parallelization, and subsystems using `templates/config.json` structure.
+Create `.planning/config.json` with subsystems and code_review using `templates/config.json` structure.
 
 **Subsystems:** Derive 5-10 initial subsystems from the project context gathered during questioning. These are short, lowercase identifiers for the major functional areas of the project.
 
@@ -263,7 +226,7 @@ Examples by project type:
 - SaaS: `["auth", "dashboard", "analytics", "billing", "notifications", "ui", "api", "database"]`
 - Mobile app: `["auth", "onboarding", "feed", "messaging", "profile", "media", "api", "storage"]`
 
-Place `subsystems` array as the first field in config.json (before `depth`). These values are used throughout the system for consistent categorization of summaries, debug docs, and adhoc work.
+These values are used throughout the system for consistent categorization of summaries, debug docs, and adhoc work.
 
 </step>
 
@@ -340,7 +303,7 @@ Update `.planning/STATE.md` Last Command field (if STATE.md exists):
 - [ ] PROJECT.md captures full context with evolutionary structure
 - [ ] Requirements initialized as hypotheses (greenfield) or with inferred Validated (brownfield)
 - [ ] Key Decisions table initialized
-- [ ] config.json has depth and parallelization settings
+- [ ] config.json has subsystems and code_review settings
 - [ ] All committed to git
 
 </success_criteria>

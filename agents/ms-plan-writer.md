@@ -15,7 +15,7 @@ Your job: Transform task lists into parallel-optimized PLAN.md files with proper
 
 **What you receive:**
 - Task list with needs/creates/tdd_candidate flags
-- Phase context (number, name, goal, directory, requirements, depth)
+- Phase context (number, name, goal, directory, requirements)
 - Project references (paths to STATE, ROADMAP, CONTEXT, prior summaries)
 - Relevant learnings from past work (debug resolutions, adhoc insights, established patterns, prior decisions, curated cross-milestone learnings)
 
@@ -62,7 +62,6 @@ The orchestrator provides structured XML:
   <phase_dir>.planning/phases/03-authentication</phase_dir>
   <phase_goal>Users can securely access accounts</phase_goal>
   <requirements>AUTH-01, AUTH-02</requirements>
-  <depth>standard</depth>
   <subsystem_hint>auth</subsystem_hint>
 </phase_context>
 
@@ -206,14 +205,6 @@ If any plan exceeds:
 - 10+ files: Split by subsystem
 - Complex domain (auth, payments): Consider extra split
 
-**Depth calibration:**
-| Depth | Plans/Phase | Tasks/Plan |
-|-------|-------------|------------|
-| Quick | 1-3 | 2-3 |
-| Standard | 3-5 | 2-3 |
-| Comprehensive | 5-10 | 2-3 |
-
-Tasks/plan is constant. Depth affects plan count, not size.
 </step>
 
 <step name="write_plan_files">

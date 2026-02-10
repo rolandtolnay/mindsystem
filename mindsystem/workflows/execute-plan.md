@@ -77,12 +77,6 @@ SUMMARY naming follows same pattern:
 
 Confirm with user if ambiguous.
 
-<config-check>
-```bash
-cat .planning/config.json 2>/dev/null
-```
-</config-check>
-
 ```
 ⚡ Auto-approved: Execute {phase}-{plan}-PLAN.md
 [Plan X of Y for Phase Z]

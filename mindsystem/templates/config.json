@@ -1,16 +1,5 @@
 {
   "subsystems": [],
-  "depth": "standard",
-  "parallelization": {
-    "enabled": true,
-    "plan_level": true,
-    "max_concurrent_agents": 3,
-    "min_plans_for_parallel": 2
-  },
-  "safety": {
-    "always_confirm_destructive": true,
-    "always_confirm_external_services": true
-  },
   "code_review": {
     "adhoc": null,
     "phase": null,

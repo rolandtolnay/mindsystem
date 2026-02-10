@@ -204,38 +204,6 @@ Waves: [01, 02, 03] (all parallel)
 **3 tasks:** Simple ~45%, Medium ~75% (risky), Complex 120% (impossible)
 </estimating_context>
 
-<depth_calibration>
-**Depth controls compression tolerance, not artificial inflation.**
-
-| Depth | Typical Phases | Typical Plans/Phase | Tasks/Plan |
-|-------|----------------|---------------------|------------|
-| Quick | 3-5 | 1-3 | 2-3 |
-| Standard | 5-8 | 3-5 | 2-3 |
-| Comprehensive | 8-12 | 5-10 | 2-3 |
-
-Tasks/plan is CONSTANT at 2-3. The 50% context rule applies universally.
-
-**Key principle:** Derive from actual work. Depth determines how aggressively you combine things, not a target to hit.
-
-- Comprehensive auth = 8 plans (because auth genuinely has 8 concerns)
-- Comprehensive "add favicon" = 1 plan (because that's all it is)
-
-Don't pad small work to hit a number. Don't compress complex work to look efficient.
-
-**Comprehensive depth example:**
-Auth system at comprehensive depth = 8 plans (not 3 big ones):
-- 01: DB models (2 tasks)
-- 02: Password hashing (2 tasks)
-- 03: JWT generation (2 tasks)
-- 04: JWT validation middleware (2 tasks)
-- 05: Login endpoint (2 tasks)
-- 06: Register endpoint (2 tasks)
-- 07: Protected route patterns (2 tasks)
-- 08: Auth UI components (3 tasks)
-
-Each plan: fresh context, peak quality. More plans = more thoroughness, same quality per plan.
-</depth_calibration>
-
 <summary>
 **2-3 tasks, 50% context target:**
 - All tasks: Peak quality
@@ -246,7 +214,6 @@ Each plan: fresh context, peak quality. More plans = more thoroughness, same qua
 
 **The rules:**
 - If in doubt, split. Quality over consolidation.
-- Depth increases plan COUNT, never plan SIZE.
 - Vertical slices over horizontal layers.
 - Explicit dependencies via `depends_on` frontmatter.
 - Autonomous plans get parallel execution.

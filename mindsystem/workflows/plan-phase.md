@@ -527,7 +527,6 @@ Assemble handoff payload:
   <phase_dir>.planning/phases/{PHASE}-{PHASE_NAME}</phase_dir>
   <phase_goal>{goal from ROADMAP}</phase_goal>
   <requirements>{REQ-IDs from ROADMAP}</requirements>
-  <depth>{from config.json or "standard"}</depth>
   <subsystem_hint>{best-match subsystem from config.json}</subsystem_hint>
 </phase_context>
 

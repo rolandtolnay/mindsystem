@@ -170,7 +170,6 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
        <context>
        Plan: @{plan_path}
        Project state: @.planning/STATE.md
-       Config: @.planning/config.json (if exists)
        </context>
 
        <success_criteria>
