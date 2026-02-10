@@ -12,40 +12,7 @@ Mindsystem is a **meta-prompting system** where every file is both implementatio
 - **Context engineering** (manage Claude's context window deliberately)
 - **Plans as prompts** (PLAN.md files are executable, not documents to transform)
 
----
-
-## Fork Philosophy
-
-This is a customized fork of Mindsystem with specific design principles that diverge from upstream.
-
-### Modularity Over Bundling
-
-Keep commands separated rather than unified into mega-flows. Each command has a clear purpose. Users should know exactly which command to use in each situation without consulting documentation.
-
-### Main Context for Collaboration
-
-Planning and interactive work stays in the main context rather than delegating to subagents. This preserves:
-- Conversational iteration during planning
-- User ability to question, redirect, and contribute
-- Visibility into Claude's reasoning
-
-Reserve subagents for autonomous execution work, not collaborative thinking.
-
-### Script + Prompt Hybrid
-
-Combine bash scripts with prompts where deterministic logic fits better in code than natural language. Examples:
-- Patch generation extracted to shell scripts
-- File manipulation via dedicated tooling
-- Research capabilities moving toward CLI tools
-
-Prompts handle reasoning and decisions; scripts handle mechanical operations.
-
-### User as Collaborator
-
-Trust that users can contribute meaningfully. Maintain:
-- **Control** — User decides when to proceed, what to skip
-- **Granularity** — Separate commands for research, requirements, planning, execution
-- **Transparency** — No hidden delegation or background orchestration
+Design principles (modularity, main context for collaboration, script+prompt hybrid, user as collaborator) govern all Mindsystem decisions. Invoke `ms-meta` skill for the full philosophy.
 
 ---
 
@@ -177,22 +144,7 @@ Build authentication system
 - `type="auto"` — Claude executes autonomously (default)
 - `type="tdd"` — TDD features with RED → GREEN → REFACTOR cycle
 
----
-
-## @-Reference Patterns
-
-**Static references** (always load):
-```
-@~/.claude/mindsystem/workflows/execute-phase.md
-@.planning/PROJECT.md
-```
-
-**Conditional references** (based on existence):
-```
-@.planning/DISCOVERY.md (if exists)
-```
-
-**@-references are eagerly loaded.** All referenced file content is injected into context upfront when the prompt is processed. For lazy loading, instruct Claude to read a file path during execution (e.g., "Read `.planning/DESIGN.md` if it exists"). Use @-references for files that are always essential; use read instructions for files that are conditionally needed.
+**@-references are eagerly loaded** — all content injected upfront. For lazy loading, use read instructions during execution. @-reference files that are always essential; use read instructions for conditionally needed files.
 
 ---
 
@@ -313,37 +265,13 @@ Include escape hatch: "Something else", "Let me describe"
 
 ---
 
-## Progressive Disclosure
-
-Information flows through layers:
-
-1. **Command** — High-level objective, delegates to workflow
-2. **Workflow** — Detailed process, references templates/references
-3. **Template** — Concrete structure with placeholders
-4. **Reference** — Deep dive on specific concept
-
-Each layer answers different questions:
-- Command: "Should I use this?"
-- Workflow: "What happens?"
-- Template: "What does output look like?"
-- Reference: "Why this design?"
-
----
-
-## Summary: Core Meta-Patterns
+## Quick Rules
 
 1. **XML for semantic structure, Markdown for content**
 2. **@-references are eagerly loaded** — use read instructions for conditional files
-3. **Commands delegate to workflows**
-4. **Progressive disclosure hierarchy**
-5. **Imperative, brief, technical** — no filler, no sycophancy
-6. **Solo developer + Claude** — no enterprise patterns
-7. **Context size as quality constraint** — split aggressively
-8. **Temporal language banned** — current state only
-9. **Plans ARE prompts** — executable, not documents
-10. **Atomic commits** — Git history as context source
-11. **AskUserQuestion for all exploration** — always options
-12. **Verify after automation** — automate first, verify after
-13. **Deviation rules are automatic** — no permission for bugs/critical
-14. **Depth controls compression** — derive from actual work
-15. **TDD gets dedicated plans** — cycle too heavy to embed
+3. **Imperative, brief, technical** — no filler, no sycophancy
+4. **Solo developer + Claude** — no enterprise patterns
+5. **Temporal language banned** — current state only
+6. **Atomic commits** — Git history as context source
+7. **AskUserQuestion for all exploration** — always options
+8. **Verify after automation** — automate first, verify after
