@@ -63,7 +63,7 @@ Present the proposed list and the merge mapping (e.g., "authentication" → "aut
 
 ## Step 3: Update config.json
 
-Read `.planning/config.json`. Add the `subsystems` array as the FIRST field (before `depth`):
+Read `.planning/config.json`. Add the `subsystems` array as the FIRST field:
 
 ```bash
 cat .planning/config.json
@@ -74,8 +74,7 @@ Use the Edit tool to add the subsystems array. The result should look like:
 ```json
 {
   "subsystems": ["auth", "api", "database", "ui", ...],
-  "depth": "standard",
-  ...
+  "code_review": { ... }
 }
 ```
 
