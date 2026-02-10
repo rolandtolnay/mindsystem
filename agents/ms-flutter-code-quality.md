@@ -2,7 +2,7 @@
 name: ms-flutter-code-quality
 description: Refactors Flutter/Dart code to follow quality guidelines. Applies code patterns, widget organization, folder structure, and simplification. Spawned by execute-phase/adhoc.
 model: sonnet
-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch
+tools: Read, Write, Edit, Bash, Grep, Glob
 color: cyan
 skills:
   - flutter-code-quality
@@ -46,9 +46,10 @@ Apply four lenses:
 
 ### Pass 1: Code Quality Patterns
 
-Fetch guidelines first:
-```
-WebFetch: https://gist.githubusercontent.com/rolandtolnay/edf9ea7d5adf218f45accb3411f0627c/raw/flutter-code-quality-guidelines.md
+Fetch guidelines first (never WebFetch — it summarizes instead of returning raw content):
+```bash
+gh api /gists/edf9ea7d5adf218f45accb3411f0627c \
+  --jq '.files["flutter-code-quality-guidelines.md"].content'
 ```
 
 Replace anti-patterns:
@@ -104,7 +105,7 @@ Apply `flutter-code-simplification` skill principles:
 ## Process
 
 1. **Identify targets** - Parse scope to find modified .dart files
-2. **Fetch guidelines** - WebFetch flutter-code-quality-guidelines.md from gist
+2. **Fetch guidelines** - Fetch guidelines via `gh api`
 3. **Refactor Pass 1** - Apply code quality patterns
 4. **Refactor Pass 2** - Apply widget organization rules
 5. **Refactor Pass 3** - Apply folder structure conventions
@@ -159,7 +160,7 @@ Code already follows guidelines.
 
 <success_criteria>
 - All functionality preserved — no behavior changes
-- Guidelines fetched from gist
+- Guidelines fetched from gist via `gh api`
 - All target .dart files refactored through four passes
 - Code follows guidelines after refactoring
 - `flutter analyze` passes

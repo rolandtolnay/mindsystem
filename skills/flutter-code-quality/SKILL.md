@@ -24,11 +24,12 @@ Comprehensive guidelines for Flutter/Dart code quality, widget organization, and
 
 Fetch fresh guidelines before each review:
 
-```
-https://gist.githubusercontent.com/rolandtolnay/edf9ea7d5adf218f45accb3411f0627c/raw/flutter-code-quality-guidelines.md
+```bash
+gh api /gists/edf9ea7d5adf218f45accb3411f0627c \
+  --jq '.files["flutter-code-quality-guidelines.md"].content'
 ```
 
-Use WebFetch to retrieve. Contains: anti-patterns, widget patterns, state management, collections, hooks, theme/styling, etc.
+Never use WebFetch for gist content — it summarizes instead of returning raw text. Contains: anti-patterns, widget patterns, state management, collections, hooks, theme/styling, etc.
 
 ## Widget Organization Guidelines (Embedded)
 
