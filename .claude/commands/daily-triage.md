@@ -11,19 +11,19 @@ This command applies the Pareto principle: find the 20% of tickets that deliver 
 <process>
 
 <step name="load_domain_context">
-You need to understand this project's architecture before you can score impact accurately. Use the following sources in order — each layer adds depth. Stop once you have enough context to understand the system's core workflows, components, and what "upstream" means for this project:
+You need to understand this project's architecture before you can score impact accurately.
 
-1. **CLAUDE.md** — Always read the project's `CLAUDE.md` first. This exists in every project and contains development conventions, architecture notes, and system overview.
+Run these in parallel:
 
-2. **PROJECT.md** — Read `.planning/PROJECT.md` if it exists. It provides business context, system structure, and current project state. Skip silently if it doesn't exist.
+1. **CLAUDE.md** — Read the project's `CLAUDE.md`. Contains development conventions, architecture notes, and system overview.
+2. **Check for PROJECT.md** — Run `test -f .planning/PROJECT.md && echo EXISTS || echo MISSING` via Bash. Do NOT attempt to read the file yet.
+3. **Load skills** — Invoke both skills using the Skill tool (no args needed):
+   - `linear` — loads the CLI reference for fetching tickets
+   - `ms-meta` — loads Mindsystem architecture knowledge for accurate impact scoring
+
+Then, if step 2 reported PROJECT.md EXISTS, read `.planning/PROJECT.md`. It provides business context, system structure, and current project state. Skip silently if MISSING.
 
 The goal is to understand: what are the core workflows, what is upstream vs downstream, and where do changes have the highest blast radius. This directly determines impact scoring in the next steps.
-</step>
-
-<step name="load_skills">
-Invoke both skills using the Skill tool (no args needed):
-- `linear` — loads the CLI reference for fetching tickets
-- `ms-meta` — loads Mindsystem architecture knowledge for accurate impact scoring
 </step>
 
 <step name="fetch_all_unsolved_tickets">
@@ -56,9 +56,9 @@ Eliminate tickets that are NOT actionable today:
 - **Blocked** — explicitly depends on another unfinished ticket (check relations like "blocked by"). Note: parent/sub-issue relationships are NOT blocking — parents are abstractions and sub-issues are the actual work. Sub-issues are always actionable regardless of parent state.
 - **Research-only** — no code deliverable, just reading/learning (defer to spare time)
 - **Needs design decisions** — requires architectural choices that haven't been made yet
-- **Too large** — estimate XL or description implies multi-session effort
-
 Mark eliminated tickets with the reason. This typically cuts the list by 30-50%.
+
+**Do NOT filter by size.** Large tickets (L, XL) survive filtering — effort scoring and session composition handle them. Filtering by size before scoring guarantees the highest-impact work never gets evaluated.
 </step>
 
 <step name="score_remaining_tickets">
@@ -85,7 +85,11 @@ Score each remaining ticket on two axes:
 - Changing a template + updating references to it = effort 2
 - Single-file fix with clear root cause = effort 1
 - "Research" or "evaluate" in the title = effort 3 (investigation needed)
-- Ticket has known root cause in comments = reduces effort by 1
+
+**Score effort on remaining work, not original scope.** Effort 3 includes "requires investigation/diagnosis" and "requires architectural decisions" as OR conditions. When comments already contain root cause analysis, approach decisions, or investigation results, those conditions no longer apply. Re-evaluate effort based on what's left to implement:
+- If investigation is done and 3-5 files remain with a known approach → effort 2, not "effort 3 minus 1"
+- If approach is decided and only 1-2 files need changes → effort 1
+- Comments that contain analysis but no clear conclusion don't reduce effort — the decision still needs to be made
 
 **Leverage = Impact / Effort**
 </step>
@@ -93,10 +97,14 @@ Score each remaining ticket on two axes:
 <step name="compose_session">
 Rank all scored tickets by leverage (highest first).
 
-Compose a session that fills 30-60 minutes:
-- **One high-leverage ticket** (leverage >= 1.5, effort 2-3), OR
-- **Two quick wins** that each score leverage >= 2.0 (effort 1 each), OR
-- **One quick win + scoping** a future high-impact ticket (read its details, identify approach, leave notes)
+Compose a session by selecting the best option:
+
+1. **Strategic ticket** — Impact 3 at any effort level. When the most upstream/core work is available, recommend it regardless of leverage score. These tickets compound across all future usage — deferring them repeatedly is worse than spending a longer session. For effort-3 strategic tickets, identify the actionable scope for today (what's the meaningful slice that ships progress).
+2. **High-leverage ticket** — Leverage >= 1.5, effort 2-3.
+3. **Two quick wins** — Each leverage >= 2.0, effort 1 each.
+4. **One quick win + scoping** a future high-impact ticket (read its details, identify approach, leave notes).
+
+Evaluate options in order. If option 1 qualifies, prefer it over lower-numbered options unless a quick win has dramatically higher leverage (3.0+).
 
 **Selection tiebreakers** (when leverage scores are equal):
 1. Correctness fixes beat quality improvements beat friction reduction
