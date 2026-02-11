@@ -6,6 +6,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.13.0] - 2026-02-11
+
+Planning pipeline rework. Plans are now pure markdown prompts optimized for a single intelligent reader — no YAML frontmatter, no XML containers. Orchestration metadata (wave grouping, dependencies) separated from execution content into EXECUTION-ORDER.md. Executor workflow cut from 1,209 to 338 lines. Every token the executor loads now serves code output, not process ceremony. Net effect: executors start with more context headroom, plans read as direct instructions, and the system aligns with Claude Code's native plan conventions and prompting best practices.
+
+### Changed
+- **Pure markdown plans** — Plans use `## Context`, `## Changes`, `## Verification`, `## Must-Haves` sections; ~90% actionable content, ~10% structure
+- **Executor workflow rewrite** — Execute-plan workflow reduced from 1,209 to 338 lines; conditional sections lazy-loaded instead of eagerly injected
+- **EXECUTION-ORDER.md for wave orchestration** — Wave grouping and dependencies moved out of plan frontmatter into a dedicated orchestration file
+- **Downstream format alignment** — Updated consolidator, check-phase, execute-phase, verify-phase, adhoc, verification-report, and roadmap templates for markdown plan terminology
+
+### Fixed
+- **Verification gaps** — Closed remaining stale frontmatter and must_haves references across verify-phase, plan-phase, and templates
+
 ## [3.12.0] - 2026-02-10
 
 ### Added
@@ -377,7 +390,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.12.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.0...HEAD
+[3.13.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.12.0...v3.13.0
 [3.12.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.11.0...v3.12.0
 [3.11.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.1...v3.11.0
 [3.10.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.0...v3.10.1
