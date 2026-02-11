@@ -1,298 +1,145 @@
 # Prompt Quality Guide
 
-Universal reference for evaluating and improving prompts, commands, agents, and LLM-facing documentation. Applies to any system where humans write instructions that LLMs execute.
+Philosophy and constraints for writing effective LLM prompts. Applies universally — commands, agents, system prompts, templates, any context where humans write instructions for LLMs to follow.
 
 ---
 
-## LLM Cognitive Model
+## How LLMs Process Instructions
 
-Effective prompting requires understanding how LLMs actually process instructions — not how humans read documents.
+### Finite Instruction-Following Capacity
 
-### The Instruction Budget
+Frontier LLMs follow ~150-200 instructions with reasonable consistency. System prompts and injected context consume a portion of that budget before your prompt even begins. Every instruction competes for the remaining capacity.
 
-Frontier LLMs follow ~150-200 instructions with reasonable consistency. System prompts (Claude Code, API wrappers, etc.) consume ~50 of those. Every instruction in your prompt competes for the remaining budget.
+Adding one instruction dilutes all others. A low-value instruction actively degrades high-value ones. This means **each instruction must earn its place** — not by being correct or reasonable, but by measurably changing the LLM's behavior in the runtime context where the prompt executes.
 
-**Each instruction must earn its place.** A low-value instruction actively degrades a high-value one by diluting attention across more items.
+Not all content costs equally against this budget:
 
-Not all content costs equally:
-
-| Content type | Budget cost | Notes |
-|---|---|---|
-| Reference data (bash commands, API formats, code examples) | Low | Factual context, not behavioral directives |
-| Structural markers (`<step>`, `## Headers`) | Low | Organize without competing for instruction slots |
-| Affirmative instructions ("do X") | Standard | One instruction slot each |
-| Negation instructions ("do NOT X") | Standard | Often wasted on behaviors the LLM wasn't going to exhibit |
-| Meta-commentary ("this is important because...") | Standard cost, zero behavioral return | Pure waste |
+- **Reference data** (commands, schemas, examples): Low cost. Factual context the LLM can't discover on its own.
+- **Structural markers** (headers, XML containers, step labels): Low cost. They organize without competing for instruction slots.
+- **Behavioral instructions** ("do X", "do NOT X"): Standard cost. One slot each.
+- **Meta-commentary** ("this is important because..."): Standard cost with zero behavioral return.
 
 ### Positional Attention Bias
 
-LLMs bias toward instructions at the **peripheries** — the very beginning and the very end. The middle receives the least attention.
+LLMs bias toward instructions at the **peripheries** of the prompt — the beginning and the end. Instructions buried in the middle receive the least attention.
 
-Structure prompts accordingly:
+- **Beginning:** Objective, critical constraints, essential reference data
+- **Middle:** Elaboration and process details (keep lean — this is the attention trough)
+- **End:** Success criteria, closing reinforcement of what matters most
 
-- **Beginning:** Objective, critical context, reference data (commands, API formats, schemas)
-- **Middle:** Behavioral overrides that need elaboration (keep lean)
-- **End:** Success criteria focused on high-skip-risk items; closing reinforcement of what matters most
+Restating a critical instruction at the end of a prompt is not redundancy — it's **peripheral reinforcement**. The items the LLM is most likely to skip should appear first in end-of-prompt criteria.
 
-Success criteria at the end are not duplication — they are **peripheral reinforcement**. Place the items the LLM is most likely to skip first in the list.
+### Context Is a Shared, Depletable Resource
 
-### Context Quality Degradation
+Every token in the prompt competes with the LLM's reasoning and output for the same context window. Output quality degrades predictably as context fills:
 
-LLM output quality degrades predictably as context fills:
-
-| Context usage | Quality level |
+| Context usage | Quality |
 |---|---|
-| 0-30% | Peak quality |
-| 30-50% | Good quality |
-| 50-70% | Degrading — LLM starts cutting corners |
-| 70%+ | Poor quality |
+| 0-30% | Peak |
+| 30-50% | Good |
+| 50-70% | Degrading — starts cutting corners |
+| 70%+ | Poor |
 
-**The 50% rule:** Work should complete within ~50% context usage. Stop before quality degrades, not at the context limit. Every token that doesn't improve output is waste.
+A verbose prompt that fills 15% of context before the LLM begins working is already handicapping output quality. Shorter, more focused prompts leave more room for the LLM's actual work.
 
-**Implication for prompts:** Shorter, more focused prompts leave more context for the LLM's actual work — reasoning, code generation, analysis. A verbose 2000-line prompt that fills 15% of context before the LLM writes a single line is already handicapping output quality.
+**Implication:** When two approaches produce equivalent results, choose the one consuming less context. This applies to prompt design, reference loading, and how much supporting material gets injected.
 
-### Default Behaviors vs. Overrides
+### Default Behaviors Shift With Context
 
-LLMs have strong default behaviors. The value of a prompt is the set of **behavioral overrides** it induces. Everything else is noise.
+LLMs have strong defaults, but those defaults become unreliable as context grows. An LLM in a 500-token conversation reliably uses its tools. The same LLM in a 50,000-token context with a large system prompt may forget specific tools exist.
 
-**The behavioral override test:** For every instruction, ask: *"Does the LLM already do this without being told?"*
+This makes the value test more nuanced than "does the LLM know this?" The real question is: **"Does the LLM reliably do this given everything else competing for its attention?"**
 
-- If yes → remove it (wastes budget)
-- If no → keep it (this is the prompt's actual value)
+- A tool reminder is waste in a minimal prompt but critical in a large, complex context
+- A formatting instruction is unnecessary for short outputs but essential when the LLM generates long, structured responses
+- A constraint the LLM follows by default may need explicit reinforcement when surrounded by many other instructions
+
+**Test instructions against the actual runtime context**, not against the LLM's theoretical capabilities.
 
 ---
 
-## Prompt Architecture
+## Core Philosophy
 
-### Section Ordering (for commands and workflow prompts)
+### The Value of a Prompt Is Its Behavioral Overrides
 
-1. **Objective** — What, why, when (always present, always first)
-2. **Context** — Reference data, file contents, dynamic inputs
-3. **Process** — Steps to follow, behavioral overrides
-4. **Success criteria** — Measurable completion checklist (always last)
+Everything in a prompt that doesn't change the LLM's behavior is noise. The question for every instruction: *"If I remove this, does the output get worse in the context where this prompt runs?"*
 
-This maps to how LLMs process: understand the goal → absorb context → execute steps → self-verify against criteria.
+- If removing it changes nothing → it wastes budget and dilutes everything else
+- If removing it causes failures → it earns its place regardless of whether it seems redundant
 
-### Semantic Containers
+This test must be empirical, not theoretical. "The LLM should know this" is irrelevant if it doesn't reliably act on it. Conversely, instructions that seem obviously unnecessary may be load-bearing in practice. Trust observed behavior over assumptions.
 
-Use containers that communicate **purpose**, not structure.
+### Specificity Over Abstraction
 
-**Good:** `<objective>`, `<verification>`, `<action>`, `<context>`
+Specific instructions outperform vague ones. "Return a JSON object with fields `name` (string) and `age` (integer)" beats "return structured data." Concrete examples anchor abstract rules and reduce the space of valid interpretations.
 
-**Bad:** `<section>`, `<item>`, `<content>`, `<subsection>`
+When a prompt includes rules, show what compliance looks like. When it includes constraints, show what violation looks like. The more concrete the instruction, the less room for the LLM to drift.
 
-Use markdown headers for hierarchy within containers. Containers mark semantic boundaries; headers organize content within those boundaries.
+### Patterns and Anti-Patterns Work Together
+
+Showing the right way ("do this") and the wrong way ("not this") are complementary techniques. Anti-patterns aren't wasted negation — they're **contrastive anchoring**. Seeing the wrong pattern makes the right pattern clearer and easier to detect.
+
+The waste to avoid is negating **unlikely behaviors** — telling the LLM not to do something it wasn't going to do. This activates the concept without benefit. But negating **observed failure modes** (things the LLM actually does wrong) is high-value, especially when paired with the correct alternative.
 
 ### Progressive Disclosure
 
-Load information only when needed. Two mechanisms:
+Load information only when needed. Not every reference, example, or constraint needs to be present from the start.
 
-- **Eager loading** (`@file` references, inline content): For files that are always essential. Content injected upfront into prompt context.
-- **Lazy loading** (read instructions during execution): For conditionally needed files. "If type is `tdd`, read `tdd-reference.md`."
+- **Eager loading:** Content injected into the prompt before the LLM begins. In practice, this means `@file` references or inline content that gets expanded at prompt assembly time. The LLM sees it immediately. Use for content needed on every execution path.
+- **Lazy loading:** Content the LLM fetches during execution when a condition is met. In practice, this means a read instruction inside the prompt: "If type is `tdd`, read `tdd-reference.md`." The content only enters context when the LLM decides it's needed.
 
-Default to lazy. Promote to eager only when the content is needed on every execution path.
-
-### Separation of Concerns
-
-Prompts serve one reader doing one job. Mixing audiences creates waste.
-
-| Keep separate | Because |
-|---|---|
-| Orchestration vs. execution | Executors don't need wave grouping or dependency info |
-| Instructions vs. rationale | LLMs need "what to do", not "why the design works" |
-| Process vs. output format | Process governs behavior; output format governs artifacts |
-| Reference data vs. behavioral rules | Different budget costs, different update frequencies |
-
----
-
-## Content Principles
-
-### Terseness Over Explanation
-
-- Single-line rules; no paragraphs where a line suffices
-- Sacrifice grammar for brevity: `"Label optional fields"` not `"You should always label optional fields explicitly"`
-- No "why" explanations — rules are self-evident or trust is assumed
-- Remove noise words: no `IMPORTANT:`, `YOU MUST`, `Please ensure`
-
-### Concrete Syntax Inline
-
-Show the pattern directly in the rule:
-
-**Good:** `Early return: if (items.isEmpty) return const SizedBox.shrink();`
-
-**Bad:** "When a collection is empty, you should return an empty widget early to avoid unnecessary rendering."
-
-- Arrow notation for transformations: `.toList()..sort()` → `.sorted()`
-- Backticks for all identifiers: `useState`, `AsyncValue.guard()`
-
-### Flat Hierarchy
-
-- Maximum two levels: `Category → Rules`
-- No nested subcategories
-- Categories as H2/H3 headers, rules as bullet points
-- Consolidate overlapping categories
-
-Deep nesting wastes structural tokens and makes rules harder for LLMs to index against input.
-
-### Affirmative Over Negation
-
-Affirmative instructions ("do X") are more reliable than negations ("do NOT X"). Negations require the LLM to:
-
-1. Understand the unwanted behavior
-2. Activate the concept
-3. Suppress it
-
-This is cognitively expensive and failure-prone. Use negations only when the LLM **actually exhibits** the unwanted behavior (verified through testing).
+Default to lazy. Promote to eager only when the content is essential regardless of execution path. Every token loaded upfront that goes unused is pure context waste.
 
 ### Imperative Voice
 
-**Do:** "Execute tasks", "Create file", "Return JSON"
+"Create the file" not "the file should be created." Imperative sentences are shorter, less ambiguous, and map directly to actions. Passive voice adds tokens without adding information.
 
-**Don't:** "Tasks should be executed", "The file should be created"
+### No Filler, No Sycophancy
 
-Imperative sentences are shorter, less ambiguous, and map directly to actions.
-
----
-
-## Document Formats
-
-Different prompt artifacts serve different purposes and optimize for different readers.
-
-### Commands (User-Facing Entry Points)
-
-Thin wrappers that delegate to workflows. Contain:
-
-- Objective (what/why/when)
-- Context injection (dynamic inputs, file references)
-- High-level process overview
-- Success criteria
-
-Commands answer: *"Should I use this?"*
-
-### Workflows (Detailed Procedures)
-
-Step-by-step execution logic. Where behavioral overrides and process details live.
-
-Commands and workflows must stay in sync — same steps at different detail levels.
-
-### Reference Documents (LLM-Optimized Knowledge)
-
-Structured for fast pattern matching during code review or analysis:
-
-```
-# Title
-
-Review instruction with $ARGUMENTS
-
-## Rules
-
-### Category Name
-- Rule with `inline code` example
-- Transformation: `bad` → `good`
-
-## Anti-Patterns (flag these)
-- Bad pattern (use X instead)
-- `concrete.bad.code()` (explanation)
-
-## Output Format
-file:line - issue → fix
-```
-
-Key properties:
-- No introductory paragraphs or rationale
-- Concrete code inline with every rule
-- Dedicated anti-patterns section (mirror rules in negative form)
-- Explicit output format with example
-
-### Plans (Executable Prompts)
-
-Pure markdown — no XML containers, no YAML frontmatter. ~90% actionable content, ~10% structure. Plans ARE the prompt, not a document that gets transformed.
-
-**Specificity test:** Can the executor start implementing without clarifying questions? If not, the plan is too vague.
+Words that carry zero information content — "Let me", "Simply", "Basically", "I'd be happy to", "Great question!" — waste both prompt tokens and output tokens. Direct instructions and factual statements only.
 
 ---
 
-## Waste Patterns
+## Evaluating Instructions
 
-Instructions that consume budget without changing behavior:
+### The Reliability Test
 
-| Pattern | Example | Why it wastes budget |
+For each instruction in a prompt, ask:
+
+1. **Does removing this degrade output in the actual runtime context?** Not in theory — in practice, with the full system prompt and injected context present. If no, remove.
+2. **Is this positioned for attention?** High-skip-risk items belong at the beginning or end, not buried in the middle.
+3. **If this is a negation, does the LLM actually exhibit the unwanted behavior?** If not, the negation activates the concept without benefit. Remove.
+4. **Is this restated elsewhere?** Duplication at the same position is waste. Duplication across positions (process step + success criterion) is peripheral reinforcement and may be intentional.
+5. **Could this be shorter without losing meaning?** Fewer tokens = less budget consumed.
+
+### Success Criteria
+
+Success criteria at the end of a prompt serve as peripheral reinforcement — a final pass of attention over what matters most.
+
+- Order by **skip risk** (highest first) — the things the LLM is most likely to forget or shortcut
+- Omit items for steps the LLM never skips (obvious first steps, routine actions)
+- Keep to 5-7 items — each additional item dilutes all others
+- Use concrete, verifiable language, not vague aspirations
+
+### Common Waste
+
+| Pattern | Example | Problem |
 |---|---|---|
-| Tool-usage instructions | "use the Skill tool", "call Read" | LLM knows its own tools |
-| Meta-commentary | "Thoroughness is more important than speed" | Concrete instructions below already enforce this |
-| Architecture rationale | "These steps survive the context reset" | Explains *why*, not *what to do* |
-| Negations of unlikely behavior | "Do NOT run the CLI directly" | LLM wasn't going to; negation activates the concept |
-| Low-risk success criteria | "Ticket details fetched and understood" | LLM never skips step 1 — reinforce what it *does* skip |
-| Filler phrases | "Let me", "Simply", "Basically", "I'd be happy to" | Zero information content |
-| Sycophancy prompts | "Great question!", "Excellent choice!" | Wastes output tokens, degrades professional tone |
-| Verbose rule statements | "IMPORTANT: You must always ensure that..." | Same rule, 3x the tokens |
+| Meta-commentary | "Thoroughness is more important than speed" | The concrete instructions below already enforce this |
+| Architecture rationale | "This design survives context resets" | Explains *why*, not *what to do* |
+| Negations of unlikely behavior | "Do NOT delete the database" | LLM wasn't going to; negation activates the concept |
+| Low-risk success criteria | "File was read successfully" | LLM never skips this; reinforce what it *does* skip |
+| Filler and sycophancy | "Simply", "I'd love to help" | Zero information content |
+| Verbose restatement | "IMPORTANT: You must always ensure that..." | Same instruction at 3x the token cost |
 
-### Patterns That Earn Their Place
+### Common Value
 
-| Pattern | Example | Why it's needed |
+| Pattern | Example | Why it earns its place |
 |---|---|---|
 | Reference data | `uv run script.py get $ARGUMENTS` | LLM cannot discover this on its own |
-| Behavioral overrides | "Read files yourself, don't rely on agent summaries" | Counteracts a real default tendency |
+| Behavioral overrides | "Read files yourself, don't rely on summaries" | Counteracts a real observed tendency |
+| Tool reminders | "Use AskUserQuestion to clarify" | Specific tools get lost in large contexts |
 | Separation constraints | "Do NOT combine steps 3 and 4" | Prevents a verified failure mode |
-| Confidence gates | "Do NOT proceed until 95% confident" | Prevents premature transitions |
-| Gap-hunting checklists | Bullet list of ambiguity types to look for | Provides structure LLM wouldn't generate |
-| Concrete code examples | `bad pattern` → `good pattern` | Anchors abstract rules to specific syntax |
-| Output format specifications | `file:line - issue → fix` | LLM needs exact format, not just "be concise" |
-
----
-
-## Quality Evaluation
-
-### Per-Instruction Scoring
-
-For each instruction in a prompt:
-
-1. **Does this change behavior?** If the LLM would do the same thing without this instruction, remove it.
-2. **Is this positioned correctly?** High-risk items at beginning or end, not buried in the middle.
-3. **Affirmative or negating?** If negating, does the LLM actually exhibit the unwanted behavior? If not, remove.
-4. **Is this a duplicate?** Success criteria may intentionally duplicate process steps (peripheral reinforcement). Two instructions in the same position saying the same thing is waste.
-5. **Could this be shorter?** Fewer tokens = cheaper against the budget.
-
-### Success Criteria Design
-
-Success criteria serve as **end-of-prompt reinforcement**, not a cross-reference checklist.
-
-- Order by **skip risk** (highest first) — items the LLM is most likely to forget
-- Omit items for steps the LLM never skips (early steps, obvious actions)
-- Maximum 5-7 items — each one dilutes the others
-- Concrete, verifiable language: `"commit message includes [TICKET-ID]"` not `"code is clean"`
-
-### The Quality x Speed Tradeoff
-
-Every prompt feature exists on a spectrum:
-
-- **Quality gates** — Steps that measurably improve output (verification catches real mismatches, checklists catch real omissions). Worth their token cost.
-- **Engineering noise** — Steps that add overhead without measurably influencing output (redundant checks, verbose explanations, ceremony). Must be eliminated.
-
-**Decision principle:** Does this step's quality improvement justify its context cost? If not, it's noise — remove it regardless of how reasonable it sounds in theory.
-
----
-
-## Revision Process
-
-When trimming an existing prompt:
-
-1. **Count behavioral overrides** — things the LLM wouldn't do without this prompt
-2. **Count everything else**
-3. **Remove "everything else"** unless it's reference data or structural markers
-4. **Check positioning** — anything in the middle that should be at the peripheries?
-5. **Tighten success criteria** to high-skip-risk items only
-6. **Compress verbose rules** to single-line with inline code examples
-7. **Extract anti-patterns** to a dedicated section (enables fast pattern matching)
-8. **Verify specificity** — can the LLM execute without clarifying questions?
-
-### Transformation Checklist (Verbose → LLM-Optimized)
-
-1. Delete introductory paragraphs and rationale
-2. Compress sentences to single-line rules
-3. Add concrete code inline with backticks
-4. Use arrow `→` for before/after patterns
-5. Consolidate overlapping sections
-6. Extract violations to anti-patterns section
-7. Add output format with concrete example
-8. Remove all filler: "basically", "should", "please", "important"
+| Confidence gates | "Do NOT proceed until 95% confident" | Prevents premature phase transitions |
+| Contrastive examples | Right pattern paired with wrong pattern | Anchors rules through contrast |
+| Output format specifications | Exact structure with example | LLM needs the format, not "be concise" |
