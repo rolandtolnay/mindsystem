@@ -81,24 +81,63 @@ curl -sf "https://api.github.com/repos/rolandtolnay/mindsystem/contents/skills" 
 
 If no skills found, stop here.
 
-Check which of the discovered skills already exist locally:
+Check whether each discovered skill already exists in the **user scope** (`~/.claude/skills/`) and matches the remote version. Run this script, replacing `<discovered_skill_names>` with the actual skill names:
 
 ```bash
+set -e
+
+SKILLS_API="https://api.github.com/repos/rolandtolnay/mindsystem/contents/skills"
+SKILLS_RAW="https://raw.githubusercontent.com/rolandtolnay/mindsystem/main/skills"
+USER_SKILLS="$HOME/.claude/skills"
+REMOTE_TMP=$(mktemp -d)
+RESULTS=$(mktemp)
+trap "rm -rf $REMOTE_TMP $RESULTS" EXIT
+
 for skill in <discovered_skill_names>; do
-  [ -d ".claude/skills/$skill" ] && echo "$skill"
+  CONTENTS=$(curl -sf "$SKILLS_API/$skill")
+  mkdir -p "$REMOTE_TMP/$skill"
+
+  # Download root files
+  for f in $(echo "$CONTENTS" | jq -r '.[] | select(.type=="file") | .name'); do
+    curl -sf "$SKILLS_RAW/$skill/$f" -o "$REMOTE_TMP/$skill/$f"
+  done
+
+  # Download subdirectory files
+  for subdir in $(echo "$CONTENTS" | jq -r '.[] | select(.type=="dir") | .name'); do
+    mkdir -p "$REMOTE_TMP/$skill/$subdir"
+    for f in $(curl -sf "$SKILLS_API/$skill/$subdir" | jq -r '.[] | select(.type=="file") | .name'); do
+      curl -sf "$SKILLS_RAW/$skill/$subdir/$f" -o "$REMOTE_TMP/$skill/$subdir/$f"
+    done
+  done
+
+  # Compare with user scope
+  if [ -d "$USER_SKILLS/$skill" ] && diff -rq "$REMOTE_TMP/$skill" "$USER_SKILLS/$skill" >/dev/null 2>&1; then
+    echo "user_match:$skill" >> "$RESULTS"
+  elif [ -d ".claude/skills/$skill" ]; then
+    echo "project_exists:$skill" >> "$RESULTS"
+  else
+    echo "new:$skill" >> "$RESULTS"
+  fi
 done
+
+cat "$RESULTS"
 ```
 
-Use AskUserQuestion to ask the user. Adapt the question based on whether collisions exist:
+Interpret the results:
 
-- **No existing skills:** "Install Flutter-specific Claude Code skills to `.claude/skills/`?" with the discovered skill names listed. Options: "Yes, install all" / "No, skip"
-- **Some skills already exist:** "Install Flutter-specific Claude Code skills to `.claude/skills/`? These already exist and will be overwritten: {existing_names}" with both new and existing skill names listed. Options: "Yes, install and overwrite" / "No, skip"
+- **All skills are `user_match`:** Print "Skipped skill installation — all Flutter skills already available in user scope (`~/.claude/skills/`)." and **stop here**. Do NOT use AskUserQuestion.
+- **Some skills are `user_match`, some are not:** Note which skills were skipped (available in user scope), then offer to install only the remaining skills using AskUserQuestion. Adapt the question based on whether any remaining skills already exist in project scope (`project_exists`):
+  - None in project scope: "Install Flutter skills to `.claude/skills/`? {remaining_names}. (Skipped {skipped_names} — already in user scope)" Options: "Yes, install" / "No, skip"
+  - Some in project scope: "Install Flutter skills to `.claude/skills/`? These will be overwritten: {project_existing_names}. (Skipped {skipped_names} — already in user scope)" Options: "Yes, install and overwrite" / "No, skip"
+- **No skills are `user_match`:** Offer all skills using AskUserQuestion, checking project scope for overwrite warnings:
+  - No existing project skills: "Install Flutter-specific Claude Code skills to `.claude/skills/`?" with skill names listed. Options: "Yes, install all" / "No, skip"
+  - Some exist in project scope: "Install Flutter-specific Claude Code skills to `.claude/skills/`? These already exist and will be overwritten: {existing_names}" Options: "Yes, install and overwrite" / "No, skip"
 
 If user declines, stop here.
 </step>
 
 <step name="install_skills">
-If the user accepted, run this script via Bash and present the output:
+If the user accepted, run this script via Bash and present the output. Replace `<skills_to_install>` with only the skill names that need installation (i.e. the ones that were NOT `user_match` from the previous step):
 
 ```bash
 set -e
@@ -132,36 +171,33 @@ dl() {
   echo "$n $u $uc" > "$COUNTS"
 }
 
-# Discover Flutter skills
-FLUTTER_SKILLS=$(curl -sf "$SKILLS_API" | jq -r '.[] | select(.type=="dir" and (.name | startswith("flutter-"))) | .name')
+# Only install skills not already covered by user scope
+FLUTTER_SKILLS="<skills_to_install>"
 
 if [ -z "$FLUTTER_SKILLS" ]; then
-  echo "No Flutter skills found."
+  echo "No skills to install."
   rm -f "$COUNTS"
   exit 0
 fi
 
-while IFS= read -r skill; do
+for skill in $FLUTTER_SKILLS; do
   [ -z "$skill" ] && continue
   CONTENTS=$(curl -sf "$SKILLS_API/$skill")
   mkdir -p ".claude/skills/$skill"
 
   # Download root files
-  echo "$CONTENTS" | jq -r '.[] | select(.type=="file") | .name' | while IFS= read -r f; do
-    [ -z "$f" ] && continue
+  for f in $(echo "$CONTENTS" | jq -r '.[] | select(.type=="file") | .name'); do
     dl "$SKILLS_RAW/$skill/$f" ".claude/skills/$skill/$f"
   done
 
   # Download subdirectories (one level deep)
-  echo "$CONTENTS" | jq -r '.[] | select(.type=="dir") | .name' | while IFS= read -r subdir; do
-    [ -z "$subdir" ] && continue
+  for subdir in $(echo "$CONTENTS" | jq -r '.[] | select(.type=="dir") | .name'); do
     mkdir -p ".claude/skills/$skill/$subdir"
-    curl -sf "$SKILLS_API/$skill/$subdir" | jq -r '.[] | select(.type=="file") | .name' | while IFS= read -r f; do
-      [ -z "$f" ] && continue
+    for f in $(curl -sf "$SKILLS_API/$skill/$subdir" | jq -r '.[] | select(.type=="file") | .name'); do
       dl "$SKILLS_RAW/$skill/$subdir/$f" ".claude/skills/$skill/$subdir/$f"
     done
   done
-done <<< "$FLUTTER_SKILLS"
+done
 
 read NEW UPDATED UNCHANGED < "$COUNTS"
 rm -f "$COUNTS"
@@ -178,6 +214,7 @@ echo "Skills installed: $NEW new, $UPDATED updated, $UNCHANGED unchanged"
 - Gist written to `docs/code-quality.md`
 - No hardcoded file lists — new files added to the repo are picked up automatically
 - Doc diff report printed showing new/updated/unchanged counts
-- User offered skill installation via AskUserQuestion after doc sync
-- If accepted, all `flutter-*` skills from `skills/` installed to `.claude/skills/` with diff report
+- Skills in user scope (`~/.claude/skills/`) that match remote are skipped implicitly with a note — no AskUserQuestion for these
+- User offered skill installation via AskUserQuestion only for skills NOT already matching in user scope
+- If accepted, only non-user-scope skills installed to `.claude/skills/` with diff report
 </success_criteria>
