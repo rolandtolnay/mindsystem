@@ -162,6 +162,7 @@ mindsystem/
 | config.json options | execute-phase workflow + help.md |
 | Plan format or structure | plan-format.md reference + plan-phase workflow + ms-plan-writer agent |
 | EXECUTION-ORDER.md format | execute-phase workflow + ms-plan-writer agent |
+| Plan inline metadata | verifier + executor + plan-checker |
 | STATE.md format | state template + update-state script |
 | SUMMARY.md format | execute-plan workflow (inline summary instructions) |
 | Command name | help.md command list |

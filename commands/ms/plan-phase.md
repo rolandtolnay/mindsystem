@@ -112,8 +112,9 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 <success_criteria>
 
 - One or more PLAN.md files created in .planning/phases/XX-name/
-- Each plan has: objective, execution_context, context, tasks, verification, success_criteria, output
-- must_haves derived from phase goal and documented in frontmatter (truths, artifacts, key_links)
-- Tasks are specific enough for Claude to execute
+- Each plan has: Context, Changes, Verification, Must-Haves (pure markdown format)
+- Must-Haves derived as markdown checklist of user-observable truths
+- Changes are specific enough for Claude to execute
+- EXECUTION-ORDER.md created with wave groups and dependencies
 - User knows next steps (execute plan or review/adjust)
   </success_criteria>

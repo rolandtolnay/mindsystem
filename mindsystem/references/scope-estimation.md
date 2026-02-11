@@ -108,24 +108,23 @@ Plan 03: Visualization components
 </splitting_strategies>
 
 <dependency_awareness>
-**Plans declare dependencies explicitly via frontmatter.**
+**Dependencies centralized in EXECUTION-ORDER.md.**
 
-```yaml
-# Independent plan (Wave 1 candidate)
-depends_on: []
-files_modified: [src/features/user/model.ts, src/features/user/api.ts]
+```markdown
+## Wave 1 (parallel)
+- 03-01-PLAN.md — User feature
+- 03-02-PLAN.md — Product feature
 
-
-# Dependent plan (later wave)
-depends_on: ["03-01"]
-files_modified: [src/integration/stripe.ts]
-
+## Wave 2
+- 03-03-PLAN.md — Integration (after: 01, 02)
 ```
 
+Plans declare files in `**Files:**` lines within `## Changes` subsections. EXECUTION-ORDER.md tracks wave groups and dependencies.
+
 **Wave assignment rules:**
-- `depends_on: []` + no file conflicts → Wave 1 (parallel)
-- `depends_on: ["XX"]` → runs after plan XX completes
-- Shared `files_modified` with sibling → sequential (by plan number)
+- No dependencies + no file conflicts with other Wave 1 plans → Wave 1 (parallel)
+- Depends on earlier plan → later wave (runs after dependency completes)
+- Shared files with sibling plan → sequential (by plan number)
 
 **SUMMARY references:**
 - Only reference prior SUMMARY if genuinely needed (imported types, decisions affecting this plan)
@@ -134,17 +133,21 @@ files_modified: [src/integration/stripe.ts]
 </dependency_awareness>
 
 <file_ownership>
-**Exclusive file ownership prevents conflicts:**
+**Exclusive file ownership prevents conflicts.**
 
-```yaml
-# Plan 01 frontmatter
-files_modified: [src/models/user.ts, src/api/users.ts, src/components/UserList.tsx]
+File ownership is determined from `**Files:**` lines in each plan's `## Changes` section and validated in EXECUTION-ORDER.md wave assignments.
 
-# Plan 02 frontmatter
-files_modified: [src/models/product.ts, src/api/products.ts, src/components/ProductList.tsx]
+```markdown
+# Plan 01 Changes
+### 1. Create User model
+**Files:** `src/models/user.ts`, `src/api/users.ts`, `src/components/UserList.tsx`
+
+# Plan 02 Changes
+### 1. Create Product model
+**Files:** `src/models/product.ts`, `src/api/products.ts`, `src/components/ProductList.tsx`
 ```
 
-No overlap → can run parallel.
+No overlap → can run parallel (same wave in EXECUTION-ORDER.md).
 
 **If file appears in multiple plans:** Later plan depends on earlier (by plan number).
 **If file cannot be split:** Plans must be sequential for that file.
@@ -202,6 +205,8 @@ Waves: [01, 02, 03] (all parallel)
 
 **2 tasks:** Simple ~30%, Medium ~50%, Complex ~80% (split)
 **3 tasks:** Simple ~45%, Medium ~75% (risky), Complex 120% (impossible)
+
+**Executor overhead:** ~2,400 tokens (down from ~6,900 in previous versions), freeing ~4,500 tokens per plan for code quality.
 </estimating_context>
 
 <summary>
@@ -215,9 +220,9 @@ Waves: [01, 02, 03] (all parallel)
 **The rules:**
 - If in doubt, split. Quality over consolidation.
 - Vertical slices over horizontal layers.
-- Explicit dependencies via `depends_on` frontmatter.
+- Dependencies centralized in EXECUTION-ORDER.md.
 - Autonomous plans get parallel execution.
 
-**Commit rule:** Each plan produces 3-4 commits total (2-3 task commits + 1 docs commit).
+**Commit rule:** Each plan produces 3-4 commits total (2-3 change commits + 1 docs commit).
 </summary>
 </scope_estimation>

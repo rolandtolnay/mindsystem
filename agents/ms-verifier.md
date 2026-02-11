@@ -74,33 +74,37 @@ Extract phase goal from ROADMAP.md. This is the outcome to verify, not the tasks
 
 Determine what must be verified. In re-verification mode, must-haves come from Step 0.
 
-**Option A: Must-haves in PLAN frontmatter**
+**Option A: Must-Haves from PLAN.md**
 
-Check if any PLAN.md has `must_haves` in frontmatter:
+Check if any PLAN.md has a `## Must-Haves` section:
 
 ```bash
-grep -l "must_haves:" "$PHASE_DIR"/*-PLAN.md 2>/dev/null
+grep -l "## Must-Haves" "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 ```
 
-If found, extract and use:
+If found, parse the markdown checklist items:
 
-```yaml
-must_haves:
-  truths:
-    - "User can see existing messages"
-    - "User can send a message"
-  artifacts:
-    - path: "src/components/Chat.tsx"
-      provides: "Message list rendering"
-  key_links:
-    - from: "Chat.tsx"
-      to: "api/chat"
-      via: "fetch in useEffect"
+```markdown
+## Must-Haves
+- [ ] User can see existing messages
+- [ ] User can send a message
 ```
+
+Each `- [ ]` item is a **truth** to verify.
+
+**Derive artifacts** from `## Changes` section by parsing `**Files:**` lines:
+
+```bash
+grep "^\*\*Files:\*\*" "$PHASE_DIR"/*-PLAN.md
+```
+
+Each `**Files:**` line identifies artifacts to verify (existence, substantiveness, wiring).
+
+**Derive key_links** from `## Changes` content — look for references between components (fetch calls, imports, database queries mentioned in implementation details).
 
 **Option B: Derive from phase goal**
 
-If no must_haves in frontmatter, derive using goal-backward process:
+If no `## Must-Haves` section found in plans, derive using goal-backward process:
 
 1. **State the goal:** Take phase goal from ROADMAP.md
 
@@ -764,7 +768,7 @@ return <div>No messages</div>  // Always shows "no messages"
 
 - [ ] Previous VERIFICATION.md checked (Step 0)
 - [ ] If re-verification: must-haves loaded from previous, focus on failed items
-- [ ] If initial: must-haves established (from frontmatter or derived)
+- [ ] If initial: must-haves established (from ## Must-Haves section or derived from phase goal)
 - [ ] All truths verified with status and evidence
 - [ ] All artifacts checked at all three levels (exists, substantive, wired)
 - [ ] All key links verified

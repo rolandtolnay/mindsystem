@@ -36,7 +36,7 @@ PLAN.md IS the prompt that Claude executes. Plans are grouped into execution wav
 
 **Vertical slices over horizontal layers:** Group by feature (User: model + API + UI) not by type (all models → all APIs → all UIs).
 
-**Explicit dependencies:** Every plan declares what it needs (`depends_on`) and what it touches (`files_modified`). Empty dependencies = parallel candidate.
+**Explicit dependencies:** EXECUTION-ORDER.md centralizes dependency and parallelism tracking. Plans with no dependencies = parallel candidates.
 
 **Secure by design:** Assume hostile input on every boundary. Validate, parameterize, authenticate, fail closed.
 
@@ -154,39 +154,48 @@ Cluster related gaps by:
 - Same concern (fetch + render → one "wire frontend" plan)
 - Dependency order (can't wire if artifact is stub → fix stub first)
 
-**6. Create gap closure tasks:**
+**6. Create gap closure changes:**
 
-For each gap:
-```xml
-<task name="{fix_description}" type="auto">
-  <files>{artifact.path}</files>
-  <action>
-    {For each item in gap.missing:}
-    - {missing item}
+For each gap, create a markdown change subsection:
 
-    Reference existing code: {from SUMMARYs}
-    Gap reason: {gap.reason}
-  </action>
-  <verify>{How to confirm gap is closed}</verify>
-  <done>{Observable truth now achievable}</done>
-</task>
+```markdown
+### N. {Fix description}
+**Files:** `{artifact.path}`
+
+{For each item in gap.missing:}
+- {missing item}
+
+Reference existing code: {from SUMMARYs}
+Gap reason: {gap.reason}
 ```
 
 **7. Write PLAN.md files:**
 
-Use standard template but note gap closure context:
+Use pure markdown plan format with gap closure context:
 
-```yaml
----
-phase: XX-name
-plan: NN              # Sequential after existing
-type: execute
-wave: 1               # Gap closures typically single wave
-depends_on: []        # Usually independent of each other
-files_modified: [...]
-gap_closure: true     # Flag for tracking
----
+```markdown
+# Plan NN: {Gap closure description}
+
+**Subsystem:** {subsystem} | **Type:** execute
+
+## Context
+Gap closure for phase XX. Addresses gaps identified by verification.
+
+## Changes
+
+### 1. {Fix description}
+**Files:** `{artifact.path}`
+
+{Implementation details from gap.missing items}
+
+## Verification
+- {How to confirm gap is closed}
+
+## Must-Haves
+- [ ] {Observable truth now achievable}
 ```
+
+Also create or update EXECUTION-ORDER.md to include gap closure plans (typically single wave, independent of each other).
 
 **9. Present gap closure summary:**
 
@@ -432,7 +441,7 @@ cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 **If DESIGN.md exists:**
 - Tasks reference specific screens/components from design
 - Verification criteria include design verification items
-- must_haves include design-specified observable behaviors
+- Must-Haves include design-specified observable behaviors
 - Task actions specify exact values (colors, spacing) from design
 
 **If none exist:** Suggest /ms:research-phase for niche domains, /ms:discuss-phase for simpler domains, or proceed with roadmap only.
@@ -573,10 +582,10 @@ Task(
 The subagent handles:
 - Building dependency graph from needs/creates
 - Assigning wave numbers
-- Grouping tasks into plans (2-3 per plan)
-- Deriving must_haves (goal-backward)
+- Grouping tasks into plans (2-3 changes per plan)
+- Deriving Must-Haves (goal-backward)
 - Estimating scope, splitting if needed
-- Writing PLAN.md files
+- Writing PLAN.md files + EXECUTION-ORDER.md
 - Git commit
 - Calculating risk score
 </step>
@@ -744,10 +753,10 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Prior decisions, issues, concerns synthesized
 - [ ] Tasks identified with needs/creates dependencies
 - [ ] Task list handed off to ms-plan-writer
-- [ ] PLAN file(s) created by subagent with XML structure
-- [ ] Each plan: depends_on, files_modified in frontmatter
-- [ ] Each plan: must_haves derived (truths, artifacts, key_links)
-- [ ] Each plan: 2-3 tasks (~50% context)
+- [ ] PLAN file(s) created with pure markdown format
+- [ ] EXECUTION-ORDER.md created with wave groups
+- [ ] Each plan: Must-Haves section with observable truths
+- [ ] Each plan: 2-3 changes (~50% context)
 - [ ] Wave structure maximizes parallelism
 - [ ] PLAN file(s) committed to git
 - [ ] Risk assessment presented (score + top factors)
@@ -759,8 +768,8 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Existing SUMMARYs read for context
 - [ ] Gaps clustered into focused plans
 - [ ] Plan numbers sequential after existing (04, 05...)
-- [ ] PLAN file(s) exist with gap_closure: true
-- [ ] Each plan: tasks derived from gap.missing items
+- [ ] PLAN file(s) created with pure markdown format
+- [ ] EXECUTION-ORDER.md updated with gap closure plans
 - [ ] PLAN file(s) committed to git
 - [ ] User knows to run `/ms:execute-phase {X}` next
 </success_criteria>

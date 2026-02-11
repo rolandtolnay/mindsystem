@@ -47,8 +47,8 @@ A task "create auth endpoint" can be in the plan while password hashing is missi
 Goal-backward plan verification starts from the outcome and works backwards:
 
 1. What must be TRUE for the phase goal to be achieved?
-2. Which tasks address each truth?
-3. Are those tasks complete (files, action, verify, done)?
+2. Which changes address each truth?
+3. Are those changes complete (Files, implementation details, verification)?
 4. Are artifacts wired together, not just created in isolation?
 5. Will execution complete within context budget?
 
@@ -88,35 +88,37 @@ issue:
   fix_hint: "Add task for logout endpoint in plan 01 or new plan"
 ```
 
-## Dimension 2: Task Completeness
+## Dimension 2: Change Completeness
 
-**Question:** Does every task have Files + Action + Verify + Done?
+**Question:** Does every change subsection have Files + implementation details + corresponding verification and must-have entries?
 
 **Process:**
-1. Parse each `<task>` element in PLAN.md
-2. Check for required fields based on task type
-3. Flag incomplete tasks
+1. Parse each `### N.` subsection in PLAN.md `## Changes` section
+2. Check for required content
+3. Flag incomplete changes
 
-**Required by task type:**
-| Type | Files | Action | Verify | Done |
-|------|-------|--------|--------|------|
-| `auto` | Required | Required | Required | Required |
-| `tdd` | Required | Behavior + Implementation | Test commands | Expected outcomes |
+**Required per change subsection:**
+| Element | Required | What to check |
+|---------|----------|---------------|
+| `**Files:**` line | Yes | Lists files created/modified |
+| Implementation details | Yes | Specific enough to execute (not "implement auth") |
+| `## Verification` entry | Yes | Corresponding way to confirm this change works |
+| `## Must-Haves` entry | Yes | Observable truth this change supports |
 
 **Red flags:**
-- Missing `<verify>` — can't confirm completion
-- Missing `<done>` — no acceptance criteria
-- Vague `<action>` — "implement auth" instead of specific steps
-- Empty `<files>` — what gets created?
+- Change subsection missing `**Files:**` line
+- Vague implementation details — "implement auth" instead of specific steps
+- No corresponding entry in `## Verification`
+- No corresponding entry in `## Must-Haves`
 
 **Example issue:**
 ```yaml
 issue:
-  dimension: task_completeness
+  dimension: change_completeness
   severity: blocker
-  description: "Task 2 missing <verify> element"
+  description: "Change 2 has no corresponding verification entry"
   plan: "16-01"
-  task: 2
+  change: 2
   fix_hint: "Add verification command for build output"
 ```
 
@@ -125,29 +127,30 @@ issue:
 **Question:** Are plan dependencies valid and acyclic?
 
 **Process:**
-1. Parse `depends_on` from each plan frontmatter
-2. Build dependency graph
-3. Check for cycles, missing references, future references
+1. Read EXECUTION-ORDER.md for wave groups and dependency declarations
+2. Build dependency graph from wave assignments and explicit dependencies
+3. Check for cycles, missing references, file conflicts within waves
 
 **Red flags:**
-- Plan references non-existent plan (`depends_on: ["99"]` when 99 doesn't exist)
+- Plan listed in EXECUTION-ORDER.md but PLAN.md file doesn't exist
+- PLAN.md file exists but not listed in EXECUTION-ORDER.md
 - Circular dependency (A -> B -> A)
-- Future reference (plan 01 referencing plan 03's output)
+- Plans in same wave with overlapping `**Files:**` entries (file conflict)
 - Wave assignment inconsistent with dependencies
 
-**Dependency rules:**
-- `depends_on: []` = Wave 1 (can run parallel)
-- `depends_on: ["01"]` = Wave 2 minimum (must wait for 01)
-- Wave number = max(deps) + 1
+**Dependency rules (from EXECUTION-ORDER.md):**
+- Wave 1 plans have no dependencies (can run parallel)
+- Later wave plans depend on earlier waves completing
+- Plans in same wave must not modify the same files
 
 **Example issue:**
 ```yaml
 issue:
   dimension: dependency_correctness
   severity: blocker
-  description: "Circular dependency between plans 02 and 03"
+  description: "Plans 02 and 03 in Wave 1 both modify src/lib/auth.ts"
   plans: ["02", "03"]
-  fix_hint: "Plan 02 depends on 03, but 03 depends on 02"
+  fix_hint: "Move plan 03 to Wave 2 or split shared file into separate modules"
 ```
 
 ## Dimension 4: Key Links Planned
@@ -155,9 +158,9 @@ issue:
 **Question:** Are artifacts wired together, not just created in isolation?
 
 **Process:**
-1. Identify artifacts in `must_haves.artifacts`
-2. Check that `must_haves.key_links` connects them
-3. Verify tasks actually implement the wiring (not just artifact creation)
+1. Identify artifacts from `**Files:**` lines in `## Changes`
+2. Check that implementation details describe wiring between artifacts
+3. Verify changes actually implement the wiring (not just artifact creation)
 
 **Red flags:**
 - Component created but not imported anywhere
@@ -189,21 +192,21 @@ issue:
 **Question:** Will plans complete within context budget?
 
 **Process:**
-1. Count tasks per plan
-2. Estimate files modified per plan
+1. Count `### ` subsections (changes) per plan
+2. Count files from `**Files:**` lines per plan
 3. Check against thresholds
 
 **Thresholds:**
 | Metric | Target | Warning | Blocker |
 |--------|--------|---------|---------|
-| Tasks/plan | 2-3 | 4 | 5+ |
+| Changes/plan | 2-3 | 4 | 5+ |
 | Files/plan | 5-8 | 10 | 15+ |
 | Total context | ~50% | ~70% | 80%+ |
 
 **Red flags:**
-- Plan with 5+ tasks (quality degrades)
+- Plan with 5+ changes (quality degrades)
 - Plan with 15+ file modifications
-- Single task with 10+ files
+- Single change with 10+ files
 - Complex work (auth, payments) crammed into one plan
 
 **Example issue:**
@@ -211,38 +214,38 @@ issue:
 issue:
   dimension: scope_sanity
   severity: warning
-  description: "Plan 01 has 5 tasks - split recommended"
+  description: "Plan 01 has 5 changes - split recommended"
   plan: "01"
   metrics:
-    tasks: 5
+    changes: 5
     files: 12
   fix_hint: "Split into 2 plans: foundation (01) and integration (02)"
 ```
 
 ## Dimension 6: Verification Derivation
 
-**Question:** Do must_haves trace back to phase goal?
+**Question:** Do Must-Haves trace back to phase goal?
 
 **Process:**
-1. Check each plan has `must_haves` in frontmatter
-2. Verify truths are user-observable (not implementation details)
-3. Verify artifacts support the truths
-4. Verify key_links connect artifacts to functionality
+1. Check each plan has a `## Must-Haves` section with checklist items
+2. Verify checklist items are user-observable (not implementation details)
+3. Verify `## Changes` subsections with `**Files:**` lines support the truths
+4. Verify implementation details describe wiring between artifacts, not just creation
 
 **Red flags:**
-- Missing `must_haves` entirely
-- Truths are implementation-focused ("bcrypt installed") not user-observable ("passwords are secure")
-- Artifacts don't map to truths
-- Key links missing for critical wiring
+- Missing `## Must-Haves` section entirely
+- Checklist items are implementation-focused ("bcrypt installed") not user-observable ("passwords are secure")
+- `## Changes` doesn't create artifacts needed for Must-Haves truths
+- No wiring described between artifacts that must work together
 
 **Example issue:**
 ```yaml
 issue:
   dimension: verification_derivation
   severity: warning
-  description: "Plan 02 must_haves.truths are implementation-focused"
+  description: "Plan 02 Must-Haves are implementation-focused"
   plan: "02"
-  problematic_truths:
+  problematic_items:
     - "JWT library installed"
     - "Prisma schema updated"
   fix_hint: "Reframe as user-observable: 'User can log in', 'Session persists'"
@@ -329,31 +332,29 @@ done
 ```
 
 **Parse from each plan:**
-- Frontmatter (phase, plan, wave, depends_on, files_modified, must_haves)
-- Objective
-- Tasks (type, name, files, action, verify, done)
-- Verification criteria
-- Success criteria
+- Inline metadata (Subsystem, Type)
+- Context section
+- Changes subsections (`### N.` headers with `**Files:**` lines)
+- Verification section
+- Must-Haves section (markdown checklist)
 
-## Step 3: Parse must_haves
+## Step 3: Parse Must-Haves
 
-Extract must_haves from each plan frontmatter.
+Extract Must-Haves from each plan's `## Must-Haves` section.
 
-**Structure:**
-```yaml
-must_haves:
-  truths:
-    - "User can log in with email/password"
-    - "Invalid credentials return 401"
-  artifacts:
-    - path: "src/app/api/auth/login/route.ts"
-      provides: "Login endpoint"
-      min_lines: 30
-  key_links:
-    - from: "src/components/LoginForm.tsx"
-      to: "/api/auth/login"
-      via: "fetch in onSubmit"
+**Structure (markdown checklist):**
+```markdown
+## Must-Haves
+- [ ] User can log in with email/password
+- [ ] Invalid credentials return 401
+- [ ] Session persists across page reload
 ```
+
+Each `- [ ]` item is a user-observable truth to verify.
+
+**Also extract from `## Changes`:**
+- `**Files:**` lines → artifacts that must exist
+- Implementation details → key links between artifacts (fetch calls, imports, queries)
 
 **Aggregate across plans** to get full picture of what phase delivers.
 
@@ -375,50 +376,47 @@ User can log out     | -     | -     | MISSING
 Session persists     | 01    | 3     | COVERED
 ```
 
-## Step 5: Validate Task Structure
+## Step 5: Validate Change Structure
 
-For each task, verify required fields exist.
+For each change subsection, verify required content exists.
 
 ```bash
-# Count tasks and check structure
-grep -c "<task" "$PHASE_DIR"/*-PLAN.md
+# Count changes per plan
+grep -c "^### " "$PHASE_DIR"/*-PLAN.md
 
-# Check for missing verify elements
-grep -B5 "</task>" "$PHASE_DIR"/*-PLAN.md | grep -v "<verify>"
+# Check for Files lines in each plan
+grep "^\*\*Files:\*\*" "$PHASE_DIR"/*-PLAN.md
 ```
 
 **Check:**
-- Task type is valid (auto, tdd)
-- Auto tasks have: files, action, verify, done
-- Action is specific (not "implement auth")
-- Verify is runnable (command or check)
-- Done is measurable (acceptance criteria)
+- Each `### N.` subsection has a `**Files:**` line
+- Implementation details are specific (not "implement auth")
+- `## Verification` section has entries
+- `## Must-Haves` section has checklist items
 
 ## Step 6: Verify Dependency Graph
 
-Build and validate the dependency graph.
+Read and validate EXECUTION-ORDER.md.
 
-**Parse dependencies:**
+**Parse EXECUTION-ORDER.md:**
 ```bash
-# Extract depends_on from each plan
-for plan in "$PHASE_DIR"/*-PLAN.md; do
-  grep "depends_on:" "$plan"
-done
+cat "$PHASE_DIR"/EXECUTION-ORDER.md
 ```
 
 **Validate:**
-1. All referenced plans exist
-2. No circular dependencies
-3. Wave numbers consistent with dependencies
-4. No forward references (early plan depending on later)
+1. All PLAN.md files in phase directory are listed in EXECUTION-ORDER.md
+2. No PLAN.md files missing from EXECUTION-ORDER.md
+3. No circular dependencies between waves
+4. Plans in same wave don't modify the same files (check `**Files:**` lines)
+5. Wave ordering is consistent (later waves depend on earlier ones)
 
-**Cycle detection:** If A -> B -> C -> A, report cycle.
+**File conflict detection:** Parse `**Files:**` from plans in the same wave. If overlap found, report conflict.
 
 ## Step 7: Check Key Links Planned
 
 Verify artifacts are wired together in task actions.
 
-**For each key_link in must_haves:**
+**For each key link identified from `## Changes`:**
 1. Find the source artifact task
 2. Check if action mentions the connection
 3. Flag missing wiring
@@ -437,36 +435,31 @@ Evaluate scope against context budget.
 
 **Metrics per plan:**
 ```bash
-# Count tasks
-grep -c "<task" "$PHASE_DIR"/${PHASE}-01-PLAN.md
+# Count changes (### subsections)
+grep -c "^### " "$PHASE_DIR"/${PHASE}-01-PLAN.md
 
-# Count files in files_modified
-grep "files_modified:" "$PHASE_DIR"/${PHASE}-01-PLAN.md
+# Count files from **Files:** lines
+grep "^\*\*Files:\*\*" "$PHASE_DIR"/${PHASE}-01-PLAN.md
 ```
 
 **Thresholds:**
-- 2-3 tasks/plan: Good
-- 4 tasks/plan: Warning
-- 5+ tasks/plan: Blocker (split required)
+- 2-3 changes/plan: Good
+- 4 changes/plan: Warning
+- 5+ changes/plan: Blocker (split required)
 
-## Step 9: Verify must_haves Derivation
+## Step 9: Verify Must-Haves Derivation
 
-Check that must_haves are properly derived from phase goal.
+Check that `## Must-Haves` checklist items are properly derived from phase goal.
 
-**Truths should be:**
+**Checklist items should be:**
 - User-observable (not "bcrypt installed" but "passwords are secure")
 - Testable by human using the app
 - Specific enough to verify
 
-**Artifacts should:**
-- Map to truths (which truth does this artifact support?)
-- Have reasonable min_lines estimates
-- List exports or key content expected
-
-**Key_links should:**
-- Connect artifacts that must work together
-- Specify the connection method (fetch, Prisma query, import)
-- Cover critical wiring (where stubs hide)
+**Changes should support Must-Haves:**
+- Each Must-Have item has corresponding change(s) in `## Changes`
+- `**Files:**` lines identify artifacts that make truths possible
+- Implementation details describe wiring between artifacts (not just creation)
 
 ## Step 10: Determine Overall Status
 
@@ -478,7 +471,7 @@ Based on all dimension checks:
 - Dependency graph valid
 - Key links planned
 - Scope within budget
-- must_haves properly derived
+- Must-Haves properly derived
 
 **Status: issues_found**
 - One or more blockers or warnings
@@ -523,68 +516,70 @@ issue:
   fix_hint: "Add logout endpoint task to Plan 01 or create Plan 03"
 ```
 
-## Example 2: Circular Dependency
+## Example 2: Dependency Conflict
 
-**Plan frontmatter:**
-```yaml
-# Plan 02
-depends_on: ["01", "03"]
+**EXECUTION-ORDER.md:**
+```markdown
+## Wave 1 (parallel)
+- 03-01-PLAN.md
+- 03-02-PLAN.md
 
-# Plan 03
-depends_on: ["02"]
+## Wave 2
+- 03-03-PLAN.md (after: 01, 02)
 ```
 
+**But Plan 02 references output from Plan 03 in its implementation details.**
+
 **Analysis:**
-- Plan 02 waits for Plan 03
-- Plan 03 waits for Plan 02
-- Deadlock: Neither can start
+- Plan 02 in Wave 1 needs output from Plan 03 (Wave 2)
+- Plan 03 waits for Plan 02 to complete
+- Contradiction: forward reference from earlier wave
 
 **Issue:**
 ```yaml
 issue:
   dimension: dependency_correctness
   severity: blocker
-  description: "Circular dependency between plans 02 and 03"
+  description: "Plan 02 (Wave 1) references output from Plan 03 (Wave 2)"
   plans: ["02", "03"]
-  fix_hint: "Plan 02 depends_on includes 03, but 03 depends_on includes 02. Remove one dependency."
+  fix_hint: "Move Plan 02 to Wave 2 or remove the forward reference"
 ```
 
-## Example 3: Task Missing Verification
+## Example 3: Change Missing Verification
 
-**Task in Plan 01:**
-```xml
-<task type="auto">
-  <name>Task 2: Create login endpoint</name>
-  <files>src/app/api/auth/login/route.ts</files>
-  <action>POST endpoint accepting {email, password}, validates using bcrypt...</action>
-  <!-- Missing <verify> -->
-  <done>Login works with valid credentials</done>
-</task>
+**Change in Plan 01:**
+```markdown
+### 2. Create login endpoint
+**Files:** `src/app/api/auth/login/route.ts`
+
+POST endpoint accepting {email, password}, validates using bcrypt...
 ```
+
+**But `## Verification` has no entry for this change, and `## Must-Haves` doesn't reference login.**
 
 **Analysis:**
-- Task has files, action, done
-- Missing `<verify>` element
-- Cannot confirm task completion programmatically
+- Change has Files and implementation details
+- No corresponding verification entry
+- Cannot confirm change completion
 
 **Issue:**
 ```yaml
 issue:
-  dimension: task_completeness
+  dimension: change_completeness
   severity: blocker
-  description: "Task 2 missing <verify> element"
+  description: "Change 2 has no corresponding verification entry"
   plan: "01"
-  task: 2
-  task_name: "Create login endpoint"
-  fix_hint: "Add <verify> with curl command or test command to confirm endpoint works"
+  change: 2
+  change_name: "Create login endpoint"
+  fix_hint: "Add curl command or test to ## Verification for login endpoint"
 ```
 
 ## Example 4: Scope Exceeded
 
 **Plan 01 analysis:**
 ```
-Tasks: 5
-Files modified: 12
+Changes (### subsections): 5
+Files (from **Files:** lines): 12
   - prisma/schema.prisma
   - src/app/api/auth/login/route.ts
   - src/app/api/auth/logout/route.ts
@@ -600,7 +595,7 @@ Files modified: 12
 ```
 
 **Analysis:**
-- 5 tasks exceeds 2-3 target
+- 5 changes exceeds 2-3 target
 - 12 files is high
 - Auth is complex domain
 - Risk of quality degradation
@@ -610,10 +605,10 @@ Files modified: 12
 issue:
   dimension: scope_sanity
   severity: blocker
-  description: "Plan 01 has 5 tasks with 12 files - exceeds context budget"
+  description: "Plan 01 has 5 changes with 12 files - exceeds context budget"
   plan: "01"
   metrics:
-    tasks: 5
+    changes: 5
     files: 12
     estimated_context: "~80%"
   fix_hint: "Split into: 01 (schema + API), 02 (middleware + lib), 03 (UI components)"
@@ -630,10 +625,10 @@ Each issue follows this structure:
 ```yaml
 issue:
   plan: "16-01"              # Which plan (null if phase-level)
-  dimension: "task_completeness"  # Which dimension failed
+  dimension: "change_completeness"  # Which dimension failed
   severity: "blocker"        # blocker | warning | info
-  description: "Task 2 missing <verify> element"
-  task: 2                    # Task number if applicable
+  description: "Change 2 has no corresponding verification entry"
+  change: 2                  # Change number if applicable
   fix_hint: "Add verification command for build output"
 ```
 
@@ -641,9 +636,9 @@ issue:
 
 **blocker** - Must fix before execution
 - Missing requirement coverage
-- Missing required task fields
-- Circular dependencies
-- Scope > 5 tasks per plan
+- Missing required change fields
+- Circular dependencies or file conflicts in same wave
+- Scope > 5 changes per plan
 
 **warning** - Should fix, execution may work
 - Scope 4 tasks (borderline)
@@ -662,22 +657,22 @@ Return issues as structured list:
 ```yaml
 issues:
   - plan: "01"
-    dimension: "task_completeness"
+    dimension: "change_completeness"
     severity: "blocker"
-    description: "Task 2 missing <verify> element"
+    description: "Change 2 has no corresponding verification entry"
     fix_hint: "Add verification command"
 
   - plan: "01"
     dimension: "scope_sanity"
     severity: "warning"
-    description: "Plan has 4 tasks - consider splitting"
+    description: "Plan has 4 changes - consider splitting"
     fix_hint: "Split into foundation + integration plans"
 
   - plan: null
     dimension: "requirement_coverage"
     severity: "blocker"
-    description: "Logout requirement has no covering task"
-    fix_hint: "Add logout task to existing plan or new plan"
+    description: "Logout requirement has no covering change"
+    fix_hint: "Add logout change to existing plan or new plan"
 ```
 
 </issue_structure>
@@ -748,9 +743,9 @@ When issues need fixing:
 ```yaml
 issues:
   - plan: "01"
-    dimension: "task_completeness"
+    dimension: "change_completeness"
     severity: "blocker"
-    description: "Task 2 missing <verify> element"
+    description: "Change 2 has no corresponding verification entry"
     fix_hint: "Add verification command"
 ```
 
@@ -767,15 +762,15 @@ issues:
 
 **DO NOT run the application.** This is static plan analysis. No `npm start`, no `curl` to running server.
 
-**DO NOT accept vague tasks.** "Implement auth" is not specific enough. Tasks need concrete files, actions, verification.
+**DO NOT accept vague changes.** "Implement auth" is not specific enough. Changes need concrete files, implementation details, verification.
 
-**DO NOT skip dependency analysis.** Circular or broken dependencies cause execution failures.
+**DO NOT skip dependency analysis.** Missing EXECUTION-ORDER.md entries or file conflicts cause execution failures.
 
-**DO NOT ignore scope.** 5+ tasks per plan degrades quality. Better to report and split.
+**DO NOT ignore scope.** 5+ changes per plan degrades quality. Better to report and split.
 
 **DO NOT verify implementation details.** Check that plans describe what to build, not that code exists.
 
-**DO NOT trust task names alone.** Read the action, verify, done fields. A well-named task can be empty.
+**DO NOT trust change titles alone.** Read the implementation details, Files lines, verification entries. A well-named change can be empty.
 
 </anti_patterns>
 
@@ -785,16 +780,16 @@ Plan verification complete when:
 
 - [ ] Phase goal extracted from ROADMAP.md
 - [ ] All PLAN.md files in phase directory loaded
-- [ ] must_haves parsed from each plan frontmatter
-- [ ] Requirement coverage checked (all requirements have tasks)
-- [ ] Task completeness validated (all required fields present)
-- [ ] Dependency graph verified (no cycles, valid references)
+- [ ] Must-Haves parsed from `## Must-Haves` sections
+- [ ] Requirement coverage checked (all requirements have changes)
+- [ ] Change completeness validated (Files, details, verification)
+- [ ] EXECUTION-ORDER.md validated (all plans listed, no cycles, no file conflicts)
 - [ ] Key links checked (wiring planned, not just artifacts)
 - [ ] Scope assessed (within context budget)
-- [ ] must_haves derivation verified (user-observable truths)
+- [ ] Must-Haves derivation verified (user-observable truths)
 - [ ] Context compliance checked (if CONTEXT.md provided):
-  - [ ] Locked decisions have implementing tasks
-  - [ ] No tasks contradict locked decisions
+  - [ ] Locked decisions have implementing changes
+  - [ ] No changes contradict locked decisions
   - [ ] Deferred ideas not included in plans
 - [ ] Overall status determined (passed | issues_found)
 - [ ] Structured issues returned (if any found)
