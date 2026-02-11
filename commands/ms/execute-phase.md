@@ -17,7 +17,7 @@ allowed-tools:
 <objective>
 Execute all plans in a phase using wave-based parallel execution.
 
-Orchestrator stays lean: discover plans, analyze dependencies, group into waves, spawn subagents, collect results. Each subagent loads the full execute-plan context and handles its own plan.
+Orchestrator stays lean: discover plans, read execution order, spawn subagents in waves, collect results. Each subagent loads the full execute-plan context and handles its own plan.
 
 Context budget: ~15% orchestrator, 100% fresh per subagent.
 </objective>
@@ -49,11 +49,12 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
 2. **Discover plans**
    - List all *-PLAN.md files in phase directory
    - Check which have *-SUMMARY.md (already complete)
+   - Verify EXECUTION-ORDER.md exists
    - Build list of incomplete plans
 
-3. **Group by wave**
-   - Read `wave` from each plan's frontmatter
-   - Group plans by wave number
+3. **Validate and read execution order**
+   - Run `validate-execution-order.sh` on phase directory
+   - Parse EXECUTION-ORDER.md wave structure
    - Report wave structure to user
 
 4. **Execute waves**
@@ -61,6 +62,7 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
    - Spawn `ms-executor` for each plan in wave (parallel Task calls)
    - Wait for completion (Task blocks)
    - Verify SUMMARYs created
+   - Run `update-state.sh` to update plan progress
    - Proceed to next wave
 
 5. **Aggregate results**

@@ -3,7 +3,7 @@ Execute all plans in a phase using wave-based parallel execution. Orchestrator s
 </purpose>
 
 <core_principle>
-The orchestrator's job is coordination, not execution. Each subagent loads the full execute-plan context itself. Orchestrator discovers plans, analyzes dependencies, groups into waves, spawns agents, collects results.
+The orchestrator's job is coordination, not execution. Each subagent loads the full execute-plan context itself. Orchestrator discovers plans, reads execution order from EXECUTION-ORDER.md, spawns agents in waves, collects results.
 </core_principle>
 
 <required_reading>
@@ -56,7 +56,7 @@ Report: "Found {N} plans in {phase_dir}"
 </step>
 
 <step name="discover_plans">
-List all plans and extract metadata:
+List all plans and check completion:
 
 ```bash
 # Get all plans
@@ -64,32 +64,35 @@ ls -1 "$PHASE_DIR"/*-PLAN.md 2>/dev/null | sort
 
 # Get completed plans (have SUMMARY.md)
 ls -1 "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null | sort
-```
 
-For each plan, read frontmatter to extract:
-- `wave: N` - Execution wave (pre-computed)
+# Verify EXECUTION-ORDER.md exists
+ls "$PHASE_DIR"/EXECUTION-ORDER.md
+```
 
 Build plan inventory:
 - Plan path
 - Plan ID (e.g., "03-01")
-- Wave number
 - Completion status (SUMMARY exists = complete)
 
 Skip completed plans. If all complete, report "Phase already executed" and exit.
 </step>
 
-<step name="group_by_wave">
-Read `wave` from each plan's frontmatter and group by wave number:
+<step name="validate_execution_order">
+Run validation before launching executors:
 
 ```bash
-# For each plan, extract wave from frontmatter
-for plan in $PHASE_DIR/*-PLAN.md; do
-  wave=$(grep "^wave:" "$plan" | cut -d: -f2 | tr -d ' ')
-  echo "$plan:$wave"
-done
+~/.claude/mindsystem/scripts/validate-execution-order.sh "$PHASE_DIR"
 ```
 
-**Group plans:**
+If validation fails (exit 1), stop execution and report the mismatch to user.
+If validation passes, proceed with wave execution.
+</step>
+
+<step name="read_execution_order">
+Read EXECUTION-ORDER.md and parse wave structure:
+
+Parse `## Wave N` headers with `- XX-PLAN.md` items under each. Build wave groups:
+
 ```
 waves = {
   1: [plan-01, plan-02],
@@ -98,7 +101,9 @@ waves = {
 }
 ```
 
-**No dependency analysis needed.** Wave numbers are pre-computed during `/ms:plan-phase`.
+Filter out completed plans (those with existing SUMMARY.md).
+
+**Wave assignments come from EXECUTION-ORDER.md**, produced during `/ms:plan-phase`.
 
 Report wave structure with context:
 ```
@@ -124,7 +129,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
 
 1. **Describe what's being built (BEFORE spawning):**
 
-   Read each plan's `<objective>` section. Extract what's being built and why it matters.
+   Read each plan's `## Context` section. Extract what's being built and why it matters.
 
    **Output:**
    ```
@@ -155,27 +160,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
    ```
    Task(
      subagent_type="ms-executor",
-     prompt="
-       <objective>
-       Execute plan {plan_number} of phase {phase_number}-{phase_name}.
-       Commit each task atomically. Create SUMMARY.md.
-       </objective>
-
-       <execution_context>
-       @~/.claude/mindsystem/workflows/execute-plan.md
-       </execution_context>
-
-       <context>
-       Plan: @{plan_path}
-       Project state: @.planning/STATE.md
-       </context>
-
-       <success_criteria>
-       - [ ] All tasks executed
-       - [ ] Each task committed individually
-       - [ ] SUMMARY.md created in plan directory
-       </success_criteria>
-     "
+     prompt="Execute plan at {plan_path}\n\nPlan: @{plan_path}\nProject state: @.planning/STATE.md"
    )
    ```
 
@@ -212,7 +197,14 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
    - Bad: "Wave 2 complete. Proceeding to Wave 3."
    - Good: "Terrain system complete — 3 biome types, height-based texturing, physics collision meshes. Vehicle physics (Wave 3) can now reference ground surfaces."
 
-4. **Handle failures:**
+4. **Update state:**
+
+   After reporting wave completion, update STATE.md with progress:
+   ```bash
+   ~/.claude/mindsystem/scripts/update-state.sh {completed_count} {total_count}
+   ```
+
+5. **Handle failures:**
 
    If any agent in wave fails:
    - Report which plan failed and why
@@ -220,7 +212,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
    - If continue: proceed to next wave (dependent plans may also fail)
    - If stop: exit with partial completion report
 
-5. **Proceed to next wave**
+6. **Proceed to next wave**
 
 </step>
 
@@ -490,9 +482,8 @@ Read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and
 **Why this works:**
 
 Orchestrator context usage: ~10-15%
-- Read plan frontmatter (small)
-- Analyze dependencies (logic, no heavy reads)
-- Fill template strings
+- Read EXECUTION-ORDER.md (one small file)
+- Parse wave structure
 - Spawn Task calls
 - Collect results
 
@@ -539,5 +530,5 @@ If phase execution was interrupted (context limit, user exit, error):
 
 **STATE.md tracks:**
 - Last completed plan
-- Current wave
+- Completed plans (via SUMMARY.md existence)
 </resumption>
