@@ -158,13 +158,11 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
      prompt="
        <objective>
        Execute plan {plan_number} of phase {phase_number}-{phase_name}.
-       Commit each task atomically. Create SUMMARY.md. Update STATE.md.
+       Commit each task atomically. Create SUMMARY.md.
        </objective>
 
        <execution_context>
        @~/.claude/mindsystem/workflows/execute-plan.md
-       @~/.claude/mindsystem/templates/summary.md
-       @~/.claude/mindsystem/references/tdd.md
        </execution_context>
 
        <context>
@@ -176,7 +174,6 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
        - [ ] All tasks executed
        - [ ] Each task committed individually
        - [ ] SUMMARY.md created in plan directory
-       - [ ] STATE.md updated with position and decisions
        </success_criteria>
      "
    )

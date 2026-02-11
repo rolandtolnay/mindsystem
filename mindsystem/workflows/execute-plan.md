@@ -1,5 +1,5 @@
 <purpose>
-Execute a phase prompt (PLAN.md) and create the outcome summary (SUMMARY.md).
+Execute a plan prompt (PLAN.md) and create the outcome summary (SUMMARY.md).
 </purpose>
 
 <required_reading>
@@ -9,662 +9,178 @@ Read STATE.md before any operation to load project context.
 <process>
 
 <step name="load_project_state" priority="first">
-Before any operation, read project state:
+Read project state:
 
 ```bash
 cat .planning/STATE.md 2>/dev/null
 ```
 
 **If file exists:** Parse and internalize:
-
 - Current position (phase, plan, status)
 - Accumulated decisions (constraints on this execution)
 - Blockers/concerns (things to watch for)
-- Brief alignment status
 
-**If file missing but .planning/ exists:**
+**If file missing but .planning/ exists:** Present options — reconstruct from artifacts or continue without state.
 
-```
-STATE.md missing but planning artifacts exist.
-Options:
-1. Reconstruct from existing artifacts
-2. Continue without project state (may lose accumulated context)
-```
-
-**If .planning/ doesn't exist:** Error - project not initialized.
-
-This ensures every execution has full project context.
+**If .planning/ doesn't exist:** Error — project not initialized.
 </step>
 
-<step name="identify_plan">
-Find the next plan to execute:
-- Check roadmap for "In progress" phase
-- Find plans in that phase directory
-- Identify first plan without corresponding SUMMARY
+<step name="load_plan">
+Read the plan file provided in your prompt context.
 
-```bash
-cat .planning/ROADMAP.md
-# Look for phase with "In progress" status
-# Then find plans in that phase
-ls .planning/phases/XX-name/*-PLAN.md 2>/dev/null | sort
-ls .planning/phases/XX-name/*-SUMMARY.md 2>/dev/null | sort
-```
+Parse inline metadata from header: `**Subsystem:**` and `**Type:**` values.
 
-**Logic:**
+Parse plan sections:
+- Context (files to read, @-references)
+- Changes (tasks with implementation details)
+- Verification criteria
+- Must-Haves checklist
 
-- If `01-01-PLAN.md` exists but `01-01-SUMMARY.md` doesn't → execute 01-01
-- If `01-01-SUMMARY.md` exists but `01-02-SUMMARY.md` doesn't → execute 01-02
-- Pattern: Find first PLAN file without matching SUMMARY file
+**If plan references CONTEXT.md:** The CONTEXT.md file provides the user's vision for this phase — how they imagine it working, what's essential, and what's out of scope. Honor this context throughout execution.
 
-**Decimal phase handling:**
+**If plan references DESIGN.md:** The DESIGN.md provides visual/UX specifications — exact colors (hex), spacing (px), component states, and layouts. Use exact values from the spec, implement all component states, match wireframe layouts, include DESIGN.md verification criteria in task verification.
 
-Phase directories can be integer or decimal format:
-
-- Integer: `.planning/phases/01-foundation/01-01-PLAN.md`
-- Decimal: `.planning/phases/01.1-hotfix/01.1-01-PLAN.md`
-
-Parse phase number from path (handles both formats):
-
-```bash
-# Extract phase number (handles XX or XX.Y format)
-PHASE=$(echo "$PLAN_PATH" | grep -oE '[0-9]+(\.[0-9]+)?-[0-9]+')
-```
-
-SUMMARY naming follows same pattern:
-
-- Integer: `01-01-SUMMARY.md`
-- Decimal: `01.1-01-SUMMARY.md`
-
-Confirm with user if ambiguous.
-
-```
-⚡ Auto-approved: Execute {phase}-{plan}-PLAN.md
-[Plan X of Y for Phase Z]
-
-Starting execution...
-```
-
-Proceed directly to execution.
+**If `**Type:** tdd`:** Read `~/.claude/mindsystem/references/tdd-execution.md` for RED-GREEN-REFACTOR execution flow.
 </step>
-
-<step name="record_start_time">
-Record execution start time for performance tracking:
-
-```bash
-PLAN_START_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-PLAN_START_EPOCH=$(date +%s)
-```
-
-Store in shell variables for duration calculation at completion.
-</step>
-
-<step name="init_agent_tracking">
-**Initialize agent tracking for subagent resume capability.**
-
-Before spawning any subagents, set up tracking infrastructure:
-
-**1. Create/verify tracking files:**
-
-```bash
-# Create agent history file if doesn't exist
-if [ ! -f .planning/agent-history.json ]; then
-  echo '{"version":"1.0","max_entries":50,"entries":[]}' > .planning/agent-history.json
-fi
-
-# Clear any stale current-agent-id (from interrupted sessions)
-# Will be populated when subagent spawns
-rm -f .planning/current-agent-id.txt
-```
-
-**2. Check for interrupted agents (resume detection):**
-
-```bash
-# Check if current-agent-id.txt exists from previous interrupted session
-if [ -f .planning/current-agent-id.txt ]; then
-  INTERRUPTED_ID=$(cat .planning/current-agent-id.txt)
-  echo "Found interrupted agent: $INTERRUPTED_ID"
-fi
-```
-
-**If interrupted agent found:**
-- The agent ID file exists from a previous session that didn't complete
-- This agent can potentially be resumed using Task tool's `resume` parameter
-- Present to user: "Previous session was interrupted. Resume agent [ID] or start fresh?"
-- If resume: Use Task tool with `resume` parameter set to the interrupted ID
-- If fresh: Clear the file and proceed normally
-
-**3. Prune old entries (housekeeping):**
-
-If agent-history.json has more than `max_entries`:
-- Remove oldest entries with status "completed"
-- Never remove entries with status "spawned" (may need resume)
-- Keep file under size limit for fast reads
-
-**When to run this step:**
-- Pattern A (fully autonomous): Before spawning the single subagent
-- Pattern B (segmented): Before the segment execution loop
-- Pattern C (main context): Skip - no subagents spawned
-</step>
-
-<step name="load_prompt">
-Read the plan prompt:
-```bash
-cat .planning/phases/XX-name/{phase}-{plan}-PLAN.md
-````
-
-This IS the execution instructions. Follow it exactly.
-
-**If plan references CONTEXT.md:**
-The CONTEXT.md file provides the user's vision for this phase — how they imagine it working, what's essential, and what's out of scope. Honor this context throughout execution.
-</step>
-
-<step name="previous_phase_check">
-Before executing, check if previous phase had issues:
-
-```bash
-# Find previous phase summary
-ls .planning/phases/*/SUMMARY.md 2>/dev/null | sort -r | head -2 | tail -1
-```
-
-If previous phase SUMMARY.md has "Issues Encountered" != "None" or "Next Phase Readiness" mentions blockers:
-
-Use AskUserQuestion:
-
-- header: "Previous Issues"
-- question: "Previous phase had unresolved items: [summary]. How to proceed?"
-- options:
-  - "Proceed anyway" - Issues won't block this phase
-  - "Address first" - Let's resolve before continuing
-  - "Review previous" - Show me the full summary
-    </step>
 
 <step name="execute">
-Execute each task in the prompt. **Deviations are normal** - handle them automatically using embedded rules below.
+Record start time: `PLAN_START_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); PLAN_START_EPOCH=$(date +%s)`
 
-1. Read the @context files listed in the prompt
+Execute each task in the plan. Deviations are normal — handle them using `<deviation_rules>` below.
 
-2. For each task:
+For each task:
+1. Read any @context files listed
+2. Implement the task
+3. **If CLI/API returns auth error (401, 403, "Not authenticated", "Please run X login"):** Use AskUserQuestion with exact auth steps and verification command. Wait, verify, resume. Document as normal flow, not deviation.
+4. When you discover work not in plan: apply deviation rules automatically
+5. Run task verification
+6. Confirm done criteria met
+7. Commit the task (see `<task_commit>`)
+8. Track task completion and commit hash for summary
 
-   **If `type="auto"`:**
-
-   **Before executing:** Check if task has `tdd="true"` attribute:
-   - If yes: Follow TDD execution flow (see `<tdd_execution>`) - RED → GREEN → REFACTOR cycle with atomic commits per stage
-   - If no: Standard implementation
-
-   - Work toward task completion
-   - **If CLI/API returns authentication error:** Handle as authentication gate (see below)
-   - **When you discover additional work not in plan:** Apply deviation rules (see below) automatically
-   - Continue implementing, applying rules as needed
-   - Run the verification
-   - Confirm done criteria met
-   - **Commit the task** (see `<task_commit>` below)
-   - Track task completion and commit hash for Summary documentation
-   - Continue to next task
-
-3. Run overall verification checks from `<verification>` section
-4. Confirm all success criteria from `<success_criteria>` section met
-5. Document all deviations in Summary (automatic - see deviation_documentation below)
-   </step>
-
-<authentication_gates>
-
-## Handling Authentication Errors During Execution
-
-**When you encounter authentication errors during `type="auto"` task execution:**
-
-This is NOT a failure. Authentication gates are expected and normal. Handle them dynamically:
-
-**Authentication error indicators:**
-
-- CLI returns: "Error: Not authenticated", "Not logged in", "Unauthorized", "401", "403"
-- API returns: "Authentication required", "Invalid API key", "Missing credentials"
-- Command fails with: "Please run {tool} login" or "Set {ENV_VAR} environment variable"
-
-**Authentication gate protocol:**
-
-1. **Recognize it's an auth gate** - Not a bug, just needs credentials
-2. **STOP current task execution** - Don't retry repeatedly
-3. **Use AskUserQuestion** - Present it to user immediately
-4. **Provide exact authentication steps** - CLI commands, where to get keys
-5. **Wait for user to authenticate** - Let them complete auth flow
-6. **Verify authentication works** - Test that credentials are valid
-7. **Retry the original task** - Resume automation where you left off
-8. **Continue normally** - Don't treat this as an error in Summary
-
-**Example: Vercel deployment hits auth error**
-
-```
-Task 3: Deploy to Vercel
-Running: vercel --yes
-
-Error: Not authenticated. Please run 'vercel login'
-
-[Present via AskUserQuestion]
-
-╔═══════════════════════════════════════════════════════╗
-║  CHECKPOINT: Action Required                          ║
-╚═══════════════════════════════════════════════════════╝
-
-Progress: 2/8 tasks complete
-Task: Authenticate Vercel CLI
-
-Attempted: vercel --yes
-Error: Not authenticated
-
-What you need to do:
-  1. Run: vercel login
-  2. Complete browser authentication
-
-I'll verify: vercel whoami returns your account
-
-────────────────────────────────────────────────────────
-→ YOUR ACTION: Type "done" when authenticated
-────────────────────────────────────────────────────────
-
-[Wait for user response]
-
-[User types "done"]
-
-Verifying authentication...
-Running: vercel whoami
-✓ Authenticated as: user@example.com
-
-Retrying deployment...
-Running: vercel --yes
-✓ Deployed to: https://myapp-abc123.vercel.app
-
-Task 3 complete. Continuing to task 4...
-```
-
-**In Summary documentation:**
-
-Document authentication gates as normal flow, not deviations:
-
-```markdown
-## Authentication Gates
-
-During execution, I encountered authentication requirements:
-
-1. Task 3: Vercel CLI required authentication
-   - Paused for `vercel login`
-   - Resumed after authentication
-   - Deployed successfully
-
-These are normal gates, not errors.
-```
-
-**Key principles:**
-
-- Authentication gates are NOT failures or bugs
-- They're expected interaction points during first-time setup
-- Handle them gracefully and continue automation after unblocked
-- Don't mark tasks as "failed" or "incomplete" due to auth gates
-- Document them as normal flow, separate from deviations
-  </authentication_gates>
+After all tasks:
+- Run overall verification from plan's Verification section
+- Confirm all Must-Haves met
+</step>
 
 <deviation_rules>
 
 ## Automatic Deviation Handling
 
-**While executing tasks, you WILL discover work not in the plan.** This is normal.
+**While executing tasks, you WILL discover work not in the plan.** Apply these rules automatically. Track all deviations for summary.
 
-Apply these rules automatically. Track all deviations for Summary documentation.
+**RULE PRIORITY:**
+1. If Rule 4 applies → STOP and ask user (architectural decision)
+2. If Rules 1-3 apply → fix automatically, track for summary
+3. If genuinely unsure → apply Rule 4 (stop and ask)
 
 ---
 
 **RULE 1: Auto-fix bugs**
 
-**Trigger:** Code doesn't work as intended (broken behavior, incorrect output, errors)
+Trigger: Code doesn't work as intended (broken behavior, errors, crashes)
 
-**Action:** Fix immediately, track for Summary
+Action: Fix immediately, track for summary. No user permission needed.
 
-**Examples:**
-
-- Wrong SQL query returning incorrect data
-- Logic errors (inverted condition, off-by-one, infinite loop)
-- Type errors, null pointer exceptions, undefined references
-- Broken validation (accepts invalid input, rejects valid input)
-- Security vulnerabilities (SQL injection, XSS, CSRF, insecure auth)
-- Race conditions, deadlocks
-- Memory leaks, resource leaks
-
-**Process:**
-
-1. Fix the bug inline
-2. Add/update tests to prevent regression
-3. Verify fix works
-4. Continue task
-5. Track in deviations list: `[Rule 1 - Bug] [description]`
-
-**No user permission needed.** Bugs must be fixed for correct operation.
+Example: Logic error causing inverted condition — fix inline, add regression test, verify, track as `[Rule 1 - Bug]`.
 
 ---
 
 **RULE 2: Auto-add missing critical functionality**
 
-**Trigger:** Code is missing essential features for correctness, security, or basic operation
+Trigger: Code missing essential features for correctness, security, or operation
 
-**Action:** Add immediately, track for Summary
+Action: Add immediately, track for summary. No user permission needed.
 
-**Examples:**
+Example: Auth middleware not checking token expiry — add exp validation, add test, track as `[Rule 2 - Missing Critical]`.
 
-- Missing error handling (no try/catch, unhandled promise rejections)
-- No input validation (accepts malicious data, type coercion issues)
-- Missing null/undefined checks (crashes on edge cases)
-- No authentication on protected routes
-- Missing authorization checks (users can access others' data)
-- No CSRF protection, missing CORS configuration
-- No rate limiting on public APIs
-- Missing required database indexes (causes timeouts)
-- No logging for errors (can't debug production)
-
-**Process:**
-
-1. Add the missing functionality inline
-2. Add tests for the new functionality
-3. Verify it works
-4. Continue task
-5. Track in deviations list: `[Rule 2 - Missing Critical] [description]`
-
-**Critical = required for correct/secure/performant operation**
-**No user permission needed.** These are not "features" - they're requirements for basic correctness.
+Boundary: "Add missing validation" = Rule 2. "Add new table" = Rule 4.
 
 ---
 
 **RULE 3: Auto-fix blocking issues**
 
-**Trigger:** Something prevents you from completing current task
+Trigger: Something prevents completing current task
 
-**Action:** Fix immediately to unblock, track for Summary
+Action: Fix to unblock, track for summary. No user permission needed.
 
-**Examples:**
-
-- Missing dependency (package not installed, import fails)
-- Wrong types blocking compilation
-- Broken import paths (file moved, wrong relative path)
-- Missing environment variable (app won't start)
-- Database connection config error
-- Build configuration error (webpack, tsconfig, etc.)
-- Missing file referenced in code
-- Circular dependency blocking module resolution
-
-**Process:**
-
-1. Fix the blocking issue
-2. Verify task can now proceed
-3. Continue task
-4. Track in deviations list: `[Rule 3 - Blocking] [description]`
-
-**No user permission needed.** Can't complete task without fixing blocker.
+Example: Missing dependency blocking import — install package, verify task proceeds, track as `[Rule 3 - Blocking]`.
 
 ---
 
 **RULE 4: Ask about architectural changes**
 
-**Trigger:** Fix/addition requires significant structural modification
+Trigger: Fix/addition requires significant structural modification (new table, new service layer, framework switch, breaking API change)
 
-**Action:** STOP, report via AskUserQuestion, wait for decision
+Action: STOP. Present via AskUserQuestion: what found, proposed change, why, impact, alternatives. Wait for decision.
 
-**Examples:**
-
-- Adding new database table (not just column)
-- Major schema changes (changing primary key, splitting tables)
-- Introducing new service layer or architectural pattern
-- Switching libraries/frameworks (React → Vue, REST → GraphQL)
-- Changing authentication approach (sessions → JWT)
-- Adding new infrastructure (message queue, cache layer, CDN)
-- Changing API contracts (breaking changes to endpoints)
-- Adding new deployment environment
-
-**Process:**
-
-1. STOP current task
-2. Present clearly:
-
-```
-⚠️ Architectural Decision Needed
-
-Current task: [task name]
-Discovery: [what you found that prompted this]
-Proposed change: [architectural modification]
-Why needed: [rationale]
-Impact: [what this affects - APIs, deployment, dependencies, etc.]
-Alternatives: [other approaches, or "none apparent"]
-
-Proceed with proposed change? (yes / different approach / defer)
-```
-
-3. WAIT for user response
-4. If approved: implement, track as `[Rule 4 - Architectural] [description]`
-5. If different approach: discuss and implement
-6. If deferred: note in Summary and continue without change
-
-**User decision required.** These changes affect system design.
+Example: Need to add new database table — STOP, present the architectural decision, wait for approval.
 
 ---
 
-**RULE PRIORITY (when multiple could apply):**
-
-1. **If Rule 4 applies** → STOP and report to user (architectural decision)
-2. **If Rules 1-3 apply** → Fix automatically, track for Summary
-3. **If genuinely unsure which rule** → Apply Rule 4 (stop and report)
-
-**Edge case guidance:**
-
-- "This validation is missing" → Rule 2 (critical for security)
-- "This crashes on null" → Rule 1 (bug)
-- "Need to add table" → Rule 4 (architectural)
-- "Need to add column" → Rule 1 or 2 (depends: fixing bug or adding critical field)
-
-**When in doubt:** Ask yourself "Does this affect correctness, security, or ability to complete task?"
-
-- YES → Rules 1-3 (fix automatically)
-- MAYBE → Rule 4 (ask user)
-
-</deviation_rules>
-
-<deviation_documentation>
-
-## Documenting Deviations in Summary
-
-After all tasks complete, Summary MUST include deviations section.
-
-**If no deviations:**
-
-```markdown
-## Deviations from Plan
-
-None - plan executed exactly as written.
-```
-
-**If deviations occurred:**
+**Documentation format for summary:**
 
 ```markdown
 ## Deviations from Plan
 
 ### Auto-fixed Issues
 
-**1. [Rule 1 - Bug] Fixed case-sensitive email uniqueness constraint**
-
-- **Found during:** Task 4 (Follow/unfollow API implementation)
-- **Issue:** User.email unique constraint was case-sensitive - Test@example.com and test@example.com were both allowed, causing duplicate accounts
-- **Fix:** Changed to `CREATE UNIQUE INDEX users_email_unique ON users (LOWER(email))`
-- **Files modified:** src/models/User.ts, migrations/003_fix_email_unique.sql
-- **Verification:** Unique constraint test passes - duplicate emails properly rejected
-- **Commit:** abc123f
-
-**2. [Rule 2 - Missing Critical] Added JWT expiry validation to auth middleware**
-
-- **Found during:** Task 3 (Protected route implementation)
-- **Issue:** Auth middleware wasn't checking token expiry - expired tokens were being accepted
-- **Fix:** Added exp claim validation in middleware, reject with 401 if expired
-- **Files modified:** src/middleware/auth.ts, src/middleware/auth.test.ts
-- **Verification:** Expired token test passes - properly rejects with 401
-- **Commit:** def456g
-
----
-
-**Total deviations:** 4 auto-fixed (1 bug, 1 missing critical, 1 blocking, 1 architectural with approval)
-**Impact on plan:** All auto-fixes necessary for correctness/security/performance. No scope creep.
+**1. [Rule N - Category] Brief description**
+- **Found during:** Task [N]
+- **Issue:** [what was wrong]
+- **Fix:** [what was done]
+- **Files modified:** [files]
+- **Commit:** [hash]
 ```
 
-**This provides complete transparency:**
+If no deviations: "None — plan executed exactly as written."
 
-- Every deviation documented
-- Why it was needed
-- What rule applied
-- What was done
-- User can see exactly what happened beyond the plan
-
-</deviation_documentation>
-
-<tdd_plan_execution>
-## TDD Plan Execution
-
-When executing a plan with `type: tdd` in frontmatter, follow the RED-GREEN-REFACTOR cycle for the single feature defined in the plan.
-
-**1. Check test infrastructure (if first TDD plan):**
-If no test framework configured:
-- Detect project type from package.json/requirements.txt/etc.
-- Install minimal test framework (Jest, pytest, Go testing, etc.)
-- Create test config file
-- Verify: run empty test suite
-- This is part of the RED phase, not a separate task
-
-**2. RED - Write failing test:**
-- Read `<behavior>` element for test specification
-- Create test file if doesn't exist (follow project conventions)
-- Write test(s) that describe expected behavior
-- Run tests - MUST fail (if passes, test is wrong or feature exists)
-- Commit: `test({phase}-{plan}): add failing test for [feature]`
-
-**3. GREEN - Implement to pass:**
-- Read `<implementation>` element for guidance
-- Write minimal code to make test pass
-- Run tests - MUST pass
-- Commit: `feat({phase}-{plan}): implement [feature]`
-
-**4. REFACTOR (if needed):**
-- Clean up code if obvious improvements
-- Run tests - MUST still pass
-- Commit only if changes made: `refactor({phase}-{plan}): clean up [feature]`
-
-**Commit pattern for TDD plans:**
-Each TDD plan produces 2-3 atomic commits:
-1. `test({phase}-{plan}): add failing test for X`
-2. `feat({phase}-{plan}): implement X`
-3. `refactor({phase}-{plan}): clean up X` (optional)
-
-**Error handling:**
-- If test doesn't fail in RED phase: Test is wrong or feature already exists. Investigate before proceeding.
-- If test doesn't pass in GREEN phase: Debug implementation, keep iterating until green.
-- If tests fail in REFACTOR phase: Undo refactor, commit was premature.
-
-**Verification:**
-After TDD plan completion, ensure:
-- All tests pass
-- Test coverage for the new behavior exists
-- No unrelated tests broken
-
-**Why TDD uses dedicated plans:** TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This consumes 40-50% of context for a single feature. Dedicated plans ensure full quality throughout the cycle.
-
-**Comparison:**
-- Standard plans: Multiple tasks, 1 commit per task, 2-4 commits total
-- TDD plans: Single feature, 2-3 commits for RED/GREEN/REFACTOR cycle
-
-See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
-</tdd_plan_execution>
+</deviation_rules>
 
 <task_commit>
+
 ## Task Commit Protocol
 
-After each task completes (verification passed, done criteria met), commit immediately:
+After each task completes (verification passed, done criteria met), commit immediately.
 
-**1. Identify modified files:**
-
-Track files changed during this specific task (not the entire plan):
+**1. Stage only task-related files** (NEVER `git add .` or `git add -A`):
 
 ```bash
 git status --short
+git add src/specific/file.ts
 ```
 
-**2. Stage only task-related files:**
+**2. Determine commit type:**
 
-Stage each file individually (NEVER use `git add .` or `git add -A`):
+| Type | When |
+|------|------|
+| `feat` | New feature, endpoint, component |
+| `fix` | Bug fix, error correction |
+| `test` | Test-only changes (TDD RED phase) |
+| `refactor` | Code cleanup, no behavior change |
+| `perf` | Performance improvement |
+| `docs` | Documentation changes |
+| `chore` | Config, tooling, dependencies |
 
-```bash
-# Example - adjust to actual files modified by this task
-git add src/api/auth.ts
-git add src/types/user.ts
-```
-
-**3. Determine commit type:**
-
-| Type | When to Use | Example |
-|------|-------------|---------|
-| `feat` | New feature, endpoint, component, functionality | feat(08-02): create user registration endpoint |
-| `fix` | Bug fix, error correction | fix(08-02): correct email validation regex |
-| `test` | Test-only changes (TDD RED phase) | test(08-02): add failing test for password hashing |
-| `refactor` | Code cleanup, no behavior change (TDD REFACTOR phase) | refactor(08-02): extract validation to helper |
-| `perf` | Performance improvement | perf(08-02): add database index for user lookups |
-| `docs` | Documentation changes | docs(08-02): add API endpoint documentation |
-| `style` | Formatting, linting fixes | style(08-02): format auth module |
-| `chore` | Config, tooling, dependencies | chore(08-02): add bcrypt dependency |
-
-**4. Craft commit message:**
-
-Format: `{type}({phase}-{plan}): {task-name-or-description}`
+**3. Commit with conventional format:**
 
 ```bash
-git commit -m "{type}({phase}-{plan}): {concise task description}
+git commit -m "$(cat <<'EOF'
+{type}({phase}-{plan}): {concise task description}
 
 - {key change 1}
 - {key change 2}
-- {key change 3}
-"
+EOF
+)"
 ```
 
-**Examples:**
-
-```bash
-# Standard plan task
-git commit -m "feat(08-02): create user registration endpoint
-
-- POST /auth/register validates email and password
-- Checks for duplicate users
-- Returns JWT token on success
-"
-
-# Another standard task
-git commit -m "fix(08-02): correct email validation regex
-
-- Fixed regex to accept plus-addressing
-- Added tests for edge cases
-"
-```
-
-**Note:** TDD plans have their own commit pattern (test/feat/refactor for RED/GREEN/REFACTOR phases). See `<tdd_plan_execution>` section above.
-
-**5. Record commit hash:**
-
-After committing, capture hash for SUMMARY.md:
+**4. Capture hash:**
 
 ```bash
 TASK_COMMIT=$(git rev-parse --short HEAD)
-echo "Task ${TASK_NUM} committed: ${TASK_COMMIT}"
 ```
 
-Store in array or list for SUMMARY generation:
-```bash
-TASK_COMMITS+=("Task ${TASK_NUM}: ${TASK_COMMIT}")
-```
-
-**Atomic commit benefits:**
-- Each task independently revertable
-- Git bisect finds exact failing task
-- Git blame traces line to specific task context
-- Clear history for Claude in future sessions
-- Better observability for AI-automated workflow
+Track commit hash for summary generation.
 
 </task_commit>
 
@@ -673,537 +189,150 @@ If any task verification fails:
 
 STOP. Do not continue to next task.
 
-Present inline:
-"Verification failed for Task [X]: [task name]
+Present via AskUserQuestion:
+- What failed (expected vs actual)
+- Options: Retry, Skip (mark incomplete), Stop (investigate)
 
-Expected: [verification criteria]
-Actual: [what happened]
-
-How to proceed?
-
-1. Retry - Try the task again
-2. Skip - Mark as incomplete, continue
-3. Stop - Pause execution, investigate"
-
-Wait for user decision.
-
-If user chose "Skip", note it in SUMMARY.md under "Issues Encountered".
+If user chose "Skip", note in summary under "Issues Encountered".
 </step>
 
-<step name="record_completion_time">
-Record execution end time and calculate duration:
+<step name="create_summary">
+Record end time and calculate duration:
 
 ```bash
 PLAN_END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 PLAN_END_EPOCH=$(date +%s)
-
 DURATION_SEC=$(( PLAN_END_EPOCH - PLAN_START_EPOCH ))
 DURATION_MIN=$(( DURATION_SEC / 60 ))
-
-if [[ $DURATION_MIN -ge 60 ]]; then
-  HRS=$(( DURATION_MIN / 60 ))
-  MIN=$(( DURATION_MIN % 60 ))
-  DURATION="${HRS}h ${MIN}m"
-else
-  DURATION="${DURATION_MIN} min"
-fi
 ```
 
-Pass timing data to SUMMARY.md creation.
-</step>
+Create `{phase}-{plan}-SUMMARY.md` in the plan's phase directory.
 
-<step name="generate_user_setup">
-**Generate USER-SETUP.md if plan has user_setup in frontmatter.**
+**Frontmatter fields — populate ALL:**
 
-Check PLAN.md frontmatter for `user_setup` field:
+```yaml
+---
+phase: XX-name
+plan: YY
+subsystem: [from plan metadata or .planning/config.json subsystems]
+tags: [searchable tech keywords: jwt, stripe, react, postgres]
 
-```bash
-grep -A 50 "^user_setup:" .planning/phases/XX-name/{phase}-{plan}-PLAN.md | head -50
+requires:
+  - phase: [prior phase this depends on]
+    provides: [what that phase built that this uses]
+provides:
+  - [what this plan delivered]
+affects: [phase names/keywords that will need this context]
+
+tech-stack:
+  added: [new libraries/tools from this plan]
+  patterns: [architectural patterns established]
+
+key-files:
+  created: [important files created]
+  modified: [important files modified]
+
+key-decisions:
+  - "Decision 1"
+  - "Decision 2"
+
+patterns-established:
+  - "Pattern 1: description"
+
+mock_hints:
+  transient_states:
+    - state: "[brief transient UI state description]"
+      component: "[file path]"
+      trigger: "[async call | animation | timer]"
+  external_data:
+    - source: "[API endpoint or data source]"
+      data_type: "[what kind of data]"
+      components: ["[file1]", "[file2]"]
+
+duration: Xmin
+completed: YYYY-MM-DD
+---
 ```
 
-**If user_setup exists and is not empty:**
+**Subsystem:** Use `subsystem_hint` from plan metadata if present. Otherwise select from `jq -r '.subsystems[]' .planning/config.json`. If novel, append to config.json and log in decisions.
 
-Create `.planning/phases/XX-name/{phase}-USER-SETUP.md` using template from `~/.claude/mindsystem/templates/user-setup.md`.
+**Mock hints:** Reflect on what you built. If UI with transient states (loading, animations, async transitions) or external data dependencies, populate accordingly. If purely backend or no async UI, write `mock_hints: none  # reason`. Always populate.
 
-**Content generation:**
-
-1. Parse each service in `user_setup` array
-2. For each service, generate sections:
-   - Environment Variables table (from `env_vars`)
-   - Account Setup checklist (from `account_setup`, if present)
-   - Dashboard Configuration steps (from `dashboard_config`, if present)
-   - Local Development notes (from `local_dev`, if present)
-3. Add verification section with commands to confirm setup works
-4. Set status to "Incomplete"
-
-**Example output:**
+**Body structure:**
 
 ```markdown
-# Phase 10: User Setup Required
+# Phase [X] Plan [Y]: [Name] Summary
 
-**Generated:** 2025-01-14
-**Phase:** 10-monetization
-**Status:** Incomplete
+**[Substantive one-liner — e.g., "JWT auth with refresh rotation using jose library"]**
 
-## Environment Variables
+## Performance
+- **Duration:** [time]
+- **Started:** [ISO timestamp]
+- **Completed:** [ISO timestamp]
+- **Tasks:** [count]
+- **Files modified:** [count]
 
-| Status | Variable | Source | Add to |
-|--------|----------|--------|--------|
-| [ ] | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys → Secret key | `.env.local` |
-| [ ] | `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Webhooks → Signing secret | `.env.local` |
+## Accomplishments
+- [Most important outcome]
+- [Second key accomplishment]
 
-## Dashboard Configuration
+## Task Commits
+1. **Task 1: [name]** - `hash` (type)
+2. **Task 2: [name]** - `hash` (type)
 
-- [ ] **Create webhook endpoint**
-  - Location: Stripe Dashboard → Developers → Webhooks → Add endpoint
-  - Details: URL: https://[your-domain]/api/webhooks/stripe, Events: checkout.session.completed
+## Files Created/Modified
+- `path/file` - What it does
 
-## Local Development
+## Decisions Made
+[Key decisions with rationale, or "None — followed plan as specified"]
 
-For local testing:
-\`\`\`bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
-\`\`\`
+## Deviations from Plan
+[From deviation tracking, or "None — plan executed exactly as written."]
 
-## Verification
+## Issues Encountered
+[Problems during planned work, or "None"]
 
-[Verification commands based on service]
-
----
-**Once all items complete:** Mark status as "Complete"
+## Next Step
+[Ready for next plan, or "Phase complete, ready for transition"]
 ```
 
-**If user_setup is empty or missing:**
-
-Skip this step - no USER-SETUP.md needed.
-
-**Track for offer_next:**
-
-Set `USER_SETUP_CREATED=true` if file was generated, for use in completion messaging.
-</step>
-
-<step name="create_summary">
-Create `{phase}-{plan}-SUMMARY.md` as specified in the prompt's `<output>` section.
-Use ~/.claude/mindsystem/templates/summary.md for structure.
-
-**File location:** `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
-
-**Frontmatter population:**
-
-Before writing summary content, populate frontmatter fields from execution context:
-
-1. **Basic identification:**
-   - phase: From PLAN.md frontmatter
-   - plan: From PLAN.md frontmatter
-   - subsystem: Use `subsystem_hint` from PLAN.md frontmatter if present. Otherwise select from config.json subsystems list via `jq -r '.subsystems[]' .planning/config.json`. If novel work, append new value to config.json and log in "Decisions Made".
-   - tags: Extract tech keywords (libraries, frameworks, tools used)
-
-2. **Dependency graph:**
-   - requires: List prior phases this built upon (check PLAN.md context section for referenced prior summaries)
-   - provides: Extract from accomplishments - what was delivered
-   - affects: Infer from phase description/goal what future phases might need this
-
-3. **Tech tracking:**
-   - tech-stack.added: New libraries from package.json changes or requirements
-   - tech-stack.patterns: Architectural patterns established (from decisions/accomplishments)
-
-4. **File tracking:**
-   - key-files.created: From "Files Created/Modified" section
-   - key-files.modified: From "Files Created/Modified" section
-
-5. **Decisions:**
-   - key-decisions: Extract from "Decisions Made" section
-
-6. **Verification hints (required):**
-   - mock_hints.transient_states: Reflect on what you built. Any UI with async loading, animations, or transitions that produce brief intermediate states? List each with component file and trigger.
-   - mock_hints.external_data: Any feature that fetches from an API? List the source, data type, and rendering components.
-   - If no UI work, no async operations, no external data: write `mock_hints: none` with a brief reason comment (e.g., `mock_hints: none  # no transient states or external data dependencies`). Always populate — `none` tells verify-work to skip mock analysis.
-
-7. **Metrics:**
-   - duration: From $DURATION variable
-   - completed: From $PLAN_END_TIME (date only, format YYYY-MM-DD)
-
-Note: Subsystem must match config.json vocabulary (or extend it). If affects are unclear, use best judgment based on phase name and accomplishments.
-
-**Title format:** `# Phase [X] Plan [Y]: [Name] Summary`
-
-The one-liner must be SUBSTANTIVE:
-
+**One-liner must be SUBSTANTIVE:**
 - Good: "JWT auth with refresh rotation using jose library"
 - Bad: "Authentication implemented"
+</step>
 
-**Include performance data:**
+<step name="return_to_orchestrator">
+Do NOT commit the SUMMARY.md file. Do NOT update STATE.md or ROADMAP.md. The orchestrator handles all post-execution artifacts.
 
-- Duration: `$DURATION`
-- Started: `$PLAN_START_TIME`
-- Completed: `$PLAN_END_TIME`
-- Tasks completed: (count from execution)
-- Files modified: (count from execution)
-
-**Next Step section:**
-
-- If more plans exist in this phase: "Ready for {phase}-{next-plan}-PLAN.md"
-- If this is the last plan: "Phase complete, ready for transition"
-  </step>
-
-<step name="update_current_position">
-Update Current Position section in STATE.md to reflect plan completion.
-
-**Format:**
+Return structured completion format:
 
 ```markdown
-Phase: [current] of [total] ([phase name])
-Plan: [just completed] of [total in phase]
-Status: [In progress / Phase complete]
-Last activity: [today] - Completed {phase}-{plan}-PLAN.md
+## PLAN COMPLETE
 
-Progress: [progress bar]
+**Plan:** {phase}-{plan}
+**Tasks:** {completed}/{total}
+**Duration:** {duration}
+**SUMMARY:** {path to SUMMARY.md}
+
+**Commits:**
+- {hash}: {message}
+- {hash}: {message}
+
+**Deviations:** {count} ({breakdown by rule, or "none"})
+**Issues:** {count or "none"}
 ```
-
-**Calculate progress bar:**
-
-- Count total plans across all phases (from ROADMAP.md or ROADMAP.md)
-- Count completed plans (count SUMMARY.md files that exist)
-- Progress = (completed / total) × 100%
-- Render: ░ for incomplete, █ for complete
-
-**Example - completing 02-01-PLAN.md (plan 5 of 10 total):**
-
-Before:
-
-```markdown
-## Current Position
-
-Phase: 2 of 4 (Authentication)
-Plan: Not started
-Status: Ready to execute
-Last activity: 2025-01-18 - Phase 1 complete
-
-Progress: ██████░░░░ 40%
-```
-
-After:
-
-```markdown
-## Current Position
-
-Phase: 2 of 4 (Authentication)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2025-01-19 - Completed 02-01-PLAN.md
-
-Progress: ███████░░░ 50%
-```
-
-**Step complete when:**
-
-- [ ] Phase number shows current phase (X of total)
-- [ ] Plan number shows plans complete in current phase (N of total-in-phase)
-- [ ] Status reflects current state (In progress / Phase complete)
-- [ ] Last activity shows today's date and the plan just completed
-- [ ] Progress bar calculated correctly from total completed plans
-      </step>
-
-<step name="extract_decisions_and_issues">
-Extract decisions, issues, and concerns from SUMMARY.md into STATE.md accumulated context.
-
-**Decisions Made:**
-
-- Read SUMMARY.md "## Decisions Made" section
-- If content exists (not "None"):
-  - Add each decision to STATE.md Decisions table
-  - Format: `| [phase number] | [decision summary] | [rationale] |`
-
-**Blockers/Concerns:**
-
-- Read SUMMARY.md "## Next Phase Readiness" section
-- If contains blockers or concerns:
-  - Add to STATE.md "Blockers/Concerns Carried Forward"
-    </step>
-
-<step name="update_session_continuity">
-Update Session Continuity section in STATE.md to enable resumption in future sessions.
-
-**Format:**
-
-```markdown
-Last session: [current date and time]
-Stopped at: Completed {phase}-{plan}-PLAN.md
-```
-
-**Size constraint note:** Keep STATE.md under 150 lines total.
-</step>
-
-<step name="issues_review_gate">
-Before proceeding, check SUMMARY.md content.
-
-If "Issues Encountered" is NOT "None":
-
-```
-⚡ Auto-approved: Issues acknowledgment
-⚠️ Note: Issues were encountered during execution:
-- [Issue 1]
-- [Issue 2]
-(Logged - continuing)
-```
-
-Continue without waiting.
-</step>
-
-<step name="update_roadmap">
-Update the roadmap file:
-
-```bash
-ROADMAP_FILE=".planning/ROADMAP.md"
-```
-
-**If more plans remain in this phase:**
-
-- Update plan count: "2/3 plans complete"
-- Keep phase status as "In progress"
-
-**If this was the last plan in the phase:**
-
-- Mark phase complete: status → "Complete"
-- Add completion date
-</step>
-
-<step name="git_commit_metadata">
-Commit execution metadata (SUMMARY + STATE + ROADMAP):
-
-**Note:** All task code has already been committed during execution (one commit per task).
-PLAN.md was already committed during plan-phase. This final commit captures execution results only.
-
-**1. Stage execution artifacts:**
-
-```bash
-git add .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md
-git add .planning/STATE.md
-```
-
-**2. Stage roadmap:**
-
-```bash
-git add .planning/ROADMAP.md
-```
-
-**3. Verify staging:**
-
-```bash
-git status
-# Should show only execution artifacts (SUMMARY, STATE, ROADMAP), no code files
-```
-
-**4. Commit metadata:**
-
-```bash
-git commit -m "$(cat <<'EOF'
-docs({phase}-{plan}): complete [plan-name] plan
-
-Tasks completed: [N]/[N]
-- [Task 1 name]
-- [Task 2 name]
-- [Task 3 name]
-
-SUMMARY: .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md
-EOF
-)"
-```
-
-**Example:**
-
-```bash
-git commit -m "$(cat <<'EOF'
-docs(08-02): complete user registration plan
-
-Tasks completed: 3/3
-- User registration endpoint
-- Password hashing with bcrypt
-- Email confirmation flow
-
-SUMMARY: .planning/phases/08-user-auth/08-02-registration-SUMMARY.md
-EOF
-)"
-```
-
-**Git log after plan execution:**
-
-```
-abc123f docs(08-02): complete user registration plan
-def456g feat(08-02): add email confirmation flow
-hij789k feat(08-02): implement password hashing with bcrypt
-lmn012o feat(08-02): create user registration endpoint
-```
-
-Each task has its own commit, followed by one metadata commit documenting plan completion.
-
-For commit message conventions, see ~/.claude/mindsystem/references/git-integration.md
-</step>
-
-<step name="update_codebase_map">
-**If .planning/codebase/ exists:**
-
-Check what changed across all task commits in this plan:
-
-```bash
-# Find first task commit (right after previous plan's docs commit)
-FIRST_TASK=$(git log --oneline --grep="feat({phase}-{plan}):" --grep="fix({phase}-{plan}):" --grep="test({phase}-{plan}):" --reverse | head -1 | cut -d' ' -f1)
-
-# Get all changes from first task through now
-git diff --name-only ${FIRST_TASK}^..HEAD 2>/dev/null
-```
-
-**Update only if structural changes occurred:**
-
-| Change Detected | Update Action |
-|-----------------|---------------|
-| New directory in src/ | STRUCTURE.md: Add to directory layout |
-| package.json deps changed | STACK.md: Add/remove from dependencies list |
-| New file pattern (e.g., first .test.ts) | CONVENTIONS.md: Note new pattern |
-| New external API client | INTEGRATIONS.md: Add service entry with file path |
-| Config file added/changed | STACK.md: Update configuration section |
-| File renamed/moved | Update paths in relevant docs |
-
-**Skip update if only:**
-- Code changes within existing files
-- Bug fixes
-- Content changes (no structural impact)
-
-**Update format:**
-Make single targeted edits - add a bullet point, update a path, or remove a stale entry. Don't rewrite sections.
-
-```bash
-git add .planning/codebase/*.md
-git commit --amend --no-edit  # Include in metadata commit
-```
-
-**If .planning/codebase/ doesn't exist:**
-Skip this step.
-</step>
-
-<step name="offer_next">
-**MANDATORY: Verify remaining work before presenting next steps.**
-
-Do NOT skip this verification. Do NOT assume phase or milestone completion without checking.
-
-**Step 0: Check for USER-SETUP.md**
-
-If `USER_SETUP_CREATED=true` (from generate_user_setup step), always include this warning block at the TOP of completion output:
-
-```
-⚠️ USER SETUP REQUIRED
-
-This phase introduced external services requiring manual configuration:
-
-📋 .planning/phases/{phase-dir}/{phase}-USER-SETUP.md
-
-Quick view:
-- [ ] {ENV_VAR_1}
-- [ ] {ENV_VAR_2}
-- [ ] {Dashboard config task}
-
-Complete this setup for the integration to function.
-Run `cat .planning/phases/{phase-dir}/{phase}-USER-SETUP.md` for full details.
-
----
-```
-
-This warning appears BEFORE "Plan complete" messaging. User sees setup requirements prominently.
-
-**Step 1: Count plans and summaries in current phase**
-
-List files in the phase directory:
-
-```bash
-ls -1 .planning/phases/[current-phase-dir]/*-PLAN.md 2>/dev/null | wc -l
-ls -1 .planning/phases/[current-phase-dir]/*-SUMMARY.md 2>/dev/null | wc -l
-```
-
-State the counts: "This phase has [X] plans and [Y] summaries."
-
-**Step 2: Route based on plan completion**
-
-Compare the counts from Step 1:
-
-| Condition | Meaning | Action |
-|-----------|---------|--------|
-| summaries < plans | More plans remain | Go to **Route A** |
-| summaries = plans | Phase complete | Go to Step 3 |
-
----
-
-**Route A: More plans remain in this phase**
-
-Identify the next unexecuted plan:
-- Find the first PLAN.md file that has no matching SUMMARY.md
-- Read its `<objective>` section
-
-```
-Plan {phase}-{plan} complete.
-Summary: .planning/phases/{phase-dir}/{phase}-{plan}-SUMMARY.md
-
-{Y} of {X} plans complete for Phase {Z}.
-
-⚡ Auto-continuing: Execute next plan ({phase}-{next-plan})
-```
-
-Loop back to identify_plan step automatically.
-
-**STOP here if Route A applies. Do not continue to Step 3.**
-
----
-
-**Step 3: Check milestone status (only when all plans in phase are complete)**
-
-Read ROADMAP.md and extract:
-1. Current phase number (from the plan just completed)
-2. All phase numbers listed in the current milestone section
-
-To find phases in the current milestone, look for:
-- Phase headers: lines starting with `### Phase` or `#### Phase`
-- Phase list items: lines like `- [ ] **Phase X:` or `- [x] **Phase X:`
-
-Count total phases in the current milestone and identify the highest phase number.
-
-State: "Current phase is {X}. Milestone has {N} phases (highest: {Y})."
-
-**Step 4: Route based on milestone status**
-
-| Condition | Meaning | Action |
-|-----------|---------|--------|
-| current phase < highest phase | More phases remain | Go to **Route B** |
-| current phase = highest phase | Milestone complete | Go to **Route C** |
-
----
-
-**Route B: Phase complete, more phases remain in milestone**
-
-Show phase completion summary, then read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase.
-
-After the "Next Up" section, add:
-```
-**Also available:**
-- `/ms:verify-work {Z}` — manual acceptance testing before continuing
-```
-
----
-
-**Route C: Milestone complete (all phases done)**
-
-Show phase completion summary, then read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and follow its instructions to present the milestone complete section.
-
 </step>
 
 </process>
 
 <success_criteria>
-
-- All tasks from PLAN.md completed
+- All tasks from plan executed
 - All verifications pass
-- USER-SETUP.md generated if user_setup in frontmatter
-- SUMMARY.md created with substantive content
-- STATE.md updated (position, decisions, issues, session)
-- ROADMAP.md updated
-- If codebase map exists: map updated with execution changes (or skipped if no significant changes)
-- If USER-SETUP.md created: prominently surfaced in completion output
-  </success_criteria>
+- Each task committed individually with conventional format
+- All deviations documented
+- SUMMARY.md created with substantive content and ALL frontmatter fields
+- Structured completion format returned to orchestrator
+- No STATE.md updates (orchestrator responsibility)
+- No ROADMAP.md updates (orchestrator responsibility)
+- No SUMMARY commit (orchestrator responsibility)
+</success_criteria>
