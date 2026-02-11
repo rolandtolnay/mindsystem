@@ -1,309 +1,395 @@
-<overview>
-Claude-executable plans have a specific format that enables Claude to implement without interpretation. This reference defines what makes a plan executable vs. vague.
+<plan_format>
 
-**Key insight:** PLAN.md IS the executable prompt. It contains everything Claude needs to execute the phase, including objective, context references, tasks, verification, success criteria, and output specification.
-</overview>
+Plans are executable prompts for a single intelligent reader. ~90% actionable content, ~10% structure. Pure markdown — no XML containers, no YAML frontmatter.
 
-<core_principle>
-A plan is Claude-executable when Claude can read the PLAN.md and immediately start implementing without asking clarifying questions.
+A plan is Claude-executable when Claude can read the PLAN.md and start implementing without asking clarifying questions. If Claude has to guess, interpret, or make assumptions — the plan is too vague.
 
-If Claude has to guess, interpret, or make assumptions - the task is too vague.
-</core_principle>
+## Plan Anatomy
 
-<frontmatter>
-Every PLAN.md starts with YAML frontmatter:
+Every plan follows this structure:
 
-```yaml
+```markdown
+# Plan NN: Descriptive Title
+
+**Subsystem:** auth | **Type:** tdd
+
+## Context
+Why this work exists. Approach chosen and why.
+
+## Changes
+
+### 1. Change title
+**Files:** `src/path/to/file.ts`
+
+Implementation details with inline code blocks where needed.
+
+### 2. Another change
+**Files:** `src/path/to/other.ts`, `src/path/to/related.ts`
+
+Details referencing existing utilities: "Use `comparePassword` in `src/lib/crypto.ts`".
+
+## Verification
+- `npm test -- --grep auth` passes
+- `curl -X POST localhost:3000/api/auth/login` returns 200 with Set-Cookie
+
+## Must-Haves
+- [ ] Valid credentials return 200 with Set-Cookie header
+- [ ] Invalid credentials return 401
+- [ ] Passwords compared with bcrypt, never plaintext
+```
+
+### Section Reference
+
+| Section | Purpose | Required |
+|---------|---------|----------|
+| `# Plan NN: Title` | H1 with plan number and descriptive title | Yes |
+| `**Subsystem:** X \| **Type:** Y` | Inline metadata (replaces YAML frontmatter) | Yes (type defaults to `execute`) |
+| `## Context` | Why this work exists, why this approach | Yes |
+| `## Changes` | Numbered subsections with files and implementation details | Yes |
+| `## Verification` | Bash commands and observable checks | Yes |
+| `## Must-Haves` | Markdown checklist of user-observable truths | Yes |
+
 ---
-phase: XX-name
-plan: NN
-type: execute
-wave: N                     # Execution wave (1, 2, 3...). Pre-computed at plan time.
-depends_on: []              # Plan IDs this plan requires (e.g., ["01-01"])
-files_modified: []          # Files this plan modifies
----
-```
 
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `phase` | Yes | Phase identifier (e.g., `01-foundation`) |
-| `plan` | Yes | Plan number within phase (e.g., `01`, `02`) |
-| `type` | Yes | `execute` for standard plans, `tdd` for TDD plans |
-| `wave` | Yes | Execution wave number (1, 2, 3...). Pre-computed during planning. |
-| `depends_on` | Yes | Array of plan IDs this plan requires. |
-| `files_modified` | Yes | Files this plan touches. |
-| `subsystem_hint` | No | Subsystem from config.json, assigned by planner for executor to use in SUMMARY.md |
+## Context Section Guidance
 
-**Wave is pre-computed:** `/ms:plan-phase` assigns wave numbers based on `depends_on`. `/ms:execute-phase` reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
-</frontmatter>
+The `## Context` section bridges the gap between plan-writer and executor. The executor starts with zero context beyond the plan — approach rationale compensates for this boundary.
 
-<prompt_structure>
-Every PLAN.md follows this XML structure:
+**Include:**
+- Problem being solved
+- Approach chosen and WHY (constraints, trade-offs, rejected alternatives)
+- Key dependencies or prior work referenced
+- Technical context the executor needs to make correct decisions
+
+**Exclude:**
+- Rehash of the roadmap or project vision
+- Generic background information
+- Anything not specific to this plan's implementation decisions
+
+**Example:**
 
 ```markdown
----
-phase: XX-name
-plan: NN
-type: execute
-wave: N
-depends_on: []
-files_modified: [path/to/file.ts]
+## Context
+User authentication requires JWT tokens for the API layer. Using jose library
+(not jsonwebtoken) because jsonwebtoken uses CommonJS which causes issues with
+Next.js Edge runtime. Refresh token rotation prevents token theft — a single-use
+refresh token invalidates on use and issues a new pair.
+
+Prior plan 01 created the User model with `passwordHash` field in Prisma schema.
+```
+
 ---
 
-<objective>
-[What and why]
-Purpose: [...]
-Output: [...]
-</objective>
+## Changes Section Guidance
 
-<execution_context>
-@~/.claude/mindsystem/workflows/execute-plan.md
-@~/.claude/mindsystem/templates/summary.md
-</execution_context>
+Each `### N. Title` subsection is a coherent unit of work — a file group, a logical change, or a feature slice.
 
-<context>
-@.planning/PROJECT.md
-@.planning/ROADMAP.md
-@.planning/STATE.md
-[Only if genuinely needed:]
-@.planning/phases/XX-name/XX-YY-SUMMARY.md
-@relevant/source/files.ts
-</context>
+**Structure each subsection with:**
+- `**Files:**` line listing exact paths
+- Implementation details in prose with inline code blocks for critical snippets
+- References to existing utilities with file paths: "Use `hashPassword` in `src/lib/crypto.ts`"
+- Tables for configuration, mappings, or data structures
+- Line number references when modifying existing files: "After the import block (~line 15)"
 
-<tasks>
-<task type="auto">
-  <name>Task N: [Name]</name>
-  <files>[paths]</files>
-  <action>[what to do, what to avoid and WHY]</action>
-  <verify>[command/check]</verify>
-  <done>[criteria]</done>
-</task>
+**Sizing:** Each subsection represents 15-60 minutes of Claude work. If a subsection takes multiple sessions, split it. If it's trivial, combine with a related subsection.
 
-</tasks>
-
-<verification>
-[Overall phase checks]
-</verification>
-
-<success_criteria>
-[Measurable completion]
-</success_criteria>
-
-<output>
-[SUMMARY.md specification]
-</output>
-```
-
-</prompt_structure>
-
-<task_anatomy>
-Every task has four required fields:
-
-<field name="files">
-**What it is**: Exact file paths that will be created or modified.
-
-**Good**: `src/app/api/auth/login/route.ts`, `prisma/schema.prisma`
-**Bad**: "the auth files", "relevant components"
-
-Be specific. If you don't know the file path, figure it out first.
-</field>
-
-<field name="action">
-**What it is**: Specific implementation instructions, including what to avoid and WHY.
-
-**Good**: "Create POST endpoint that accepts {email, password}, validates using bcrypt against User table, returns JWT in httpOnly cookie with 15-min expiry. Use jose library (not jsonwebtoken - CommonJS issues with Next.js Edge runtime)."
-
-**Bad**: "Add authentication", "Make login work"
-
-Include: technology choices, data structures, behavior details, pitfalls to avoid.
-</field>
-
-<field name="verify">
-**What it is**: How to prove the task is complete.
-
-**Good**:
-
-- `npm test` passes
-- `curl -X POST /api/auth/login` returns 200 with Set-Cookie header
-- Build completes without errors
-
-**Bad**: "It works", "Looks good", "User can log in"
-
-Must be executable - a command, a test, an observable behavior.
-</field>
-
-<field name="done">
-**What it is**: Acceptance criteria - the measurable state of completion.
-
-**Good**: "Valid credentials return 200 + JWT cookie, invalid credentials return 401"
-
-**Bad**: "Authentication is complete"
-
-Should be testable without subjective judgment.
-</field>
-</task_anatomy>
-
-<task_types>
-Tasks have a `type` attribute that determines how they execute:
-
-<type name="auto">
-**Default task type** - Claude executes autonomously.
-
-**Structure:**
-
-```xml
-<task type="auto">
-  <name>Task 3: Create login endpoint with JWT</name>
-  <files>src/app/api/auth/login/route.ts</files>
-  <action>POST endpoint accepting {email, password}. Query User by email, compare password with bcrypt. On match, create JWT with jose library, set as httpOnly cookie (15-min expiry). Return 200. On mismatch, return 401.</action>
-  <verify>curl -X POST localhost:3000/api/auth/login returns 200 with Set-Cookie header</verify>
-  <done>Valid credentials → 200 + cookie. Invalid → 401.</done>
-</task>
-```
-
-Use for: Everything Claude can do independently (code, tests, builds, file operations).
-</type>
-
-**Golden rule:** If Claude CAN automate it, Claude MUST automate it. All tasks use `type="auto"`.
-
-**Decisions:** Resolve during planning via AskUserQuestion, not during execution. For purely technical choices, make the decision and document it in the plan's objective.
-</task_types>
-
-<tdd_plans>
-**TDD work uses dedicated plans.**
-
-TDD features require 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than standard tasks and would consume 50-60% of context if embedded in a multi-task plan.
-
-**When to create a TDD plan:**
-- Business logic with defined inputs/outputs
-- API endpoints with request/response contracts
-- Data transformations and parsing
-- Validation rules
-- Algorithms with testable behavior
-
-**When to use standard plans (skip TDD):**
-- UI layout and styling
-- Configuration changes
-- Glue code connecting existing components
-- One-off scripts
-
-**Heuristic:** Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
-→ Yes: Create a TDD plan (one feature per plan)
-→ No: Use standard plan, add tests after if needed
-
-See `./tdd.md` for TDD plan structure and execution guidance.
-</tdd_plans>
-
-<context_references>
-Use @file references to load context for the prompt:
+**Example:**
 
 ```markdown
-<context>
-@.planning/PROJECT.md           # Project vision
-@.planning/ROADMAP.md           # Phase structure
-@.planning/STATE.md             # Current position
+### 2. Add password comparison utility
+**Files:** `src/lib/crypto.ts`
 
-# Only include prior SUMMARY if genuinely needed:
-# - This plan imports types from prior plan
-# - Prior plan made decision affecting this plan
-# Independent plans need NO prior SUMMARY references.
+Export `comparePassword(plain: string, hash: string): Promise<boolean>` using
+bcrypt.compare. Import `bcrypt` from the existing dependency in package.json.
 
-@src/lib/db.ts                  # Existing database setup
-@src/types/user.ts              # Existing type definitions
-</context>
+Follow the pattern of `hashPassword` already in this file (~line 8).
 ```
 
-Reference files that Claude needs to understand before implementing.
+---
 
-**Anti-pattern:** Reflexive chaining (02 refs 01, 03 refs 02). Only reference what you actually need.
-</context_references>
+## Inline Metadata Specification
 
-<verification_section>
-Overall phase verification (beyond individual task verification):
+The metadata line sits directly below the H1 title:
 
 ```markdown
-<verification>
-Before declaring phase complete:
-- [ ] `npm run build` succeeds without errors
-- [ ] `npm test` passes all tests
-- [ ] No TypeScript errors
-- [ ] Feature works end-to-end manually
-</verification>
+# Plan 03: Create login endpoint with JWT
+
+**Subsystem:** auth | **Type:** tdd
 ```
 
-</verification_section>
+### Subsystem
 
-<success_criteria_section>
-Measurable criteria for phase completion:
+Matches vocabulary from the project's `config.json`. Used by the executor when generating SUMMARY.md after plan completion.
+
+### Type
+
+| Value | Behavior |
+|-------|----------|
+| `execute` | Default. Standard plan execution. Can be omitted. |
+| `tdd` | Triggers lazy-load of `tdd.md` reference during execution. Plan uses RED/GREEN/REFACTOR structure. |
+
+When `**Type:**` is omitted, the plan defaults to `execute`.
+
+---
+
+## Must-Haves Specification
+
+The `## Must-Haves` section is a markdown checklist consumed by ms-verifier. Each item is a user-observable truth — not an implementation detail.
+
+**Good (observable truths):**
+- `- [ ] Valid credentials return 200 with Set-Cookie header`
+- `- [ ] Passwords are hashed, never stored plaintext`
+- `- [ ] Unauthenticated requests to /api/protected return 401`
+
+**Bad (implementation details):**
+- `- [ ] bcrypt library installed`
+- `- [ ] JWT_SECRET in .env file`
+- `- [ ] Auth middleware created`
+
+The verifier derives artifacts and key_links from the `## Changes` section. Must-haves focus on what the user can observe or verify.
+
+---
+
+## EXECUTION-ORDER.md Specification
+
+Execution order lives in a single `EXECUTION-ORDER.md` file alongside the plans. Individual plans carry no wave numbers or dependency declarations.
+
+**Format:**
 
 ```markdown
-<success_criteria>
+# Execution Order
 
-- All tasks completed
-- All verification checks pass
-- No errors or warnings introduced
-- JWT auth flow works end-to-end
-- Protected routes redirect unauthenticated users
-  </success_criteria>
+## Wave 1 (parallel)
+- 01-PLAN.md — Database schema and Prisma client
+- 02-PLAN.md — Environment configuration
+
+## Wave 2 (parallel)
+- 03-PLAN.md — Auth endpoints (depends on schema from 01)
+- 04-PLAN.md — User profile CRUD (depends on schema from 01)
+
+## Wave 3
+- 05-PLAN.md — Protected route middleware (depends on auth from 03)
 ```
 
-</success_criteria_section>
+**Rules:**
+- Generated by plan-writer alongside plans
+- Read by execute-phase orchestrator for wave grouping
+- Plans within a wave execute in parallel
+- Single source of truth for execution structure
+- Human-readable, easy to override by editing directly
 
-<output_section>
-Specify the SUMMARY.md structure:
+---
+
+## Cross-Reference Table
+
+| Question | Answer |
+|----------|--------|
+| How does the verifier find must-haves? | Reads `## Must-Haves` section |
+| How does the executor know the subsystem? | Reads inline metadata (`**Subsystem:**`) |
+| How does the plan-checker validate plans? | Reads EXECUTION-ORDER.md + plan structure |
+| What triggers TDD lazy-loading? | `**Type:** tdd` in inline metadata |
+| How does the executor know why an approach was chosen? | Reads `## Context` section |
+| How does the executor find existing utilities? | Reads `**Files:**` lines and inline references in `## Changes` |
+
+---
+
+## What Plans Do NOT Contain
+
+- **No YAML frontmatter** — metadata is inline markdown
+- **No XML containers** — pure markdown throughout
+- **No wave numbers or dependency declarations** — centralized in EXECUTION-ORDER.md
+- **No file ownership lists** — centralized in EXECUTION-ORDER.md
+- **No `<output>` or `<execution_context>` sections** — executor handles these inline
+- **No summary template references** — executor loads templates as needed
+
+---
+
+## Examples
+
+### Simple Plan: CRUD Endpoint
 
 ```markdown
-<output>
-After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
-</output>
+# Plan 01: Create user profile CRUD endpoints
+
+**Subsystem:** api
+
+## Context
+The API needs basic user profile management. Using Next.js route handlers with
+Prisma ORM. The User model already exists in the schema (created during project
+init).
+
+## Changes
+
+### 1. Create GET /api/users/[id] endpoint
+**Files:** `src/app/api/users/[id]/route.ts`
+
+Route handler accepting `id` param. Query User by ID with Prisma. Return 200
+with user JSON (exclude passwordHash). Return 404 if not found.
+
+### 2. Create PATCH /api/users/[id] endpoint
+**Files:** `src/app/api/users/[id]/route.ts`
+
+Accept JSON body with optional `name` and `email` fields. Validate email format
+with regex. Update User with Prisma. Return 200 with updated user. Return 404
+if not found, 400 if validation fails.
+
+## Verification
+- `curl localhost:3000/api/users/1` returns 200 with user JSON
+- `curl -X PATCH localhost:3000/api/users/1 -d '{"name":"New"}' -H 'Content-Type: application/json'` returns 200
+- `curl localhost:3000/api/users/999` returns 404
+
+## Must-Haves
+- [ ] GET /api/users/:id returns user profile without password hash
+- [ ] PATCH /api/users/:id updates name and email
+- [ ] Invalid user ID returns 404
+- [ ] Invalid email format returns 400
 ```
 
-</output_section>
+### Complex Plan: Auth with Approach Rationale
 
-<specificity_levels>
-<too_vague>
+```markdown
+# Plan 03: Create login endpoint with JWT
 
-```xml
-<task type="auto">
-  <name>Task 1: Add authentication</name>
-  <files>???</files>
-  <action>Implement auth</action>
-  <verify>???</verify>
-  <done>Users can authenticate</done>
-</task>
+**Subsystem:** auth | **Type:** execute
+
+## Context
+User authentication for the API layer. Using jose library instead of
+jsonwebtoken — jsonwebtoken uses CommonJS which causes issues with Next.js Edge
+runtime. Tokens use httpOnly cookies (not Authorization headers) to prevent XSS
+token theft.
+
+Refresh token rotation: each refresh token is single-use. On refresh, the old
+token is invalidated and a new access/refresh pair is issued. This limits the
+window of a stolen refresh token.
+
+Prior plan 01 created the User model with `passwordHash` field in Prisma schema.
+
+## Changes
+
+### 1. Create POST /api/auth/login endpoint
+**Files:** `src/app/api/auth/login/route.ts`
+
+POST endpoint accepting `{email, password}`. Query User by email with Prisma.
+Compare password using `comparePassword` in `src/lib/crypto.ts` (created in
+plan 02). On match, create access JWT (15-min expiry) and refresh JWT (7-day
+expiry) with jose. Set both as httpOnly cookies. Return 200 with user profile.
+On mismatch, return 401 with generic "Invalid credentials" message.
+
+### 2. Create POST /api/auth/refresh endpoint
+**Files:** `src/app/api/auth/refresh/route.ts`
+
+Read refresh token from cookie. Verify with jose. Look up token in
+RefreshToken table — if not found or already used, return 401. Mark current
+token as used. Issue new access + refresh pair. Set cookies. Return 200.
+
+### 3. Add RefreshToken model to schema
+**Files:** `prisma/schema.prisma`
+
+Add RefreshToken model with fields: `id`, `token` (unique), `userId` (relation
+to User), `used` (boolean, default false), `expiresAt` (DateTime), `createdAt`.
+Run `npx prisma db push` after schema change.
+
+## Verification
+- `curl -X POST localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{"email":"test@test.com","password":"test123"}'` returns 200 with Set-Cookie headers
+- Login with wrong password returns 401
+- Refresh endpoint with valid cookie returns new tokens
+- Refresh endpoint with used token returns 401
+
+## Must-Haves
+- [ ] Valid credentials return 200 with httpOnly cookie containing JWT
+- [ ] Invalid credentials return 401 with generic error message
+- [ ] Refresh token rotation invalidates used tokens
+- [ ] Passwords compared with bcrypt, never plaintext
+```
+
+### TDD Plan: Pure Markdown RED/GREEN/REFACTOR
+
+```markdown
+# Plan 04: Email validation utility
+
+**Subsystem:** validation | **Type:** tdd
+
+## Context
+Multiple endpoints need email validation (registration, profile update, invite).
+Centralizing in a utility prevents inconsistent validation rules. Using TDD
+because the function has clear inputs/outputs and edge cases that benefit from
+test-first design.
+
+## Changes
+
+### 1. RED — Write failing tests
+**Files:** `src/lib/__tests__/validate-email.test.ts`
+
+Test cases:
+- Valid: `user@example.com`, `name+tag@domain.co.uk` → returns true
+- Invalid: `@domain.com`, `user@`, `user@.com`, empty string, `null` → returns false
+- Edge: very long local part (>64 chars), very long domain (>255 chars) → returns false
+
+Import `validateEmail` from `src/lib/validate-email.ts` (does not exist yet).
+Run tests — all must fail with import/function error.
+
+### 2. GREEN — Implement minimal validation
+**Files:** `src/lib/validate-email.ts`
+
+Export `validateEmail(email: string): boolean`. Use regex matching RFC 5322
+simplified pattern. Handle null/undefined input by returning false. No
+optimization — just make tests pass.
+
+### 3. REFACTOR — Extract regex constant
+**Files:** `src/lib/validate-email.ts`
+
+Extract regex to `EMAIL_REGEX` constant at module level. Add JSDoc with
+examples. Run tests — all must still pass. Only commit if changes improve
+readability.
+
+## Verification
+- `npm test -- --grep "validate-email"` passes all cases
+- Import works from other modules without errors
+
+## Must-Haves
+- [ ] Valid email addresses return true
+- [ ] Invalid email addresses return false
+- [ ] Edge cases (length limits, null input) handled correctly
+```
+
+---
+
+## Specificity Guidelines
+
+### Too Vague
+
+```markdown
+### 1. Add authentication
+**Files:** ???
+
+Implement auth.
 ```
 
 Claude: "How? What type? What library? Where?"
-</too_vague>
 
-<just_right>
+### Just Right
 
-```xml
-<task type="auto">
-  <name>Task 1: Create login endpoint with JWT</name>
-  <files>src/app/api/auth/login/route.ts</files>
-  <action>POST endpoint accepting {email, password}. Query User by email, compare password with bcrypt. On match, create JWT with jose library, set as httpOnly cookie (15-min expiry). Return 200. On mismatch, return 401. Use jose instead of jsonwebtoken (CommonJS issues with Edge).</action>
-  <verify>curl -X POST localhost:3000/api/auth/login -H "Content-Type: application/json" -d '{"email":"test@test.com","password":"test123"}' returns 200 with Set-Cookie header containing JWT</verify>
-  <done>Valid credentials → 200 + cookie. Invalid → 401. Missing fields → 400.</done>
-</task>
+```markdown
+### 1. Create login endpoint with JWT
+**Files:** `src/app/api/auth/login/route.ts`
+
+POST endpoint accepting {email, password}. Query User by email, compare
+password with bcrypt. On match, create JWT with jose library, set as httpOnly
+cookie (15-min expiry). Return 200. On mismatch, return 401. Use jose instead
+of jsonwebtoken (CommonJS issues with Edge).
 ```
 
 Claude can implement this immediately.
-</just_right>
 
-<note_on_tdd>
-**TDD candidates get dedicated plans.**
+### Too Detailed
 
-If email validation warrants TDD, create a TDD plan for it. See `./tdd.md` for TDD plan structure.
-</note_on_tdd>
+Writing the actual code in the plan. Trust Claude to implement from clear instructions — specify WHAT and WHY, not the exact lines of code.
 
-<too_detailed>
-Writing the actual code in the plan. Trust Claude to implement from clear instructions.
-</too_detailed>
-</specificity_levels>
+---
 
-<anti_patterns>
-<vague_actions>
+## Anti-Patterns
+
+### Vague Actions
 
 - "Set up the infrastructure"
 - "Handle edge cases"
@@ -311,9 +397,8 @@ Writing the actual code in the plan. Trust Claude to implement from clear instru
 - "Add proper error handling"
 
 These require Claude to decide WHAT to do. Specify it.
-</vague_actions>
 
-<unverifiable_completion>
+### Unverifiable Completion
 
 - "It works correctly"
 - "User experience is good"
@@ -321,27 +406,21 @@ These require Claude to decide WHAT to do. Specify it.
 - "Tests pass" (which tests? do they exist?)
 
 These require subjective judgment. Make it objective.
-</unverifiable_completion>
 
-<missing_context>
+### Missing Context
 
 - "Use the standard approach"
 - "Follow best practices"
 - "Like the other endpoints"
 
-Claude doesn't know your standards. Be explicit.
-</missing_context>
-</anti_patterns>
+Claude has no memory of your standards across contexts. Be explicit.
 
-<sizing_tasks>
-Good task size: 15-60 minutes of Claude work.
+### Implementation-Detail Must-Haves
 
-**Too small**: "Add import statement for bcrypt" (combine with related task)
-**Just right**: "Create login endpoint with JWT validation" (focused, specific)
-**Too big**: "Implement full authentication system" (split into multiple plans)
+- "bcrypt library installed"
+- "Middleware file created"
+- "ENV variable added"
 
-If a task takes multiple sessions, break it down.
-If a task is trivial, combine with related tasks.
+Must-haves are user-observable truths. The verifier checks outcomes, not internals.
 
-**Note on scope:** If a phase has >3 tasks or spans multiple subsystems, split into multiple plans using the naming convention `{phase}-{plan}-PLAN.md`. See `./scope-estimation.md` for guidance.
-</sizing_tasks>
+</plan_format>
