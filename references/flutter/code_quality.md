@@ -18,6 +18,7 @@ Read files, check against rules below. Output concise but comprehensive—sacrif
 - Callbacks needing 4+ local scope params → define inside `build()`: `void handleSubmit() { ... }` not `_handleSubmit(ref, controller, user, state)`
 - Simple child widgets → named local variables: `final bar = Container(...);` not `_buildBar()`
 - Single-line guard clauses: `if (data == null) return const SizedBox(width: _kBarWidth);`
+- `HookWidget` over `StatefulWidget` when only managing animation controllers or simple state: `useAnimationController` replaces manual `State` lifecycle
 
 ## State & Providers
 
@@ -71,6 +72,7 @@ Read files, check against rules below. Output concise but comprehensive—sacrif
 - `useMemoized` for derived values: `useMemoized(() => items.any((e) => e.isExpansion), [items])`
 - `useIsMounted()` guard for async state updates
 - Disposable resources in `useRef`: `final controllerRef = useRef<Controller?>(null);`
+- `useAnimationController` for press/tap animations: replaces `StatefulWidget` + manual `AnimationController` lifecycle
 
 ## Model & Data
 
@@ -80,6 +82,7 @@ Read files, check against rules below. Output concise but comprehensive—sacrif
 - Structured types over primitives: `Address` not `street: String, city: String`
 - Nullable Function in copyWith: `Address? Function()? address`
 - Suffix data classes: `UserProfileData`
+- Value equality via `Equatable`: `extends Equatable` + `List<Object?> get props => [id]` not manual `operator ==`/`hashCode`
 
 ## Widget API
 
@@ -93,6 +96,9 @@ Read files, check against rules below. Output concise but comprehensive—sacrif
 - Single widget with optional animation: `Animation<double>?` with `animation?.value ?? 1.0`
 - `Listenable.merge()` over nested AnimatedBuilders
 - Modal/sheet widgets with static `show`: `static Future<void> show(BuildContext context) => showAppBottomSheet(builder: (_) => MyModal())`
+- Press feedback: `ScaleTransition` + `useAnimationController` over `AnimatedScale` + `setState(_isPressed)` — avoids gesture arena delays in scroll views
+- Auto-reverse pattern: `addStatusListener((s) { if (s == AnimationStatus.completed) ctrl.reverse(); })` for one-shot press effects
+- `HitTestBehavior.opaque` on `GestureDetector` for cards with transparent regions
 
 ## Theme & Styling
 
@@ -105,6 +111,7 @@ Read files, check against rules below. Output concise but comprehensive—sacrif
 
 - Private extensions for file-local computations: `extension on UserEntity { ... }`
 - Styling methods on type extensions in same file: `extension on ButtonStyle { BoxDecoration buildDecoration(context) => ... }`
+- Display extensions by scope: multi-widget → model file; single-widget → `extension _FooDisplay` private in consuming widget file
 
 ## Project Structure
 
@@ -134,6 +141,10 @@ Read files, check against rules below. Output concise but comprehensive—sacrif
 - Generic `expansionVisibilityProvider` names
 - `.asData?.value` (use `.value`)
 - Separate `isPremium` boolean alongside `multiplier` data
+- `AnimatedScale` + `onTapDown`/`onTapUp`/`onTapCancel` for press feedback in scrollable lists (use `ScaleTransition` + `useAnimationController`)
+- `StatefulWidget` for animation-only state (use `HookWidget` + `useAnimationController`)
+- Manual `operator ==` / `hashCode` overrides (use `Equatable` with `props`)
+- `extensions/` subdirectory for display logic (co-locate with model or widget instead)
 
 ## Output Format
 
@@ -152,3 +163,4 @@ lib/home/home_screen.dart:89 - hardcoded Color(0xFF...) → context.color.*
 ```
 
 State issue + location. Skip explanation unless fix non-obvious. No preamble.
+
