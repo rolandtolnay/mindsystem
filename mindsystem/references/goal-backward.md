@@ -117,31 +117,16 @@ Key links get extra verification attention. These are where stubs and placeholde
 </the_process>
 
 <output_format>
-The derive_must_haves step produces a structured list for PLAN.md frontmatter:
+The derive_must_haves step produces a markdown checklist for the plan's ## Must-Haves section:
 
-```yaml
-must_haves:
-  truths:
-    - "User can see existing messages"
-    - "User can send a message"
-    - "Messages persist across refresh"
-  artifacts:
-    - path: "src/components/Chat.tsx"
-      provides: "Message list rendering"
-    - path: "src/app/api/chat/route.ts"
-      provides: "Message CRUD operations"
-    - path: "prisma/schema.prisma"
-      provides: "Message model"
-  key_links:
-    - from: "Chat.tsx"
-      to: "api/chat"
-      via: "fetch in useEffect"
-    - from: "api/chat POST"
-      to: "database"
-      via: "prisma.message.create"
+```markdown
+## Must-Haves
+- [ ] User can see existing messages
+- [ ] User can send a message
+- [ ] Messages persist across refresh
 ```
 
-This structure is machine-readable for verification after execution.
+Each item is a user-observable truth. The verifier derives artifacts and key_links from the plan's ## Changes section.
 </output_format>
 
 <examples>
@@ -261,7 +246,7 @@ Key links are verification priorities. Without them, you check everything equall
 
 The `derive_must_haves` step runs after gathering context, before breaking into tasks.
 
-Output: `must_haves` structure written to PLAN.md frontmatter.
+Output: must-haves written to the plan's ## Must-Haves section.
 
 Tasks are then designed to CREATE the artifacts and ESTABLISH the wiring.
 
@@ -269,7 +254,7 @@ Tasks are then designed to CREATE the artifacts and ESTABLISH the wiring.
 
 The `verify_phase_goal` step runs after all plans execute, before updating roadmap.
 
-Input: `must_haves` from PLAN.md frontmatter (or derived from goal if missing).
+Input: ## Must-Haves from plan markdown (or derived from goal if missing).
 
 Process: Check each truth against codebase, verify artifacts exist and aren't stubs, trace key links.
 

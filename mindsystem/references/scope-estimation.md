@@ -32,10 +32,10 @@ Why 50% not 80%?
 | Task Complexity | Tasks/Plan | Context/Task | Total |
 |-----------------|------------|--------------|-------|
 | Simple (CRUD, config) | 3 | ~10-15% | ~30-45% |
-| Complex (auth, payments) | 2 | ~20-30% | ~40-50% |
+| Complex (auth, payments) | 2-3 | ~15-25% | ~40-50% |
 | Very complex (migrations, refactors) | 1-2 | ~30-40% | ~30-50% |
 
-**When in doubt: Default to 2 tasks.** Better to have an extra plan than degraded quality.
+**Default to 3 tasks for simple-medium work, 2 for complex.** Executor overhead reduction creates headroom for the third task.
 </task_rule>
 
 <tdd_plans>
