@@ -126,7 +126,7 @@ Matches vocabulary from the project's `config.json`. Used by the executor when g
 | Value | Behavior |
 |-------|----------|
 | `execute` | Default. Standard plan execution. Can be omitted. |
-| `tdd` | Triggers lazy-load of `tdd.md` reference during execution. Plan uses RED/GREEN/REFACTOR structure. |
+| `tdd` | Triggers lazy-load of `tdd-execution.md` reference during execution. Plan uses RED/GREEN/REFACTOR structure. |
 
 When `**Type:**` is omitted, the plan defaults to `execute`.
 

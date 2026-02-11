@@ -323,7 +323,7 @@ Task(
 Phase directory: {phase_dir}
 Phase goal: {goal from ROADMAP.md}
 
-Check must_haves against actual codebase. Create VERIFICATION.md.
+Check Must-Haves against actual codebase. Create VERIFICATION.md.
 Verify what actually exists in the code.",
   subagent_type="ms-verifier"
 )
@@ -452,9 +452,43 @@ Update ROADMAP.md to reflect phase completion:
 
 Commit phase completion (roadmap, state, verification):
 ```bash
-git add .planning/ROADMAP.md .planning/STATE.md .planning/phases/{phase_dir}/*-VERIFICATION.md
+git add .planning/ROADMAP.md .planning/STATE.md .planning/phases/{phase_dir}/*-VERIFICATION.md .planning/phases/{phase_dir}/*-SUMMARY.md
 git add .planning/REQUIREMENTS.md  # if updated
 git commit -m "docs(phase-{X}): complete phase execution"
+```
+</step>
+
+<step name="update_codebase_map">
+**If `.planning/codebase/` exists:**
+
+Check what changed during this phase:
+
+```bash
+# Get all source changes from this phase's commits
+PHASE_COMMITS=$(git log --oneline --grep="({phase_number}-" --format="%H" | head -20)
+if [ -n "$PHASE_COMMITS" ]; then
+  FIRST=$(echo "$PHASE_COMMITS" | tail -1)
+  git diff --name-only ${FIRST}^..HEAD 2>/dev/null | grep -v "^\.planning/"
+fi
+```
+
+**Update only if structural changes occurred:**
+
+| Change Detected | Update Action |
+|-----------------|---------------|
+| New directory in src/ | STRUCTURE.md: Add to directory layout |
+| package.json deps changed | STACK.md: Add/remove from dependencies list |
+| New file pattern (e.g., first .test.ts) | CONVENTIONS.md: Note new pattern |
+| New external API client | INTEGRATIONS.md: Add service entry |
+| Config file added/changed | STACK.md: Update configuration section |
+
+**Skip update if only:** Code changes within existing files, bug fixes, content changes.
+
+Make single targeted edits — add a bullet, update a path, remove a stale entry.
+
+```bash
+git add .planning/codebase/*.md
+git commit -m "docs: update codebase map after phase {X}"
 ```
 </step>
 
@@ -491,7 +525,7 @@ Each subagent: Fresh 200k context
 - Loads full execute-plan workflow
 - Loads templates, references
 - Executes plan with full capacity
-- Creates SUMMARY, commits
+- Creates SUMMARY (orchestrator commits)
 
 **No polling.** Task tool blocks until completion. No TaskOutput loops.
 

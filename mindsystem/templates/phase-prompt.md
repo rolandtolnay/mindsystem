@@ -89,7 +89,7 @@ Rules:
 
 ## External Services
 
-When a plan introduces external services requiring human configuration, describe them in the plan's ## Context section. The executor generates `{phase}-USER-SETUP.md` with a checklist for the user.
+When a plan introduces external services requiring human configuration, describe them in the plan's ## Context section. The user handles external service setup (account creation, secret retrieval) based on plan context.
 
 **The automation-first rule:** External service notes contain ONLY what Claude literally cannot do:
 - Account creation (requires human signup)
@@ -97,8 +97,6 @@ When a plan introduces external services requiring human configuration, describe
 - Dashboard configuration (requires human in browser)
 
 **NOT included:** Package installs, code changes, file creation, CLI commands Claude can run.
-
-See `~/.claude/mindsystem/templates/user-setup.md` for full schema and examples.
 
 ---
 
