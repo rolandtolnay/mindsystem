@@ -132,7 +132,7 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 **Success criteria:**
 - 2-5 observable behaviors per phase (from user's perspective)
 - Cross-checked against requirements during roadmap creation
-- Flow downstream to `must_haves` in plan-phase
+- Flow downstream to `## Must-Haves` in plan-phase
 - Verified by verify-phase after execution
 - Format: "User can [action]" or "[Thing] works/exists"
 

@@ -241,7 +241,7 @@ Present: Factual statements, verification results, direct answers
 
 **DON'T:** `<section>`, `<item>`, `<content>`
 
-**DO:** Semantic purpose tags: `<objective>`, `<verification>`, `<action>`
+**DO:** Semantic purpose tags: `<objective>`, `<verification>`, `<process>`
 
 ### Vague Plans (Banned)
 

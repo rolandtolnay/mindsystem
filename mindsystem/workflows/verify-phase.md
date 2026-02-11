@@ -42,7 +42,7 @@ grep -E "^| ${PHASE_NUM}" .planning/REQUIREMENTS.md 2>/dev/null
 # All SUMMARY files (claims to verify)
 ls "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
 
-# All PLAN files (for must_haves in frontmatter)
+# All PLAN files (for Must-Haves in plan markdown)
 ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 ```
 
@@ -54,32 +54,28 @@ ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 <step name="establish_must_haves">
 **Determine what must be verified.**
 
-**Option A: Must-haves in PLAN frontmatter**
+**Option A: Must-haves in plan markdown**
 
-Check if any PLAN.md has `must_haves` in frontmatter:
+Check if any PLAN.md has a `## Must-Haves` section:
 
 ```bash
-grep -l "must_haves:" "$PHASE_DIR"/*-PLAN.md 2>/dev/null
+grep -l "## Must-Haves" "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 ```
 
-If found, extract and use:
-```yaml
-must_haves:
-  truths:
-    - "User can see existing messages"
-    - "User can send a message"
-  artifacts:
-    - path: "src/components/Chat.tsx"
-      provides: "Message list rendering"
-  key_links:
-    - from: "Chat.tsx"
-      to: "api/chat"
-      via: "fetch in useEffect"
+If found, extract checklist items. Must-haves are markdown checklist entries:
+
+```markdown
+## Must-Haves
+- [ ] User can see existing messages
+- [ ] User can send a message
+- [ ] Messages persist after refresh
 ```
+
+Each `- [ ]` item is an observable truth to verify. Derive artifacts from `**Files:**` lines in `## Changes` sections and key links from the implementation details.
 
 **Option B: Derive from phase goal**
 
-If no must_haves in frontmatter, derive using goal-backward process:
+If no `## Must-Haves` section found in plans, derive using goal-backward process:
 
 1. **State the goal:** Take phase goal from ROADMAP.md
 
@@ -370,7 +366,7 @@ verify_state_render_link() {
 
 ### Aggregate key link results
 
-For each key link in must_haves:
+For each key link derived from plan `## Changes` and `## Must-Haves` sections:
 - Run appropriate verification function
 - Record status and evidence
 - WIRED / PARTIAL / STUB / NOT_WIRED
@@ -615,7 +611,7 @@ The orchestrator will:
 </process>
 
 <success_criteria>
-- [ ] Must-haves established (from frontmatter or derived)
+- [ ] Must-haves established (from plan ## Must-Haves section or derived)
 - [ ] All truths verified with status and evidence
 - [ ] All artifacts checked at all three levels
 - [ ] All key links verified

@@ -120,7 +120,7 @@ grep -l "status: diagnosed" "$PHASE_DIR"/*-UAT.md 2>/dev/null
 
 **2. Parse gaps:**
 
-**From VERIFICATION.md** (if exists): Parse `gaps:` from YAML frontmatter.
+**From VERIFICATION.md** (if exists): Parse gaps from `## Gaps Summary` section (markdown format with `### Critical Gaps` and `### Non-Critical Gaps` subsections).
 
 **From UAT.md** (if exists with status: diagnosed): Parse gaps from `## Gaps` section (YAML format).
 

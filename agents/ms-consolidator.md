@@ -65,7 +65,7 @@ Look for these patterns in source files:
 - "limitation: X"
 
 **Rationale markers:**
-- `<action>` tags in PLANs often contain "because" or "due to"
+- Implementation details in plan `## Changes` subsections often contain "because" or "due to"
 - "why:" sections
 - "rationale:" sections
 - Comparison tables with "Recommendation"
@@ -167,9 +167,9 @@ For each source file found:
 4. Note the source file and phase number
 
 **For PLAN.md files:**
-- Extract from `<action>` tags, especially text after "because", "due to", "since"
-- Look for explicit rationale sections
-- Extract from task names that indicate choices ("Use X for Y")
+- Extract from `### N.` subsections under `## Changes`, especially text after "because", "due to", "since"
+- Extract approach rationale from `## Context` section
+- Extract from change descriptions that indicate choices ("Use X for Y")
 
 **For CONTEXT.md files:**
 - Extract from `<decisions>` section (user-locked choices)

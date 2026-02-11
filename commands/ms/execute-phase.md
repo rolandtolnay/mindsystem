@@ -77,7 +77,7 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
 
 7. **Verify phase goal**
    - Spawn `ms-verifier` subagent with phase directory and goal
-   - Verifier checks must_haves against actual codebase (not SUMMARY claims)
+   - Verifier checks Must-Haves against actual codebase (not SUMMARY claims)
    - Creates VERIFICATION.md with detailed report
    - Route by status:
      - `passed` → continue to step 8
@@ -228,7 +228,7 @@ After all plans in phase complete:
 - [ ] All incomplete plans in phase executed
 - [ ] Each plan has SUMMARY.md
 - [ ] Code review completed (or skipped if config says "skip")
-- [ ] Phase goal verified (must_haves checked against codebase)
+- [ ] Phase goal verified (Must-Haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] Patch file generated OR explicitly skipped with message
 - [ ] STATE.md reflects phase completion

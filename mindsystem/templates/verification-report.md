@@ -147,7 +147,7 @@ None — all verifiable items checked programmatically.
 ## Verification Metadata
 
 **Verification approach:** Goal-backward (derived from phase goal)
-**Must-haves source:** {PLAN.md frontmatter | derived from ROADMAP.md goal}
+**Must-haves source:** {PLAN.md ## Must-Haves section | derived from ROADMAP.md goal}
 **Automated checks:** {N} passed, {M} failed
 **Human checks required:** {N}
 **Total verification time:** {duration}
@@ -311,7 +311,7 @@ None needed until automated gaps are fixed.
 ## Verification Metadata
 
 **Verification approach:** Goal-backward (derived from phase goal)
-**Must-haves source:** 03-01-PLAN.md frontmatter
+**Must-haves source:** 03-01-PLAN.md ## Must-Haves section
 **Automated checks:** 2 passed, 8 failed
 **Human checks required:** 0 (blocked by automated failures)
 **Total verification time:** 2 min

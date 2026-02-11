@@ -254,7 +254,7 @@ completed: YYYY-MM-DD
 ---
 ```
 
-**Subsystem:** Use `subsystem_hint` from plan metadata if present. Otherwise select from `jq -r '.subsystems[]' .planning/config.json`. If novel, append to config.json and log in decisions.
+**Subsystem:** Use inline `**Subsystem:**` metadata from plan header if present. Otherwise select from `jq -r '.subsystems[]' .planning/config.json`. If novel, append to config.json and log in decisions.
 
 **Mock hints:** Reflect on what you built. If UI with transient states (loading, animations, async transitions) or external data dependencies, populate accordingly. If purely backend or no async UI, write `mock_hints: none  # reason`. Always populate.
 

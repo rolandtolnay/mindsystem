@@ -18,11 +18,11 @@ This spawns ms-plan-checker to analyze your PLAN.md files against the phase goal
 
 <what_it_checks>
 1. **Requirement Coverage** — Does every phase requirement have tasks addressing it?
-2. **Task Completeness** — Does every task have files, action, verify, done?
+2. **Task Completeness** — Does every change have Files, implementation details, and verification?
 3. **Dependency Correctness** — Are plan dependencies valid and acyclic?
 4. **Key Links Planned** — Are artifacts wired together, not just created in isolation?
 5. **Scope Sanity** — Will plans complete within context budget (2-3 tasks per plan)?
-6. **Verification Derivation** — Are must_haves user-observable, not implementation-focused?
+6. **Verification Derivation** — Are Must-Haves user-observable, not implementation-focused?
 7. **Context Compliance** — Do plans honor decisions from CONTEXT.md?
 </what_it_checks>
 
@@ -60,7 +60,7 @@ Count plans and tasks:
 ```bash
 for plan in "$PHASE_DIR"/*-PLAN.md; do
   echo "=== $(basename $plan) ==="
-  grep -c "<task" "$plan" 2>/dev/null || echo "0 tasks"
+  grep -c "^### " "$plan" 2>/dev/null || echo "0 changes"
 done
 ```
 </step>

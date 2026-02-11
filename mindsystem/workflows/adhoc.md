@@ -132,33 +132,28 @@ plan_file=".planning/adhoc/${timestamp}-${slug}-PLAN.md"
 Create minimal PLAN.md:
 
 ```markdown
----
-type: adhoc
-description: [user description]
-created: [ISO timestamp]
-related_phase: [current phase from STATE.md, or "none"]
----
+# Adhoc: [User's description]
 
-<objective>
-[User's description of what needs to be done]
-</objective>
+**Subsystem:** [subsystem or "general"] | **Type:** execute
 
-<tasks>
+## Context
+[User's description of what needs to be done and why]
 
-<task type="auto">
-  <name>Task 1: [Action-oriented name]</name>
-  <files>[file paths]</files>
-  <action>[What to do, what to avoid and WHY]</action>
-  <verify>[Command or check to prove completion]</verify>
-</task>
+## Changes
 
-[Task 2 if needed, same structure]
+### 1. [Action-oriented name]
+**Files:** `[file paths]`
 
-</tasks>
+[What to do, what to avoid and WHY]
 
-<verification>
-[How to verify the work is complete]
-</verification>
+[### 2. if needed, same structure]
+
+## Verification
+- [How to verify the work is complete]
+
+## Must-Haves
+- [ ] [Observable outcome 1]
+- [ ] [Observable outcome 2]
 ```
 
 Write to file:
