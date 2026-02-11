@@ -3,55 +3,71 @@
 <plan_anatomy>
 ## Plan Anatomy
 
-```yaml
----
-phase: XX-name
-plan: NN
-type: execute        # or "tdd"
-wave: N              # Pre-computed execution wave
-depends_on: []       # Prior plans this requires
-files_modified: []   # Exclusive file ownership
----
+Plans use pure markdown — no YAML frontmatter, no XML containers.
+
+**Required sections:**
+
+```markdown
+# Plan NN: Action-oriented title
+
+**Subsystem:** name | **Type:** execute (or tdd)
+
+## Context
+What and why — problem being solved, approach chosen, key constraints.
+
+## Changes
+
+### 1. Change name
+**Files:** `exact/file/paths.ts`
+
+Specific implementation instructions. What to do, what to avoid and WHY.
+Include technology choices, data structures, behavior details, pitfalls.
+
+### 2. Next change
+**Files:** `other/file/paths.ts`
+
+[Implementation details with inline code blocks where needed]
+
+## Verification
+- `command to prove completion`
+- Observable behavior checks
+
+## Must-Haves
+- [ ] Measurable acceptance criterion 1
+- [ ] Measurable acceptance criterion 2
 ```
 
-```xml
-<objective>What and why</objective>
-<execution_context>@-references to workflows/templates</execution_context>
-<context>@-references to project files</context>
-<tasks>
-  <task type="auto">
-    <name>Task N: Name</name>
-    <files>paths</files>
-    <action>What to do, what to avoid and WHY</action>
-    <verify>How to prove completion</verify>
-    <done>Measurable acceptance criteria</done>
-  </task>
-</tasks>
-<verification>Overall checks</verification>
-<success_criteria>Completion criteria</success_criteria>
-<output>SUMMARY.md specification</output>
-```
+**Inline metadata:** `**Subsystem:**` populates SUMMARY.md subsystem field. `**Type:** tdd` triggers lazy-load of TDD execution reference.
 
-**Task specificity test:** Can Claude read the plan and start implementing without asking clarifying questions? If not, task is too vague.
+**Orchestration is separate:** Wave grouping and dependencies live in `EXECUTION-ORDER.md`, not in plans.
+
+**Specificity test:** Can Claude read the plan and start implementing without asking clarifying questions? If not, the plan is too vague.
 </plan_anatomy>
 
-<wave_execution>
-## Wave Execution
+<execution_order>
+## Execution Order
 
-Plans have `wave` number in frontmatter (pre-computed during planning):
+Wave grouping and dependencies live in a single `EXECUTION-ORDER.md` file per phase, separate from plans:
 
-**Wave assignment rules:**
-- Plans with no dependencies → Wave 1
-- Plans depending on wave 1 plans → Wave 2
-- Wave number = max(dependency wave numbers) + 1
+```markdown
+# Execution Order
 
-**Execution flow:**
-1. Orchestrator discovers all plans in phase
-2. Groups by wave number
-3. Wave N: Spawn all plans as parallel subagents
-4. Wait for wave N to complete, then wave N+1
-5. Each agent has fresh 200k context at peak quality
-</wave_execution>
+## Wave 1 (parallel)
+- 01-PLAN.md — Create user model and API endpoints
+- 02-PLAN.md — Set up authentication middleware
+
+## Wave 2 (after Wave 1)
+- 03-PLAN.md — Build dashboard with protected routes
+- 04-PLAN.md — Create admin panel
+```
+
+**Benefits:**
+- Plans are pure execution prompts — zero orchestration metadata
+- Orchestrator reads one file instead of scanning N plan files
+- Human-readable, easy to override
+
+**Validation:** A shell script validates all plans are listed, no missing references, no file conflicts within waves.
+</execution_order>
 
 <deviation_rules>
 ## Deviation Rules
@@ -79,15 +95,15 @@ Executor handles unplanned discoveries automatically:
 
 **Sections:** Project Reference, Current Position, Performance Metrics, Accumulated Context (Decisions, Pending Todos, Blockers/Concerns), Session Continuity.
 
-**Update triggers:** After each plan execution, phase transitions, decisions made, blockers discovered.
+**Update triggers:** After each plan execution (via script), phase transitions, decisions made, blockers discovered.
 </state_management>
 
 <summary_system>
 ## SUMMARY System
 
-Created after each plan execution. Provides compressed history for future context.
+Created after each plan execution via inline instructions in the executor workflow (~20 lines, not a separate template).
 
-**Machine-readable frontmatter:** phase, plan, subsystem, tags, requires, provides, affects, tech-stack, key-files, duration, completed.
+**Machine-readable frontmatter:** subsystem, provides, affects, patterns-established, key-decisions, key-files, mock_hints.
 
 **Substantive one-liner:**
 - Good: "JWT auth with refresh rotation using jose library"

@@ -33,7 +33,7 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 
 **The 50% rule:** Plans should complete within ~50% context usage. Stop BEFORE quality degrades, not at context limit.
 
-**Solution:** Aggressive atomicity. Plans stay small (2-3 tasks max). Each plan executes in a fresh subagent with 200k tokens purely for implementation.
+**Solution:** Aggressive atomicity. Plans stay small (3 tasks max). Each plan executes in a fresh subagent with 200k tokens purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
 </what_mindsystem_is>
 
 <philosophy>
@@ -53,7 +53,7 @@ The critical judgment when evaluating any Mindsystem feature: **does this step's
 
 Reserve subagents for autonomous execution work, not collaborative thinking.
 
-**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: patch generation extracted to shell scripts, file manipulation via dedicated tooling. Prompts handle reasoning and decisions; scripts handle mechanical operations.
+**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: STATE.md updates via shell script, execution order validation via script, patch generation extracted to shell. Prompts handle reasoning and decisions; scripts handle mechanical operations.
 
 **User as collaborator.** Trust that users can contribute meaningfully. Maintain:
 - **Control** — User decides when to proceed, what to skip
@@ -62,7 +62,7 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 
 **Solo developer + Claude workflow.** No enterprise patterns (sprint ceremonies, RACI matrices, stakeholder management). User is the visionary. Claude is the builder.
 
-**Plans ARE prompts.** PLAN.md is not a document that gets transformed — it IS the executable prompt containing objective, context, tasks, and verification.
+**Plans ARE prompts.** PLAN.md is not a document that gets transformed — it IS the executable prompt. Plans optimize for a single intelligent reader executing in one context: ~90% actionable content (Context, Changes, Verification, Must-Haves), ~10% structure. Orchestration metadata (wave grouping, dependencies) lives separately in EXECUTION-ORDER.md, not in individual plans.
 
 **Claude automates everything.** If it has CLI/API, Claude does it. Human interaction points exist only for verification (human confirms visual/UX), decisions (human chooses direction), and unavoidable manual steps (no API exists). These are handled dynamically at runtime, not pre-planned into execution.
 
@@ -72,9 +72,13 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 </philosophy>
 
 <context_engineering>
-**The primary constraint is context quality.** LLM output quality correlates directly with input quality. Every unnecessary token — verbose instructions, inline scripts, redundant explanations — accelerates degradation. The goal: complete work before quality drops.
+**The primary constraint is context quality.** LLM output quality correlates directly with input quality. Every unnecessary token — verbose instructions, inline scripts, redundant explanations, orchestration metadata mixed with execution content — accelerates degradation. The goal: complete work before quality drops.
 
 **Decision principle: minimize context at equal output.** When two approaches produce equivalent results, choose the one consuming less context. This applies to everything: prompt design, workflow steps, feature scope, and whether a feature should be extended or simplified.
+
+**Separation of orchestration from execution.** Plans serve the executor (needs Context, Changes, Verification, Must-Haves). The orchestrator needs wave grouping, dependencies, and file conflict data. Mixing these means the executor loads orchestration metadata it doesn't need. Solution: plans carry only execution content; orchestration lives in EXECUTION-ORDER.md.
+
+**Plans as context-optimized prompts.** Pure markdown (no XML containers, no YAML frontmatter) achieves the same or better executor results with less structural overhead. Executor workflow stays lean (~350 lines) with summary creation as inline instructions (~20 lines) rather than a separate template.
 
 ### Latency-Quality Spectrum
 
@@ -85,6 +89,7 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 | CLI tool wrapping | High (API logic externalized) | Medium (tool development) | Repeated API interactions across sessions |
 | Progressive disclosure | Medium (defer loading) | None | Always — default approach |
 | Eager vs lazy loading | Variable | None | @-ref for essential files; read instructions for conditional |
+| Orchestration separation | Medium (per-plan savings) | None | Always — orchestration metadata centralized in EXECUTION-ORDER.md |
 </context_engineering>
 
 <architecture>
@@ -142,7 +147,7 @@ mindsystem/
 3. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
 4. `/ms:discuss-phase N` (optional) → Gather context before planning
 5. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
-6. `/ms:plan-phase N` → Creates PLAN.md files (main context, with user)
+6. `/ms:plan-phase N` → Creates PLAN.md files + EXECUTION-ORDER.md (main context, with user)
 7. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
 8. `/ms:verify-work N` (optional) → UAT verification with inline fixing
 </architecture>
@@ -155,9 +160,10 @@ mindsystem/
 | Agent expected output | Workflow that spawns it |
 | Template structure | All agents/workflows that reference it |
 | config.json options | execute-phase workflow + help.md |
-| Plan anatomy/frontmatter | plan-phase workflow + ms-plan-writer agent |
-| STATE.md format | state template + execute-plan workflow |
-| SUMMARY.md format | summary template + execute-plan workflow |
+| Plan format or structure | plan-format.md reference + plan-phase workflow + ms-plan-writer agent |
+| EXECUTION-ORDER.md format | execute-phase workflow + ms-plan-writer agent |
+| STATE.md format | state template + update-state script |
+| SUMMARY.md format | execute-plan workflow (inline summary instructions) |
 | Command name | help.md command list |
 | New command | help.md + (workflow if non-trivial) |
 | New agent | Workflow that spawns it |
@@ -188,6 +194,8 @@ mindsystem/
 - **Horizontal splitting** — split plans by vertical feature slices, not by layer (model/API/UI)
 - **Context inflation** — plans with >3 tasks, @-references to files not needed for current path
 - **Manual gates for automatable work** — if Claude can verify it, don't ask the user
+- **Orchestration in plans** — wave numbers, dependencies, and file ownership metadata belong in EXECUTION-ORDER.md, not in individual plan files
+- **XML/YAML in plans** — plans use pure markdown; XML containers and YAML frontmatter are overhead that doesn't improve code output
 </anti_patterns>
 
 <deep_dive_paths>

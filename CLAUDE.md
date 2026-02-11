@@ -105,7 +105,7 @@ Internal organization varies — semantic sub-containers, markdown headers withi
 
 ### Semantic Containers Only
 
-XML tags serve semantic purposes. Use Markdown headers for hierarchy within.
+XML tags serve semantic purposes in **commands and workflows**. Use Markdown headers for hierarchy within.
 
 **DO:**
 ```xml
@@ -128,23 +128,67 @@ Build authentication system
 </section>
 ```
 
-### Task Structure
+**Exception:** Plans use pure markdown — no XML containers, no YAML frontmatter. See Plan Structure below.
 
-```xml
-<task type="auto">
-  <name>Task N: Action-oriented name</name>
-  <files>src/path/file.ts, src/other/file.ts</files>
-  <action>What to do, what to avoid and WHY</action>
-  <verify>Command or check to prove completion</verify>
-  <done>Measurable acceptance criteria</done>
-</task>
+### Plan Structure
+
+Plans are **pure markdown** — executable prompts optimized for a single intelligent reader in one context. Target ~90% actionable content, ~10% structure.
+
+```markdown
+# Plan 01: Create login endpoint with JWT
+
+**Subsystem:** auth | **Type:** tdd
+
+## Context
+Why this work exists. Problem being solved. Approach chosen.
+
+## Changes
+
+### 1. Create auth route handler
+**Files:** `src/api/auth/login.ts`
+
+POST endpoint accepting {email, password}. Query User by email,
+compare with bcrypt. On match, create JWT with jose, set as httpOnly
+cookie. Return 200. On mismatch, return 401.
+
+### 2. Add password comparison utility
+**Files:** `src/lib/crypto.ts`
+
+[Implementation details with inline code blocks where needed]
+
+## Verification
+- `curl -X POST localhost:3000/api/auth/login` returns 200 with Set-Cookie
+- `npm test -- --grep auth` passes
+
+## Must-Haves
+- [ ] POST /api/auth/login returns 200 with Set-Cookie for valid credentials
+- [ ] Invalid credentials return 401
+- [ ] Passwords compared with bcrypt, never plaintext
 ```
 
-**Task types:**
-- `type="auto"` — Claude executes autonomously (default)
-- `type="tdd"` — TDD features with RED → GREEN → REFACTOR cycle
+**Inline metadata:** `**Subsystem:**` and `**Type:**` on one line. Type `tdd` triggers lazy-load of TDD reference.
+
+**Orchestration is separate.** Wave grouping and dependencies live in `EXECUTION-ORDER.md`, not in individual plans.
+
+**Specificity test:** Can Claude read the plan and start implementing without clarifying questions? If not, the plan is too vague.
 
 **@-references are eagerly loaded** — all content injected upfront. For lazy loading, use read instructions during execution. @-reference files that are always essential; use read instructions for conditionally needed files.
+
+---
+
+## Context Engineering
+
+**The 50% rule:** Plans complete within ~50% context usage. Every token that doesn't improve code output is waste.
+
+**Plans as prompts:** Simpler plan = simpler executor workflow = more context for code quality. Plans optimize for a single intelligent reader executing in one context.
+
+**Separate orchestration from execution:** Plans contain only what the executor needs (Context, Changes, Verification, Must-Haves). Wave grouping and dependencies live in `EXECUTION-ORDER.md`.
+
+**Budget principles:**
+- @-reference essential files; read instructions for conditional files
+- Deterministic operations (STATE updates, validation) belong in scripts, not prompts
+- Load detailed references only when triggered (e.g., TDD reference only for TDD plans)
+- Independent plans don't need chained SUMMARY references
 
 ---
 
@@ -199,24 +243,26 @@ Present: Factual statements, verification results, direct answers
 
 **DO:** Semantic purpose tags: `<objective>`, `<verification>`, `<action>`
 
-### Vague Tasks (Banned)
+### Vague Plans (Banned)
 
-```xml
-<!-- BAD -->
-<task type="auto">
-  <name>Add authentication</name>
-  <action>Implement auth</action>
-  <verify>???</verify>
-</task>
+**BAD:**
+```markdown
+### 1. Add authentication
+Implement auth.
+```
 
-<!-- GOOD -->
-<task type="auto">
-  <name>Create login endpoint with JWT</name>
-  <files>src/app/api/auth/login/route.ts</files>
-  <action>POST endpoint accepting {email, password}. Query User by email, compare password with bcrypt. On match, create JWT with jose library, set as httpOnly cookie. Return 200. On mismatch, return 401.</action>
-  <verify>curl -X POST localhost:3000/api/auth/login returns 200 with Set-Cookie header</verify>
-  <done>Valid credentials → 200 + cookie. Invalid → 401.</done>
-</task>
+**GOOD:**
+```markdown
+### 1. Create login endpoint with JWT
+**Files:** `src/app/api/auth/login/route.ts`
+
+POST endpoint accepting {email, password}. Query User by email, compare
+password with bcrypt. On match, create JWT with jose library, set as
+httpOnly cookie. Return 200. On mismatch, return 401.
+
+## Must-Haves
+- [ ] Valid credentials → 200 + cookie
+- [ ] Invalid → 401
 ```
 
 ---
@@ -267,7 +313,7 @@ Include escape hatch: "Something else", "Let me describe"
 
 ## Quick Rules
 
-1. **XML for semantic structure, Markdown for content**
+1. **XML for commands/workflows, pure Markdown for plans**
 2. **@-references are eagerly loaded** — use read instructions for conditional files
 3. **Imperative, brief, technical** — no filler, no sycophancy
 4. **Solo developer + Claude** — no enterprise patterns
@@ -275,3 +321,4 @@ Include escape hatch: "Something else", "Let me describe"
 6. **Atomic commits** — Git history as context source
 7. **AskUserQuestion for all exploration** — always options
 8. **Verify after automation** — automate first, verify after
+9. **Separate orchestration from execution** — plans carry execution content only
