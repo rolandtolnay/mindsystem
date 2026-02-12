@@ -109,7 +109,11 @@ If exists, extract:
 
 **3c. Optional context — project UI skill:**
 
-Before proceeding, check your available skills for one that provides domain expertise relevant to this project's UI implementation patterns. If found, invoke it via the Skill tool and extract aesthetic patterns (colors, components, spacing, typography) for the `<existing_aesthetic>` block passed to ms-designer.
+Scan the skills list in the most recent system-reminder for a skill whose description mentions UI patterns, components, design system, or implementation styling for this project's technology (e.g., "Flutter/Dart patterns", "React component library", "UI implementation patterns").
+
+If a matching skill is found, invoke it: `Skill(skill: "skill-name")`. Extract aesthetic patterns (colors, components, spacing, typography) from the loaded content for the `<existing_aesthetic>` block passed to ms-designer.
+
+If no matching skill is found, skip this step and note "No project UI skill found" in the `<existing_aesthetic>` block.
 
 **3d. Optional context - codebase analysis:**
 
@@ -178,7 +182,7 @@ Follow mockup-generation workflow:
 4. Present directions to user for approval/tweaking
 5. Read platform template (mobile or web)
 6. Spawn 3 x ms-mockup-designer agents in parallel
-7. Generate comparison page, open in browser, and present to user
+7. Run comparison script (`compare_mockups.py`), open in browser, and present to user
 8. Handle selection (single pick, combine, tweak, more variants, or skip)
 9. Extract CSS specs from chosen variant into `<mockup_direction>` block
 
