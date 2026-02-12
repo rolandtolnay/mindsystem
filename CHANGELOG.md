@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.13.1] - 2026-02-12
+
+### Changed
+- **Inline mock generation for verify-work** — Replaced mock-generator subagent (~90s per mock) with direct inline method edits in the main context; eliminated test-overrides scaffolding (feature flags, injection points) in favor of temporary hardcoded return values
+- **Batch-only mock subagent** — ms-mock-generator now reserved for 5+ mocks; removed generate-mocks workflow and updated mock-patterns reference for inline editing techniques
+
 ## [3.13.0] - 2026-02-11
 
 Planning pipeline rework. Plans are now pure markdown prompts optimized for a single intelligent reader — no YAML frontmatter, no XML containers. Orchestration metadata (wave grouping, dependencies) separated from execution content into EXECUTION-ORDER.md. Executor workflow cut from 1,209 to 338 lines. Every token the executor loads now serves code output, not process ceremony. Net effect: executors start with more context headroom, plans read as direct instructions, and the system aligns with Claude Code's native plan conventions and prompting best practices.
@@ -390,7 +396,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.1...HEAD
+[3.13.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.0...v3.13.1
 [3.13.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.12.0...v3.13.0
 [3.12.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.11.0...v3.12.0
 [3.11.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.10.1...v3.11.0
