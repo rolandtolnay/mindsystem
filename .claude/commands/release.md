@@ -32,8 +32,6 @@ Read current version from package.json:
 CURRENT=$(grep '"version"' package.json | sed 's/.*: "\(.*\)".*/\1/')
 echo "Current version: $CURRENT"
 ```
-
-Parse into components for incrementing.
 </step>
 
 <step name="review_changes">
@@ -44,8 +42,6 @@ git status
 git diff --stat
 git diff --stat --cached
 ```
-
-Review and understand what needs to be committed.
 </step>
 
 <step name="commit_changes">
@@ -64,8 +60,6 @@ Stage and commit changes with conventional commit format.
 - Use descriptive scope (e.g., `mindsystem`, `agent`, `command`)
 - Stage files individually, never `git add .`
 - Include `Co-Authored-By: Claude <noreply@anthropic.com>` in commit body
-
-Create all necessary commits before proceeding.
 </step>
 
 <step name="analyze_commits">
@@ -99,8 +93,37 @@ Current: X.Y.Z
 Announce the new version before proceeding.
 </step>
 
+<step name="gather_ticket_context">
+Extract ticket references (e.g., `[MIN-123]`, `MIN-123`) from commit messages and bodies since last tag.
+
+```bash
+git log --format="%s%n%b" $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD
+```
+
+For each unique ticket ID found, fetch it via the Linear skill CLI:
+
+```bash
+uv run ~/.claude/skills/linear/scripts/linear.py get <ID>
+```
+
+Use each ticket's title and description (especially Problem/Solution sections) to understand the user-facing intent behind each change.
+
+Skip this step if no ticket references are found.
+</step>
+
 <step name="generate_changelog">
-Read commits since last version and generate changelog entries.
+Read commits since last version and generate changelog entries, using ticket context from the previous step.
+
+**Relevance filter — include only core Mindsystem changes:**
+
+| Include | Omit |
+|---------|------|
+| New/changed commands, workflows, agents | Prompt quality guide updates (reference material) |
+| Template or reference changes that alter system behavior | Flutter-specific skill changes |
+| Script changes | Documentation-only changes to CLAUDE.md or ms-meta |
+| New features, bug fixes, refactors to core system | Standalone utility scripts |
+
+When uncertain, include. The user can remove during confirmation.
 
 **Changelog format (Keep a Changelog):**
 
@@ -108,29 +131,28 @@ Read commits since last version and generate changelog entries.
 ## [X.Y.Z] - YYYY-MM-DD
 
 ### Added
-- New features (from `feat:` commits)
-
 ### Changed
-- Changes to existing functionality (from `refactor:`, behavior changes)
-
 ### Fixed
-- Bug fixes (from `fix:` commits)
-
 ### Removed
-- Removed features (if any)
 ```
 
-**Rules:**
-- Group by type (Added, Changed, Fixed, Removed)
-- One bullet per logical change
-- Write from user perspective, not implementation details
-- Include scope context where helpful
-- Skip empty sections
-- Consolidate iterative commits on the same feature into one entry reflecting the **final state** (e.g., if a feat adds X and a later refactor simplifies X, write one entry describing what shipped)
+**Writing rules:**
+- Group by type (Added, Changed, Fixed, Removed). Skip empty sections.
+- One bullet per logical change. Consolidate iterative commits on the same feature into one entry reflecting the **final state**.
+- Write from user perspective: what changed and why it benefits them. Use ticket Problem/Solution context when available.
+- Never include ticket identifiers (e.g., `[MIN-86]`) in changelog lines
 </step>
 
 <step name="confirm_changelog">
 Present the generated changelog to the user for approval via AskUserQuestion. Display the full markdown section that will be inserted into CHANGELOG.md.
+
+If any commits were omitted by the relevance filter, list them below the changelog with a brief reason:
+
+```
+**Omitted from changelog:**
+- `abc1234 docs(ms-meta): update prompt quality principles` — reference material, no behavioral change
+- `def5678 docs(flutter-skill): add animation patterns` — Flutter-specific, not core system
+```
 
 Options:
 - **Approve** — Proceed to write the changelog and continue the release
@@ -213,20 +235,11 @@ echo "To publish to npm, run: npm publish"
 
 </process>
 
-<examples>
-**Auto-detect version bump:**
-```
-/release
-```
-Analyzes commits, determines bump type, updates changelog.
-
-**Force minor bump:**
-```
-/release minor
-```
-
-**Force specific version:**
-```
-/release 2.1.0
-```
-</examples>
+<success_criteria>
+- [ ] Ticket context fetched for commits referencing Linear tickets and used to inform changelog entries
+- [ ] Relevance filter applied — peripheral changes (prompt guides, Flutter skills, docs-only) omitted from changelog
+- [ ] Omitted commits listed with reasons in the confirmation message
+- [ ] Changelog entries written from user perspective (benefit, not implementation detail)
+- [ ] No ticket identifiers in changelog lines
+- [ ] CHANGELOG.md not written until user approves
+</success_criteria>
