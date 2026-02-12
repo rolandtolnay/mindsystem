@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.14.0] - 2026-02-12
+
+### Changed
+- **verify-work context footprint reduced by 36%** — UAT template stripped to pure reference data (403→129 lines), removing behavioral sections that duplicated workflow instructions; template double-load eliminated
+
+### Fixed
+- **design-phase skill loading and script invocation** — Replaced vague "check your available skills" with explicit scan-invoke-fallback instructions; replaced "generate comparison page" with "run the comparison script" and added anti-pattern guard against generating HTML manually
+
 ## [3.13.1] - 2026-02-12
 
 ### Changed
@@ -396,7 +404,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.14.0...HEAD
+[3.14.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.1...v3.14.0
 [3.13.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.0...v3.13.1
 [3.13.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.12.0...v3.13.0
 [3.12.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.11.0...v3.12.0
