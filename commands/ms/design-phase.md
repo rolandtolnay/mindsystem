@@ -109,7 +109,7 @@ If exists, extract:
 
 **3c. Optional context — project UI skill:**
 
-Scan the skills list in the most recent system-reminder for a skill whose description mentions UI patterns, components, design system, or implementation styling for this project's technology (e.g., "Flutter/Dart patterns", "React component library", "UI implementation patterns").
+Scan the skills list in the most recent system-reminder for a skill whose description mentions UI patterns, components, design system, or implementation styling (e.g., "Flutter/Dart patterns", "React component library", "UI implementation patterns").
 
 If a matching skill is found, invoke it: `Skill(skill: "skill-name")`. Extract aesthetic patterns (colors, components, spacing, typography) from the loaded content for the `<existing_aesthetic>` block passed to ms-designer.
 
