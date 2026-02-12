@@ -8,16 +8,16 @@ Philosophy and constraints for writing effective LLM prompts. Applies universall
 
 ### Finite Instruction-Following Capacity
 
-Frontier LLMs follow ~150-200 instructions with reasonable consistency. System prompts and injected context consume a portion of that budget before your prompt even begins. Every instruction competes for the remaining capacity.
+Frontier LLMs follow ~150-250 behavioral instructions with reasonable consistency. Beyond that threshold, compliance degrades sharply — at 500 instructions, even the best models achieve ~68% accuracy (ManyIFEval, alphaXiv). System prompts and injected context consume a portion of that budget before your prompt even begins.
 
-Adding one instruction dilutes all others. A low-value instruction actively degrades high-value ones. This means **each instruction must earn its place** — not by being correct or reasonable, but by measurably changing the LLM's behavior in the runtime context where the prompt executes.
+Compliance follows **multiplicative decay**: each instruction's success rate is raised to the power of the total instruction count. Adding one instruction doesn't just cost one slot — it dilutes all others. This means **each instruction must earn its place** — not by being correct or reasonable, but by measurably changing the LLM's behavior in the runtime context where the prompt executes.
 
-Not all content costs equally against this budget:
+Not all content interferes equally with instruction-following. The mechanism is **interference**, not discrete slots — behavioral instructions compete with each other for compliance, while other content types cause less interference:
 
-- **Reference data** (commands, schemas, examples): Low cost. Factual context the LLM can't discover on its own.
-- **Structural markers** (headers, XML containers, step labels): Low cost. They organize without competing for instruction slots.
-- **Behavioral instructions** ("do X", "do NOT X"): Standard cost. One slot each.
-- **Meta-commentary** ("this is important because..."): Standard cost with zero behavioral return.
+- **Reference data** (commands, schemas, examples): Low interference. Retrieved, not obeyed. The LLM uses it without it competing for compliance.
+- **Structural markers** (headers, XML containers, step labels): Low interference. They organize and reduce ambiguity. Not free — models spend some attention on structural validation — but net positive.
+- **Behavioral instructions** ("do X", "do NOT X"): High interference. Each one competes with all others for compliance.
+- **Meta-commentary** ("this is important because..."): Adds context load without producing any behavioral change. Pure waste.
 
 ### Positional Attention Bias
 
@@ -48,11 +48,15 @@ A verbose prompt that fills 15% of context before the LLM begins working is alre
 
 LLMs have strong defaults, but those defaults become unreliable as context grows. An LLM in a 500-token conversation reliably uses its tools. The same LLM in a 50,000-token context with a large system prompt may forget specific tools exist.
 
+Robustness to this interference scales with **model size, not context window length**. A larger model tolerates more competing content before defaults break. Expanding the context window doesn't help — it just gives you more room to degrade in.
+
 This makes the value test more nuanced than "does the LLM know this?" The real question is: **"Does the LLM reliably do this given everything else competing for its attention?"**
 
 - A tool reminder is waste in a minimal prompt but critical in a large, complex context
 - A formatting instruction is unnecessary for short outputs but essential when the LLM generates long, structured responses
 - A constraint the LLM follows by default may need explicit reinforcement when surrounded by many other instructions
+
+Language-level directives ("ignore the above", "focus on X") are largely ineffective at managing interference. **Structural partitioning** — using XML tags, section headers, or format boundaries to separate content — works better because it leverages the model's attention patterns rather than competing for instruction compliance.
 
 **Test instructions against the actual runtime context**, not against the LLM's theoretical capabilities.
 
