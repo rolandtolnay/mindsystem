@@ -8,9 +8,9 @@ Philosophy and constraints for writing effective LLM prompts. Applies universall
 
 ### Finite Instruction-Following Capacity
 
-Frontier LLMs follow ~150-250 behavioral instructions with reasonable consistency. Beyond that threshold, compliance degrades sharply — at 500 instructions, even the best models achieve ~68% accuracy (ManyIFEval, alphaXiv). System prompts and injected context consume a portion of that budget before your prompt even begins.
+Frontier LLMs follow ~150-250 behavioral instructions with reasonable consistency. Beyond that, compliance degrades sharply. System prompts and injected context consume a portion of that budget before your prompt even begins.
 
-Compliance degrades non-linearly as instruction count increases. The pattern is model-dependent — reasoning models (o3, Gemini 2.5 Pro) show **threshold decay** (near-perfect through ~150 instructions, then steep decline), standard frontier models show **linear decay** from much earlier, and smaller models show **exponential decay**. Adding one instruction doesn't just cost one slot — it dilutes all others. ManyIFEval (EMNLP 2025) confirmed instructions have *negative* dependencies: simultaneous compliance is harder than individual probabilities predict. This means **each instruction must earn its place** — not by being correct or reasonable, but by measurably changing the LLM's behavior in the runtime context where the prompt executes.
+Adding one instruction doesn't just cost one slot — it dilutes all others. Instructions have _negative_ dependencies: simultaneous compliance is harder than individual probabilities predict. This means **each instruction must earn its place** — not by being correct or reasonable, but by measurably changing the LLM's behavior in the runtime context where the prompt executes.
 
 Not all content interferes equally with instruction-following. The mechanism is **interference**, not discrete slots — behavioral instructions compete with each other for compliance, while other content types cause less interference:
 
@@ -18,7 +18,7 @@ Not all content interferes equally with instruction-following. The mechanism is 
 - **Structural markers** (headers, XML containers, step labels): Low interference. They organize and reduce ambiguity. Not free — models spend some attention on structural validation — but net positive.
 - **Behavioral instructions** ("do X", "do NOT X"): High interference. Each one competes with all others for compliance.
 - **Motivational fluff** ("this is important", "thoroughness matters"): Adds context load without producing any behavioral change. Pure waste.
-- **Corrective rationale** ("never use ellipses — TTS engines can't pronounce them"): Connects a rule to a concrete failure mode, enabling the LLM to generalize beyond the literal instruction. Anthropic explicitly recommends this for Claude 4.x. Earns its place when it encodes a causal chain the LLM wouldn't infer on its own.
+- **Corrective rationale** ("never use ellipses — TTS engines can't pronounce them"): Connects a rule to a concrete failure mode, enabling the LLM to generalize beyond the literal instruction. Earns its place when it encodes a causal chain the LLM wouldn't infer on its own.
 
 ### Positional Attention Bias
 
@@ -32,14 +32,14 @@ Restating a critical instruction at the end of a prompt is not redundancy — it
 
 ### Context Is a Shared, Depletable Resource
 
-Every token in the prompt competes with the LLM's reasoning and output for the same context window. Degradation begins earlier than expected and is non-linear — EMNLP 2025 research showed performance drops from as few as 100 tokens of irrelevant content, and even whitespace-only filler causes 7-48% degradation. As a rough heuristic:
+Every token in the prompt competes with the LLM's reasoning and output for the same context window. Degradation begins earlier than expected, is non-linear, and even small amounts of irrelevant content cause measurable performance drops. As a rough heuristic:
 
-| Context usage | Quality |
-|---|---|
-| 0-30% | Peak |
-| 30-50% | Good |
-| 50-70% | Degrading — starts cutting corners |
-| 70%+ | Poor |
+| Context usage | Quality                            |
+| ------------- | ---------------------------------- |
+| 0-30%         | Peak                               |
+| 30-50%        | Good                               |
+| 50-70%        | Degrading — starts cutting corners |
+| 70%+          | Poor                               |
 
 Actual thresholds depend on task complexity, semantic similarity between query and target, and distractor presence. A verbose prompt that fills 15% of context before the LLM begins working is already handicapping output quality. Shorter, more focused prompts leave more room for the LLM's actual work.
 
@@ -49,7 +49,7 @@ Actual thresholds depend on task complexity, semantic similarity between query a
 
 LLMs have strong defaults, but those defaults become unreliable as context grows. An LLM in a 500-token conversation reliably uses its tools. The same LLM in a 50,000-token context with a large system prompt may forget specific tools exist.
 
-Robustness to this interference scales with **model size, not context window length**. A larger model tolerates more competing content before defaults break. Expanding the context window doesn't help — it just gives you more room to degrade in.
+Smaller models are more sensitive to prompt bloat — a larger model tolerates more competing content before defaults break, while expanding the context window doesn't help. When writing prompts for constrained models (e.g., subagents on haiku), tighter instructions matter more than on frontier models.
 
 This makes the value test more nuanced than "does the LLM know this?" The real question is: **"Does the LLM reliably do this given everything else competing for its attention?"**
 
@@ -57,7 +57,7 @@ This makes the value test more nuanced than "does the LLM know this?" The real q
 - A formatting instruction is unnecessary for short outputs but essential when the LLM generates long, structured responses
 - A constraint the LLM follows by default may need explicit reinforcement when surrounded by many other instructions
 
-Language-level directives ("ignore the above", "focus on X") are less reliable than structural approaches at managing interference — instruction hierarchy research (2025) shows models inconsistently prioritize directives regardless of nominal priority signals. **Structural partitioning** — using XML tags, section headers, or format boundaries to separate content — works better because it leverages the model's attention patterns rather than competing for instruction compliance. All three major vendors (Anthropic, OpenAI, Google) now explicitly recommend XML/Markdown structural markers for prompt organization.
+Language-level directives ("ignore the above", "focus on X") are less reliable than structural approaches at managing interference. **Structural partitioning** — using XML tags, section headers, or format boundaries to separate content — works better because it leverages the model's attention patterns rather than competing for instruction compliance. Structural markers (XML tags, Markdown headers) are now recommended by all major providers (Anthropic, OpenAI, Google), not just Claude-specific.
 
 **Test instructions against the actual runtime context**, not against the LLM's theoretical capabilities.
 
@@ -65,10 +65,10 @@ Language-level directives ("ignore the above", "focus on X") are less reliable t
 
 Modern reasoning models (Claude with extended thinking, OpenAI o3/o4-mini, Gemini 2.5 Pro) reason internally by default. This changes the optimal prompting strategy:
 
-- **Goal-oriented over procedural.** Provide high-level goals and constraints, not step-by-step reasoning instructions. Anthropic: "Claude often performs better with high level instructions to just think deeply about a task rather than step-by-step prescriptive guidance."
-- **CoT instructions are redundant or harmful.** Wharton (June 2025) measured +2.9% gain for o3-mini and -3.3% for Gemini Flash 2.5 from "think step by step," at 20-80% more latency. OpenAI: "Asking a reasoning model to reason more may actually hurt the performance."
-- **Over-specification backfire.** Instructions duplicating default behavior (e.g., "be thorough", "use tools aggressively") can over-amplify, causing worse results than no instruction at all. Claude 4.x and GPT-5 are particularly sensitive to this.
-- **Start minimal, add for failures.** Begin with the fewest possible instructions on the best available model. Add instructions only when you observe a specific failure mode. This is now officially recommended by Anthropic's context engineering guide.
+- **Goal-oriented over procedural.** Provide high-level goals and constraints, not step-by-step reasoning instructions. The model's internal reasoning handles decomposition better than prescribed steps.
+- **CoT instructions are redundant or harmful.** "Think step by step" adds latency with negligible or negative accuracy impact — the model is already reasoning internally.
+- **Over-specification backfire.** Instructions duplicating default behavior (e.g., "be thorough", "use tools aggressively") can over-amplify, causing worse results than no instruction at all.
+- **Start minimal, add for failures.** Begin with the fewest possible instructions on the best available model. Add instructions only when you observe a specific failure mode.
 
 ---
 
@@ -76,7 +76,7 @@ Modern reasoning models (Claude with extended thinking, OpenAI o3/o4-mini, Gemin
 
 ### The Value of a Prompt Is Its Behavioral Overrides
 
-Everything in a prompt that doesn't change the LLM's behavior is noise. The question for every instruction: *"If I remove this, does the output get worse in the context where this prompt runs?"*
+Everything in a prompt that doesn't change the LLM's behavior is noise. The question for every instruction: _"If I remove this, does the output get worse in the context where this prompt runs?"_
 
 - If removing it changes nothing → it wastes budget and dilutes everything else
 - If removing it causes failures → it earns its place regardless of whether it seems redundant
@@ -137,24 +137,24 @@ Success criteria at the end of a prompt serve as peripheral reinforcement — a 
 
 ### Common Waste
 
-| Pattern | Example | Problem |
-|---|---|---|
-| Motivational fluff | "Thoroughness is more important than speed" | No causal chain — the concrete instructions below already enforce this |
-| Architecture rationale | "This design survives context resets" | Explains *why*, not *what to do* |
-| Negations of unlikely behavior | "Do NOT delete the database" | LLM wasn't going to; negation activates the concept |
-| Low-risk success criteria | "File was read successfully" | LLM never skips this; reinforce what it *does* skip |
-| Filler and sycophancy | "Simply", "I'd love to help" | Zero information content |
-| Verbose restatement | "IMPORTANT: You must always ensure that..." | Same instruction at 3x the token cost |
+| Pattern                        | Example                                     | Problem                                                                |
+| ------------------------------ | ------------------------------------------- | ---------------------------------------------------------------------- |
+| Motivational fluff             | "Thoroughness is more important than speed" | No causal chain — the concrete instructions below already enforce this |
+| Architecture rationale         | "This design survives context resets"       | Explains _why_, not _what to do_                                       |
+| Negations of unlikely behavior | "Do NOT delete the database"                | LLM wasn't going to; negation activates the concept                    |
+| Low-risk success criteria      | "File was read successfully"                | LLM never skips this; reinforce what it _does_ skip                    |
+| Filler and sycophancy          | "Simply", "I'd love to help"                | Zero information content                                               |
+| Verbose restatement            | "IMPORTANT: You must always ensure that..." | Same instruction at 3x the token cost                                  |
 
 ### Common Value
 
-| Pattern | Example | Why it earns its place |
-|---|---|---|
-| Reference data | `uv run script.py get $ARGUMENTS` | LLM cannot discover this on its own |
-| Behavioral overrides | "Read files yourself, don't rely on summaries" | Counteracts a real observed tendency |
-| Tool reminders | "Use AskUserQuestion to clarify" | Specific tools get lost in large contexts |
-| Separation constraints | "Do NOT combine steps 3 and 4" | Prevents a verified failure mode |
-| Confidence gates | "Do NOT proceed until 95% confident" | Prevents premature phase transitions |
-| Contrastive examples | Right pattern paired with wrong pattern | Anchors rules through contrast |
-| Output format specifications | Exact structure with example | LLM needs the format, not "be concise" |
-| Corrective rationale | "Format as plain text — output feeds a TTS engine" | Encodes a causal chain enabling generalization beyond the literal rule |
+| Pattern                      | Example                                            | Why it earns its place                                                 |
+| ---------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| Reference data               | `uv run script.py get $ARGUMENTS`                  | LLM cannot discover this on its own                                    |
+| Behavioral overrides         | "Read files yourself, don't rely on summaries"     | Counteracts a real observed tendency                                   |
+| Tool reminders               | "Use AskUserQuestion to clarify"                   | Specific tools get lost in large contexts                              |
+| Separation constraints       | "Do NOT combine steps 3 and 4"                     | Prevents a verified failure mode                                       |
+| Confidence gates             | "Do NOT proceed until 95% confident"               | Prevents premature phase transitions                                   |
+| Contrastive examples         | Right pattern paired with wrong pattern            | Anchors rules through contrast                                         |
+| Output format specifications | Exact structure with example                       | LLM needs the format, not "be concise"                                 |
+| Corrective rationale         | "Format as plain text — output feeds a TTS engine" | Encodes a causal chain enabling generalization beyond the literal rule |
