@@ -43,9 +43,9 @@ Phase: $ARGUMENTS (optional)
 4. **Extract testable deliverables** from summaries
 5. **Classify tests by mock requirements** — Use SUMMARY.md mock_hints when available; classify inline with keyword heuristics when absent. Confirm data availability with user before batching.
 6. **Group into batches** — By mock type, max 4 per batch, no-mock tests first
-   - If any tests require mocks: Read `~/.claude/mindsystem/references/mock-patterns.md` and `~/.claude/mindsystem/workflows/generate-mocks.md` for mock generation guidance
+   - If any tests require transient_state mocks: Read `~/.claude/mindsystem/references/mock-patterns.md` for delay strategies
 7. **For each batch:**
-   - If mock needed: Generate mocks, present toggle instructions, wait for confirmation
+   - If mock needed: Apply inline mocks (1-4 direct edits, 5+ via ms-mock-generator subagent), tell user to hot reload
    - Present tests via AskUserQuestion (Pass / Can't test / Skip / Other)
    - Process results, update UAT.md
    - **For each issue found:**
@@ -54,10 +54,10 @@ Phase: $ARGUMENTS (optional)
      - If complex: Spawn ms-verify-fixer subagent
      - 2 retries on failed re-test, then offer options
 8. **On batch transition:**
-   - If new mock_type: Discard old mocks, generate new ones
+   - If new mock_type: Revert old mocks (`git checkout -- <mocked_files>`), apply new ones
    - If same mock_type: Keep mocks active
 9. **On completion:**
-   - Discard all mocks (git stash drop)
+   - Revert all mocks (`git checkout -- <mocked_files>`)
    - Generate UAT fixes patch
    - Restore user's pre-existing work (if stashed)
    - Commit UAT.md, present summary
@@ -77,7 +77,7 @@ Phase: $ARGUMENTS (optional)
 - Don't run automated tests — this is manual user validation
 - Don't skip investigation — always try 2-3 tool calls before escalating
 - Don't fix complex issues inline — spawn fixer subagent for multi-file or architectural changes
-- Don't commit mock code — always stash before fixing
+- Don't commit mock code — stash mocked files before fixing, restore after
 - Don't re-present skipped tests — assumptions stand
 </anti_patterns>
 
@@ -85,14 +85,14 @@ Phase: $ARGUMENTS (optional)
 - [ ] Dirty tree handled at start (stash/commit/abort)
 - [ ] Tests extracted from SUMMARY.md and classified
 - [ ] Tests batched by mock requirements
-- [ ] Mocks generated when needed with clear toggle instructions
+- [ ] Mocks applied inline when needed (1-4 direct, 5+ via subagent)
 - [ ] Tests presented in batches of 4 using AskUserQuestion
 - [ ] Issues investigated with lightweight check first
 - [ ] Simple issues fixed inline with proper commit message
 - [ ] Complex issues escalated to fixer subagent
 - [ ] Failed re-tests get 2 retries then options
 - [ ] Stash conflicts auto-resolved to fix version
-- [ ] Mocks discarded on completion
+- [ ] Mocks reverted on completion (git checkout)
 - [ ] UAT fixes patch generated
 - [ ] User's pre-existing work restored
 - [ ] UAT.md committed with final summary

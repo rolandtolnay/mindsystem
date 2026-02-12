@@ -14,7 +14,7 @@ source: [list of SUMMARY.md files tested]
 started: [ISO timestamp]
 updated: [ISO timestamp]
 current_batch: [N]
-mock_stash: [stash name or null]
+mocked_files: []
 pre_work_stash: [stash name or null]
 ---
 
@@ -138,7 +138,7 @@ mock_type: empty_response
 - `started`: IMMUTABLE - set on creation
 - `updated`: OVERWRITE - update on every change
 - `current_batch`: OVERWRITE - current batch number
-- `mock_stash`: OVERWRITE - name of stashed mocks or null
+- `mocked_files`: OVERWRITE - list of files with inline mocks, or empty array
 - `pre_work_stash`: OVERWRITE - user's pre-existing work stash or null
 
 **Progress:**
@@ -196,23 +196,22 @@ mock_type: empty_response
 <mock_lifecycle>
 
 **When batch needs mocks:**
-1. Generate mock files (uncommitted)
-2. User enables mocks
-3. Testing proceeds
+1. Edit service methods inline (hardcoded return values)
+2. Record files in `mocked_files` frontmatter
+3. User hot reloads, testing proceeds
 
 **When fix needed:**
-1. `git stash push -m "mocks-batch-N"`
-2. Update `mock_stash` in frontmatter
-3. Fix applied, committed
-4. `git stash pop` to restore mocks
-5. Clear `mock_stash` if no conflicts
+1. `git stash push -m "mocks-batch-N" -- <mocked_files>`
+2. Fix applied, committed
+3. `git stash pop` to restore mocks
+4. If conflict: take fix version, remove file from `mocked_files`
 
 **On batch transition (different mock_type):**
-1. Discard old mocks: `git stash drop`
-2. Generate new mocks for new batch
+1. Revert old mocks: `git checkout -- <mocked_files>`
+2. Clear `mocked_files`, apply new inline mocks
 
 **On session complete:**
-1. Discard all mocks: `git stash drop`
+1. Revert all mocks: `git checkout -- <mocked_files>`
 2. Restore pre_work_stash if exists
 
 </mock_lifecycle>
@@ -225,8 +224,9 @@ On `/ms:verify-work` with existing UAT.md:
    - "complete" → offer to re-run or view results
    - "testing" or "fixing" → resume
 
-2. Check `mock_stash`:
-   - If exists, offer to restore or discard
+2. Check `mocked_files`:
+   - If non-empty, verify mocks still present via `git diff --name-only`
+   - If mocks lost, regenerate for current batch
 
 3. Check `current_batch`:
    - Resume from that batch
@@ -262,7 +262,7 @@ source: 04-01-SUMMARY.md, 04-02-SUMMARY.md
 started: 2025-01-15T10:30:00Z
 updated: 2025-01-15T11:15:00Z
 current_batch: 2
-mock_stash: mocks-batch-2
+mocked_files: [src/services/auth_service.dart, src/services/api_service.dart]
 pre_work_stash: null
 ---
 

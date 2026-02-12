@@ -5,7 +5,7 @@ Complete verify-and-fix session: by session end, everything verified, issues fix
 </purpose>
 
 <execution_context>
-<!-- mock-patterns.md and generate-mocks.md loaded on demand when mocks are needed (see classify_tests step) -->
+<!-- mock-patterns.md loaded on demand for transient_state mocks (see generate_mocks step) -->
 </execution_context>
 
 <template>
@@ -232,7 +232,7 @@ tests:
 <step name="create_batches">
 **Group tests into batches:**
 
-**If any tests have mock_required=true:** Read `~/.claude/mindsystem/references/mock-patterns.md` and `~/.claude/mindsystem/workflows/generate-mocks.md` now for mock generation guidance.
+**If any tests have mock_required=true AND batch includes `transient_state` mocks:** Read `~/.claude/mindsystem/references/mock-patterns.md` for delay/never-resolve strategies.
 
 **Rules:**
 1. Group by mock_type (tests needing same mock state go together)
@@ -311,7 +311,7 @@ source: [list of SUMMARY.md files]
 started: [ISO timestamp]
 updated: [ISO timestamp]
 current_batch: 1
-mock_stash: null
+mocked_files: []
 pre_work_stash: [from dirty tree handling, or null]
 ---
 
@@ -378,11 +378,11 @@ Read current batch from UAT.md.
 **1. Handle mock generation (if needed):**
 
 If `mock_type` is not null AND different from previous batch:
-- Discard old mocks if any (use stash name from `mock_stash` in UAT.md frontmatter):
+- Revert old mocks if any (from `mocked_files` in UAT.md frontmatter):
   ```bash
-  MOCK_STASH=$(git stash list | grep "mocks-batch" | head -1 | cut -d: -f1)
-  [ -n "$MOCK_STASH" ] && git stash drop "$MOCK_STASH"
+  git checkout -- <mocked_files>
   ```
+- Clear `mocked_files` in frontmatter
 - Go to `generate_mocks`
 
 If `mock_type` is null or same as previous:
@@ -394,72 +394,61 @@ Go to `present_tests`
 </step>
 
 <step name="generate_mocks">
-**Generate mocks for current batch:**
+**Generate mocks for current batch using inline approach:**
 
-Present mock generation options:
-```
-## Batch [N]: [Name]
+Count mock-requiring tests in this batch.
 
-**Mock required:** [mock_type description]
+**Decision logic:**
 
-This batch tests states that require mock data. Options:
+| Count | Approach |
+|-------|----------|
+| 1-4   | Inline: edit service methods directly in main context |
+| 5+    | Subagent: spawn ms-mock-generator for batch editing |
 
-1. Generate mocks (Recommended) — I'll create the override files
-2. I'll set up mocks manually — Skip generation, you handle it
-3. Skip this batch — Log all tests as assumptions
-```
+**Inline approach (1-4 mocks):**
 
-**If "Generate mocks":**
+For each test in the batch:
+1. Identify the service/repository method that provides the data
+2. Read the method
+3. Edit to hardcode desired return value BEFORE the real implementation:
+   ```
+   // MOCK: {description} — revert after UAT
+   {hardcoded return/throw}
+   ```
+4. For transient_state mocks: Read `~/.claude/mindsystem/references/mock-patterns.md` for delay/never-resolve strategies
 
-Spawn mock generator:
+**Subagent approach (5+ mocks):**
+
 ```
 Task(
   prompt="""
-Generate mocks for manual UAT testing.
+Generate inline mocks for manual UAT testing.
 
-Project: {from PROJECT.md}
 Phase: {phase_name}
-Mock type: {mock_type}
 
-Tests requiring this mock:
-{test list with expected behaviors}
+Tests requiring mocks:
+{test list with mock_type and expected behaviors}
 
-Follow patterns from @~/.claude/mindsystem/workflows/generate-mocks.md
+Mocked files from previous batches (avoid conflicts):
+{mocked_files from UAT.md frontmatter}
 """,
   subagent_type="ms-mock-generator",
   description="Generate {mock_type} mocks"
 )
 ```
 
-After mock generator returns:
+**After mocks applied (both approaches):**
 
-1. Update UAT.md: `mock_stash: null` (mocks are uncommitted, not stashed yet)
-2. Present toggle instructions from mock generator
-3. Ask user to confirm mocks are active:
+1. Record mocked files in UAT.md frontmatter: `mocked_files: [file1.dart, file2.dart, ...]`
+2. Tell user: "Mocks applied. Hot reload to test."
+3. Proceed directly to `present_tests` — no user confirmation needed
 
-```
-questions:
-  - question: "I've created the mock files. Have you enabled the mocks and verified they're working?"
-    header: "Mocks ready"
-    options:
-      - label: "Yes, mocks are active"
-        description: "I've toggled the flags and hot reloaded"
-      - label: "Having trouble"
-        description: "Something isn't working with the mocks"
-    multiSelect: false
-```
+**Skip option:**
 
-**If "I'll set up manually":**
-- Present what mock state is needed
-- Wait for user to confirm ready
-
-**If "Skip this batch":**
-- Prompt for reason: "Why are you skipping this batch?"
-- Mark all tests in batch as `skipped` with user's reason
+If user has previously indicated they want to skip mock batches, or if mock generation fails:
+- Mark all tests in batch as `skipped`
 - Append to Assumptions section
 - Proceed to next batch
-
-Proceed to `present_tests`.
 </step>
 
 <step name="present_tests">
@@ -574,9 +563,9 @@ For each question:
 
 **1. Stash mocks (if active):**
 ```bash
-git stash push -m "mocks-batch-{N}"
+git stash push -m "mocks-batch-{N}" -- <mocked_files>
 ```
-Update UAT.md: `mock_stash: "mocks-batch-{N}"`
+Use `mocked_files` list from UAT.md frontmatter.
 
 **2. Make the fix:**
 - Edit the file(s)
@@ -605,11 +594,11 @@ git stash pop
 
 **Handle stash conflict:**
 ```bash
-# If conflict, take fix version
+# Conflict means fix touched a mocked file — take the fix version
 git checkout --theirs <conflicted-file>
 git add <conflicted-file>
 ```
-Log that mock was discarded for that file.
+Remove conflicted file from `mocked_files` list in UAT.md (mock no longer needed for that file).
 
 **6. Request re-test:**
 ```
@@ -626,7 +615,7 @@ Go to `handle_retest`.
 
 **1. Stash mocks (if active):**
 ```bash
-git stash push -m "mocks-batch-{N}"
+git stash push -m "mocks-batch-{N}" -- <mocked_files>
 ```
 
 **2. Spawn ms-verify-fixer:**
@@ -738,13 +727,12 @@ questions:
 
 Read full UAT file.
 
-Check `mock_stash` — if exists, offer to restore:
+Check `mocked_files` — if non-empty, verify mocks are still present:
+```bash
+git diff --name-only
 ```
-Found stashed mocks: {mock_stash}
-
-1. Restore mocks — Continue where we left off
-2. Discard mocks — Start batch fresh
-```
+If mocked files have uncommitted changes, mocks are still active — continue.
+If mocked files are clean, mocks were lost — regenerate for current batch.
 
 Find current position:
 - current_batch
@@ -796,12 +784,11 @@ issues: {count}
 <step name="complete_session">
 **Complete UAT session:**
 
-**1. Discard mocks:**
+**1. Revert mocks:**
 ```bash
-# Find and drop the specific mock stash (not just the top one)
-MOCK_STASH=$(git stash list | grep "mocks-batch" | head -1 | cut -d: -f1)
-[ -n "$MOCK_STASH" ] && git stash drop "$MOCK_STASH"
+git checkout -- <mocked_files>
 ```
+Use `mocked_files` list from UAT.md frontmatter. Clear the list after reverting.
 
 **2. Generate UAT fixes patch (if fixes were made):**
 ```bash
@@ -818,7 +805,7 @@ PRE_WORK_STASH=$(git stash list | grep "pre-verify-work" | head -1 | cut -d: -f1
 
 **4. Update UAT.md:**
 - status: complete
-- Clear current_batch, mock_stash
+- Clear current_batch, mocked_files
 - Final Progress counts
 
 **5. Commit UAT.md:**
@@ -863,7 +850,7 @@ Check if more phases remain in ROADMAP.md:
 |---------|------|------|
 | Frontmatter.status | OVERWRITE | Phase transitions |
 | Frontmatter.current_batch | OVERWRITE | Batch transitions |
-| Frontmatter.mock_stash | OVERWRITE | Stash operations |
+| Frontmatter.mocked_files | OVERWRITE | Mock generation/cleanup |
 | Frontmatter.updated | OVERWRITE | Every write |
 | Progress | OVERWRITE | After each test result |
 | Current Batch | OVERWRITE | Batch transitions |
@@ -895,7 +882,7 @@ Default: **major** (safe default)
 - [ ] Dirty tree handled at start
 - [ ] Tests classified by mock requirements
 - [ ] Batches created respecting dependencies and mock types
-- [ ] Mocks generated when needed with toggle instructions
+- [ ] Mocks applied inline when needed (1-4 direct, 5+ via subagent)
 - [ ] Tests presented in batches of 4
 - [ ] Issues investigated with lightweight check (2-3 calls)
 - [ ] Simple issues fixed inline with proper commit
@@ -903,7 +890,7 @@ Default: **major** (safe default)
 - [ ] Re-test retries (2 max, tracked via retry_count) before offering options
 - [ ] Blocked tests re-presented after blocking issues resolved
 - [ ] Stash conflicts auto-resolved to fix version
-- [ ] Mocks discarded on completion
+- [ ] Mocks reverted on completion (git checkout)
 - [ ] UAT fixes patch generated
 - [ ] User's pre-existing work restored
 - [ ] UAT.md committed with final summary
