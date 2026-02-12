@@ -4,15 +4,11 @@ description: Fetch all unsolved Linear tickets, score them by leverage, and reco
 
 <objective>
 Daily triage routine that surfaces the highest-leverage work for a 30-60 minute Claude Code session. Fetches all unsolved tickets from Linear, understands the project's architecture, scores each ticket by impact and effort, and recommends 1-3 tickets that maximize value delivered today.
-
-This command applies the Pareto principle: find the 20% of tickets that deliver 80% of the impact.
 </objective>
 
 <process>
 
 <step name="load_domain_context">
-You need to understand this project's architecture before you can score impact accurately.
-
 Run these in parallel:
 
 1. **CLAUDE.md** — Read the project's `CLAUDE.md`. Contains development conventions, architecture notes, and system overview.
@@ -21,9 +17,7 @@ Run these in parallel:
    - `linear` — loads the CLI reference for fetching tickets
    - `ms-meta` — loads Mindsystem architecture knowledge for accurate impact scoring
 
-Then, if step 2 reported PROJECT.md EXISTS, read `.planning/PROJECT.md`. It provides business context, system structure, and current project state. Skip silently if MISSING.
-
-The goal is to understand: what are the core workflows, what is upstream vs downstream, and where do changes have the highest blast radius. This directly determines impact scoring in the next steps.
+Then, if step 2 reported PROJECT.md EXISTS, read `.planning/PROJECT.md`. Skip silently if MISSING.
 </step>
 
 <step name="fetch_all_unsolved_tickets">
@@ -47,7 +41,7 @@ Always fetch details when:
 - The estimate seems off relative to the title (e.g., a seemingly simple fix with a large estimate — why?)
 - The ticket has comments (comment count > 0) — comments often contain critical context like root cause analysis, design decisions, or scope clarifications
 
-Err on the side of fetching more details rather than fewer. A wrong score from insufficient context is worse than spending an extra minute reading ticket details. Fetch tickets in parallel where possible.
+Err on the side of fetching more details rather than fewer. Fetch tickets in parallel where possible.
 </step>
 
 <step name="filter_ready_now">
@@ -104,7 +98,7 @@ Compose a session by selecting the best option:
 3. **Two quick wins** — Each leverage >= 2.0, effort 1 each.
 4. **One quick win + scoping** a future high-impact ticket (read its details, identify approach, leave notes).
 
-Evaluate options in order. If option 1 qualifies, prefer it over lower-numbered options unless a quick win has dramatically higher leverage (3.0+).
+Evaluate options in order. Prefer the first qualifying option unless a quick win has dramatically higher leverage (3.0+).
 
 **Selection tiebreakers** (when leverage scores are equal):
 1. Correctness fixes beat quality improvements beat friction reduction
@@ -146,13 +140,10 @@ End with: "Ready to start? Pick a ticket and I'll fetch its full details."
 </process>
 
 <success_criteria>
-- All unsolved tickets fetched from Linear (backlog + started + todo)
-- Project architecture understood before scoring
 - Ambiguous tickets inspected in detail (with comments) before scoring
-- Blocked/premature tickets filtered out (internally, not shown to user)
-- Every remaining ticket scored on impact (1-3) and effort (1-3)
 - Effort scores reflect Claude Code development speed, not traditional estimates
-- 1-2 top tickets recommended with quick plans
-- 3 alternatives presented with arguments for why you'd pick them instead
+- 3 alternatives presented with arguments for why you'd pick each
 - Output is concise and conversational — no backlog dumps or filter breakdowns
+- Score effort on remaining work after accounting for comments/investigation already done
+- 1-2 top tickets recommended with quick plans
 </success_criteria>
