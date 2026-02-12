@@ -8,29 +8,6 @@ Complete verify-and-fix session: by session end, everything verified, issues fix
 <!-- mock-patterns.md loaded on demand for transient_state mocks (see generate_mocks step) -->
 </execution_context>
 
-<template>
-@~/.claude/mindsystem/templates/UAT.md
-</template>
-
-<philosophy>
-**Verify and fix in one session.**
-
-Old flow: verify → log gaps → /clear → plan-phase --gaps → execute → verify again
-New flow: verify → investigate → fix → re-test → continue
-
-**Mocks enable testing unreachable states.**
-
-Error displays, premium features, empty lists — all require specific backend conditions. Mocks let you toggle states and test immediately.
-
-**Keep mocks and fixes separate.**
-
-Mocks are uncommitted scaffolding. Fixes are clean commits. Git stash keeps them separated.
-
-**Fix while context is hot.**
-
-When you find an issue, you have the mock state active, the test fresh in mind, and the user ready to re-test. Fix it now, not later.
-</philosophy>
-
 <process>
 
 <step name="check_dirty_tree" priority="first">
@@ -42,20 +19,7 @@ git status --porcelain
 
 **If output is non-empty (dirty tree):**
 
-Present options via AskUserQuestion:
-```
-questions:
-  - question: "You have uncommitted changes. How should I handle them before starting UAT?"
-    header: "Git state"
-    options:
-      - label: "Stash changes"
-        description: "git stash push -m 'pre-verify-work' — I'll restore them after UAT"
-      - label: "Commit first"
-        description: "Let me commit these changes before we start"
-      - label: "Abort"
-        description: "Cancel UAT, I'll handle my changes manually"
-    multiSelect: false
-```
+AskUserQuestion with options: Stash changes / Commit first / Abort
 
 **Handle response:**
 - "Stash changes" → `git stash push -m "pre-verify-work"`, record `pre_work_stash: "pre-verify-work"` for later
@@ -183,50 +147,14 @@ Reason over SUMMARY.md content (accomplishments, files created/modified, decisio
 | "offline", "no connection" | offline_state |
 | Normal happy path | no mock needed |
 
-For tests that remain genuinely uncertain after both the two-question framework and keyword heuristics, present them via AskUserQuestion grouped by uncertainty:
-```
-questions:
-  - question: "Does [test name] require mock data or a special app state to test?"
-    header: "Mock needed?"
-    options:
-      - label: "No mock needed"
-        description: "Can test with real/local data"
-      - label: "Needs mock"
-        description: "Requires simulated state or data"
-```
+For tests that remain genuinely uncertain after both the two-question framework and keyword heuristics, AskUserQuestion per uncertain test: No mock needed / Needs mock.
 
 **Dependency inference (both tiers):**
 - "Reply to comment" depends on "View comments"
 - "Delete account" depends on "Login"
 - Tests mentioning prior state depend on tests that create that state
 
-Build classification list:
-```yaml
-tests:
-  - name: "Login success"
-    mock_required: false
-    mock_type: null
-    dependencies: []
-
-  - name: "Login error message"
-    mock_required: true
-    mock_type: "error_state"
-    mock_reason: "error response from auth endpoint"
-    dependencies: ["login_flow"]
-
-  - name: "Recipe list loading skeleton"
-    mock_required: true
-    mock_type: "transient_state"
-    mock_reason: "loading skeleton during recipe fetch — async, resolves in <1s"
-    dependencies: []
-
-  - name: "View recipe list"
-    mock_required: true
-    mock_type: "external_data"
-    mock_reason: "recipe items from /api/recipes"
-    needs_user_confirmation: true
-    dependencies: []
-```
+Build classification list with fields: name, mock_required, mock_type, mock_reason, dependencies, needs_user_confirmation.
 </step>
 
 <step name="create_batches">
@@ -236,136 +164,24 @@ tests:
 
 **Rules:**
 1. Group by mock_type (tests needing same mock state go together)
-2. **User confirmation for external_data tests:** Before batching, collect all tests with `needs_user_confirmation: true`, grouped by data source. Present via AskUserQuestion:
-
-```
-questions:
-  - question: "Do you have [data_type] data from [source] locally?"
-    header: "[data_type]"
-    options:
-      - label: "Yes, data exists"
-        description: "I have [data_type] in my local environment"
-      - label: "No, needs mock"
-        description: "I need this data mocked for testing"
-      - label: "Skip these tests"
-        description: "Log as assumptions and move on"
-    multiSelect: false
-```
-
-Handle responses:
-- "Yes, data exists" → reclassify affected tests as `mock_required: false`
-- "No, needs mock" → keep as `mock_required: true`, `mock_type: "external_data"`
-- "Skip these tests" → mark all affected tests as `skipped`
-
-Group by data source (not per-test) to stay within AskUserQuestion's 4-question limit.
+2. **User confirmation for external_data tests:** Before batching, collect all tests with `needs_user_confirmation: true`, grouped by data source. AskUserQuestion per data source: Yes, data exists / No, needs mock / Skip these tests. Handle responses: reclassify as `mock_required: false`, keep as mock, or mark `skipped`. Group by data source (not per-test) to stay within AskUserQuestion's 4-question limit.
 
 3. **Separate transient_state batch:** Transient states use a different mock strategy (delay/force) than data mocks. Give them their own batch.
 4. Respect dependencies (if B depends on A, A must be in same or earlier batch)
 5. Max 4 tests per batch (AskUserQuestion limit)
 6. Batch ordering: no-mock → external_data → error_state → empty_response → transient_state → premium_user → offline_state
 
-**Batch structure:**
-```yaml
-batches:
-  - batch: 1
-    name: "No Mocks Required"
-    mock_type: null
-    tests: [1, 2, 3]
-
-  - batch: 2
-    name: "External Data"
-    mock_type: "external_data"
-    tests: [4, 5]
-
-  - batch: 3
-    name: "Error States"
-    mock_type: "error_state"
-    tests: [6, 7, 8]
-
-  - batch: 4
-    name: "Transient States"
-    mock_type: "transient_state"
-    tests: [9, 10]
-
-  - batch: 5
-    name: "Premium Features"
-    mock_type: "premium_user"
-    tests: [11, 12]
-```
+Each batch has: batch number, name, mock_type, and test list.
 </step>
 
 <step name="create_uat_file">
-**Create UAT file with full structure:**
+**Create UAT file:**
 
 ```bash
 mkdir -p "$PHASE_DIR"
 ```
 
-Create file at `.planning/phases/XX-name/{phase}-UAT.md`:
-
-```markdown
----
-status: testing
-phase: XX-name
-source: [list of SUMMARY.md files]
-started: [ISO timestamp]
-updated: [ISO timestamp]
-current_batch: 1
-mocked_files: []
-pre_work_stash: [from dirty tree handling, or null]
----
-
-## Progress
-
-total: [N]
-tested: 0
-passed: 0
-issues: 0
-fixing: 0
-pending: [N]
-skipped: 0
-
-## Current Batch
-
-batch: 1 of [total_batches]
-name: "[batch name]"
-mock_type: [mock_type or null]
-tests: [test numbers]
-status: pending
-
-## Tests
-
-### 1. [Test Name]
-expected: [observable behavior]
-mock_required: [true/false]
-mock_type: [type or null]
-result: [pending]
-
-### 2. [Test Name]
-...
-
-## Fixes Applied
-
-[none yet]
-
-## Batches
-
-### Batch 1: [Name]
-tests: [1, 2, 3]
-status: pending
-mock_type: null
-
-### Batch 2: [Name]
-tests: [4, 5, 6, 7]
-status: pending
-mock_type: error_state
-
-...
-
-## Assumptions
-
-[none yet]
-```
+Create file at `.planning/phases/XX-name/{phase}-UAT.md` following the template structure in context. Populate with classified tests and batch data from previous steps.
 
 Proceed to `execute_batch`.
 </step>
@@ -456,22 +272,7 @@ If user has previously indicated they want to skip mock batches, or if mock gene
 
 Collect tests for current batch (only `[pending]` and `blocked` results).
 
-Build AskUserQuestion with up to 4 questions:
-```
-questions:
-  - question: "Test {N}: {name} — {expected}"
-    header: "Test {N}"
-    options:
-      - label: "Pass"
-        description: "Works as expected"
-      - label: "Can't test"
-        description: "Blocked by a previous failure"
-      - label: "Skip"
-        description: "Assume it works (can't test this state)"
-    multiSelect: false
-```
-
-The "Other" option is auto-added for issue descriptions.
+AskUserQuestion per test (up to 4): Pass / Can't test / Skip. "Other" auto-added for issue descriptions.
 
 **Tip for users:** To skip with custom reason, select "Other" and start with `Skip:` — e.g., `Skip: Requires paid API key`.
 
@@ -680,20 +481,7 @@ Mocks are stashed — working tree is clean.
 <step name="handle_retest">
 **Handle re-test result:**
 
-Present re-test question:
-```
-questions:
-  - question: "Re-test: {test_name} — Does it work now?"
-    header: "Re-test"
-    options:
-      - label: "Pass"
-        description: "Fixed! Works correctly now"
-      - label: "Still broken"
-        description: "Same issue persists"
-      - label: "New issue"
-        description: "Original fixed but found different problem"
-    multiSelect: false
-```
+AskUserQuestion: Pass / Still broken / New issue.
 
 **If Pass:**
 - Update test: `result: pass`, `fix_status: verified`
@@ -840,6 +628,11 @@ Check if more phases remain in ROADMAP.md:
 </process>
 
 <update_rules>
+**Immutable (set on creation, never overwrite):** phase, source, started
+**Result values:** [pending], pass, issue, blocked, skipped
+**Issue adds:** reported, severity, fix_status (investigating | applied | verified), fix_commit, retry_count
+**Skipped adds:** reason
+
 **Write UAT.md after:**
 - Each batch of responses processed
 - Each fix applied
@@ -851,6 +644,7 @@ Check if more phases remain in ROADMAP.md:
 | Frontmatter.status | OVERWRITE | Phase transitions |
 | Frontmatter.current_batch | OVERWRITE | Batch transitions |
 | Frontmatter.mocked_files | OVERWRITE | Mock generation/cleanup |
+| Frontmatter.pre_work_stash | OVERWRITE | Dirty tree handling |
 | Frontmatter.updated | OVERWRITE | Every write |
 | Progress | OVERWRITE | After each test result |
 | Current Batch | OVERWRITE | Batch transitions |
@@ -879,19 +673,11 @@ Default: **major** (safe default)
 </severity_inference>
 
 <success_criteria>
-- [ ] Dirty tree handled at start
-- [ ] Tests classified by mock requirements
-- [ ] Batches created respecting dependencies and mock types
-- [ ] Mocks applied inline when needed (1-4 direct, 5+ via subagent)
-- [ ] Tests presented in batches of 4
-- [ ] Issues investigated with lightweight check (2-3 calls)
-- [ ] Simple issues fixed inline with proper commit
-- [ ] Complex issues escalated to fixer subagent
-- [ ] Re-test retries (2 max, tracked via retry_count) before offering options
+- [ ] Mocks stashed before fixing, restored after (git stash push/pop cycle)
+- [ ] Stash conflicts auto-resolved to fix version (git checkout --theirs)
 - [ ] Blocked tests re-presented after blocking issues resolved
-- [ ] Stash conflicts auto-resolved to fix version
-- [ ] Mocks reverted on completion (git checkout)
+- [ ] Failed re-tests get 2 retries then options (tracked via retry_count)
+- [ ] All mocks reverted on completion (git checkout -- <mocked_files>)
 - [ ] UAT fixes patch generated
-- [ ] User's pre-existing work restored
-- [ ] UAT.md committed with final summary
+- [ ] User's pre-existing work restored from stash
 </success_criteria>

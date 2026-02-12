@@ -82,18 +82,11 @@ Phase: $ARGUMENTS (optional)
 </anti_patterns>
 
 <success_criteria>
-- [ ] Dirty tree handled at start (stash/commit/abort)
-- [ ] Tests extracted from SUMMARY.md and classified
-- [ ] Tests batched by mock requirements
-- [ ] Mocks applied inline when needed (1-4 direct, 5+ via subagent)
-- [ ] Tests presented in batches of 4 using AskUserQuestion
-- [ ] Issues investigated with lightweight check first
-- [ ] Simple issues fixed inline with proper commit message
-- [ ] Complex issues escalated to fixer subagent
-- [ ] Failed re-tests get 2 retries then options
-- [ ] Stash conflicts auto-resolved to fix version
-- [ ] Mocks reverted on completion (git checkout)
+- [ ] Mocks stashed before fixing, restored after (git stash push/pop cycle)
+- [ ] Stash conflicts auto-resolved to fix version (git checkout --theirs)
+- [ ] Blocked tests re-presented after blocking issues resolved
+- [ ] Failed re-tests get 2 retries then options (tracked via retry_count)
+- [ ] All mocks reverted on completion (git checkout -- <mocked_files>)
 - [ ] UAT fixes patch generated
-- [ ] User's pre-existing work restored
-- [ ] UAT.md committed with final summary
+- [ ] User's pre-existing work restored from stash
 </success_criteria>
