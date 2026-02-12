@@ -1,6 +1,6 @@
 ---
 name: flutter-code-quality
-description: Flutter/Dart code quality, widget organization, and folder structure guidelines. Use when reviewing, refactoring, or cleaning up Flutter code after implementation.
+description: Organize Flutter/Dart code to follow project conventions. Use after implementation to restructure folders, fix widget file organization, align naming patterns, or clean up code to match project standards.
 license: MIT
 metadata:
   author: Roland Tolnay

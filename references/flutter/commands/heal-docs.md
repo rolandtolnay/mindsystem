@@ -1,5 +1,5 @@
 ---
-description: Optimize Markdown documentation for LLM consumption — single files or entire skill/reference folders
+description: Optimize Markdown skill and reference documentation for LLM consumption. Use on SKILL.md content, reference files, or entire documentation folders.
 argument-hint: "<file-or-folder-path>"
 allowed-tools: [Read, Write, Edit, Glob, Grep, AskUserQuestion]
 ---

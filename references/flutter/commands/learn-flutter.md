@@ -1,5 +1,5 @@
 ---
-description: Extract Flutter/Dart coding principles from code changes and update the remote gist
+description: Learn from recent Flutter/Dart code changes and update the remote coding principles gist. Use after completing Flutter implementation work.
 argument-hint: [focus_instructions] [number] [commit_sha]
 allowed-tools: Bash, Read, Grep, Glob, Write
 ---

@@ -1,6 +1,6 @@
 ---
 name: flutter-code-simplification
-description: Flutter/Dart code simplification principles. Use when simplifying, refactoring, or cleaning up Flutter code for clarity and maintainability.
+description: Reduce complexity in Flutter/Dart code. Use when code is too nested, hard to read, or has duplication. Extracts widgets, flattens logic, removes unnecessary abstraction.
 license: MIT
 metadata:
   author: Roland Tolnay

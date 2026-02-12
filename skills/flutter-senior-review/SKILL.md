@@ -1,6 +1,6 @@
 ---
 name: flutter-senior-review
-description: Senior engineering principles for Flutter/Dart code reviews. Apply when reviewing, refactoring, or writing Flutter code to identify structural improvements that make code evolvable, not just working.
+description: Review Flutter/Dart code for architectural and structural design issues. Use when reviewing PRs, auditing widget design, evaluating state management, or identifying problems that make code hard to evolve.
 license: MIT
 metadata:
   author: Roland Tolnay

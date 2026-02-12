@@ -1,5 +1,5 @@
 ---
-description: Extract reusable Flutter/Dart patterns from the current project into LLM-optimized documentation
+description: Extract reusable Flutter/Dart patterns from project code into LLM-optimized reference docs. Use when capturing widget patterns, architecture conventions, or coding standards as documentation.
 argument-hint: "<pattern-area-description>"
 allowed-tools: [Task, AskUserQuestion, Glob, Grep, Read, Write, Bash]
 ---
