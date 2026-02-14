@@ -105,6 +105,8 @@ Created after each plan execution via inline instructions in the executor workfl
 
 **Machine-readable frontmatter:** subsystem, provides, affects, patterns-established, key-decisions, key-files, mock_hints.
 
+**Subsystem vocabulary growth:** If plan work introduces a novel subsystem not in config.json, the executor appends it to the `subsystems` array, uses it in SUMMARY.md frontmatter, and logs the addition in the summary's decisions section. No blocking gate — append and log immediately. Future phases pick up the new subsystem automatically.
+
 **Substantive one-liner:**
 - Good: "JWT auth with refresh rotation using jose library"
 - Bad: "Phase complete"

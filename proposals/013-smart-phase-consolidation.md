@@ -314,31 +314,35 @@ The transition is seamless: phases always load knowledge files. Within-milestone
 
 ### Process
 
-1. **Determine affected subsystems.** Read phase SUMMARY.md frontmatter for `subsystem` field. Check if phase artifacts mention additional subsystems. Typically 1-2 subsystems per phase, occasionally 3.
+1. **Determine affected subsystems.** Take the union of all `subsystem` values from the phase's SUMMARY.md frontmatter fields. Each plan's SUMMARY.md has exactly one subsystem — a phase with 3 plans may yield up to 3 affected subsystems. This set is explicit and unambiguous.
 
-2. **Read existing knowledge files** for affected subsystems (if they exist).
+2. **Read existing knowledge files** for affected subsystems (if they exist). On first run, `.planning/knowledge/` may not exist — handle gracefully.
 
-3. **Read phase artifacts.** For each artifact type, extract knowledge by section:
+3. **Validate subsystem alignment.** Compare `knowledge/*.md` filenames against config.json subsystems. Warn in consolidation report if orphaned knowledge files exist (filename doesn't match any config.json subsystem). This catches renames and typos without automating the fix.
+
+4. **Read phase artifacts.** For each artifact type, extract knowledge by section:
    - CONTEXT.md → locked decisions, vision elements that inform future work, deferred ideas (as scope notes)
    - DESIGN.md → component specs, design tokens, UX flows, verification criteria
    - RESEARCH.md → stack recommendations, architecture patterns, don't-hand-roll solutions, pitfalls
    - SUMMARY.md → accomplishments (architecture), key-decisions, patterns-established, issues encountered (pitfalls), key-files
    - Not all artifacts exist for every phase — handle missing files gracefully
 
-4. **Merge into knowledge file sections.** For each affected subsystem:
+5. **Distribute content to subsystems.** Plan-level artifacts (SUMMARY.md) map 1:1 to their `subsystem` field — direct assignment. Phase-level artifacts (CONTEXT.md, DESIGN.md, RESEARCH.md) span the whole phase and may cover multiple subsystems. Distribute their content across the known set of affected subsystems (from step 1) using content analysis. This is bounded judgment over 2-3 options, not open-ended classification.
+
+6. **Merge into knowledge file sections.** For each affected subsystem:
    - Decisions: add new, update superseded, remove contradicted
    - Architecture: update structural description with new components/patterns
    - Design: add new specs, update changed specs
    - Pitfalls: add new, deduplicate with existing
    - Key Files: add new, remove renamed/deleted
 
-5. **Write updated knowledge files.** One file per affected subsystem in `.planning/knowledge/`.
+7. **Handle cross-cutting concerns.** If the phase touches multiple subsystems, write the relevant facet of shared decisions/patterns into each subsystem's file with light cross-references.
 
-6. **Handle cross-cutting concerns.** If the phase touches multiple subsystems, write the relevant facet of shared decisions/patterns into each subsystem's file with light cross-references.
+8. **Write updated knowledge files.** Use `mkdir -p .planning/knowledge/` before writing. One file per affected subsystem.
 
-7. **Delete PLAN.md files.** Execution instructions consumed — zero future value.
+9. **Delete PLAN.md files.** Execution instructions consumed — zero future value.
 
-8. **Return consolidation report** to execute-phase orchestrator.
+10. **Return consolidation report** to execute-phase orchestrator. Include subsystem alignment warnings from step 3 if any.
 
 ### Output
 
@@ -357,6 +361,7 @@ Per-subsystem knowledge files following the format defined above, plus a consoli
 
 **Files deleted:** {list of PLAN.md files}
 **Files preserved:** CONTEXT.md, DESIGN.md, RESEARCH.md, SUMMARY.md (safety net)
+**Alignment warnings:** {orphaned knowledge files not in config.json, or "none"}
 ```
 
 ### Verify-Work Lightweight Update
@@ -514,12 +519,12 @@ Next milestone (any phase) → loads knowledge/{subsystem}.md (same mechanism)
 
 ---
 
-## Open Questions
+## Design Decisions (Resolved)
 
-1. **Knowledge file frontmatter.** Should subsystem knowledge files have YAML frontmatter for machine-readable metadata (subsystem name, last updated, source phases)? This would enable cheap scanning without reading full content. Trade-off: adds structural overhead to what should be a clean document.
+1. **No knowledge file frontmatter.** Knowledge files have no YAML frontmatter. The filename is the address (`knowledge/auth.md` → auth subsystem), the one-line summary under the heading provides orientation. Frontmatter serves selective loading — scanning metadata to decide whether to read the full file. Knowledge files don't need selection; they're loaded directly by subsystem match from ROADMAP.md + config.json. Every token in a knowledge file should serve the consuming phase, not provenance tracking. Provenance lives in git history.
 
-2. **First phase of first milestone.** No knowledge files exist. All pre-planning phases gracefully handle missing `.planning/knowledge/` directory. Consolidator creates the directory on first run. No special cases needed — but worth verifying in implementation.
+2. **First phase is a non-issue.** No knowledge files exist on first run. The consolidator uses `mkdir -p .planning/knowledge/` before writing (step 8). All consuming phases use the same existence-check patterns already used for CONTEXT.md, DESIGN.md, and RESEARCH.md (`cat ... 2>/dev/null` or `ls ... 2>/dev/null`). "No prior knowledge" is the correct state for the first phase — no special cases needed.
 
-3. **Subsystem renaming.** If a subsystem is renamed in config.json (e.g., "auth" → "authentication"), the corresponding knowledge file needs renaming. Should the consolidator detect this, or is it a manual operation? Low frequency, manageable either way.
+3. **Subsystem renaming is a manual operation.** Automated detection requires either stored rename history or fuzzy matching — both add complexity for a near-zero-frequency event. Instead, the consolidator validates alignment: compare `knowledge/*.md` filenames against config.json subsystems and warn on mismatches (step 3). This catches renames and typos without automating the fix. The human decides whether to rename (`mv`), merge, or delete the orphaned file.
 
-4. **Multiple subsystems per phase.** A phase touching 3 subsystems requires reading 3 existing knowledge files and writing 3 updated files. The consolidator must determine which knowledge belongs to which subsystem. The subsystem assignment comes from: SUMMARY.md frontmatter (primary subsystem), PLAN.md inline metadata, and consolidator judgment for cross-cutting content.
+4. **Multiple subsystems use explicit + bounded judgment.** Affected subsystems come from the union of all `subsystem` values in the phase's SUMMARY.md frontmatter fields — explicit and unambiguous. Plan-level artifacts (SUMMARY.md) map 1:1 to their subsystem. Phase-level artifacts (CONTEXT.md, DESIGN.md, RESEARCH.md) are distributed across the known set of affected subsystems using content analysis (step 5). This is bounded LLM judgment over 2-3 already-identified options, not open-ended classification.
