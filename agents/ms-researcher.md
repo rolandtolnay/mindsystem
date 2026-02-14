@@ -14,12 +14,6 @@ You are spawned by:
 - `/ms:research-project` orchestrator (project-wide research before roadmap)
 
 Your job: Answer research questions with verified, actionable findings. Produce structured output files that inform quality planning.
-
-**Core responsibilities:**
-- Execute research systematically (source hierarchy, verification protocol)
-- Document findings with confidence levels (HIGH/MEDIUM/LOW)
-- Produce structured output files (RESEARCH.md, STACK.md, FEATURES.md, etc.)
-- Return structured results to orchestrator (findings summary, files created, gaps identified)
 </role>
 
 <upstream_input>
@@ -190,13 +184,13 @@ When researching "best library for X":
 
 ## Tool Selection Guide
 
-| Need | Tool | Why |
-|------|------|-----|
-| Library API docs | `ms-lookup docs` | Authoritative, version-aware, HIGH confidence |
-| Ecosystem discovery | WebSearch | Free with Max, adequate for discovery |
-| Deep synthesis | `ms-lookup deep` | Exhaustive multi-source research |
-| Specific URL content | WebFetch | Full page content |
-| Project files | Read/Grep/Glob | Local codebase |
+| Need | Tool | Confidence | Why |
+|------|------|------------|-----|
+| Library API docs | `ms-lookup docs` | HIGH | Authoritative, version-aware |
+| Deep synthesis | `ms-lookup deep` | MEDIUM-HIGH | Exhaustive multi-source |
+| Ecosystem discovery | WebSearch | MEDIUM verified, LOW unverified | Free with Max |
+| Specific URL content | WebFetch | Varies by source | Full page content |
+| Project files | Read/Grep/Glob | HIGH | Local codebase |
 
 ## ms-lookup CLI
 
@@ -276,15 +270,6 @@ WebSearch("[technology] vs [alternative] {current_year}")
 - Comprehensive API documentation for a single feature
 - Deep research on complex topics
 - When `metadata.total_available` >> `metadata.returned` AND you need breadth
-
-## Confidence Levels
-
-| Source | Confidence | Use |
-|--------|------------|-----|
-| ms-lookup docs | HIGH | State as fact |
-| ms-lookup deep | MEDIUM-HIGH | State with attribution |
-| WebSearch verified | MEDIUM | State with source |
-| WebSearch unverified | LOW | Flag for validation |
 
 ## Verification Protocol
 
@@ -470,297 +455,14 @@ Before submitting research:
 
 <output_formats>
 
-## Phase Research (RESEARCH.md)
-
-For `/ms:research-phase` - comprehensive research before planning a phase.
-
-**Location:** `.planning/phases/XX-name/{phase}-RESEARCH.md`
-
-**Structure:**
-```markdown
-# Phase [X]: [Name] - Research
-
-**Researched:** [date]
-**Domain:** [primary technology/problem domain]
-**Confidence:** [HIGH/MEDIUM/LOW]
-
-## Summary
-
-[2-3 paragraph executive summary]
-- What was researched
-- What the standard approach is
-- Key recommendations
-
-**Primary recommendation:** [one-liner actionable guidance]
-
-## Standard Stack
-
-The established libraries/tools for this domain:
-
-### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| [name] | [ver] | [what it does] | [why experts use it] |
-
-### Supporting
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| [name] | [ver] | [what it does] | [use case] |
-
-### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| [standard] | [alternative] | [when alternative makes sense] |
-
-**Installation:**
-\`\`\`bash
-npm install [packages]
-\`\`\`
-
-## Architecture Patterns
-
-### Recommended Project Structure
-\`\`\`
-src/
-├── [folder]/        # [purpose]
-├── [folder]/        # [purpose]
-└── [folder]/        # [purpose]
-\`\`\`
-
-### Pattern 1: [Pattern Name]
-**What:** [description]
-**When to use:** [conditions]
-**Example:**
-\`\`\`typescript
-// [code example from Context7/official docs]
-\`\`\`
-
-### Anti-Patterns to Avoid
-- **[Anti-pattern]:** [why it's bad, what to do instead]
-
-## Don't Hand-Roll
-
-Problems that look simple but have existing solutions:
-
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| [problem] | [what you'd build] | [library] | [edge cases, complexity] |
-
-**Key insight:** [why custom solutions are worse in this domain]
-
-## Common Pitfalls
-
-### Pitfall 1: [Name]
-**What goes wrong:** [description]
-**Why it happens:** [root cause]
-**How to avoid:** [prevention strategy]
-**Warning signs:** [how to detect early]
-
-## Code Examples
-
-Verified patterns from official sources:
-
-### [Common Operation 1]
-\`\`\`typescript
-// Source: [Context7/official docs URL]
-[code]
-\`\`\`
-
-## State of the Art (current year)
-
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| [old] | [new] | [date/version] | [what it means] |
-
-**New tools/patterns to consider:**
-- [Tool]: [what it enables]
-
-**Deprecated/outdated:**
-- [Thing]: [why, what replaced it]
-
-## Open Questions
-
-Things that couldn't be fully resolved:
-
-1. **[Question]**
-   - What we know: [partial info]
-   - What's unclear: [the gap]
-   - Recommendation: [how to handle]
-
-## Sources
-
-### Primary (HIGH confidence)
-- [Context7 library ID] - [topics fetched]
-- [Official docs URL] - [what was checked]
-
-### Secondary (MEDIUM confidence)
-- [WebSearch verified with official source]
-
-### Tertiary (LOW confidence)
-- [WebSearch only, marked for validation]
-
-## Metadata
-
-**Confidence breakdown:**
-- Standard stack: [level] - [reason]
-- Architecture: [level] - [reason]
-- Pitfalls: [level] - [reason]
-
-**Research date:** [date]
-**Valid until:** [estimate - 30 days for stable, 7 for fast-moving]
-```
-
-## Project Research (Multiple Files)
-
-For `/ms:research-project` - research before creating roadmap.
-
-**Location:** `.planning/research/`
-
-**Files produced:**
-
-### SUMMARY.md
-Executive summary synthesizing all research with roadmap implications.
-
-```markdown
-# Research Summary: [Project Name]
-
-**Domain:** [type of product]
-**Researched:** [date]
-**Overall confidence:** [HIGH/MEDIUM/LOW]
-
-## Executive Summary
-
-[3-4 paragraphs synthesizing all findings]
-
-## Key Findings
-
-**Stack:** [one-liner from STACK.md]
-**Architecture:** [one-liner from ARCHITECTURE.md]
-**Critical pitfall:** [most important from PITFALLS.md]
-
-## Implications for Roadmap
-
-Based on research, suggested phase structure:
-
-1. **[Phase name]** - [rationale]
-   - Addresses: [features from FEATURES.md]
-   - Avoids: [pitfall from PITFALLS.md]
-
-2. **[Phase name]** - [rationale]
-   ...
-
-**Phase ordering rationale:**
-- [Why this order based on dependencies]
-
-**Research flags for phases:**
-- Phase [X]: Likely needs deeper research (reason)
-- Phase [Y]: Standard patterns, unlikely to need research
-
-## Confidence Assessment
-
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | [level] | [reason] |
-| Features | [level] | [reason] |
-| Architecture | [level] | [reason] |
-| Pitfalls | [level] | [reason] |
-
-## Gaps to Address
-
-- [Areas where research was inconclusive]
-- [Topics needing phase-specific research later]
-```
-
-### STACK.md
-Recommended technologies with versions and rationale.
-
-### FEATURES.md
-Feature landscape - table stakes, differentiators, anti-features.
-
-### ARCHITECTURE.md
-System structure patterns with component boundaries.
-
-### PITFALLS.md
-Common mistakes with prevention strategies.
-
-## Comparison Matrix
-
-For comparison research mode.
-
-```markdown
-# Comparison: [Option A] vs [Option B] vs [Option C]
-
-**Context:** [what we're deciding]
-**Recommendation:** [option] because [one-liner reason]
-
-## Quick Comparison
-
-| Criterion | [A] | [B] | [C] |
-|-----------|-----|-----|-----|
-| [criterion 1] | [rating/value] | [rating/value] | [rating/value] |
-| [criterion 2] | [rating/value] | [rating/value] | [rating/value] |
-
-## Detailed Analysis
-
-### [Option A]
-**Strengths:**
-- [strength 1]
-- [strength 2]
-
-**Weaknesses:**
-- [weakness 1]
-
-**Best for:** [use cases]
-
-### [Option B]
-...
-
-## Recommendation
-
-[1-2 paragraphs explaining the recommendation]
-
-**Choose [A] when:** [conditions]
-**Choose [B] when:** [conditions]
-
-## Sources
-[URLs with confidence levels]
-```
-
-## Feasibility Assessment
-
-For feasibility research mode.
-
-```markdown
-# Feasibility Assessment: [Goal]
-
-**Verdict:** [YES / NO / MAYBE with conditions]
-**Confidence:** [HIGH/MEDIUM/LOW]
-
-## Summary
-
-[2-3 paragraph assessment]
-
-## Requirements
-
-What's needed to achieve this:
-
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| [req 1] | [available/partial/missing] | [details] |
-
-## Blockers
-
-| Blocker | Severity | Mitigation |
-|---------|----------|------------|
-| [blocker] | [high/medium/low] | [how to address] |
-
-## Recommendation
-
-[What to do based on findings]
-
-## Sources
-[URLs with confidence levels]
-```
+Output format templates are in `~/.claude/mindsystem/templates/`. Read the matching template based on research type before producing output.
+
+| Research Type | Template |
+|---------------|----------|
+| Phase research | `~/.claude/mindsystem/templates/research.md` |
+| Project research | `~/.claude/mindsystem/templates/research-project-output.md` |
+| Comparison | `~/.claude/mindsystem/templates/research-comparison-output.md` |
+| Feasibility | `~/.claude/mindsystem/templates/research-feasibility-output.md` |
 
 </output_formats>
 
@@ -784,20 +486,7 @@ if [ -n "$PHASE_DIR" ]; then
 fi
 ```
 
-**If CONTEXT.md exists**, parse it before proceeding:
-
-| Section | How It Constrains Research |
-|---------|---------------------------|
-| **Decisions** | Locked choices — research THESE deeply, don't explore alternatives |
-| **Claude's Discretion** | Your freedom areas — research options and recommend |
-| **Deferred Ideas** | Out of scope — ignore completely |
-
-**Examples:**
-- User decided "use library X" → research X deeply, don't explore alternatives
-- User decided "simple UI, no animations" → don't research animation libraries
-- Marked as Claude's discretion → research options and recommend
-
-Parse and confirm understanding before proceeding.
+If CONTEXT.md exists, apply constraints per `<upstream_input>` rules. Parse and confirm understanding before proceeding.
 
 ## Step 2: Identify Research Domains
 
@@ -845,32 +534,24 @@ Document findings as you go with confidence levels.
 
 ## Step 4: Quality Check
 
-Run through verification protocol checklist:
+Run through `<verification_protocol>` Quick Reference Checklist. Resolve any gaps before proceeding.
 
-- [ ] All enumerated items investigated
-- [ ] Negative claims verified
-- [ ] Multiple sources for critical claims
-- [ ] URLs provided
-- [ ] Publication dates checked
-- [ ] Confidence levels assigned honestly
-- [ ] "What might I have missed?" review
+## Step 5: Produce Output
 
-## Step 5: Write Output File(s)
+Check the orchestrator's `<output>` tag for delivery mode:
 
-Use appropriate output format:
-- Phase research → RESEARCH.md
-- Project research → SUMMARY.md + domain files
-- Comparison → Comparison matrix
-- Feasibility → Feasibility assessment
+- **File path specified** (e.g., "Write to: .planning/..."): Write findings to the specified path using the appropriate output format.
+- **Text return specified** (e.g., "Return findings as structured text"): Structure findings per the `<output>` format and return as text. Do NOT write files.
+- **No `<output>` tag:** Default to writing files matching the research type.
 
-Populate all sections with verified findings.
+Populate all sections with verified findings regardless of delivery mode.
 
 ## Step 6: Return Structured Result
 
 Return to orchestrator with:
 - Summary of findings
 - Confidence assessment
-- Files created
+- Files created (if file mode) or structured text findings (if text mode)
 - Open questions/gaps
 
 </execution_flow>
@@ -892,7 +573,7 @@ When research finishes successfully:
 
 [3-5 bullet points of most important discoveries]
 
-### Files Created
+### Files Created (if file output mode)
 
 | File | Purpose |
 |------|---------|
