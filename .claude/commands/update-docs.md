@@ -33,31 +33,16 @@ git log --oneline -5
 </context>
 
 <process>
-1. **Understand the change** — Identify what was added/modified:
-   - New command? New agent? Modified workflow?
-   - What behavior changed?
-   - What does the user need to know?
+1. **Classify the change** — Determines which sections to update:
+   - **New command** → add entries in all three files
+   - **Modified workflow** → update existing entries in all three files
+   - **New agent** → update ms-meta `<agents_index>`, help.md if user-facing
 
-2. **Update README.md** — Public-facing, concise:
-   - **Command table** (line ~333): One-line description, keep it brief
-   - **Playbooks section**: Only if the change affects common workflows
-   - **Style**: Marketing-friendly, focus on user value
-   - **DON'T**: Add implementation details or exhaustive options
+2. **Update README.md** — Command table entry and playbooks section per guidelines below
 
-3. **Update commands/ms/help.md** — Detailed reference:
-   - **Command section**: Full description with options and flags
-   - **Usage examples**: Show common invocations
-   - **Workflow sections**: Update if command fits into existing workflows
-   - **Style**: Technical, complete, include all options
-   - **DON'T**: Duplicate playbook-style content from README
+3. **Update commands/ms/help.md** — Full command documentation with usage examples per guidelines below
 
-4. **Update .claude/skills/ms-meta/SKILL.md** — Claude's knowledge:
-   - **`<core_workflow>`**: Update if command sequence changed
-   - **`<agents_index>`**: Add new agents or update spawn sources
-   - **`<workflows_index>`**: Add new workflows
-   - **`<fork_features>`**: Add significant new capabilities
-   - **Style**: Concise, structured for Claude consumption
-   - **DON'T**: Add verbose explanations (Claude reads the actual files)
+4. **Update .claude/skills/ms-meta/SKILL.md** — Relevant sections per guidelines below
 
 5. **Verify consistency** — Check that all three files tell the same story:
    - Command names match exactly
@@ -69,43 +54,18 @@ git log --oneline -5
 
 ## README.md Best Practices
 
-**Command table format:**
-```markdown
-| `/ms:command-name [args]` | Brief description (what it does for the user) |
-```
-
-**Keep descriptions:**
-- User-focused (what they get, not how it works)
-- Under 70 characters
+- User-focused descriptions, under 70 characters
 - Action-oriented verbs ("Create", "Verify", "Update")
-
-**Avoid:**
-- Implementation details
-- Listing all options/flags
-- Technical jargon
+- No implementation details, no exhaustive options, no technical jargon
+- Playbooks section: only if the change affects common workflows
 
 ## commands/ms/help.md Best Practices
 
-**Command entry format:**
-```markdown
-**`/ms:command-name [args]`**
-Description of what it does.
-
-- Use when: specific situation or trigger
-- Behavior detail 1
-- Behavior detail 2
-- Options: describe flags and variations
-
-Usage: `/ms:command-name arg`
-Usage: `/ms:command-name` (auto-detect mode)
-Result: What gets created/modified
-```
-
-**Include:**
-- All command options and flags
-- Multiple usage examples
+- All command options, flags, and variations
+- Multiple usage examples with `Usage:` and `Result:` lines
 - What files get created/modified
 - When to use vs. alternatives
+- No playbook-style content duplicated from README
 
 ## .claude/skills/ms-meta/SKILL.md Best Practices
 
@@ -121,20 +81,11 @@ Result: What gets created/modified
 
 </update_guidelines>
 
-<verification>
-After updating, verify:
-
-1. **README command table** — New/changed command has correct one-liner
-2. **help.md command section** — Command fully documented with usage examples
-3. **ms-meta SKILL.md** — Relevant sections updated (workflow, agents, features)
-4. **No contradictions** — All three files describe the same behavior
-5. **No duplications** — Each file serves its purpose (overview vs. reference vs. knowledge)
-</verification>
-
 <success_criteria>
+- Changes are minimal and targeted (don't rewrite unrelated content)
+- Each file serves its purpose (overview vs. reference vs. knowledge) — no cross-duplication
+- All three files are consistent with each other
 - README.md command table updated with brief, user-focused description
 - commands/ms/help.md has complete command documentation with usage examples
 - .claude/skills/ms-meta/SKILL.md has updated workflow/agents/features sections
-- All three files are consistent with each other
-- Changes are minimal and targeted (don't rewrite unrelated content)
 </success_criteria>

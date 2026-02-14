@@ -208,6 +208,7 @@ Read source files directly for detailed knowledge:
 
 | Topic | Read |
 |-------|------|
+| Health checks & config healing | `commands/ms/doctor.md` |
 | Execution orchestration | `mindsystem/workflows/execute-phase.md` |
 | Plan execution (in subagent) | `mindsystem/workflows/execute-plan.md` |
 | Plan format & anatomy | `mindsystem/references/plan-format.md` |
