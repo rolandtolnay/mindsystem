@@ -13,25 +13,15 @@ allowed-tools:
 <objective>
 Define project requirements and create roadmap with phase breakdown.
 
-Derives REQUIREMENTS.md from MILESTONE-CONTEXT.md (or through lightweight questioning for first milestones), then maps requirements to phases.
-
 Run after `/ms:new-milestone` or `/ms:new-project` + optional `/ms:research-project`.
-
-**How it works:** Spawns ms-roadmapper agent which derives requirements AND creates roadmap in one pass, then presents combined results for approval.
 </objective>
 
 <execution_context>
-@~/.claude/mindsystem/references/principles.md
-@~/.claude/mindsystem/workflows/define-requirements.md
-@~/.claude/mindsystem/templates/requirements.md
-@~/.claude/mindsystem/templates/roadmap.md
 @~/.claude/mindsystem/templates/state.md
-@~/.claude/mindsystem/references/goal-backward.md
 </execution_context>
 
 <context>
 @.planning/PROJECT.md
-@.planning/config.json
 @.planning/MILESTONE-CONTEXT.md (if exists)
 @.planning/research/FEATURES.md (if exists)
 @.planning/research/SUMMARY.md (if exists)
@@ -342,13 +332,11 @@ Update `.planning/STATE.md` Last Command field:
 </process>
 
 <success_criteria>
-- [ ] PROJECT.md validated
-- [ ] Context gathered (from MILESTONE-CONTEXT.md, research, or questioning)
-- [ ] ms-roadmapper spawned with context
-- [ ] REQUIREMENTS.md created with REQ-IDs and scope classification
 - [ ] All v1 requirements mapped to phases (no orphans)
 - [ ] Success criteria derived for each phase (2-5 observable behaviors)
-- [ ] Requirements and roadmap presented to user for approval
 - [ ] User feedback incorporated (if any)
+- [ ] Requirements and roadmap presented to user for approval
+- [ ] ms-roadmapper spawned with full planning context
+- [ ] REQUIREMENTS.md created with REQ-IDs and scope classification
 - [ ] REQUIREMENTS.md, ROADMAP.md, STATE.md committed after approval
 </success_criteria>

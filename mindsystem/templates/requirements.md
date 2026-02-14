@@ -110,23 +110,7 @@ Which phases cover which requirements. Updated by create-roadmap.
 </guidelines>
 
 <evolution>
-
-**After each phase completes:**
-1. Mark covered requirements as Complete
-2. Update traceability status
-3. Note any requirements that changed scope
-
-**After roadmap updates:**
-1. Verify all v1 requirements still mapped
-2. Add new requirements if scope expanded
-3. Move requirements to v2/out of scope if descoped
-
-**Requirement completion criteria:**
-- Requirement is "Complete" when:
-  - Feature is implemented
-  - Feature is verified (tests pass, manual check done)
-  - Feature is committed
-
+Update requirements after phase completion: mark requirements Complete, update traceability status. After roadmap changes: verify all v1 requirements still mapped, add/move requirements as scope changes. A requirement is "Complete" when implemented, verified, and committed.
 </evolution>
 
 <example>
@@ -143,31 +127,13 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 - [ ] **AUTH-01**: User can sign up with email and password
 - [ ] **AUTH-02**: User receives email verification after signup
-- [ ] **AUTH-03**: User can reset password via email link
-- [ ] **AUTH-04**: User session persists across browser refresh
 
 ### Profiles
 
 - [ ] **PROF-01**: User can create profile with display name
 - [ ] **PROF-02**: User can upload avatar image
-- [ ] **PROF-03**: User can write bio (max 500 chars)
-- [ ] **PROF-04**: User can view other users' profiles
 
-### Content
-
-- [ ] **CONT-01**: User can create text post
-- [ ] **CONT-02**: User can upload image with post
-- [ ] **CONT-03**: User can edit own posts
-- [ ] **CONT-04**: User can delete own posts
-- [ ] **CONT-05**: User can view feed of posts
-
-### Social
-
-- [ ] **SOCL-01**: User can follow other users
-- [ ] **SOCL-02**: User can unfollow users
-- [ ] **SOCL-03**: User can like posts
-- [ ] **SOCL-04**: User can comment on posts
-- [ ] **SOCL-05**: User can view activity feed (followed users' posts)
+[... additional categories ...]
 
 ## v2 Requirements
 
@@ -175,16 +141,7 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 - **NOTF-01**: User receives in-app notifications
 - **NOTF-02**: User receives email for new followers
-- **NOTF-03**: User receives email for comments on own posts
-- **NOTF-04**: User can configure notification preferences
-
-### Moderation
-
-- **MODR-01**: User can report content
-- **MODR-02**: User can block other users
-- **MODR-03**: Admin can view reported content
-- **MODR-04**: Admin can remove content
-- **MODR-05**: Admin can ban users
+- **NOTF-03**: User can configure notification preferences
 
 ## Out of Scope
 
@@ -193,7 +150,6 @@ Which phases cover which requirements. Updated by create-roadmap.
 | Real-time chat | High complexity, not core to community value |
 | Video posts | Storage/bandwidth costs, defer to v2+ |
 | OAuth login | Email/password sufficient for v1 |
-| Mobile app | Web-first, mobile later |
 
 ## Traceability
 
@@ -201,22 +157,8 @@ Which phases cover which requirements. Updated by create-roadmap.
 |-------------|-------|--------|
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
 | PROF-01 | Phase 2 | Pending |
 | PROF-02 | Phase 2 | Pending |
-| PROF-03 | Phase 2 | Pending |
-| PROF-04 | Phase 2 | Pending |
-| CONT-01 | Phase 3 | Pending |
-| CONT-02 | Phase 3 | Pending |
-| CONT-03 | Phase 3 | Pending |
-| CONT-04 | Phase 3 | Pending |
-| CONT-05 | Phase 3 | Pending |
-| SOCL-01 | Phase 4 | Pending |
-| SOCL-02 | Phase 4 | Pending |
-| SOCL-03 | Phase 4 | Pending |
-| SOCL-04 | Phase 4 | Pending |
-| SOCL-05 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total

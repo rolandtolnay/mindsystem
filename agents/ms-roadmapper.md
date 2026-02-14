@@ -115,8 +115,6 @@ NEVER include phases for:
 - Documentation for documentation's sake
 - Change management processes
 
-If it sounds like corporate PM theater, delete it.
-
 ## Requirements Drive Structure
 
 **Derive phases from requirements. Don't impose structure.**
@@ -503,26 +501,7 @@ Parse and confirm understanding before proceeding.
 
 ## Step 2: Derive Requirements
 
-Apply `<requirements_derivation>` process:
-1. Extract features from MILESTONE-CONTEXT.md (or gathered context)
-2. Cross-reference research/FEATURES.md if available
-3. Transform features into atomic requirements with REQ-IDs
-4. Classify scope (v1/v2/out-of-scope) using milestone priorities
-5. Validate core value alignment against PROJECT.md
-6. **Write REQUIREMENTS.md immediately** using template
-
-```
-Requirements derived:
-- v1: 11 requirements across 4 categories
-- v2: 5 requirements deferred
-- Out of scope: 3 exclusions
-
-Categories:
-- Authentication: 3 requirements (AUTH-01, AUTH-02, AUTH-03)
-- Profiles: 2 requirements (PROF-01, PROF-02)
-- Content: 4 requirements (CONT-01, CONT-02, CONT-03, CONT-04)
-- Social: 2 requirements (SOC-01, SOC-02)
-```
+Apply `<requirements_derivation>` process. Write REQUIREMENTS.md immediately using template.
 
 ## Step 3: Load Research Context (if exists)
 
@@ -535,23 +514,11 @@ Research informs phase identification but requirements drive coverage.
 
 ## Step 4: Identify Phases
 
-Apply phase identification methodology:
-1. Group requirements by natural delivery boundaries
-2. Identify dependencies between groups
-3. Create phases that complete coherent capabilities
+Apply `<phase_identification>` methodology.
+
 ## Step 5: Derive Success Criteria and Pre-Work Flags
 
-For each phase, apply goal-backward:
-1. State phase goal (outcome, not task)
-2. Derive 2-5 observable truths (user perspective)
-3. Cross-check against requirements
-4. Flag any gaps
-
-Then derive pre-work recommendations using indicators from `<pre_work_analysis>`:
-5. Assess Research need (technical unknowns)
-6. Assess Discuss need (vision unknowns)
-7. Assess Design need (visual unknowns)
-8. Add topic/focus fields only when Likely
+Apply `<goal_backward_phases>` process for each phase, then derive pre-work recommendations using indicators from `<pre_work_analysis>`.
 
 ## Step 6: Validate Coverage
 
@@ -719,14 +686,6 @@ Examples:
 
 ## What Not to Do
 
-**Don't impose arbitrary structure:**
-- Bad: "All projects need 5-7 phases"
-- Good: Derive phases from requirements
-
-**Don't use horizontal layers:**
-- Bad: Phase 1: Models, Phase 2: APIs, Phase 3: UI
-- Good: Phase 1: Complete Auth feature, Phase 2: Complete Content feature
-
 **Don't skip coverage validation:**
 - Bad: "Looks like we covered everything"
 - Good: Explicit mapping of every requirement to exactly one phase
@@ -734,10 +693,6 @@ Examples:
 **Don't write vague success criteria:**
 - Bad: "Authentication works"
 - Good: "User can log in with email/password and stay logged in across sessions"
-
-**Don't add project management artifacts:**
-- Bad: Time estimates, Gantt charts, resource allocation, risk matrices
-- Good: Phases, goals, requirements, success criteria
 
 **Don't duplicate requirements across phases:**
 - Bad: AUTH-01 in Phase 2 AND Phase 3
@@ -749,33 +704,12 @@ Examples:
 
 Roadmap is complete when:
 
-- [ ] MILESTONE-CONTEXT.md (or gathered context) parsed
-- [ ] Features extracted and transformed into requirements
+- [ ] Phases derived from requirements (not imposed as arbitrary structure)
+- [ ] 100% requirement coverage validated (no orphans, no duplicates)
+- [ ] Success criteria cross-checked against requirements (gaps resolved)
 - [ ] v1/v2/out-of-scope classified using milestone priorities
 - [ ] Core value alignment validated against PROJECT.md
-- [ ] REQUIREMENTS.md written with REQ-IDs
-- [ ] PROJECT.md core value understood
-- [ ] All v1 requirements extracted with IDs
-- [ ] Research context loaded (if exists)
-- [ ] Phases derived from requirements (not imposed)
-- [ ] Dependencies between phases identified
-- [ ] Success criteria derived for each phase (2-5 observable behaviors)
-- [ ] Success criteria cross-checked against requirements (gaps resolved)
-- [ ] 100% requirement coverage validated (no orphans)
-- [ ] ROADMAP.md structure complete
-- [ ] STATE.md structure complete
-- [ ] REQUIREMENTS.md traceability update prepared
-- [ ] Draft presented for user approval
-- [ ] User feedback incorporated (if any)
-- [ ] Files written (after approval)
-- [ ] Structured return provided to orchestrator
-
-Quality indicators:
-
-- **Coherent phases:** Each delivers one complete, verifiable capability
-- **Clear success criteria:** Observable from user perspective, not implementation details
-- **Full coverage:** Every requirement mapped, no orphans
-- **Natural structure:** Phases feel inevitable, not arbitrary
-- **Honest gaps:** Coverage issues surfaced, not hidden
+- [ ] Pre-work recommendations assessed for each phase
+- [ ] All files written to disk before returning
 
 </success_criteria>

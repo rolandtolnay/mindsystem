@@ -4,8 +4,6 @@ Define concrete, checkable requirements for v1.
 Two modes:
 1. **With research** — Transform FEATURES.md into scoped requirements
 2. **Without research** — Gather requirements through questioning
-
-This is the bridge between "what's possible/wanted" and "what we're committing to."
 </purpose>
 
 <required_reading>
@@ -318,13 +316,11 @@ Requirements defined:
 </quality_criteria>
 
 <success_criteria>
-- [ ] PROJECT.md core value extracted
-- [ ] Features gathered (from research OR conversation)
-- [ ] All categories presented to user
-- [ ] User scoped each category (v1/v2/out of scope)
-- [ ] User had opportunity to add requirements
 - [ ] Core value alignment validated
+- [ ] User had opportunity to add requirements
+- [ ] User scoped each category (v1/v2/out of scope)
+- [ ] All categories presented to user
 - [ ] REQUIREMENTS.md created with REQ-IDs
 - [ ] v1, v2, and out of scope clearly separated
-- [ ] Requirements committed to git
+- [ ] Features gathered (from research OR conversation)
 </success_criteria>
