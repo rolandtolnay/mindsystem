@@ -218,15 +218,11 @@ Use `+N` for new entries added, `updated` for sections rewritten with changes, `
 </critical_rules>
 
 <success_criteria>
-- [ ] Affected subsystems determined from SUMMARY.md `subsystem` fields
-- [ ] Existing knowledge files read (or handled gracefully on first run)
 - [ ] Subsystem alignment validated against config.json
-- [ ] Phase artifacts read (missing files handled gracefully)
 - [ ] Content extracted and distributed per extraction guide
 - [ ] Knowledge files written to `.planning/knowledge/`
 - [ ] Empty sections omitted from knowledge files
 - [ ] PLAN.md files deleted from phase directory
 - [ ] CONTEXT.md, DESIGN.md, RESEARCH.md, SUMMARY.md preserved
-- [ ] Consolidation report returned to orchestrator
 - [ ] No commits made
 </success_criteria>

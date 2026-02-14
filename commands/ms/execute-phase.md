@@ -237,15 +237,12 @@ After all plans in phase complete:
 
 <success_criteria>
 - [ ] All incomplete plans in phase executed
-- [ ] Each plan has SUMMARY.md
 - [ ] Code review completed (or skipped if config says "skip")
 - [ ] Phase goal verified (Must-Haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] Patch file generated OR explicitly skipped with message
 - [ ] Knowledge files written to .planning/knowledge/ (consolidation complete)
 - [ ] PLAN.md files deleted from phase directory
-- [ ] STATE.md reflects phase completion
-- [ ] ROADMAP.md updated
+- [ ] STATE.md and ROADMAP.md reflect phase completion
 - [ ] REQUIREMENTS.md updated (phase requirements marked Complete)
-- [ ] User informed of next steps
 </success_criteria>
