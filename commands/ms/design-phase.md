@@ -107,6 +107,23 @@ If exists, extract:
 - What Must Be Nailed (essentials)
 - Specific Ideas (references to products)
 
+**3b2. Optional context — prior knowledge:**
+
+```bash
+# Determine subsystem from ROADMAP phase description + config.json
+jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+# Load matching knowledge files
+cat .planning/knowledge/{subsystem}.md 2>/dev/null
+```
+
+If knowledge files exist, extract:
+- Architecture patterns (tech constraints the design must respect)
+- Prior design patterns (visual consistency)
+- Key decisions (constraints)
+- Pitfalls (design must avoid known traps)
+
+Pass the extracted knowledge to ms-designer in the design prompt (see step 5 `<prior_knowledge>` block).
+
 **3c. Optional context — project UI skill:**
 
 Scan the skills list in the most recent system-reminder for a skill whose description mentions UI patterns, components, design system, or implementation styling (e.g., "Flutter/Dart patterns", "React component library", "UI implementation patterns").
@@ -237,6 +254,23 @@ Reference products:
 Vision inferred from phase requirements and PROJECT.md context.
 Reference products: [From Q&A if asked, or "None specified"]
 </user_vision>
+
+<prior_knowledge>
+[If knowledge files exist:]
+
+Architecture constraints:
+[From knowledge Architecture sections]
+
+Prior design patterns:
+[From knowledge Design sections]
+
+Pitfalls to avoid:
+[From knowledge Pitfalls sections]
+
+[If no knowledge files exist:]
+
+No prior knowledge files. First phase or no prior execution.
+</prior_knowledge>
 
 <existing_aesthetic>
 [If project UI skill exists:]

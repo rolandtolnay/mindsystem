@@ -22,16 +22,16 @@ This is the ritual that separates "development" from "shipped."
 
 When a milestone completes, this workflow:
 
-1. Consolidates phase decisions into `.planning/milestones/v[X.Y]-DECISIONS.md`
-2. Cleans up phase artifacts (PLAN, CONTEXT, RESEARCH, DESIGN files deleted)
-3. Extracts full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
-4. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
-5. Archives milestone context to `.planning/milestones/v[X.Y]-CONTEXT.md`
-6. Updates ROADMAP.md to replace milestone details with one-line summary
-7. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-8. Extracts learnings into `.planning/LEARNINGS.md` (curated one-line patterns with source refs)
-9. Performs full PROJECT.md evolution review
-10. Routes to `/ms:new-milestone` for next milestone
+1. Cleans up raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER deleted)
+2. Extracts full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
+3. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
+4. Archives milestone context to `.planning/milestones/v[X.Y]-CONTEXT.md`
+5. Updates ROADMAP.md to replace milestone details with one-line summary
+6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
+7. Performs full PROJECT.md evolution review
+8. Routes to `/ms:new-milestone` for next milestone
+
+Knowledge files in `.planning/knowledge/` persist across milestones (maintained by phase-level consolidation in execute-phase).
 
 **Context Efficiency:**
 
@@ -102,136 +102,36 @@ cat .planning/config.json 2>/dev/null
 Proceeding to stats gathering...
 ```
 
-Proceed directly to consolidate_decisions step.
+Proceed directly to cleanup_artifacts step.
 
 </step>
 
-<step name="consolidate_decisions">
+<step name="cleanup_artifacts">
 
-Consolidate phase decisions before archiving.
-
-**Spawn ms-consolidator agent:**
-
-```
-Task(
-  prompt="Consolidate decisions from milestone v[X.Y] [Name].
-
-Phase range: [PHASE_START]-[PHASE_END]
-Phase directories:
-- .planning/phases/01-foundation
-- .planning/phases/02-auth
-- [etc. for all phases in milestone]
-
-Extract decisions from PLAN, CONTEXT, RESEARCH, DESIGN files.
-Create v[X.Y]-DECISIONS.md in .planning/milestones/.
-Delete source files (preserve SUMMARY, VERIFICATION, UAT).",
-  subagent_type="ms-consolidator"
-)
-```
-
-**Wait for completion and verify:**
+Delete remaining raw artifacts from phase directories. Knowledge files are already current from phase-level consolidation in execute-phase — no consolidation or learnings extraction needed.
 
 ```bash
-ls .planning/milestones/v[X.Y]-DECISIONS.md
+for dir in .planning/phases/${PHASE_START}*/ .planning/phases/${PHASE_END}*/; do
+  rm -f "$dir"/*-CONTEXT.md "$dir"/*-DESIGN.md "$dir"/*-RESEARCH.md
+  rm -f "$dir"/*-SUMMARY.md "$dir"/*-UAT.md "$dir"/*-VERIFICATION.md
+  rm -f "$dir"/*-EXECUTION-ORDER.md
+done
 ```
 
-**Present consolidation summary:**
+Expand the loop to cover ALL phases in the milestone range (not just start/end).
+
+Files deleted:
+- CONTEXT.md, DESIGN.md, RESEARCH.md (safety net — no longer needed)
+- SUMMARY.md (historical reference — consolidated into knowledge)
+- UAT.md, VERIFICATION.md, EXECUTION-ORDER.md (execution records)
+
+Knowledge files in `.planning/knowledge/` persist (they ARE the milestone's knowledge output).
+
+**Present cleanup summary:**
 
 ```
-✓ Decisions consolidated: [N] decisions in [M] categories
-✓ Source files cleaned: PLAN, CONTEXT, RESEARCH, DESIGN deleted
-✓ Preserved: SUMMARY, VERIFICATION, UAT files
-
-Report: .planning/milestones/v[X.Y]-DECISIONS.md
-```
-
-Continue to extract_learnings step.
-
-</step>
-
-<step name="extract_learnings">
-
-Extract reusable patterns from milestone artifacts into `.planning/LEARNINGS.md`.
-
-**Runs in main context** (not subagent) — curation requires judgment.
-
-**Reference:** `~/.claude/mindsystem/templates/learnings.md`
-
-**1. Scan source artifacts:**
-
-All sources are PRESERVED by ms-consolidator (only PLAN, CONTEXT, RESEARCH, DESIGN are deleted).
-
-```bash
-# Debug resolutions — parse frontmatter for root_cause, resolution, subsystem, prevention
-ls .planning/debug/resolved/*.md 2>/dev/null
-```
-
-```bash
-# Adhoc summaries — parse frontmatter for learnings array, subsystem
-ls .planning/adhoc/*-SUMMARY.md 2>/dev/null
-```
-
-```bash
-# Phase summaries in milestone range — read Deviations/Issues sections, parse subsystem
-ls .planning/phases/{PHASE_START}*/{PHASE_START}*-SUMMARY.md .planning/phases/{PHASE_END}*/{PHASE_END}*-SUMMARY.md 2>/dev/null
-# (expand to all phases in milestone range)
-```
-
-```bash
-# Completed todos — scan for reusable patterns (lower priority)
-ls .planning/todos/done/*.md 2>/dev/null
-```
-
-For each source found, read frontmatter and relevant sections. Extract candidate learnings.
-
-**2. Curate entries:**
-
-- Select 4-8 entries max from candidates
-- Exclude: decisions (belong in DECISIONS.md), trivial fixes, one-time issues
-- Prefer prevention framing: "Always validate X before Y" over "We found a bug in X"
-- Deduplicate: if two sources surface the same pattern, keep the more prescriptive version
-
-**3. Group by subsystem:**
-
-```bash
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
-```
-
-Group entries under subsystem headings from config.json vocabulary.
-
-**4. Write to LEARNINGS.md:**
-
-Format per entry:
-```
-- **{Brief title}**: {Prescriptive action} → `{source_ref}`
-```
-
-If `.planning/LEARNINGS.md` does not exist (first milestone):
-- Create file with header from template
-- Add milestone section
-
-If `.planning/LEARNINGS.md` exists (subsequent milestone):
-- Prepend new milestone section after header (reverse chronological)
-- Update "Last updated" footer
-
-**5. Handle "no learnings" gracefully:**
-
-If no meaningful patterns found across all sources:
-- Do NOT create or modify LEARNINGS.md
-- Present informational message:
-  ```
-  ℹ No reusable learnings found for v[X.Y]
-    Sources scanned: [N] debug docs, [N] adhoc summaries, [N] phase summaries, [N] completed todos
-    Skipping LEARNINGS.md update
-  ```
-
-**6. Present summary:**
-
-```
-✓ Learnings extracted: [N] entries across [M] subsystems
-  - [subsystem1]: [count] entries
-  - [subsystem2]: [count] entries
-  Written to: .planning/LEARNINGS.md
+Raw artifacts cleaned from phase directories
+Knowledge files persist in .planning/knowledge/
 ```
 
 Continue to gather_stats step.
@@ -757,21 +657,17 @@ Commit milestone completion including archive files and deletions.
 
 ```bash
 # Stage archive files (new)
-git add .planning/milestones/v[X.Y]-DECISIONS.md
 git add .planning/milestones/v[X.Y]-ROADMAP.md
 git add .planning/milestones/v[X.Y]-REQUIREMENTS.md
 git add .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
 git add .planning/milestones/v[X.Y]-CONTEXT.md 2>/dev/null || true
-
-# Stage learnings (may not exist if no learnings found)
-git add .planning/LEARNINGS.md 2>/dev/null || true
 
 # Stage updated files
 git add .planning/MILESTONES.md
 git add .planning/PROJECT.md
 git add .planning/STATE.md
 
-# Stage deletions
+# Stage deletions (raw artifacts cleaned from phase directories)
 git add -u .planning/
 
 # Commit with descriptive message
@@ -779,13 +675,13 @@ git commit -m "$(cat <<'EOF'
 chore: complete v[X.Y] milestone
 
 Archived:
-- milestones/v[X.Y]-DECISIONS.md (consolidated decisions)
 - milestones/v[X.Y]-ROADMAP.md
 - milestones/v[X.Y]-REQUIREMENTS.md
 - milestones/v[X.Y]-MILESTONE-AUDIT.md (if audit was run)
 
 Cleaned:
-- Phase PLAN, CONTEXT, RESEARCH, DESIGN files (consolidated into DECISIONS.md)
+- Raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- Knowledge files persist in .planning/knowledge/
 
 Deleted (fresh for next milestone):
 - ROADMAP.md
@@ -795,7 +691,6 @@ Updated:
 - MILESTONES.md (new entry)
 - PROJECT.md (requirements → Validated)
 - STATE.md (reset for next milestone)
-- LEARNINGS.md (curated patterns, if any found)
 
 Tagged: v[X.Y]
 EOF
@@ -886,9 +781,8 @@ If yes → milestone. If no → keep working.
 
 Milestone completion is successful when:
 
-- [ ] Decisions consolidated (milestones/v[X.Y]-DECISIONS.md created)
-- [ ] Phase artifacts cleaned (PLAN, CONTEXT, RESEARCH, DESIGN deleted)
-- [ ] Learnings extracted to .planning/LEARNINGS.md (or gracefully skipped if none found)
+- [ ] Raw artifacts cleaned from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- [ ] Knowledge files persist in .planning/knowledge/
 - [ ] MILESTONES.md entry created with stats and accomplishments
 - [ ] PROJECT.md full evolution review completed
 - [ ] All shipped requirements moved to Validated in PROJECT.md

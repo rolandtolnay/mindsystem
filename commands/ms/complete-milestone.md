@@ -68,30 +68,19 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Present milestone scope and stats
    - Wait for confirmation
 
-1.5. **Consolidate decisions:**
+1.5. **Clean up raw artifacts:**
 
-   Spawn ms-consolidator to extract decisions from phase artifacts:
+   Delete remaining raw artifacts from phase directories. Knowledge files are already current from phase-level consolidation in execute-phase.
 
-   ```
-   Task(
-     prompt="Consolidate decisions from milestone v{{version}}.
-     Phase range: [PHASE_START]-[PHASE_END]
-     Create v{{version}}-DECISIONS.md.
-     Delete source files (PLAN, CONTEXT, RESEARCH, DESIGN).",
-     subagent_type="ms-consolidator"
-   )
-   ```
-
-   Wait for completion. Verify DECISIONS.md created:
    ```bash
-   ls .planning/milestones/v{{version}}-DECISIONS.md
+   for dir in .planning/phases/${PHASE_START}*/ .planning/phases/${PHASE_END}*/; do
+     rm -f "$dir"/*-CONTEXT.md "$dir"/*-DESIGN.md "$dir"/*-RESEARCH.md
+     rm -f "$dir"/*-SUMMARY.md "$dir"/*-UAT.md "$dir"/*-VERIFICATION.md
+     rm -f "$dir"/*-EXECUTION-ORDER.md
+   done
    ```
 
-1.7. **Extract learnings:**
-
-   Scan debug resolutions, adhoc summaries, phase summaries, and completed todos.
-   Curate 4-8 reusable patterns into `.planning/LEARNINGS.md` (or skip gracefully if none found).
-   See workflow `extract_learnings` step for full process.
+   Expand loop to cover ALL phases in milestone range. Knowledge files in `.planning/knowledge/` persist.
 
 2. **Gather stats:**
 
@@ -128,7 +117,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 7. **Commit and tag:**
 
-   - Stage: MILESTONES.md, PROJECT.md, ROADMAP.md, STATE.md, LEARNINGS.md, archive files
+   - Stage: MILESTONES.md, PROJECT.md, ROADMAP.md, STATE.md, archive files
    - Commit: `chore: archive v{{version}} milestone`
    - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
    - Ask about pushing tag
@@ -144,9 +133,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 <success_criteria>
 
-- Decisions consolidated to `.planning/milestones/v{{version}}-DECISIONS.md`
-- Phase artifacts cleaned (PLAN, CONTEXT, RESEARCH, DESIGN deleted)
-- Learnings extracted to `.planning/LEARNINGS.md` (or gracefully skipped if none found)
+- Raw artifacts cleaned from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- Knowledge files persist in .planning/knowledge/
 - Milestone archived to `.planning/milestones/v{{version}}-ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}-REQUIREMENTS.md`
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)
@@ -162,7 +150,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 - **Load workflow first:** Read complete-milestone.md before executing
 - **Verify completion:** All phases must have SUMMARY.md files
 - **User confirmation:** Wait for approval at verification gates
-- **Archive before deleting:** Always create archive files before updating/deleting originals
+- **Archive before deleting:** Always create archive files (ROADMAP, REQUIREMENTS) before updating/deleting originals
 - **One-line summary:** Collapsed milestone in ROADMAP.md should be single line with link
 - **Context efficiency:** Archive keeps ROADMAP.md and REQUIREMENTS.md constant size per milestone
 - **Fresh requirements:** Next milestone starts with `/ms:create-roadmap`, not reusing old file

@@ -36,6 +36,7 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
 1. Validate phase number argument (error if missing or invalid)
 2. Check if phase exists in roadmap
 3. Check if CONTEXT.md already exists (offer to update if yes)
+   - **Load prior knowledge** — determine relevant subsystem(s) from ROADMAP.md + config.json, load matching `.planning/knowledge/{subsystem}.md` files. If knowledge exists, present brief "What we know so far" summary before questioning.
 4. Follow discuss-phase.md workflow with **ALL questions using AskUserQuestion**:
    - Present phase from roadmap
    - Use AskUserQuestion: "How do you imagine this working?" with interpretation options

@@ -364,21 +364,20 @@ ls .planning/todos/done/*.md 2>/dev/null
 
 If exists, grep body content for phase keywords or subsystem. Extract brief description of resolved items.
 
-**6d. Milestone decisions:**
+**6d. Subsystem knowledge files (cross-milestone curated context):**
 
 ```bash
-ls .planning/milestones/v*-DECISIONS.md 2>/dev/null
+ls .planning/knowledge/*.md 2>/dev/null
 ```
 
-If exists, grep for entries matching current subsystem or phase keywords. Extract matched decision rows.
-
-**6e. LEARNINGS.md (cross-milestone index):**
+Determine relevant subsystem(s) from config.json + ROADMAP.md phase description:
 
 ```bash
-cat .planning/LEARNINGS.md 2>/dev/null
+jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
 ```
 
-If exists, grep for entries matching phase keywords, subsystem, or tech terms. Extract matched one-liner entries with source references.
+Load matching `knowledge/{subsystem}.md` files. Extract decisions, architecture, pitfalls.
 
 **Collect matched learnings for handoff** — assemble into flat list for `<learnings>` section.
 
@@ -406,7 +405,7 @@ Assess each pending todo - relevant to this phase? Natural to address now?
 - Applicable decisions (from frontmatter + full summary)
 - Todos being addressed (from pending todos)
 - Concerns being verified (from "Next Phase Readiness")
-- Matched learnings (from debug docs, adhoc summaries, patterns, decisions, LEARNINGS.md)
+- Matched learnings (from debug docs, adhoc summaries, patterns, knowledge files)
 </step>
 
 <step name="gather_phase_context">
@@ -563,8 +562,7 @@ Assemble handoff payload:
   <learning type="debug" source=".planning/debug/resolved/{slug}.md">{root_cause} — fix: {resolution}</learning>
   <learning type="adhoc" source=".planning/adhoc/{file}.md">{learnings entry}</learning>
   <learning type="pattern" source=".planning/phases/{path}">{patterns-established entry}</learning>
-  <learning type="decision" source=".planning/milestones/{file}">{decision}: {rationale}</learning>
-  <learning type="curated" source="{source_ref from LEARNINGS.md}">{one-liner pattern}</learning>
+  <learning type="knowledge" source=".planning/knowledge/{subsystem}.md">{decisions, architecture, pitfalls from knowledge files}</learning>
 </learnings>
 ```
 

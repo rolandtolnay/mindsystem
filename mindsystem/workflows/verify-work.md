@@ -602,6 +602,26 @@ git add ".planning/phases/XX-name/{phase}-UAT.md"
 git commit -m "test({phase}): complete UAT - {passed} passed, {fixed} fixed, {skipped} assumptions"
 ```
 
+**5.5. Update knowledge pitfalls (lightweight):**
+
+```bash
+# Check for significant findings
+grep -c "severity: blocker\|severity: major" "$PHASE_DIR/${PHASE}-UAT.md" 2>/dev/null
+```
+
+If significant issues (blocker/major) were found AND fixed:
+1. Determine affected subsystem(s) from the UAT.md test descriptions and config.json
+2. Read relevant `knowledge/{subsystem}.md` files
+3. Append new pitfall entries to the Pitfalls section (do not rewrite entire file — just append)
+4. Commit knowledge file updates:
+```bash
+git add .planning/knowledge/*.md && git commit -m "docs: update pitfalls from UAT findings"
+```
+
+If no significant findings or no fixes: skip silently.
+
+This is NOT a full re-consolidation. Read only UAT.md and add specific pitfall entries.
+
 **6. Present summary:**
 ```
 ## UAT Complete: Phase {phase}

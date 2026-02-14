@@ -71,6 +71,10 @@ cat .planning/phases/${PHASE}-*/${PHASE}-DESIGN.md 2>/dev/null
 
 # Locked decisions
 grep -A30 "### Decisions Made" .planning/STATE.md 2>/dev/null
+
+# Prior knowledge (cross-milestone context)
+jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+cat .planning/knowledge/{subsystem}.md 2>/dev/null
 ```
 
 Extract from pre-scan:
@@ -79,6 +83,7 @@ Extract from pre-scan:
 - `phase_requirements`: Specific requirements
 - `locked_decisions`: From CONTEXT.md and STATE.md
 - `design_specs`: From DESIGN.md if exists
+- `prior_knowledge`: From `.planning/knowledge/{subsystem}.md` — prior decisions, known pitfalls, architecture patterns (so agents don't re-research settled decisions)
 
 ## 4. Determine Research Scope
 
@@ -133,6 +138,10 @@ needed to implement this phase.
 <existing_tech>
 {existing_tech from pre-scan — so agent knows what's already in the project}
 </existing_tech>
+
+<prior_knowledge>
+{prior_decisions, known_pitfalls, architecture_patterns from knowledge files — so agents don't re-research settled decisions}
+</prior_knowledge>
 
 <objective>
 Research external documentation for Phase {N}: {name}
@@ -192,6 +201,10 @@ Analyze project codebase for patterns relevant to Phase {N}: {name}
 {existing_tech from pre-scan}
 </existing_tech>
 
+<prior_knowledge>
+{prior_decisions, known_pitfalls, architecture_patterns from knowledge files — so agents don't re-research settled decisions}
+</prior_knowledge>
+
 <scan_hints>
 {keywords extracted from phase description for targeted scanning}
 </scan_hints>
@@ -225,6 +238,10 @@ Focus on what practitioners recommend and what mistakes to avoid.
 <existing_tech>
 {existing_tech from pre-scan}
 </existing_tech>
+
+<prior_knowledge>
+{prior_decisions, known_pitfalls, architecture_patterns from knowledge files — so agents don't re-research settled decisions}
+</prior_knowledge>
 
 <objective>
 Research best practices for Phase {N}: {name}

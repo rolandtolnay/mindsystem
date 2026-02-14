@@ -51,6 +51,29 @@ Parse phase details from roadmap:
 - Phase description
 - Status (should be "Not started" or "In progress")
 
+Continue to load_prior_knowledge.
+</step>
+
+<step name="load_prior_knowledge">
+Determine which subsystem(s) this phase touches from ROADMAP.md phase description + config.json:
+
+```bash
+jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
+```
+
+Load matching `knowledge/{subsystem}.md` files:
+
+```bash
+cat .planning/knowledge/{subsystem}.md 2>/dev/null
+```
+
+Handle gracefully when `.planning/knowledge/` doesn't exist (first milestone, no phases executed yet).
+
+**If knowledge exists:** Present a brief "What we know so far" summary to the user before questioning — prior decisions, architectural patterns, and pitfalls relevant to this phase. This grounds the discussion without interrogating.
+
+**If no knowledge files exist:** Skip silently (normal for first phase).
+
 Continue to check_existing.
 </step>
 

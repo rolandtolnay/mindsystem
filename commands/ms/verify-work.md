@@ -61,6 +61,7 @@ Phase: $ARGUMENTS (optional)
    - Generate UAT fixes patch
    - Restore user's pre-existing work (if stashed)
    - Commit UAT.md, present summary
+   - **Update knowledge pitfalls** — if significant UAT issues (blocker/major) were fixed, append pitfall entries to relevant knowledge files
 
 10. **Update last command**
     - Update `.planning/STATE.md` Last Command field
