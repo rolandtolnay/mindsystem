@@ -72,9 +72,9 @@ cat .planning/phases/${PHASE}-*/${PHASE}-DESIGN.md 2>/dev/null
 # Locked decisions
 grep -A30 "### Decisions Made" .planning/STATE.md 2>/dev/null
 
-# Prior knowledge (cross-milestone context)
+# Prior knowledge — match subsystem(s) by comparing phase description against config.json names
 jq -r '.subsystems[]' .planning/config.json 2>/dev/null
-cat .planning/knowledge/{subsystem}.md 2>/dev/null
+cat .planning/knowledge/{matched_subsystem}.md 2>/dev/null
 ```
 
 Extract from pre-scan:

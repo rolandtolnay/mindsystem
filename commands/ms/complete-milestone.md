@@ -73,14 +73,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    Delete remaining raw artifacts from phase directories. Knowledge files are already current from phase-level consolidation in execute-phase.
 
    ```bash
-   for dir in .planning/phases/${PHASE_START}*/ .planning/phases/${PHASE_END}*/; do
-     rm -f "$dir"/*-CONTEXT.md "$dir"/*-DESIGN.md "$dir"/*-RESEARCH.md
-     rm -f "$dir"/*-SUMMARY.md "$dir"/*-UAT.md "$dir"/*-VERIFICATION.md
-     rm -f "$dir"/*-EXECUTION-ORDER.md
-   done
+   ~/.claude/mindsystem/scripts/cleanup-phase-artifacts.sh $PHASE_START $PHASE_END
    ```
-
-   Expand loop to cover ALL phases in milestone range. Knowledge files in `.planning/knowledge/` persist.
 
 2. **Gather stats:**
 
@@ -134,7 +128,6 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 <success_criteria>
 
 - Raw artifacts cleaned from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
-- Knowledge files persist in .planning/knowledge/
 - Milestone archived to `.planning/milestones/v{{version}}-ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}-REQUIREMENTS.md`
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)

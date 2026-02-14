@@ -109,11 +109,11 @@ If exists, extract:
 
 **3b2. Optional context — prior knowledge:**
 
+Match subsystem(s) to this phase by comparing ROADMAP phase description against subsystem names in config.json. Load matching knowledge files:
+
 ```bash
-# Determine subsystem from ROADMAP phase description + config.json
 jq -r '.subsystems[]' .planning/config.json 2>/dev/null
-# Load matching knowledge files
-cat .planning/knowledge/{subsystem}.md 2>/dev/null
+cat .planning/knowledge/{matched_subsystem}.md 2>/dev/null
 ```
 
 If knowledge files exist, extract:

@@ -20,8 +20,6 @@ Idempotent — safe to run repeatedly.
 </objective>
 
 <context>
-@.planning/PROJECT.md
-@.planning/ROADMAP.md
 @.planning/config.json
 </context>
 
@@ -112,7 +110,9 @@ Collect all unique values found. Note count of artifacts scanned and values foun
 </step>
 
 <step name="derive_and_confirm">
-**State A only.** Derive 5-12 canonical subsystem identifiers from:
+**State A only.** Read `.planning/PROJECT.md` and `.planning/ROADMAP.md`.
+
+Derive 5-12 canonical subsystem identifiers from:
 
 1. Unique values found in `audit_existing_usage`
 2. Project domain from PROJECT.md
@@ -167,7 +167,37 @@ EOF
 jq -r '.subsystems[]' .planning/config.json
 ```
 
-Scan all artifacts (phase SUMMARYs, adhoc SUMMARYs, debug docs, todos) using the same `sed` extraction pattern from `audit_existing_usage`.
+Scan all artifacts for `subsystem:` values. Extract from YAML frontmatter:
+
+```bash
+echo "=== Phase SUMMARYs ==="
+for f in .planning/phases/*/*-SUMMARY.md; do
+  [ -f "$f" ] || continue
+  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
+  [ -n "$val" ] && echo "$f: $val"
+done
+
+echo "=== Adhoc SUMMARYs ==="
+for f in .planning/adhoc/*-SUMMARY.md; do
+  [ -f "$f" ] || continue
+  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
+  [ -n "$val" ] && echo "$f: $val"
+done
+
+echo "=== Debug docs ==="
+for f in .planning/debug/*.md .planning/debug/resolved/*.md; do
+  [ -f "$f" ] || continue
+  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
+  [ -n "$val" ] && echo "$f: $val"
+done
+
+echo "=== Todos ==="
+for f in .planning/todos/pending/*.md .planning/todos/done/*.md; do
+  [ -f "$f" ] || continue
+  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
+  [ -n "$val" ] && echo "$f: $val"
+done
+```
 
 Classify each artifact's `subsystem:` value:
 - **OK** — value is in canonical list
@@ -238,13 +268,9 @@ All checks passed.
 </process>
 
 <success_criteria>
-- [ ] `.planning/` existence verified before any other work
-- [ ] `config.json` created from template if missing
-- [ ] State A (empty subsystems): audit finds existing values, derives canonical list, confirms with user
-- [ ] State A: config.json updated, existing artifacts standardized, changes committed
-- [ ] State B (populated subsystems): all artifacts scanned and classified
-- [ ] State B all OK: reports PASS
-- [ ] State B issues found: offers fix/review/skip, applies fixes, commits
-- [ ] Final report displayed with check name, result, and counts
-- [ ] Idempotent: re-running after State A completes hits State B and reports PASS
+- [ ] State A: config.json updated, existing artifacts standardized to canonical values, changes committed
+- [ ] State B issues: offers fix/review/skip, applies fixes, commits
+- [ ] Final report displayed with check name, result, and artifact/subsystem counts
+- [ ] State A: derives canonical list from audit + project context, confirms with user before applying
+- [ ] State B: all artifacts scanned and classified; reports PASS if all OK
 </success_criteria>

@@ -111,19 +111,8 @@ Proceed directly to cleanup_artifacts step.
 Delete remaining raw artifacts from phase directories. Knowledge files are already current from phase-level consolidation in execute-phase — no consolidation or learnings extraction needed.
 
 ```bash
-for dir in .planning/phases/${PHASE_START}*/ .planning/phases/${PHASE_END}*/; do
-  rm -f "$dir"/*-CONTEXT.md "$dir"/*-DESIGN.md "$dir"/*-RESEARCH.md
-  rm -f "$dir"/*-SUMMARY.md "$dir"/*-UAT.md "$dir"/*-VERIFICATION.md
-  rm -f "$dir"/*-EXECUTION-ORDER.md
-done
+~/.claude/mindsystem/scripts/cleanup-phase-artifacts.sh $PHASE_START $PHASE_END
 ```
-
-Expand the loop to cover ALL phases in the milestone range (not just start/end).
-
-Files deleted:
-- CONTEXT.md, DESIGN.md, RESEARCH.md (safety net — no longer needed)
-- SUMMARY.md (historical reference — consolidated into knowledge)
-- UAT.md, VERIFICATION.md, EXECUTION-ORDER.md (execution records)
 
 Knowledge files in `.planning/knowledge/` persist (they ARE the milestone's knowledge output).
 
