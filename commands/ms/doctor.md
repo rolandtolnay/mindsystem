@@ -77,33 +77,7 @@ jq -r '.subsystems // [] | length' .planning/config.json
 **State A only.** Scan all artifact types for existing free-form `subsystem:` values.
 
 ```bash
-echo "=== Phase SUMMARYs ==="
-for f in .planning/phases/*/*-SUMMARY.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$val"
-done
-
-echo "=== Adhoc SUMMARYs ==="
-for f in .planning/adhoc/*-SUMMARY.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$val"
-done
-
-echo "=== Debug docs ==="
-for f in .planning/debug/*.md .planning/debug/resolved/*.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$val"
-done
-
-echo "=== Todos ==="
-for f in .planning/todos/pending/*.md .planning/todos/done/*.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$val"
-done
+~/.claude/mindsystem/scripts/scan-artifact-subsystems.sh --values-only
 ```
 
 Collect all unique values found. Note count of artifacts scanned and values found.
@@ -170,33 +144,7 @@ jq -r '.subsystems[]' .planning/config.json
 Scan all artifacts for `subsystem:` values. Extract from YAML frontmatter:
 
 ```bash
-echo "=== Phase SUMMARYs ==="
-for f in .planning/phases/*/*-SUMMARY.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$f: $val"
-done
-
-echo "=== Adhoc SUMMARYs ==="
-for f in .planning/adhoc/*-SUMMARY.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$f: $val"
-done
-
-echo "=== Debug docs ==="
-for f in .planning/debug/*.md .planning/debug/resolved/*.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$f: $val"
-done
-
-echo "=== Todos ==="
-for f in .planning/todos/pending/*.md .planning/todos/done/*.md; do
-  [ -f "$f" ] || continue
-  val=$(sed -n '/^---$/,/^---$/p' "$f" | grep "^subsystem:" | sed 's/subsystem: *//')
-  [ -n "$val" ] && echo "$f: $val"
-done
+~/.claude/mindsystem/scripts/scan-artifact-subsystems.sh
 ```
 
 Classify each artifact's `subsystem:` value:
