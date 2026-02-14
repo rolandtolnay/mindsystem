@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.15.0] - 2026-02-14
+
+### Added
+- **`ms:doctor` command** — Project health check that diagnoses configuration drift (subsystem vocabulary, missing setup) and fixes issues interactively
+- **Phase-level knowledge consolidation** — Consolidator runs after each phase, producing per-subsystem knowledge files that preserve decisions, design rationale, and implementation insights across the project lifecycle
+- **Parallel specialized agents for research phases** — Research work split across multiple focused sub-agents with orchestrator synthesis for deeper, faster results
+
+### Changed
+- All consuming phases (discuss, design, research, plan, verify, new-milestone) load per-subsystem knowledge files for compounding context
+- Milestone completion simplified to cleanup-only (knowledge is already consolidated per-phase)
+- `discuss-phase` prompt streamlined to reduce context waste
+- `roadmapper` prompt trimmed to reduce interference with agent output
+- Subsystem scanning and phase artifact cleanup extracted to reusable scripts
+
 ## [3.14.0] - 2026-02-12
 
 ### Changed
@@ -404,7 +418,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.14.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.15.0...HEAD
+[3.15.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.14.0...v3.15.0
 [3.14.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.1...v3.14.0
 [3.13.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.0...v3.13.1
 [3.13.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.12.0...v3.13.0
