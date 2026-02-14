@@ -441,6 +441,38 @@ fi
 - Discard: `rm {patch_file}`
 </step>
 
+<step name="consolidate_knowledge">
+Consolidate phase knowledge into per-subsystem knowledge files.
+
+**Spawn ms-consolidator:**
+
+```
+Task(
+  prompt="Consolidate knowledge from phase {phase_number}.
+  Phase directory: {phase_dir}
+  Phase number: {phase_number}
+  Read SUMMARY.md files for affected subsystems, then read phase artifacts
+  and existing knowledge files. Produce updated knowledge files and delete
+  PLAN.md files.",
+  subagent_type="ms-consolidator"
+)
+```
+
+**Verify consolidation:**
+
+```bash
+ls .planning/knowledge/*.md 2>/dev/null
+```
+
+Report the consolidation summary returned by ms-consolidator.
+
+**Handle failure:** If consolidation fails, ask user:
+- "Continue without consolidation" → proceed to update_roadmap
+- "Stop execution" → exit with partial completion report
+
+Knowledge consolidation is not a blocking gate — phase execution succeeded regardless.
+</step>
+
 <step name="update_roadmap">
 Update ROADMAP.md to reflect phase completion:
 
@@ -453,6 +485,8 @@ Update ROADMAP.md to reflect phase completion:
 Commit phase completion (roadmap, state, verification):
 ```bash
 git add .planning/ROADMAP.md .planning/STATE.md .planning/phases/{phase_dir}/*-VERIFICATION.md .planning/phases/{phase_dir}/*-SUMMARY.md
+git add .planning/knowledge/*.md
+git add -u .planning/phases/{phase_dir}/*-PLAN.md
 git add .planning/REQUIREMENTS.md  # if updated
 git commit -m "docs(phase-{X}): complete phase execution"
 ```

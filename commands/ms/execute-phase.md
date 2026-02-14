@@ -90,10 +90,17 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
    - Verify: patch file exists OR skip message logged
    - Note: Patch captures all changes including simplifications
 
-9. **Update roadmap and state**
-   - Update ROADMAP.md, STATE.md
+9. **Consolidate knowledge**
+   - Spawn `ms-consolidator` with phase directory and number
+   - Consolidator reads phase artifacts and existing knowledge files
+   - Produces updated `.planning/knowledge/{subsystem}.md` files
+   - Deletes PLAN.md files (execution instructions consumed)
+   - Verify: knowledge files written to `.planning/knowledge/`
 
-10. **Update requirements**
+10. **Update roadmap and state**
+    - Update ROADMAP.md, STATE.md
+
+11. **Update requirements**
     Mark phase requirements as Complete:
     - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
     - Read REQUIREMENTS.md traceability table
@@ -101,16 +108,18 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
     - Write updated REQUIREMENTS.md
     - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-11. **Commit phase completion**
+12. **Commit phase completion**
     Bundle all phase metadata updates in one commit:
     - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
+    - Stage knowledge files: `git add .planning/knowledge/*.md`
+    - Stage PLAN.md deletions: `git add -u .planning/phases/{phase_dir}/*-PLAN.md`
     - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
     - Commit: `docs({phase}): complete {phase-name} phase`
 
-12. **Offer next steps**
+13. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 
-13. **Update last command**
+14. **Update last command**
     - Update `.planning/STATE.md` Last Command field
     - Format: `Last Command: ms:execute-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
 </process>
@@ -213,8 +222,10 @@ After code simplification step:
 
 After all plans in phase complete:
 1. Stage: ROADMAP.md, STATE.md, REQUIREMENTS.md (if updated), VERIFICATION.md
-2. Commit with format: `docs({phase}): complete {phase-name} phase`
-3. Bundles all phase-level state updates in one commit
+2. Stage knowledge files: `git add .planning/knowledge/*.md`
+3. Stage PLAN.md deletions: `git add -u .planning/phases/{phase_dir}/*-PLAN.md`
+4. Commit with format: `docs({phase}): complete {phase-name} phase`
+5. Bundles all phase-level state updates in one commit
 
 **NEVER use:**
 - `git add .`
@@ -231,6 +242,8 @@ After all plans in phase complete:
 - [ ] Phase goal verified (Must-Haves checked against codebase)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] Patch file generated OR explicitly skipped with message
+- [ ] Knowledge files written to .planning/knowledge/ (consolidation complete)
+- [ ] PLAN.md files deleted from phase directory
 - [ ] STATE.md reflects phase completion
 - [ ] ROADMAP.md updated
 - [ ] REQUIREMENTS.md updated (phase requirements marked Complete)
