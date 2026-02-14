@@ -161,17 +161,7 @@ Priority is clarity over features. Better to show less and make it obvious than 
 1. **Vision sections** (`<vision>`, `<essential>`, `<specifics>`, `<notes>`) — for human understanding
 2. **Decision sections** (`<decisions>`, `<deferred>`) — for downstream agent parsing
 
-The user is the visionary. They know:
-- How they imagine it working
-- What it should feel like
-- What's essential vs nice-to-have
-- References to things they like
-
-The user does NOT know (and shouldn't be asked):
-- Codebase patterns (Claude reads the code)
-- Technical risks (Claude identifies during research)
-- Implementation constraints (Claude figures out)
-- Success metrics (Claude infers from the work)
+Vision sections capture the user's own words — how they imagine it, what they reference, what excites them. Do not inject technical analysis, risk assessment, or implementation constraints into vision sections.
 
 **Vision content should read like:**
 - A founder describing their product vision

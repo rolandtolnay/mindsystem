@@ -119,11 +119,10 @@ Create `.planning/phases/XX-name/DISCOVERY.md`:
 </output_structure>
 
 <success_criteria>
-- All scope questions answered with authoritative sources
-- Quality checklist items completed
-- Clear primary recommendation
 - Low-confidence findings marked with validation checkpoints
-- Ready to inform PLAN.md creation
+- Quality checklist items completed
+- All scope questions answered with authoritative sources
+- Clear primary recommendation
 </success_criteria>
 
 <guidelines>

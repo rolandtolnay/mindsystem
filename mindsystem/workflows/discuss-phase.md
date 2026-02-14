@@ -30,11 +30,7 @@ Phase number: $ARGUMENTS (required)
 Validate phase exists in roadmap:
 
 ```bash
-if [ -f .planning/ROADMAP.md ]; then
-  cat .planning/ROADMAP.md | grep "Phase ${PHASE}:"
-else
-  cat .planning/ROADMAP.md | grep "Phase ${PHASE}:"
-fi
+grep "Phase ${PHASE}:" .planning/ROADMAP.md
 ```
 
 **If phase not found:**
@@ -239,10 +235,8 @@ Confirm: "Committed: docs(${PHASE}): capture phase context"
 
 <success_criteria>
 
-- Phase validated against roadmap
 - Vision gathered through collaborative thinking (not interrogation)
 - User's imagination captured: how it works, what's essential
-- CONTEXT.md created in phase directory
-- CONTEXT.md committed to git
 - User knows next steps (typically: research or plan the phase)
+- CONTEXT.md committed to git
 </success_criteria>

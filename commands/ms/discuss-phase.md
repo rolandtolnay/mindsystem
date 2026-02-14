@@ -13,9 +13,7 @@ Output: {phase}-CONTEXT.md capturing the user's vision for the phase
 </objective>
 
 <execution_context>
-@~/.claude/mindsystem/references/principles.md
 @~/.claude/mindsystem/workflows/discuss-phase.md
-@~/.claude/mindsystem/templates/context.md
 </execution_context>
 
 <context>
@@ -50,13 +48,6 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
    - Format: `Last Command: ms:discuss-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
 
 **CRITICAL: ALL questions use AskUserQuestion. Never ask inline text questions.**
-
-User is the visionary, you are the builder:
-- Ask about vision, feel, essential outcomes
-- DON'T ask about technical risks (you figure those out)
-- DON'T ask about codebase patterns (you read the code)
-- DON'T ask about success metrics (too corporate)
-- DON'T interrogate about constraints they didn't mention
 </process>
 
 <success_criteria>
