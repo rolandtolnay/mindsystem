@@ -112,6 +112,8 @@ If no `## Must-Haves` section found in plans, derive using goal-backward process
 
    - List 3-7 observable behaviors from user perspective
    - Each truth should be testable by a human using the app
+   - Good: "User can see existing messages in the chat" (observable, testable)
+   - Bad: "Chat component works correctly" (vague, untestable)
 
 3. **Derive artifacts:** For each truth, ask "What must EXIST?"
 
@@ -150,109 +152,26 @@ For each required artifact, verify three levels:
 
 ### Level 1: Existence
 
-```bash
-check_exists() {
-  local path="$1"
-  if [ -f "$path" ]; then
-    echo "EXISTS"
-  elif [ -d "$path" ]; then
-    echo "EXISTS (directory)"
-  else
-    echo "MISSING"
-  fi
-}
-```
-
-If MISSING → artifact fails, record and continue.
+Check the file or directory exists. If MISSING → artifact fails, record and continue.
 
 ### Level 2: Substantive
 
-Check that the file has real implementation, not a stub.
+Verify the file has real implementation, not a stub:
 
-**Line count check:**
+1. **Adequate length** for its type — component: 15+ lines, route: 10+, hook/util: 10+, schema: 5+
+2. **No stub patterns** — grep for: `TODO`, `FIXME`, `placeholder`, `not implemented`, `coming soon`, `return null`, `return undefined`, `return {}`, `return []`, `lorem ipsum`
+3. **Has exports** — the file exports its primary functionality
 
-```bash
-check_length() {
-  local path="$1"
-  local min_lines="$2"
-  local lines=$(wc -l < "$path" 2>/dev/null || echo 0)
-  [ "$lines" -ge "$min_lines" ] && echo "SUBSTANTIVE ($lines lines)" || echo "THIN ($lines lines)"
-}
-```
-
-Minimum lines by type:
-
-- Component: 15+ lines
-- API route: 10+ lines
-- Hook/util: 10+ lines
-- Schema model: 5+ lines
-
-**Stub pattern check:**
-
-```bash
-check_stubs() {
-  local path="$1"
-
-  # Universal stub patterns
-  local stubs=$(grep -c -E "TODO|FIXME|placeholder|not implemented|coming soon" "$path" 2>/dev/null || echo 0)
-
-  # Empty returns
-  local empty=$(grep -c -E "return null|return undefined|return \{\}|return \[\]" "$path" 2>/dev/null || echo 0)
-
-  # Placeholder content
-  local placeholder=$(grep -c -E "will be here|placeholder|lorem ipsum" "$path" 2>/dev/null || echo 0)
-
-  local total=$((stubs + empty + placeholder))
-  [ "$total" -gt 0 ] && echo "STUB_PATTERNS ($total found)" || echo "NO_STUBS"
-}
-```
-
-**Export check (for components/hooks):**
-
-```bash
-check_exports() {
-  local path="$1"
-  grep -E "^export (default )?(function|const|class)" "$path" && echo "HAS_EXPORTS" || echo "NO_EXPORTS"
-}
-```
-
-**Combine level 2 results:**
-
-- SUBSTANTIVE: Adequate length + no stubs + has exports
-- STUB: Too short OR has stub patterns OR no exports
-- PARTIAL: Mixed signals (length OK but has some stubs)
+**Status:** SUBSTANTIVE (all pass), STUB (too short OR stub patterns OR no exports), PARTIAL (mixed signals)
 
 ### Level 3: Wired
 
-Check that the artifact is connected to the system.
+Verify the artifact is connected to the system. Adapt grep patterns to the project's tech stack (file extensions, import syntax, module system):
 
-**Import check (is it used?):**
+1. **Imported** — other files reference/import the artifact
+2. **Used** — the artifact is called/rendered/instantiated (not just imported)
 
-```bash
-check_imported() {
-  local artifact_name="$1"
-  local search_path="${2:-src/}"
-  local imports=$(grep -r "import.*$artifact_name" "$search_path" --include="*.ts" --include="*.tsx" 2>/dev/null | wc -l)
-  [ "$imports" -gt 0 ] && echo "IMPORTED ($imports times)" || echo "NOT_IMPORTED"
-}
-```
-
-**Usage check (is it called?):**
-
-```bash
-check_used() {
-  local artifact_name="$1"
-  local search_path="${2:-src/}"
-  local uses=$(grep -r "$artifact_name" "$search_path" --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "import" | wc -l)
-  [ "$uses" -gt 0 ] && echo "USED ($uses times)" || echo "NOT_USED"
-}
-```
-
-**Combine level 3 results:**
-
-- WIRED: Imported AND used
-- ORPHANED: Exists but not imported/used
-- PARTIAL: Imported but not used (or vice versa)
+**Status:** WIRED (imported AND used), ORPHANED (exists but not imported/used), PARTIAL (imported but not used or vice versa)
 
 ### Final artifact status
 
@@ -265,112 +184,21 @@ check_used() {
 
 ## Step 5: Verify Key Links (Wiring)
 
-Key links are critical connections. If broken, the goal fails even with all artifacts present.
+Key links are critical connections. If broken, the goal fails even with all artifacts present. This is where 80% of stubs hide — the pieces exist but aren't connected.
 
-### Pattern: Component → API
+Identify the project's tech stack from file extensions and project structure. For each key link, verify the connection using grep patterns appropriate to the technology.
 
-```bash
-verify_component_api_link() {
-  local component="$1"
-  local api_path="$2"
+**Common link types to check:**
 
-  # Check for fetch/axios call to the API
-  local has_call=$(grep -E "fetch\(['\"].*$api_path|axios\.(get|post).*$api_path" "$component" 2>/dev/null)
+- **UI → Data source:** Component/widget fetches or subscribes to data. Verify the call exists AND the response is used (not just fired and ignored).
+- **Data layer → Backend/DB:** API route or repository queries the database. Verify the query result is returned/used (not a static placeholder).
+- **User action → Handler:** Form/button has a handler with real implementation. Red flag: handler only logs, only prevents default, or is an empty closure.
+- **State → Display:** State variable or model is declared AND rendered/displayed (not just stored).
 
-  if [ -n "$has_call" ]; then
-    # Check if response is used
-    local uses_response=$(grep -A 5 "fetch\|axios" "$component" | grep -E "await|\.then|setData|setState" 2>/dev/null)
+**For each link, verify two things:**
 
-    if [ -n "$uses_response" ]; then
-      echo "WIRED: $component → $api_path (call + response handling)"
-    else
-      echo "PARTIAL: $component → $api_path (call exists but response not used)"
-    fi
-  else
-    echo "NOT_WIRED: $component → $api_path (no call found)"
-  fi
-}
-```
-
-### Pattern: API → Database
-
-```bash
-verify_api_db_link() {
-  local route="$1"
-  local model="$2"
-
-  # Check for Prisma/DB call
-  local has_query=$(grep -E "prisma\.$model|db\.$model|$model\.(find|create|update|delete)" "$route" 2>/dev/null)
-
-  if [ -n "$has_query" ]; then
-    # Check if result is returned
-    local returns_result=$(grep -E "return.*json.*\w+|res\.json\(\w+" "$route" 2>/dev/null)
-
-    if [ -n "$returns_result" ]; then
-      echo "WIRED: $route → database ($model)"
-    else
-      echo "PARTIAL: $route → database (query exists but result not returned)"
-    fi
-  else
-    echo "NOT_WIRED: $route → database (no query for $model)"
-  fi
-}
-```
-
-### Pattern: Form → Handler
-
-```bash
-verify_form_handler_link() {
-  local component="$1"
-
-  # Find onSubmit handler
-  local has_handler=$(grep -E "onSubmit=\{|handleSubmit" "$component" 2>/dev/null)
-
-  if [ -n "$has_handler" ]; then
-    # Check if handler has real implementation
-    local handler_content=$(grep -A 10 "onSubmit.*=" "$component" | grep -E "fetch|axios|mutate|dispatch" 2>/dev/null)
-
-    if [ -n "$handler_content" ]; then
-      echo "WIRED: form → handler (has API call)"
-    else
-      # Check for stub patterns
-      local is_stub=$(grep -A 5 "onSubmit" "$component" | grep -E "console\.log|preventDefault\(\)$|\{\}" 2>/dev/null)
-      if [ -n "$is_stub" ]; then
-        echo "STUB: form → handler (only logs or empty)"
-      else
-        echo "PARTIAL: form → handler (exists but unclear implementation)"
-      fi
-    fi
-  else
-    echo "NOT_WIRED: form → handler (no onSubmit found)"
-  fi
-}
-```
-
-### Pattern: State → Render
-
-```bash
-verify_state_render_link() {
-  local component="$1"
-  local state_var="$2"
-
-  # Check if state variable exists
-  local has_state=$(grep -E "useState.*$state_var|\[$state_var," "$component" 2>/dev/null)
-
-  if [ -n "$has_state" ]; then
-    # Check if state is used in JSX
-    local renders_state=$(grep -E "\{.*$state_var.*\}|\{$state_var\." "$component" 2>/dev/null)
-
-    if [ -n "$renders_state" ]; then
-      echo "WIRED: state → render ($state_var displayed)"
-    else
-      echo "NOT_WIRED: state → render ($state_var exists but not displayed)"
-    fi
-  else
-    echo "N/A: state → render (no state var $state_var)"
-  fi
-}
-```
+1. **Connection exists** — grep confirms the call/import/reference
+2. **Connection is functional** — the result is consumed, not ignored. A fetch with no await, a query whose result isn't returned, or a handler that only logs are all PARTIAL, not WIRED.
 
 ## Step 6: Check Requirements Coverage
 
@@ -394,36 +222,14 @@ For each requirement:
 
 ## Step 7: Scan for Anti-Patterns
 
-Identify files modified in this phase:
+Identify files modified in this phase from PLAN.md `**Files:**` lines or git history — do NOT rely on SUMMARY.md for file lists.
 
 ```bash
-# Extract files from SUMMARY.md
-grep -E "^\- \`" "$PHASE_DIR"/*-SUMMARY.md | sed 's/.*`\([^`]*\)`.*/\1/' | sort -u
+# Extract files from PLAN.md (trustworthy source)
+grep "^\*\*Files:\*\*" "$PHASE_DIR"/*-PLAN.md | sed 's/.*`\([^`]*\)`.*/\1/' | sort -u
 ```
 
-Run anti-pattern detection:
-
-```bash
-scan_antipatterns() {
-  local files="$@"
-
-  for file in $files; do
-    [ -f "$file" ] || continue
-
-    # TODO/FIXME comments
-    grep -n -E "TODO|FIXME|XXX|HACK" "$file" 2>/dev/null
-
-    # Placeholder content
-    grep -n -E "placeholder|coming soon|will be here" "$file" -i 2>/dev/null
-
-    # Empty implementations
-    grep -n -E "return null|return \{\}|return \[\]|=> \{\}" "$file" 2>/dev/null
-
-    # Console.log only implementations
-    grep -n -B 2 -A 2 "console\.log" "$file" 2>/dev/null | grep -E "^\s*(const|function|=>)"
-  done
-}
-```
+Scan each file for anti-patterns: `TODO/FIXME/XXX/HACK` comments, placeholder content (`coming soon`, `will be here`), empty implementations (`return null`, `return {}`, `=> {}`), console.log-only handlers.
 
 Categorize findings:
 
@@ -689,95 +495,13 @@ Automated checks passed. Awaiting human verification.
 
 </critical_rules>
 
-<stub_detection_patterns>
-
-## Universal Stub Patterns
-
-```bash
-# Comment-based stubs
-grep -E "(TODO|FIXME|XXX|HACK|PLACEHOLDER)" "$file"
-grep -E "implement|add later|coming soon|will be" "$file" -i
-
-# Placeholder text in output
-grep -E "placeholder|lorem ipsum|coming soon|under construction" "$file" -i
-
-# Empty or trivial implementations
-grep -E "return null|return undefined|return \{\}|return \[\]" "$file"
-grep -E "console\.(log|warn|error).*only" "$file"
-
-# Hardcoded values where dynamic expected
-grep -E "id.*=.*['\"].*['\"]" "$file"
-```
-
-## React Component Stubs
-
-```javascript
-// RED FLAGS:
-return <div>Component</div>
-return <div>Placeholder</div>
-return <div>{/* TODO */}</div>
-return null
-return <></>
-
-// Empty handlers:
-onClick={() => {}}
-onChange={() => console.log('clicked')}
-onSubmit={(e) => e.preventDefault()}  // Only prevents default
-```
-
-## API Route Stubs
-
-```typescript
-// RED FLAGS:
-export async function POST() {
-  return Response.json({ message: "Not implemented" });
-}
-
-export async function GET() {
-  return Response.json([]); // Empty array with no DB query
-}
-
-// Console log only:
-export async function POST(req) {
-  console.log(await req.json());
-  return Response.json({ ok: true });
-}
-```
-
-## Wiring Red Flags
-
-```typescript
-// Fetch exists but response ignored:
-fetch('/api/messages')  // No await, no .then, no assignment
-
-// Query exists but result not returned:
-await prisma.message.findMany()
-return Response.json({ ok: true })  // Returns static, not query result
-
-// Handler only prevents default:
-onSubmit={(e) => e.preventDefault()}
-
-// State exists but not rendered:
-const [messages, setMessages] = useState([])
-return <div>No messages</div>  // Always shows "no messages"
-```
-
-</stub_detection_patterns>
-
 <success_criteria>
 
-- [ ] Previous VERIFICATION.md checked (Step 0)
-- [ ] If re-verification: must-haves loaded from previous, focus on failed items
-- [ ] If initial: must-haves established (from ## Must-Haves section or derived from phase goal)
-- [ ] All truths verified with status and evidence
-- [ ] All artifacts checked at all three levels (exists, substantive, wired)
-- [ ] All key links verified
-- [ ] Requirements coverage assessed (if applicable)
-- [ ] Anti-patterns scanned and categorized
-- [ ] Human verification items identified
-- [ ] Overall status determined
-- [ ] Gaps structured in YAML frontmatter (if gaps_found)
-- [ ] Re-verification metadata included (if previous existed)
-- [ ] VERIFICATION.md created with complete report
-- [ ] Results returned to orchestrator (NOT committed)
+- [ ] Gaps structured in YAML frontmatter (if gaps_found) — planner depends on this
+- [ ] Key links verified — not just artifact existence; this is where stubs hide
+- [ ] Artifacts checked at all three levels (exists → substantive → wired)
+- [ ] SUMMARY.md claims verified against actual code, not trusted
+- [ ] Human verification items identified for what can't be checked programmatically
+- [ ] Re-verification: focus on previously-failed items, regression-check passed items
+- [ ] Results returned to orchestrator — NOT committed
 </success_criteria>
