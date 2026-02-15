@@ -23,13 +23,15 @@ This is the ritual that separates "development" from "shipped."
 When a milestone completes, this workflow:
 
 1. Cleans up raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER deleted)
-2. Extracts full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
-3. Archives requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
-4. Archives milestone context to `.planning/milestones/v[X.Y]-CONTEXT.md`
-5. Updates ROADMAP.md to replace milestone details with one-line summary
-6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-7. Performs full PROJECT.md evolution review
-8. Routes to `/ms:new-milestone` for next milestone
+2. Creates `.planning/milestones/v[X.Y]/` directory for all archive files
+3. Extracts full milestone details to `.planning/milestones/v[X.Y]/ROADMAP.md`
+4. Archives requirements to `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
+5. Archives milestone context to `.planning/milestones/v[X.Y]/CONTEXT.md`
+6. Archives research files to `.planning/milestones/v[X.Y]/research/` (if exists)
+7. Updates ROADMAP.md to replace milestone details with one-line summary
+8. Deletes REQUIREMENTS.md (fresh one created for next milestone)
+9. Performs full PROJECT.md evolution review
+10. Routes to `/ms:new-milestone` for next milestone
 
 Knowledge files in `.planning/knowledge/` persist across milestones (maintained by phase-level consolidation in execute-phase).
 
@@ -428,7 +430,11 @@ Extract completed milestone details and create archive file.
 
 **Process:**
 
-1. Create archive file path: `.planning/milestones/v[X.Y]-ROADMAP.md`
+1. Create milestone directory and archive file:
+   ```bash
+   mkdir -p .planning/milestones/v[X.Y]
+   ```
+   Archive file path: `.planning/milestones/v[X.Y]/ROADMAP.md`
 
 2. Read `~/.claude/mindsystem/templates/milestone-archive.md` template
 
@@ -453,7 +459,7 @@ Extract completed milestone details and create archive file.
    - {{DECISIONS_FROM_PROJECT}} — Key decisions from PROJECT.md
    - {{ISSUES_RESOLVED_DURING_MILESTONE}} — From summaries
 
-6. Write filled template to `.planning/milestones/v[X.Y]-ROADMAP.md`
+6. Write filled template to `.planning/milestones/v[X.Y]/ROADMAP.md`
 
 7. Delete ROADMAP.md (fresh one created for next milestone):
    ```bash
@@ -462,13 +468,13 @@ Extract completed milestone details and create archive file.
 
 8. Verify archive exists:
    ```bash
-   ls .planning/milestones/v[X.Y]-ROADMAP.md
+   ls .planning/milestones/v[X.Y]/ROADMAP.md
    ```
 
 9. Confirm roadmap archive complete:
 
    ```
-   ✅ v[X.Y] roadmap archived to milestones/v[X.Y]-ROADMAP.md
+   ✅ v[X.Y] roadmap archived to milestones/v[X.Y]/ROADMAP.md
    ✅ ROADMAP.md deleted (fresh one for next milestone)
    ```
 
@@ -487,7 +493,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
    cat .planning/REQUIREMENTS.md
    ```
 
-2. Create archive file: `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
+2. Create archive file: `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
 
 3. Transform requirements for archive:
    - Mark all v1 requirements as `[x]` complete
@@ -531,7 +537,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
 
 6. Confirm:
    ```
-   ✅ Requirements archived to milestones/v[X.Y]-REQUIREMENTS.md
+   ✅ Requirements archived to milestones/v[X.Y]/REQUIREMENTS.md
    ✅ REQUIREMENTS.md deleted (fresh one needed for next milestone)
    ```
 
@@ -544,13 +550,13 @@ Archive requirements and prepare for fresh requirements in next milestone.
 Move the milestone audit file to the archive (if it exists):
 
 ```bash
-# Move audit to milestones folder (if exists)
-[ -f .planning/v[X.Y]-MILESTONE-AUDIT.md ] && mv .planning/v[X.Y]-MILESTONE-AUDIT.md .planning/milestones/
+# Move audit to milestone folder (if exists)
+[ -f .planning/v[X.Y]-MILESTONE-AUDIT.md ] && mv .planning/v[X.Y]-MILESTONE-AUDIT.md .planning/milestones/v[X.Y]/MILESTONE-AUDIT.md
 ```
 
 Confirm:
 ```
-✅ Audit archived to milestones/v[X.Y]-MILESTONE-AUDIT.md
+✅ Audit archived to milestones/v[X.Y]/MILESTONE-AUDIT.md
 ```
 
 (Skip silently if no audit file exists — audit is optional)
@@ -562,15 +568,32 @@ Confirm:
 Archive the milestone context file (if it exists):
 
 ```bash
-[ -f .planning/MILESTONE-CONTEXT.md ] && mv .planning/MILESTONE-CONTEXT.md .planning/milestones/v[X.Y]-CONTEXT.md
+[ -f .planning/MILESTONE-CONTEXT.md ] && mv .planning/MILESTONE-CONTEXT.md .planning/milestones/v[X.Y]/CONTEXT.md
 ```
 
 If archived:
 ```
-✅ Context archived to milestones/v[X.Y]-CONTEXT.md
+✅ Context archived to milestones/v[X.Y]/CONTEXT.md
 ```
 
 (Skip silently if no context file exists)
+
+</step>
+
+<step name="archive_research">
+
+Archive research files to milestone (if research directory exists):
+
+```bash
+[ -d .planning/research ] && mv .planning/research .planning/milestones/v[X.Y]/research
+```
+
+If archived:
+```
+✅ Research archived to milestones/v[X.Y]/research/
+```
+
+(Skip silently if no research directory exists)
 
 </step>
 
@@ -645,28 +668,27 @@ git push origin v[X.Y]
 Commit milestone completion including archive files and deletions.
 
 ```bash
-# Stage archive files (new)
-git add .planning/milestones/v[X.Y]-ROADMAP.md
-git add .planning/milestones/v[X.Y]-REQUIREMENTS.md
-git add .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
-git add .planning/milestones/v[X.Y]-CONTEXT.md 2>/dev/null || true
+# Stage archive directory (covers ROADMAP, REQUIREMENTS, AUDIT, CONTEXT, research)
+git add .planning/milestones/v[X.Y]/
 
 # Stage updated files
 git add .planning/MILESTONES.md
 git add .planning/PROJECT.md
 git add .planning/STATE.md
 
-# Stage deletions (raw artifacts cleaned from phase directories)
+# Stage deletions (raw artifacts cleaned from phase directories, research dir removed)
 git add -u .planning/
 
 # Commit with descriptive message
 git commit -m "$(cat <<'EOF'
 chore: complete v[X.Y] milestone
 
-Archived:
-- milestones/v[X.Y]-ROADMAP.md
-- milestones/v[X.Y]-REQUIREMENTS.md
-- milestones/v[X.Y]-MILESTONE-AUDIT.md (if audit was run)
+Archived to milestones/v[X.Y]/:
+- ROADMAP.md
+- REQUIREMENTS.md
+- MILESTONE-AUDIT.md (if audit was run)
+- CONTEXT.md (if milestone context existed)
+- research/ (if research existed)
 
 Cleaned:
 - Raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
@@ -675,6 +697,7 @@ Cleaned:
 Deleted (fresh for next milestone):
 - ROADMAP.md
 - REQUIREMENTS.md
+- .planning/research/ (archived to milestone)
 
 Updated:
 - MILESTONES.md (new entry)
@@ -699,9 +722,10 @@ Shipped:
 - [N] phases ([M] plans, [P] tasks)
 - [One sentence of what shipped]
 
-Archived:
-- milestones/v[X.Y]-ROADMAP.md
-- milestones/v[X.Y]-REQUIREMENTS.md
+Archived to milestones/v[X.Y]/:
+- ROADMAP.md
+- REQUIREMENTS.md
+- research/ (if existed)
 
 Summary: .planning/MILESTONES.md
 Tag: v[X.Y]
@@ -777,8 +801,10 @@ Milestone completion is successful when:
 - [ ] All shipped requirements moved to Validated in PROJECT.md
 - [ ] Key Decisions updated with outcomes
 - [ ] ROADMAP.md reorganized with milestone grouping
-- [ ] Roadmap archive created (milestones/v[X.Y]-ROADMAP.md)
-- [ ] Requirements archive created (milestones/v[X.Y]-REQUIREMENTS.md)
+- [ ] Milestone directory created (milestones/v[X.Y]/)
+- [ ] Roadmap archive created (milestones/v[X.Y]/ROADMAP.md)
+- [ ] Requirements archive created (milestones/v[X.Y]/REQUIREMENTS.md)
+- [ ] Research archived to milestone (milestones/v[X.Y]/research/) if .planning/research/ existed
 - [ ] REQUIREMENTS.md deleted (fresh for next milestone)
 - [ ] STATE.md updated with fresh project reference
 - [ ] Git tag created (v[X.Y])

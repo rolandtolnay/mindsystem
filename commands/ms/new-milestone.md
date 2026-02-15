@@ -64,7 +64,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 3. **Strategic assessment (silent — do not output this step):**
    - Check for previous milestone artifacts using calculated version:
      - `.planning/knowledge/*.md` (subsystem knowledge files — persist across milestones)
-     - `.planning/milestones/v{VERSION}-MILESTONE-AUDIT.md` (if exists)
+     - `.planning/milestones/v{VERSION}/MILESTONE-AUDIT.md` (if exists)
      - `.planning/TECH-DEBT.md` (if exists)
    - Identify: outstanding tech debt, untested assumptions, high-impact gaps, unaddressed requirements
    - This is background analysis — synthesize silently, surface through suggestions in step 4

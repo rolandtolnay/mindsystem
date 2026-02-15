@@ -112,8 +112,8 @@ _For current project status, see .planning/ROADMAP.md_
 
 **Archive location:**
 
-- Save to `.planning/milestones/v{VERSION}-{NAME}.md`
-- Example: `.planning/milestones/v1.0-mvp.md`
+- Save to `.planning/milestones/v{VERSION}/ROADMAP.md`
+- Example: `.planning/milestones/v1.0/ROADMAP.md`
 
 **After archiving:**
 

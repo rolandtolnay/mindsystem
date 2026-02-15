@@ -147,7 +147,7 @@ mindsystem/
 ### Core Workflow
 
 1. `/ms:new-project` → Questions → PROJECT.md
-2. `/ms:research-project` (optional) → .planning/research/
+2. `/ms:research-project` (optional) → .planning/research/ (archived to milestones/v[X.Y]/research/ during complete-milestone)
 3. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
 4. `/ms:discuss-phase N` (optional) → Gather context before planning
 5. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
