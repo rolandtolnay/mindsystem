@@ -40,12 +40,14 @@ if [ "$DISK_COUNT" -eq 0 ]; then
 fi
 
 # --- Parse EXECUTION-ORDER.md for plan filenames ---
-ORDER_PLANS=$(grep -oE '[0-9]+-PLAN\.md' "$EXEC_ORDER" | sort -u)
+# Pattern matches phase-prefixed names like 03-01-PLAN.md, 16-01-PLAN.md, 72.1-01-PLAN.md
+ORDER_PLANS=$(grep -oE '[0-9][0-9.]*-[0-9]+-PLAN\.md' "$EXEC_ORDER" | sort -u)
 ORDER_COUNT=$(echo "$ORDER_PLANS" | grep -c . 2>/dev/null || echo 0)
 
 # --- Check 1: Every disk plan is listed in EXECUTION-ORDER.md ---
 ERRORS=""
 while IFS= read -r plan; do
+  [ -z "$plan" ] && continue
   if ! echo "$ORDER_PLANS" | grep -qx "$plan"; then
     ERRORS="${ERRORS}  Missing from EXECUTION-ORDER.md: $plan\n"
   fi
@@ -53,6 +55,7 @@ done <<< "$DISK_PLANS"
 
 # --- Check 2: Every plan in EXECUTION-ORDER.md exists on disk ---
 while IFS= read -r plan; do
+  [ -z "$plan" ] && continue
   if ! echo "$DISK_PLANS" | grep -qx "$plan"; then
     ERRORS="${ERRORS}  Listed in EXECUTION-ORDER.md but file missing: $plan\n"
   fi
@@ -75,7 +78,7 @@ while IFS= read -r line; do
     WAVE_COUNT=$((WAVE_COUNT + 1))
     WAVE_FILES[$CURRENT_WAVE]=""
   elif [ -n "$CURRENT_WAVE" ]; then
-    PLAN_FILE=$(echo "$line" | grep -oE '[0-9]+-PLAN\.md' || true)
+    PLAN_FILE=$(echo "$line" | grep -oE '[0-9][0-9.]*-[0-9]+-PLAN\.md' || true)
     if [ -n "$PLAN_FILE" ] && [ -f "$PHASE_DIR/$PLAN_FILE" ]; then
       # Extract **Files:** lines from plan
       FILE_PATHS=$(grep -E '^\*\*Files:\*\*' "$PHASE_DIR/$PLAN_FILE" | sed 's/\*\*Files:\*\*//g' | tr ',' '\n' | sed 's/`//g; s/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)

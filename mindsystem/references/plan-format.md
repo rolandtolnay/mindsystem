@@ -160,15 +160,15 @@ Execution order lives in a single `EXECUTION-ORDER.md` file alongside the plans.
 # Execution Order
 
 ## Wave 1 (parallel)
-- 01-PLAN.md — Database schema and Prisma client
-- 02-PLAN.md — Environment configuration
+- 03-01-PLAN.md — Database schema and Prisma client
+- 03-02-PLAN.md — Environment configuration
 
 ## Wave 2 (parallel)
-- 03-PLAN.md — Auth endpoints (depends on schema from 01)
-- 04-PLAN.md — User profile CRUD (depends on schema from 01)
+- 03-03-PLAN.md — Auth endpoints (depends on schema from 01)
+- 03-04-PLAN.md — User profile CRUD (depends on schema from 01)
 
 ## Wave 3
-- 05-PLAN.md — Protected route middleware (depends on auth from 03)
+- 03-05-PLAN.md — Protected route middleware (depends on auth from 03)
 ```
 
 **Rules:**

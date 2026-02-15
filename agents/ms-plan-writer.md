@@ -294,11 +294,11 @@ Create `.planning/phases/{phase_dir}/EXECUTION-ORDER.md`:
 # Execution Order
 
 ## Wave 1 (parallel)
-- 01-PLAN.md — {description}
-- 02-PLAN.md — {description}
+- {phase}-01-PLAN.md — {description}
+- {phase}-02-PLAN.md — {description}
 
 ## Wave 2 (parallel)
-- 03-PLAN.md — {description} (depends on 01 for {reason})
+- {phase}-03-PLAN.md — {description} (depends on 01 for {reason})
 ```
 
 Rules:

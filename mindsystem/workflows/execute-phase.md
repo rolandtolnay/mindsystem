@@ -91,7 +91,7 @@ If validation passes, proceed with wave execution.
 <step name="read_execution_order">
 Read EXECUTION-ORDER.md and parse wave structure:
 
-Parse `## Wave N` headers with `- XX-PLAN.md` items under each. Build wave groups:
+Parse `## Wave N` headers with `- {phase}-XX-PLAN.md` items under each. Build wave groups:
 
 ```
 waves = {
