@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.1] - 2026-02-15
+
+### Changed
+- Extract skill loading into dedicated step in design-phase workflow, ensuring design context is loaded before adaptive Q&A begins
+- Add Skill tool access to Flutter code quality and simplifier agents
+- Add allowed-tools specification to discuss-phase command
+
+### Fixed
+- Plan-writer and plan-checker agents were silently downgraded from Opus to Sonnet due to explicit model overrides in workflow and reference docs
+
 ## [3.16.0] - 2026-02-15
 
 ### Added
@@ -430,7 +440,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.1...HEAD
+[3.16.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.0...v3.16.1
 [3.16.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.15.0...v3.16.0
 [3.15.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.14.0...v3.15.0
 [3.14.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.13.1...v3.14.0
