@@ -67,6 +67,10 @@ Check for and read `.planning/phases/XX-name/{phase}-CONTEXT.md` - contains rese
 **Load design specs if exists (created by /ms:design-phase):**
 Check for and read `.planning/phases/XX-name/{phase}-DESIGN.md` - contains visual/UX specifications including layouts, components, flows, and verification criteria.
 
+**Load tech debt if quality/cleanup phase:**
+If phase name or roadmap goal contains "quality", "cleanup", "refactor", or "tech debt":
+Check for and read `.planning/TECH-DEBT.md` — prioritized issues for scope selection during task breakdown.
+
 **Load codebase context if exists:**
 Check for `.planning/codebase/` and load relevant documents based on phase type.
 

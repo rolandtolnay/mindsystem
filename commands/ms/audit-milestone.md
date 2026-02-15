@@ -306,26 +306,23 @@ Use AskUserQuestion with options A and B.
 
 1. Determine next phase number (append at end of current phases)
 2. Create phase directory: `.planning/phases/{NN}-code-quality/`
-3. Create `PHASE-FINDINGS.md` with full review findings
-4. Update ROADMAP.md with new phase:
+3. Update ROADMAP.md with new phase:
 
 ```markdown
 ### Phase {N}: Code Quality (Generated)
 **Goal:** Address structural improvements from milestone code review
-
-**Findings to address:**
-[High impact items from review]
+**Scope:** High and Medium items from .planning/TECH-DEBT.md
 
 Plans:
 - [ ] {N}-01: High impact structural fixes
 ```
 
-5. Report:
+4. Report:
 ```markdown
 ## Quality Phase Created
 
 **Phase {N}:** `.planning/phases/{NN}-code-quality/`
-**Findings documented:** `PHASE-FINDINGS.md`
+**Scope source:** `.planning/TECH-DEBT.md`
 
 ---
 
@@ -394,13 +391,14 @@ After code review (all sources now available), generate or update `.planning/TEC
 
 1. **Read existing** `.planning/TECH-DEBT.md` (if exists) — parse active items and dismissed list, note highest `TD-{N}` ID
 2. **Read template** from `@~/.claude/mindsystem/templates/tech-debt.md`
-3. **Collect tech debt** from all sources:
-   - Phase VERIFICATION.md anti-patterns (severity: warning or info — blockers go to `gaps`)
-   - Non-critical gaps from phase verifications
-   - Code review findings (if analyze-only reviewer was used in Step 8)
+3. **Collect tech debt** from all sources with severity mapping:
+   - Integration checker bugs → **Critical**
+   - Code review findings → pass through reviewer severity (**High** / **Medium** / **Low**)
+   - Phase VERIFICATION.md anti-patterns → **Medium** or **Low** (blockers go to `gaps`, not tech debt)
+   - Non-critical gaps from phase verifications → **Medium**
 4. **De-duplicate** against existing active items AND dismissed items (match by location + description similarity)
 5. **Assign `TD-{N}` IDs** continuing from highest existing ID
-6. **Write/update** `.planning/TECH-DEBT.md` following the template format
+6. **Write/update** `.planning/TECH-DEBT.md` — group items under `## Critical`, `## High`, `## Medium`, `## Low` sections per template. Omit empty sections.
 
 ## 9. Commit Audit Report
 
@@ -432,7 +430,7 @@ Read `~/.claude/mindsystem/references/routing/audit-result-routing.md` and follo
 - [ ] Code review completed (or skipped if config says "skip")
 - [ ] If analyze-only reviewer: YAML findings parsed and added to report
 - [ ] If analyze-only reviewer: Binary decision presented (quality phase vs tech debt)
-- [ ] If quality phase chosen: Phase directory created with PHASE-FINDINGS.md
+- [ ] If quality phase chosen: Phase directory created, ROADMAP updated with TECH-DEBT.md scope
 - [ ] MILESTONE-AUDIT.md committed to git
 - [ ] Results presented with actionable next steps
 </success_criteria>

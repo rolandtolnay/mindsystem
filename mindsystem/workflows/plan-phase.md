@@ -74,7 +74,7 @@ ls .planning/codebase/*.md 2>/dev/null
 | database, schema, models | ARCHITECTURE.md, STACK.md |
 | testing, tests | TESTING.md, CONVENTIONS.md |
 | integration, external API | INTEGRATIONS.md, STACK.md |
-| refactor, cleanup | CONCERNS.md, ARCHITECTURE.md |
+| refactor, cleanup, quality, tech debt | CONCERNS.md, ARCHITECTURE.md |
 | setup, config | STACK.md, STRUCTURE.md |
 | (default) | STACK.md, ARCHITECTURE.md |
 
