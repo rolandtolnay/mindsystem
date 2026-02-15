@@ -2,7 +2,7 @@
 name: ms-flutter-code-quality
 description: Refactors Flutter/Dart code to follow quality guidelines. Applies code patterns, widget organization, folder structure, and simplification. Spawned by execute-phase/adhoc.
 model: sonnet
-tools: Read, Write, Edit, Bash, Grep, Glob
+tools: Read, Write, Edit, Bash, Grep, Glob, Skill
 color: cyan
 skills:
   - flutter-code-quality

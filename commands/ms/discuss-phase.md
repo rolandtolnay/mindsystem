@@ -2,6 +2,12 @@
 name: ms:discuss-phase
 description: Gather phase context through adaptive questioning before planning
 argument-hint: "[phase]"
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - AskUserQuestion
 ---
 
 <objective>
