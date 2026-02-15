@@ -214,24 +214,11 @@ For each phase, analyze whether pre-work would reduce risk before planning. Thre
 
 | Pre-Work | Question It Answers | Command |
 |----------|---------------------|---------|
-| **Research** | "Do I know HOW to build this?" | `/ms:research-phase` |
 | **Discussion** | "Do I understand WHAT the user wants?" | `/ms:discuss-phase` |
 | **Design** | "Do I know what this should LOOK like?" | `/ms:design-phase` |
+| **Research** | "Do I know HOW to build this?" | `/ms:research-phase` |
 
 All use binary Likely/Unlikely with parenthetical reason. These are hints to users, not mandates.
-
-### Research Indicators
-
-**Likely when ANY of:**
-- External APIs or services involved
-- New libraries/frameworks to learn
-- Architectural decisions not yet made
-- Technical approach unclear
-
-**Unlikely when ALL of:**
-- Using established internal patterns
-- CRUD operations with known stack
-- Well-documented conventions exist
 
 ### Discussion Indicators
 
@@ -266,6 +253,19 @@ All use binary Likely/Unlikely with parenthetical reason. These are hints to use
 - Infrastructure, testing, deployment phases
 - Uses established UI patterns exclusively
 
+### Research Indicators
+
+**Likely when ANY of:**
+- External APIs or services involved
+- New libraries/frameworks to learn
+- Architectural decisions not yet made
+- Technical approach unclear
+
+**Unlikely when ALL of:**
+- Using established internal patterns
+- CRUD operations with known stack
+- Well-documented conventions exist
+
 **Note:** Discussion and Design often overlap for UI-facing phases. This is intentional — they serve different purposes (vision vs specification) and a phase may benefit from both.
 
 ### Output Format
@@ -273,12 +273,12 @@ All use binary Likely/Unlikely with parenthetical reason. These are hints to use
 For each phase in ROADMAP.md:
 
 ```markdown
-**Research**: Likely (external API) | Unlikely (established patterns)
-**Research topics**: [What needs investigating] (only if Likely)
 **Discuss**: Likely (ambiguous user flow) | Unlikely (clear requirements)
 **Discuss topics**: [What to clarify] (only if Likely)
 **Design**: Likely (significant new UI) | Unlikely (backend only)
 **Design focus**: [What to design] (only if Likely)
+**Research**: Likely (external API) | Unlikely (established patterns)
+**Research topics**: [What needs investigating] (only if Likely)
 ```
 
 </pre_work_analysis>
@@ -461,11 +461,11 @@ When presenting to user for approval:
 
 ### Pre-Work Recommendations
 
-| Phase | Research | Discuss | Design |
-|-------|----------|---------|--------|
+| Phase | Discuss | Design | Research |
+|-------|---------|--------|----------|
 | 1 - Setup | Unlikely | Unlikely | Unlikely |
-| 2 - Auth | Likely | Likely | Unlikely |
-| 3 - Content | Unlikely | Likely | Likely |
+| 2 - Auth | Likely | Unlikely | Likely |
+| 3 - Content | Likely | Likely | Unlikely |
 
 **Phase 2 topics:**
 - Research: [external auth providers]
@@ -601,8 +601,8 @@ When files are written and returning to orchestrator:
 
 ### Pre-Work Recommendations
 
-| Phase | Research | Discuss | Design |
-|-------|----------|---------|--------|
+| Phase | Discuss | Design | Research |
+|-------|---------|--------|----------|
 | 1 - {name} | {Likely/Unlikely} | {Likely/Unlikely} | {Likely/Unlikely} |
 | 2 - {name} | {Likely/Unlikely} | {Likely/Unlikely} | {Likely/Unlikely} |
 

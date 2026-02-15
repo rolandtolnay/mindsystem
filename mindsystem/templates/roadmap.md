@@ -34,9 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
   3. [Observable behavior from user perspective]
-**Research**: Unlikely (established patterns)
 **Discuss**: Unlikely (clear requirements)
 **Design**: Unlikely (backend only)
+**Research**: Unlikely (established patterns)
 **Plans**: [Number of plans, e.g., "3 plans" or "TBD"]
 
 Plans:
@@ -51,12 +51,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
-**Research**: Likely (new integration)
-**Research topics**: [What needs investigating]
 **Discuss**: Likely (ambiguous user flow)
 **Discuss topics**: [What to clarify]
 **Design**: Likely (significant new UI)
 **Design focus**: [What to design]
+**Research**: Likely (new integration)
+**Research topics**: [What needs investigating]
 **Plans**: [Number of plans]
 
 Plans:
@@ -81,10 +81,10 @@ Plans:
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
   3. [Observable behavior from user perspective]
-**Research**: Likely (external API)
-**Research topics**: [What needs investigating]
 **Discuss**: Unlikely (established patterns)
 **Design**: Unlikely (API only)
+**Research**: Likely (external API)
+**Research topics**: [What needs investigating]
 **Plans**: [Number of plans]
 
 Plans:
@@ -98,9 +98,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
-**Research**: Unlikely (internal patterns)
 **Discuss**: Unlikely (clear requirements)
 **Design**: Unlikely (backend only)
+**Research**: Unlikely (internal patterns)
 **Plans**: [Number of plans]
 
 Plans:
@@ -137,9 +137,9 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 - Format: "User can [action]" or "[Thing] works/exists"
 
 **Pre-work indicators** (all use Likely/Unlikely with parenthetical reason):
-- `Research` - Technical unknowns: external APIs, new libraries, architectural decisions
 - `Discuss` - Vision unknowns: ambiguous requirements, UX decisions, novel features
 - `Design` - Visual unknowns: significant new UI, novel interactions, multi-screen flows
+- `Research` - Technical unknowns: external APIs, new libraries, architectural decisions
 - Include topic/focus fields only when Likely
 - Indicators are hints, not mandates - validate at planning time
 - UI-facing phases often need both Discuss and Design (this is intentional)
