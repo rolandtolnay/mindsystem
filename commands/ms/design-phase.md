@@ -7,6 +7,7 @@ allowed-tools:
   - Bash
   - Task
   - AskUserQuestion
+  - Skill
 ---
 
 <objective>
@@ -122,17 +123,9 @@ If knowledge files exist, extract:
 - Key decisions (constraints)
 - Pitfalls (design must avoid known traps)
 
-Pass the extracted knowledge to ms-designer in the design prompt (see step 5 `<prior_knowledge>` block).
+Pass the extracted knowledge to ms-designer in the design prompt (see step 6 `<prior_knowledge>` block).
 
-**3c. Optional context — project UI skill:**
-
-Scan the skills list in the most recent system-reminder for a skill whose description mentions UI patterns, components, design system, or implementation styling (e.g., "Flutter/Dart patterns", "React component library", "UI implementation patterns").
-
-If a matching skill is found, invoke it: `Skill(skill: "skill-name")`. Extract aesthetic patterns (colors, components, spacing, typography) from the loaded content for the `<existing_aesthetic>` block passed to ms-designer.
-
-If no matching skill is found, skip this step and note "No project UI skill found" in the `<existing_aesthetic>` block.
-
-**3d. Optional context - codebase analysis:**
+**3c. Optional context - codebase analysis:**
 
 ```bash
 # Platform detection
@@ -152,14 +145,24 @@ grep -r "colors\|theme\|spacing" src/ --include="*.ts" --include="*.dart" 2>/dev
 
 Document discovered patterns for the designer.
 
-## 4. Adaptive Q&A (If Gaps Exist)
+## 4. Load Project Skills
+
+Scan the skill list in your system message for skills matching this phase's technology or domain. Invoke each match via the Skill tool before proceeding — skills contain conventions and patterns that change what you design for.
+
+- One clear match → invoke it directly
+- Multiple candidates → use AskUserQuestion to let the user choose
+- No match → proceed without
+
+Extract aesthetic patterns (colors, components, spacing, typography) from loaded skill content for the `<existing_aesthetic>` block passed to ms-designer.
+
+## 5. Adaptive Q&A (If Gaps Exist)
 
 Assess context coverage:
 - Can platform be inferred? (from codebase or PROJECT.md)
 - Can visual style be inferred? (from project UI skill or codebase)
 - Can design priorities be inferred? (from CONTEXT.md or phase requirements)
 
-**If everything can be inferred:** Skip to step 5.
+**If everything can be inferred:** Skip to step 6.
 
 **If gaps exist:** Use AskUserQuestion with targeted questions.
 
@@ -177,7 +180,7 @@ Use AskUserQuestion to confirm:
 2. **Ask more questions** — Continue gathering context
 3. **Add context** — Let user provide additional information
 
-## 4b. Mockup Generation (Optional)
+## 5b. Mockup Generation (Optional)
 
 After gathering context and closing gaps, assess whether this phase has significant new UI (new screens, novel flows, complex layouts — not minor tweaks to existing patterns).
 
@@ -203,11 +206,11 @@ Follow mockup-generation workflow:
 8. Handle selection (single pick, combine, tweak, more variants, or skip)
 9. Extract CSS specs from chosen variant into `<mockup_direction>` block
 
-Pass gathered context (PROJECT.md, ROADMAP.md phase entry, existing aesthetic) to the workflow. The workflow returns either a `<mockup_direction>` block for step 5, or nothing if user skips.
+Pass gathered context (PROJECT.md, ROADMAP.md phase entry, existing aesthetic) to the workflow. The workflow returns either a `<mockup_direction>` block for step 6, or nothing if user skips.
 
-**If user selects "No":** Proceed directly to step 5.
+**If user selects "No":** Proceed directly to step 6.
 
-## 5. Spawn ms-designer Agent
+## 6. Spawn ms-designer Agent
 
 Assemble the design prompt from gathered context:
 
@@ -294,7 +297,7 @@ No existing aesthetic. Design fresh with platform conventions.
 </existing_aesthetic>
 
 <mockup_direction>
-[If mockups were generated in step 4b, include the extracted specs:]
+[If mockups were generated in step 5b, include the extracted specs:]
 
 Direction: [chosen direction name]
 Philosophy: [direction one-sentence philosophy]
@@ -351,7 +354,7 @@ Task(
 )
 ```
 
-## 6. Handle Agent Return
+## 7. Handle Agent Return
 
 **`## DESIGN COMPLETE`:**
 
@@ -378,7 +381,7 @@ Also offer:
 
 Present the question to user. Get response. Spawn continuation with the clarification.
 
-## 7. Conversational Refinement
+## 8. Conversational Refinement
 
 After initial generation, if user wants to refine:
 
@@ -413,7 +416,7 @@ Use the iteration template from `~/.claude/mindsystem/templates/design-iteration
    - Verify "what needs improvement" was addressed
    - Update design version in DESIGN.md frontmatter
 
-## 8. Update Last Command
+## 9. Update Last Command
 
 Update `.planning/STATE.md` Last Command field:
 - Find line starting with `Last Command:` in Current Position section
