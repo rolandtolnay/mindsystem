@@ -43,6 +43,14 @@ Parse plan sections:
 **If `**Type:** tdd`:** Read `~/.claude/mindsystem/references/tdd-execution.md` for RED-GREEN-REFACTOR execution flow.
 </step>
 
+<step name="load_skills">
+Scan the skill list in your system message for skills matching the plan's technology or domain. Invoke each match via the Skill tool before proceeding — skills contain project-specific conventions and patterns that change what you produce during implementation.
+
+- One clear match → invoke it directly
+- Multiple candidates → use AskUserQuestion to let the user choose
+- No match → proceed without
+</step>
+
 <step name="execute">
 Record start time: `PLAN_START_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); PLAN_START_EPOCH=$(date +%s)`
 
