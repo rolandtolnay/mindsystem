@@ -263,133 +263,73 @@ For niche domains (3D, games, audio, shaders, ML), suggest `/ms:research-phase` 
 </step>
 
 <step name="read_project_history">
-**Intelligent context assembly from frontmatter dependency graph:**
+**Intelligent context assembly via scanner script + selective reading:**
 
-**1. Scan all summary frontmatter (cheap - first ~25 lines):**
+**1. Determine scanner arguments** from prior steps:
+
+- Phase number from identify_phase step
+- Subsystem from `.planning/config.json` if available
+- Phase name from ROADMAP.md phase description
 
 ```bash
-for f in .planning/phases/*/*-SUMMARY.md; do
-  # Extract frontmatter only (between first two --- markers)
-  sed -n '1,/^---$/p; /^---$/q' "$f" | head -30
-done
+SUBSYSTEM=$(jq -r '.subsystems[0] // empty' .planning/config.json 2>/dev/null)
+PHASE_NAME=$(grep -A2 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null | head -1 | sed 's/.*Phase [0-9]*: *//')
 ```
 
-Parse YAML to extract: phase, subsystem, requires, provides, affects, tags, key-decisions, key-files
+**2. Run context scanner:**
 
-**2. Build dependency graph for current phase:**
+```bash
+uv run ~/.claude/mindsystem/scripts/scan-planning-context.py \
+  --phase "${PHASE}" \
+  --phase-name "${PHASE_NAME}" \
+  ${SUBSYSTEM:+--subsystem "${SUBSYSTEM}"}
+```
 
-- **Check affects field:** Which prior phases have current phase in their `affects` list? → Direct dependencies
-- **Check subsystem:** Which prior phases share same subsystem? → Related work
-- **Check requires chains:** If phase X requires phase Y, and we need X, we also need Y → Transitive dependencies
-- **Check roadmap:** Any phases marked as dependencies in ROADMAP.md phase description?
+**3. Parse JSON output.** Check `success` field. If the script fails or returns non-JSON, fall back to manual scanning (read SUMMARY frontmatter with sed as before). The scanner handles missing directories gracefully — check `sources.*.skipped` for skip reasons.
 
-**3. Select relevant summaries:**
+**4. Present established patterns to user:**
 
-Auto-select phases that match ANY of:
-- Current phase name/number appears in prior phase's `affects` field
-- Same `subsystem` value
-- In `requires` chain (transitive closure)
-- Explicitly mentioned in STATE.md decisions as affecting current phase
-
-Typical selection: 2-4 prior phases (immediately prior + related subsystem work)
-
-**4. Extract context from frontmatter (WITHOUT opening full summaries yet):**
-
-From selected phases' frontmatter, extract:
-- **Tech available:** Union of all tech-stack.added lists
-- **Patterns established:** Union of all tech-stack.patterns and patterns-established
-- **Key files:** Union of all key-files (for @context references)
-- **Decisions:** Extract key-decisions from frontmatter
-
-**4b. Present established patterns to user:**
-
-If patterns-established entries were collected, display:
+From `aggregated.patterns_established`, display:
 
 ```
 ### Established Patterns to Maintain
 - [Pattern: description] (from phase XX)
 ```
 
-If no patterns collected, skip.
+If empty, skip.
 
-**5. Now read FULL summaries for selected phases:**
+**5. Conditionally read full summaries.**
 
-Only now open and read complete SUMMARY.md files for the selected relevant phases. Extract:
-- Detailed "Accomplishments" section
-- "Next Phase Readiness" warnings/blockers
-- "Issues Encountered" that might affect current phase
-- "Deviations from Plan" for patterns
+Read full SUMMARY.md body ONLY for summaries where:
+- `relevance` is HIGH AND `has_readiness_warnings` is true
+- OR frontmatter alone doesn't provide enough context for task breakdown (use judgment)
 
-**6. Search additional knowledge sources (cross-cutting retrieval):**
+Extract from full reads: "Next Phase Readiness" warnings, "Issues Encountered", detailed accomplishments.
 
-Use keywords already extracted: phase name, subsystem (from config.json), tags/tech terms from selected summaries.
+Summaries scored MEDIUM or HIGH without readiness warnings → frontmatter data in JSON is sufficient (tech stack, patterns, key files, decisions already aggregated).
 
-**6a. Resolved debug docs:**
+**6. Present matched learnings:**
 
-```bash
-for f in .planning/debug/resolved/*.md; do
-  sed -n '1,/^---$/p; /^---$/q' "$f" | head -20
-done 2>/dev/null
-```
-
-Select docs matching: same `subsystem`, overlapping `tags`, or `phase` in dependency chain.
-Extract: `root_cause` + `resolution` one-liners from frontmatter.
-
-**If matched debug docs found, present warning to user:**
+**From `debug_learnings`** — present as warnings:
 
 ```
 ### Previous Debug Sessions in This Area
 - **{slug}** ({subsystem}): {root_cause} — Fix: {resolution}
 ```
 
-Awareness only — learnings still flow to `<learnings>` handoff.
-If no matches, skip.
+**From `adhoc_learnings`** — extract entries with non-empty `learnings` arrays for handoff context.
 
-**6b. Adhoc summaries:**
+If neither source has matches, skip.
 
-```bash
-for f in .planning/adhoc/*-SUMMARY.md; do
-  sed -n '1,/^---$/p; /^---$/q' "$f" | head -20
-done 2>/dev/null
-```
+**7. Read knowledge files:**
 
-Select matching: same `subsystem`, overlapping `tags`, or `related_phase` in dependency chain.
-Extract: `learnings` array entries (skip if empty).
+For each entry in `knowledge_files` where `matched` is true, read the full file. Knowledge files are prose (no frontmatter) so the LLM must read them to extract decisions, architecture, pitfalls.
 
-**6c. Completed todos:**
+**8. Assess pending todos:**
 
-```bash
-ls .planning/todos/done/*.md 2>/dev/null
-```
-
-If exists, grep body content for phase keywords or subsystem. Extract brief description of resolved items.
-
-**6d. Subsystem knowledge files (cross-milestone curated context):**
-
-```bash
-ls .planning/knowledge/*.md 2>/dev/null
-```
-
-Determine relevant subsystem(s) from config.json + ROADMAP.md phase description:
-
-```bash
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
-grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
-```
-
-Load matching `knowledge/{subsystem}.md` files. Extract decisions, architecture, pitfalls.
-
-**Collect matched learnings for handoff** — assemble into flat list for `<learnings>` section.
+From `pending_todos` frontmatter in JSON, assess each todo's relevance. Read full body only for todos matching current phase subsystem/tags.
 
 **From STATE.md:** Decisions → constrain approach. Pending todos → candidates. Blockers → may need to address.
-
-**From pending todos:**
-
-```bash
-ls .planning/todos/pending/*.md 2>/dev/null
-```
-
-Assess each pending todo - relevant to this phase? Natural to address now?
 
 **Answer before proceeding:**
 - Q1: What decisions from previous phases constrain this phase?
@@ -399,13 +339,13 @@ Assess each pending todo - relevant to this phase? Natural to address now?
 
 **Track for handoff to ms-plan-writer:**
 - Which summaries were selected (for @context references)
-- Tech stack available (from frontmatter)
-- Established patterns (from frontmatter)
-- Key files to reference (from frontmatter)
-- Applicable decisions (from frontmatter + full summary)
+- Tech stack available (from `aggregated.tech_stack_added`)
+- Established patterns (from `aggregated.patterns_established`)
+- Key files to reference (from `aggregated.key_files_created` + `key_files_modified`)
+- Applicable decisions (from `aggregated.key_decisions` + full summary reads)
 - Todos being addressed (from pending todos)
-- Concerns being verified (from "Next Phase Readiness")
-- Matched learnings (from debug docs, adhoc summaries, patterns, knowledge files)
+- Concerns being verified (from "Next Phase Readiness" in full reads)
+- Matched learnings (from `debug_learnings`, `adhoc_learnings`, patterns, knowledge files)
 </step>
 
 <step name="gather_phase_context">
