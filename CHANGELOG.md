@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.17.1] - 2026-02-15
+
+### Changed
+
+- Reorder pre-work recommendations to Discuss → Design → Research, matching the intended execution flow where vision clarity precedes visual specification precedes technical investigation
+
+### Fixed
+
+- Remove redundant command labels from Next Up routing format for cleaner output
+
 ## [3.17.0] - 2026-02-15
 
 ### Added
@@ -454,7 +464,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.1...HEAD
+[3.17.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.0...v3.17.1
 [3.17.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.2...v3.17.0
 [3.16.2]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.1...v3.16.2
 [3.16.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.0...v3.16.1
