@@ -10,7 +10,7 @@ Created and updated by `/ms:audit-milestone`. Items persist across milestones. U
 
 **Item IDs** use `TD-{N}` format — monotonically increasing, never reused. New items continue from highest existing ID.
 
-**Sources:** Phase verifications (anti-patterns, non-critical gaps), code review findings, integration checker bugs.
+**Sources:** Phase verifications (anti-patterns, non-critical gaps), code review findings, integration checker bugs, unfixed UAT issues.
 
 ---
 
@@ -54,6 +54,7 @@ Created and updated by `/ms:audit-milestone`. Items persist across milestones. U
 
 **Severity mapping from sources:**
 - Integration checker bugs → Critical
+- Unfixed UAT issues → Critical (blocker) / High (major) / Medium (minor) / Low (cosmetic)
 - Code review findings → pass through reviewer severity (High/Medium/Low)
 - Phase verification anti-patterns → Medium or Low (blockers go to `gaps`, not tech debt)
 - Non-critical verification gaps → Medium

@@ -393,6 +393,7 @@ After code review (all sources now available), generate or update `.planning/TEC
 2. **Read template** from `@~/.claude/mindsystem/templates/tech-debt.md`
 3. **Collect tech debt** from all sources with severity mapping:
    - Integration checker bugs → **Critical**
+   - Unfixed UAT issues (result: `issue`, fix_status ≠ `verified`) → **Critical** (blocker) / **High** (major) / **Medium** (minor) / **Low** (cosmetic)
    - Code review findings → pass through reviewer severity (**High** / **Medium** / **Low**)
    - Phase VERIFICATION.md anti-patterns → **Medium** or **Low** (blockers go to `gaps`, not tech debt)
    - Non-critical gaps from phase verifications → **Medium**
