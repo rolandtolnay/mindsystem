@@ -386,9 +386,7 @@ Present gaps and offer next command:
 
 ## ▶ Next Up
 
-**Plan gap closure** — create additional plans to complete the phase
-
-`/ms:plan-phase {X} --gaps`
+`/ms:plan-phase {X} --gaps` — create additional plans to complete the phase
 
 <sub>`/clear` first → fresh context window</sub>
 

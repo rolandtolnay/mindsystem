@@ -266,15 +266,13 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
     ## ▶ Next Up
 
-    **[Recommended command]** — [one-line reason from conversation]
-
-    `/ms:[recommended-command]`
+    `/ms:[recommended-command]` — [one-line reason from conversation]
 
     <sub>`/clear` first → fresh context window</sub>
 
     ---
 
-    **Also available:** `/ms:[alternative-command]`
+    **Also available:** `/ms:[alternative-command]` — [brief reason]
 
     ---
     ```

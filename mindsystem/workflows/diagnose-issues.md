@@ -181,9 +181,7 @@ Debug sessions: ${DEBUG_DIR}/
 
 ## Next Up
 
-**Plan fixes** — create fix plans from diagnosed gaps
-
-`/ms:plan-phase {phase} --gaps`
+`/ms:plan-phase {phase} --gaps` — create fix plans from diagnosed gaps
 
 `/clear` first for fresh context window
 

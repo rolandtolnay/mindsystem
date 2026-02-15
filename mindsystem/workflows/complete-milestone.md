@@ -734,9 +734,7 @@ Tag: v[X.Y]
 
 ## ▶ Next Up
 
-**Start Next Milestone** — define goals and requirements
-
-`/ms:new-milestone`
+`/ms:new-milestone` — define goals and requirements
 
 <sub>`/clear` first → fresh context window</sub>
 

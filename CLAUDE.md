@@ -288,17 +288,14 @@ Use instead:
 
 ## ▶ Next Up
 
-**{identifier}: {name}** — {one-line description}
-
-`{copy-paste command}`
+`{copy-paste command}` — {one-line description}
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- Alternative option
-- Another option
+- `/ms:alternative` — brief reason
 
 ---
 ```

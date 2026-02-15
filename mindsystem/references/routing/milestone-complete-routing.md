@@ -23,9 +23,7 @@ All {N} phases finished!
 
 ## ▶ Next Up
 
-**Audit milestone** — verify requirements, cross-phase integration, E2E flows
-
-`/ms:audit-milestone`
+`/ms:audit-milestone` — verify requirements, cross-phase integration, E2E flows
 
 <sub>`/clear` first → fresh context window</sub>
 

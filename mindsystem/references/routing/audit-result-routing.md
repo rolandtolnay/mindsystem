@@ -38,9 +38,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ## ▶ Next Up
 
-**Complete milestone** — archive and tag
-
-`/ms:complete-milestone {version}`
+`/ms:complete-milestone {version}` — archive and tag
 
 <sub>`/clear` first → fresh context window</sub>
 ```
@@ -73,9 +71,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ## ▶ Next Up
 
-**Plan gap closure** — create phases to complete milestone
-
-`/ms:plan-milestone-gaps`
+`/ms:plan-milestone-gaps` — create phases to complete milestone
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -112,13 +108,8 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ## ▶ Options
 
-**A. Complete milestone** — accept debt, track in backlog
-
-`/ms:complete-milestone {version}`
-
-**B. Plan cleanup phase** — address debt before completing
-
-`/ms:plan-milestone-gaps`
+- `/ms:complete-milestone {version}` — accept debt, track in backlog
+- `/ms:plan-milestone-gaps` — address debt before completing
 
 <sub>`/clear` first → fresh context window</sub>
 ```

@@ -176,9 +176,7 @@ git commit -m "docs(roadmap): add gap closure phases {N}-{M}"
 
 ## ▶ Next Up
 
-**Plan first gap closure phase**
-
-`/ms:plan-phase {N}`
+`/ms:plan-phase {N}` — plan first gap closure phase
 
 <sub>`/clear` first → fresh context window</sub>
 

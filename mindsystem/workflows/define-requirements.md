@@ -289,9 +289,7 @@ Requirements defined:
 
 ## ▶ Next Up
 
-**Create roadmap** — phases mapped to requirements
-
-`/ms:create-roadmap`
+`/ms:create-roadmap` — phases mapped to requirements
 
 <sub>`/clear` first → fresh context window</sub>
 

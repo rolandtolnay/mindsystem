@@ -9,9 +9,7 @@ Standard format for presenting next steps after completing a command or workflow
 
 ## ▶ Next Up
 
-**{identifier}: {name}** — {one-line description}
-
-`{command to copy-paste}`
+`{command to copy-paste}` — {one-line description}
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -24,14 +22,23 @@ Standard format for presenting next steps after completing a command or workflow
 ---
 ```
 
+When there's meaningful additional context (like a phase identifier), add it as a header line:
+
+```
+**Phase {N}: {Name}** — {Goal}
+
+`/ms:plan-phase {N}`
+```
+
 ## Format Rules
 
-1. **Always show what it is** — name + description, never just a command path
-2. **Pull context from source** — ROADMAP.md for phases, PLAN.md `<objective>` for plans
-3. **Command in inline code** — backticks, easy to copy-paste, renders as clickable link
-4. **`/clear` explanation** — always include, keeps it concise but explains why
-5. **"Also available" not "Other options"** — sounds more app-like
-6. **Visual separators** — `---` above and below to make it stand out
+1. **Command is the anchor** — backtick command + description on one line, no separate bold label restating the command name
+2. **Phase identifiers are additive context** — `**Phase 2: Auth**` carries info the command doesn't; bold labels like `**Plan gap closure**` just restate `/ms:plan-phase --gaps` and should be omitted
+3. **Pull context from source** — ROADMAP.md for phases, PLAN.md `<objective>` for plans
+4. **Command in inline code** — backticks, easy to copy-paste, renders as clickable link
+5. **`/clear` explanation** — always include, keeps it concise but explains why
+6. **"Also available" not "Other options"** — sounds more app-like
+7. **Visual separators** — `---` above and below to make it stand out
 
 ## Variants
 
@@ -167,9 +174,7 @@ All 4 phases shipped
 
 ## ▶ Next Up
 
-**Start v1.1** — discover what to build next
-
-`/ms:new-milestone`
+`/ms:new-milestone` — discover what to build next
 
 <sub>`/clear` first → fresh context window</sub>
 

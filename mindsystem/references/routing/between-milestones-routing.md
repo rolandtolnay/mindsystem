@@ -28,9 +28,7 @@ Ready to plan the next milestone.
 
 ## ▶ Next Up
 
-**Start Next Milestone** — discover what to build, update PROJECT.md
-
-`/ms:new-milestone`
+`/ms:new-milestone` — discover what to build, update PROJECT.md
 
 <sub>`/clear` first → fresh context window</sub>
 

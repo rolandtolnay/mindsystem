@@ -328,9 +328,7 @@ Plans:
 
 ## ▶ Next Up
 
-**Plan the quality phase**
-
-`/ms:plan-phase {N}`
+`/ms:plan-phase {N}` — plan the quality phase
 
 <sub>`/clear` first → fresh context window</sub>
 ```

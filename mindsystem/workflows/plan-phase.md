@@ -213,9 +213,7 @@ Also create or update EXECUTION-ORDER.md to include gap closure plans (typically
 
 ## ▶ Next Up
 
-**Execute gap closure plans**
-
-`/ms:execute-phase {X}`
+`/ms:execute-phase {X}` — execute gap closure plans
 
 <sub>`/clear` first → fresh context window</sub>
 

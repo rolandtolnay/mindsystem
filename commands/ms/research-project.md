@@ -335,9 +335,9 @@ Key findings:
 - Critical pitfall: [one-liner]
 
 ---
-## > Next Up
-**Define requirements and create roadmap** - `/ms:create-roadmap`
-<sub>`/clear` first</sub>
+## ▶ Next Up
+`/ms:create-roadmap` — define requirements and create roadmap
+<sub>`/clear` first → fresh context window</sub>
 ---
 ```
 

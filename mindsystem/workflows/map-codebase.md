@@ -271,9 +271,7 @@ Created .planning/codebase/:
 
 ## ▶ Next Up
 
-**Initialize project** — use codebase context for planning
-
-`/ms:new-project`
+`/ms:new-project` — use codebase context for planning
 
 <sub>`/clear` first → fresh context window</sub>
 

@@ -46,9 +46,7 @@ Extract:
 
 ## ▶ Next Up
 
-**Plan gap closure** — create additional plans to complete the phase
-
-`/ms:plan-phase {Z} --gaps`
+`/ms:plan-phase {Z} --gaps` — create additional plans to complete the phase
 
 <sub>`/clear` first → fresh context window</sub>
 
