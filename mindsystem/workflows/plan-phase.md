@@ -511,7 +511,6 @@ Assemble handoff payload:
 ```
 Task(
   subagent_type: "ms-plan-writer"
-  model: "sonnet"
   description: "Write PLAN.md files for phase {PHASE}"
   prompt: "{assembled handoff payload}"
 )
@@ -602,7 +601,6 @@ Spawn ms-plan-checker:
 ```
 Task(
   subagent_type: "ms-plan-checker"
-  model: "sonnet"
   description: "Verify phase ${PHASE} plans"
   prompt: """
 Verify plans for phase ${PHASE}.

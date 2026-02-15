@@ -173,12 +173,11 @@ options:
 
 **When user chooses "Verify first":**
 
-Spawn ms-plan-checker subagent with sonnet model:
+Spawn ms-plan-checker subagent:
 
 ```
 Task(
   subagent_type: "ms-plan-checker"
-  model: "sonnet"
   description: "Verify phase {PHASE} plans"
   prompt: """
 Verify plans for phase {PHASE}.
