@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-02-15
+
+### Added
+- Tech debt collection from UAT: unfixed issues discovered during milestone audit now flow automatically into TECH-DEBT.md with severity mapping (blocker→Critical, major→High, minor→Medium, cosmetic→Low)
+
+### Changed
+- Milestone archives use versioned folders (`milestones/v[X.Y]/`) instead of flat files, with research files preserved alongside the roadmap
+- TECH-DEBT.md replaces PHASE-FINDINGS.md as the single source of truth for quality issues, using 4-tier severity sections; plan-phase auto-loads it for quality/cleanup phases
+
 ## [3.16.2] - 2026-02-15
 
 ### Fixed
@@ -445,7 +454,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.2...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.0...HEAD
+[3.17.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.2...v3.17.0
 [3.16.2]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.1...v3.16.2
 [3.16.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.0...v3.16.1
 [3.16.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.15.0...v3.16.0
