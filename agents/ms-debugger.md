@@ -1,6 +1,7 @@
 ---
 name: ms-debugger
 description: Investigates bugs using scientific method, manages debug sessions, handles checkpoints. Spawned by /ms:debug orchestrator.
+model: opus
 tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch
 color: orange
 ---

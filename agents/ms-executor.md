@@ -1,6 +1,7 @@
 ---
 name: ms-executor
 description: Executes Mindsystem plans with atomic commits, deviation handling, and summary creation. Spawned by execute-phase orchestrator.
+model: opus
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill, AskUserQuestion
 color: yellow
 ---

@@ -1,7 +1,7 @@
 ---
 name: ms-plan-checker
 description: Verifies plans will achieve phase goal before execution. Goal-backward analysis of plan quality. Spawned by /ms:plan-phase orchestrator.
-model: sonnet
+model: opus
 tools: Read, Bash, Glob, Grep
 color: green
 ---

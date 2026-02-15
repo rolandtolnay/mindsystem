@@ -1,6 +1,7 @@
 ---
 name: ms-verify-fixer
 description: Investigates and fixes single UAT issues. Spawned by verify-work when lightweight investigation fails.
+model: sonnet
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: orange
 ---

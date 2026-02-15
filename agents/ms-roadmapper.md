@@ -1,6 +1,7 @@
 ---
 name: ms-roadmapper
 description: Derives requirements from milestone context, creates project roadmaps with phase breakdown, requirement mapping, success criteria derivation, and coverage validation. Spawned by /ms:create-roadmap command.
+model: opus
 tools: Read, Write, Bash, Glob, Grep
 color: purple
 ---

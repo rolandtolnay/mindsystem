@@ -1,6 +1,7 @@
 ---
 name: ms-designer
 description: Creates visual/UX design specifications for phases. Spawned by /ms:design-phase orchestrator.
+model: opus
 tools: Read, Write, Bash, Grep, Glob
 color: magenta
 ---

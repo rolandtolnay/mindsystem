@@ -10,11 +10,11 @@ allowed-tools:
   - Task
 ---
 
-<purpose>
+<objective>
 On-demand plan verification. Use when a plan seems large or complex and you want a structured review before executing.
 
 This spawns ms-plan-checker to analyze your PLAN.md files against the phase goal.
-</purpose>
+</objective>
 
 <what_it_checks>
 1. **Requirement Coverage** — Does every phase requirement have tasks addressing it?
@@ -48,23 +48,6 @@ ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 If no PLAN.md files found, remind user to run `/ms:plan-phase` first.
 </step>
 
-<step name="load_context">
-Read the phase goal from ROADMAP.md:
-
-```bash
-grep -A 15 "Phase ${PHASE}:" .planning/ROADMAP.md | head -20
-```
-
-Count plans and tasks:
-
-```bash
-for plan in "$PHASE_DIR"/*-PLAN.md; do
-  echo "=== $(basename $plan) ==="
-  grep -c "^### " "$plan" 2>/dev/null || echo "0 changes"
-done
-```
-</step>
-
 <step name="spawn_checker">
 Spawn the plan checker agent:
 
@@ -93,57 +76,37 @@ Present the checker's findings clearly.
 **Format for VERIFICATION PASSED:**
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- PLAN VERIFICATION: PASSED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Plan Verification: PASSED
 
-Phase: [name]
-Plans: [count]
-Tasks: [total count]
+Phase: [name] | Plans: [count] | Tasks: [total count]
 
-All checks passed:
-✓ Requirement coverage complete
-✓ All tasks have required fields
-✓ Dependency graph valid
-✓ Key links planned
-✓ Scope within budget
-✓ Verification criteria derived
-✓ Context compliance verified (if CONTEXT.md exists)
+All checks passed.
 
-Ready to execute: /ms:execute-phase $ARGUMENTS
+Ready to execute: `/ms:execute-phase $ARGUMENTS`
 ```
 
 **Format for ISSUES FOUND:**
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- PLAN VERIFICATION: ISSUES FOUND
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Plan Verification: ISSUES FOUND
 
-Phase: [name]
-Plans: [count]
-Issues: [X blockers, Y warnings]
+Phase: [name] | Plans: [count] | Issues: [X blockers, Y warnings]
 
-BLOCKERS (must fix):
+### Blockers (must fix)
 
-1. [dimension] [description]
-   Plan: [which plan]
-   Fix: [specific fix hint]
+1. **[dimension]** [description]
+   Plan: [which plan] | Fix: [specific fix hint]
 
-2. [dimension] [description]
-   Plan: [which plan]
-   Fix: [specific fix hint]
+### Warnings (should fix)
 
-WARNINGS (should fix):
-
-1. [dimension] [description]
+1. **[dimension]** [description]
    Fix: [hint]
 
 ---
 
 Options:
-- Fix the issues and run /ms:check-phase $ARGUMENTS again
-- Proceed anyway: /ms:execute-phase $ARGUMENTS (not recommended if blockers exist)
+- Fix the issues and run `/ms:check-phase $ARGUMENTS` again
+- Proceed anyway: `/ms:execute-phase $ARGUMENTS` (not recommended if blockers exist)
 ```
 </step>
 
@@ -163,3 +126,9 @@ Options:
 /ms:execute-phase 5   # Execute
 ```
 </examples>
+
+<success_criteria>
+- Blockers and warnings presented distinctly — blockers have plan name and fix hint
+- Output includes actionable next command (`/ms:execute-phase` or `/ms:check-phase` rerun)
+- Checker agent spawned with correct phase directory path
+</success_criteria>
