@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.2] - 2026-02-15
+
+### Fixed
+- Plan file references in EXECUTION-ORDER.md now use phase-prefixed names (e.g., `16-01-PLAN.md`) matching actual filenames, preventing validation failures during execution
+
 ## [3.16.1] - 2026-02-15
 
 ### Changed
@@ -440,7 +445,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.2...HEAD
+[3.16.2]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.1...v3.16.2
 [3.16.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.0...v3.16.1
 [3.16.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.15.0...v3.16.0
 [3.15.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.14.0...v3.15.0
