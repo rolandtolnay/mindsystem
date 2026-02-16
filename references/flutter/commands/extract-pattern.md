@@ -170,7 +170,7 @@ Options:
 4. "Neither" - Let me explain the intended approach
 ```
 
-Thoroughness is more important than speed. Ask as many questions as needed to achieve complete clarity.
+Ask as many questions as needed to achieve complete clarity.
 
 ## 5. Write Pattern File
 
@@ -213,16 +213,6 @@ If changes needed, apply targeted edits to the file (not full rewrites).
 </process>
 
 <collaboration_principles>
-Thoroughness over speed. This command extracts reusable documentation that will be referenced across multiple projects. Getting it right matters more than getting it fast.
-
-**When to ask the user (non-exhaustive):**
-- Pattern area description is ambiguous or could mean multiple things
-- Found contradicting implementations across files
-- Unsure whether something is intentional convention vs tech debt
-- Multiple valid approaches exist and it's unclear which to document
-- Agent exploration found gaps — unclear where to look next
-- Draft includes patterns you're not confident about
-
 **How to ask:**
 - Always use AskUserQuestion with concrete options
 - Include file paths and code snippets in option descriptions when relevant
@@ -231,11 +221,9 @@ Thoroughness over speed. This command extracts reusable documentation that will 
 </collaboration_principles>
 
 <success_criteria>
-- Pattern area fully understood through clarifying questions
 - 3-5 explore agents launched in parallel (SINGLE message)
+- File written directly (no draft-in-conversation step)
 - All contradictions and ambiguities resolved with user
 - Output file follows LLM-optimized format (terse rules, inline code, anti-patterns)
 - Code blocks are complete and copy-pasteable
-- File written directly (no draft-in-conversation step)
-- User reviewed in editor and approved
 </success_criteria>
