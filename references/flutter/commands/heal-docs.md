@@ -27,7 +27,7 @@ Core transformations (apply all of these):
 - Remove `IMPORTANT:`, `YOU MUST`, `Please ensure` prefixes
 - Remove introductory paragraphs and rationale
 - Remove `---` horizontal rules between sections
-- No "why" explanations — rules are self-evident or trust is assumed
+- No "why" explanations — rules are self-evident
 - Delete duplicate summary/recap sections that restate rules already covered
 </principles>
 
@@ -178,10 +178,8 @@ Revert all: `git checkout -- <path>`
 </process>
 
 <success_criteria>
-- All target files read and classified by type
-- User confirmed before any writes
-- Transformations applied following the correct strategy per file type
 - Preservation rules verified — no checklists, code blocks, tables, or decision frameworks removed
+- User confirmed before any writes
 - Files written directly (no drafts)
 - Final report with line counts and git commands
 - No placeholder text or broken markdown in output
