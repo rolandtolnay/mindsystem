@@ -1,15 +1,15 @@
 ---
-description: Capture lessons from Flutter/Dart refactorings into reusable docs for future LLM code writers. Use after completing a refactoring.
+description: Capture lessons from code refactorings into reusable docs for future LLM code writers. Use after completing a refactoring.
 argument-hint: [refactoring-description] [commit_sha]
 allowed-tools: [AskUserQuestion, Bash, Read, Grep, Glob, Write]
 ---
 
 <objective>
-Analyze Flutter/Dart code changes from a refactoring and distill lessons into a standalone reference file. The command (an LLM) derives lessons from the diff — the code changes were produced by an LLM, so diff analysis IS the primary source of insight.
+Analyze code changes from a refactoring and distill lessons into a standalone reference file. The command (an LLM) derives lessons from the diff — the code changes were produced by an LLM, so diff analysis IS the primary source of insight.
 
 Output: a `.md` file in `docs/lessons/` optimized for LLM consumption with enough clarity for human review.
 
-Scope sits between `learn-flutter` (one-liner code quality rules) and `extract-pattern` (comprehensive playbooks). A lesson captures the "why" and "watch out for" from a specific refactoring — typically 2-4 insights with code examples.
+A lesson sits between one-liner code quality rules and comprehensive playbooks. It captures the "why" and "watch out for" from a specific refactoring — typically 2-4 insights with code examples.
 </objective>
 
 <context>
@@ -36,14 +36,14 @@ Lesson files are optimized for LLM consumption — terse, actionable, with concr
 
 One-line scope: what was refactored, what was wrong with the old approach.
 
-**Domain:** state-management | navigation | error-handling | data-layer | ui-structure | forms | testing | etc.
+**Domain:** state-management | navigation | error-handling | data-layer | ui-structure | api-design | database | concurrency | auth | caching | forms | testing | etc.
 **Applies when:** concrete trigger condition for when this lesson is relevant
 
 ## [Insight Title]
 
 1-2 sentences: what the transformation is and what's non-obvious about it. Reference `specific classes` and `patterns`.
 
-```dart
+```
 // Before: brief label
 oldApproach();
 
