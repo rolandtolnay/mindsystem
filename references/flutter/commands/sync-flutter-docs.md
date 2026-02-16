@@ -8,7 +8,6 @@ Fetch the latest Flutter reference files from the mindsystem GitHub repo and the
 
 Running this command again overwrites all files with the latest versions.
 
-This command is portable: copy it into any Flutter project's `.claude/commands/` to use.
 </objective>
 
 <process>
@@ -210,11 +209,8 @@ echo "Skills installed: $NEW new, $UPDATED updated, $UNCHANGED unchanged"
 </process>
 
 <success_criteria>
-- All discovered doc files written to `docs/` and `docs/patterns/`
-- Gist written to `docs/code-quality.md`
-- No hardcoded file lists — new files added to the repo are picked up automatically
-- Doc diff report printed showing new/updated/unchanged counts
 - Skills in user scope (`~/.claude/skills/`) that match remote are skipped implicitly with a note — no AskUserQuestion for these
 - User offered skill installation via AskUserQuestion only for skills NOT already matching in user scope
 - If accepted, only non-user-scope skills installed to `.claude/skills/` with diff report
+- No hardcoded file lists — new files added to the repo are picked up automatically
 </success_criteria>

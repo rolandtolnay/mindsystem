@@ -21,30 +21,14 @@ Git state:
 </context>
 
 <developer_role>
-The developer's involvement in the refactoring is directional — they spotted a problem, gave high-level instructions, and reviewed the LLM's output. They did NOT author individual line changes.
+The developer spotted a problem and gave direction — they did NOT author line changes.
 
-The developer uniquely knows:
-- What looked wrong in the original code (the trigger)
-- The high-level direction given
-- Whether the result is satisfactory
-
-The developer does NOT uniquely know:
-- Why specific code patterns were chosen (the LLM decided)
-- Trade-offs between approaches (the LLM evaluated)
-
-Constrain all AskUserQuestion interactions to what the developer can actually answer. The command derives lessons from the diff; the developer provides framing and validation.
+Ask about: what looked wrong (the trigger), high-level direction, whether the result is satisfactory.
+Do NOT ask about: why specific code patterns were chosen, trade-offs between approaches — derive these from the diff.
 </developer_role>
 
 <output_format_spec>
 Lesson files are optimized for LLM consumption — terse, actionable, with concrete code.
-
-**Principles:**
-- Insights: 1-2 sentences stating the transformation + what's non-obvious, with `inline code`
-- Code blocks show before/after — complete, copy-pasteable
-- Rules distill insights into terse one-liners for quick reference (mechanically extractable for skill synthesis)
-- Single Anti-Patterns section (merged pitfalls + bad patterns) with concrete bad code
-- "Applies when" trigger for future injection decisions
-- No filler: no "You should", "It is recommended", "Make sure to", "IMPORTANT:"
 
 **Structure template:**
 ```markdown
@@ -180,8 +164,6 @@ Options:
 3. "Something's wrong" — I'll point out what's off
 ```
 
-This is a validation gate, not an authoring step. The developer confirms direction; they don't need to articulate the code-level details.
-
 ## 5. Write Lesson File
 
 Create `docs/lessons/` directory if it doesn't exist:
@@ -190,17 +172,6 @@ mkdir -p docs/lessons
 ```
 
 Write directly to `docs/lessons/{slug}.md`.
-
-**Quality checks before writing:**
-- Each insight is 1-2 sentences with `inline code` — states the transformation and the non-obvious part
-- Code blocks show before/after with enough context to be copy-pasteable
-- Rules section has terse one-liners distilled from the insights
-- Anti-patterns section has concrete bad code (merged pitfalls + patterns)
-- "Applies when" trigger is specific enough for future injection decisions
-- No filler words, no emphasis markers, no `IMPORTANT:` prefixes
-- All code blocks use ```dart fencing
-- Domain tag and "Applies when" line are present
-- One-line scope captures what was wrong with the old approach
 
 Report: file path, line count, number of insights, domain tag.
 
@@ -227,5 +198,4 @@ Apply targeted edits if changes needed.
 - Insights are 1-2 sentences with `inline code` + before/after code blocks
 - Rules section has terse one-liners mechanically extractable for skill synthesis
 - Anti-patterns section merges pitfalls and bad patterns with concrete code
-- File written directly to `docs/lessons/{slug}.md`
 </success_criteria>
