@@ -5,9 +5,7 @@ allowed-tools: Bash, Read, Grep, Glob, Write
 ---
 
 <objective>
-Extract Flutter/Dart coding principles from code changes and append them to the remote GitHub Gist. This command is self-contained and portable across projects.
-
-The gist serves as a persistent, cross-project Flutter code quality reference that grows over time as you learn from real code changes.
+Extract Flutter/Dart coding principles from code changes and append them to the remote GitHub Gist.
 </objective>
 
 <context>
@@ -114,7 +112,7 @@ Examples:
 <step name="fetch_current_gist">
 ## 3. Fetch Current Gist
 
-Fetch the gist content using `gh api` (NOT WebFetch — it summarizes instead of returning raw content):
+Fetch the gist content using `gh api`:
 
 ```bash
 gh api /gists/edf9ea7d5adf218f45accb3411f0627c \
@@ -166,10 +164,10 @@ Never exceed 10 principles per invocation.
 <step name="extract_principles">
 ## 6. Extract Principles
 
-Look for patterns in how code was improved:
-- What changed from "bad" to "good"?
-- What new patterns were introduced?
-- What existing patterns were reinforced?
+Compare before/after in each hunk. Identify:
+- Refactoring transformations (old pattern → new pattern)
+- New API usage or library patterns introduced
+- Structural improvements (file organization, naming, decomposition)
 
 Prioritize:
 1. Areas mentioned in focus instructions
@@ -231,14 +229,9 @@ If a principle doesn't fit existing categories, add to the closest match.
 </process>
 
 <success_criteria>
-- [ ] gh auth verified before proceeding
-- [ ] Arguments parsed correctly (SHA, count, focus)
-- [ ] Current gist fetched via `gh api --jq` (not WebFetch)
-- [ ] Principles extracted from code changes
-- [ ] No duplicate principles added
 - [ ] Format follows LLM-optimized rules (terse, inline code, no emphasis markers)
-- [ ] Gist updated via `jq --rawfile` piped to `gh api --input -`
-- [ ] Temp file cleaned up
+- [ ] No duplicate principles added
+- [ ] Gist updated via `jq --rawfile` piped to `gh api --input -` (not `-f files[...]=@path`)
 - [ ] Update verified by re-fetching via `gh api --jq` and grepping for new content
-- [ ] Summary reported to user
+- [ ] Gist fetched and updated via `gh api` (not WebFetch)
 </success_criteria>
