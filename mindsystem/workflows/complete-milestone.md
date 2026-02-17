@@ -22,16 +22,18 @@ This is the ritual that separates "development" from "shipped."
 
 When a milestone completes, this workflow:
 
-1. Cleans up raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER deleted)
-2. Creates `.planning/milestones/v[X.Y]/` directory for all archive files
-3. Extracts full milestone details to `.planning/milestones/v[X.Y]/ROADMAP.md`
-4. Archives requirements to `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
-5. Archives milestone context to `.planning/milestones/v[X.Y]/CONTEXT.md`
-6. Archives research files to `.planning/milestones/v[X.Y]/research/` (if exists)
-7. Updates ROADMAP.md to replace milestone details with one-line summary
-8. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-9. Performs full PROJECT.md evolution review
-10. Routes to `/ms:new-milestone` for next milestone
+1. Creates `.planning/milestones/v[X.Y]/` directory for all archive files
+2. Extracts full milestone details to `.planning/milestones/v[X.Y]/ROADMAP.md`
+3. Archives requirements to `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
+4. Archives milestone context to `.planning/milestones/v[X.Y]/CONTEXT.md`
+5. Archives research files to `.planning/milestones/v[X.Y]/research/` (if exists)
+6. Consolidates phase summaries to `.planning/milestones/v[X.Y]/PHASE-SUMMARIES.md`
+7. Deletes raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+8. Moves phase directories to `.planning/milestones/v[X.Y]/phases/`
+9. Updates ROADMAP.md to replace milestone details with one-line summary
+10. Deletes REQUIREMENTS.md (fresh one created for next milestone)
+11. Performs full PROJECT.md evolution review
+12. Routes to `/ms:new-milestone` for next milestone
 
 Knowledge files in `.planning/knowledge/` persist across milestones (maintained by phase-level consolidation in execute-phase).
 
@@ -48,6 +50,10 @@ Knowledge files in `.planning/knowledge/` persist across milestones (maintained 
 - Milestone header (status, phases, date)
 - Full phase details from roadmap
 - Milestone summary (decisions, issues, technical debt)
+
+**PHASE-SUMMARIES** consolidates all `*-SUMMARY.md` files from phase directories, organized by phase and plan, before artifacts are deleted.
+
+**phases/** contains the phase directories themselves (with remaining files like `.patch`, `mockups/`) moved from `.planning/phases/`.
 
 **REQUIREMENTS archive** contains:
 - All v1 requirements marked complete with outcomes
@@ -104,28 +110,7 @@ cat .planning/config.json 2>/dev/null
 Proceeding to stats gathering...
 ```
 
-Proceed directly to cleanup_artifacts step.
-
-</step>
-
-<step name="cleanup_artifacts">
-
-Delete remaining raw artifacts from phase directories. Knowledge files are already current from phase-level consolidation in execute-phase — no consolidation or learnings extraction needed.
-
-```bash
-~/.claude/mindsystem/scripts/cleanup-phase-artifacts.sh $PHASE_START $PHASE_END
-```
-
-Knowledge files in `.planning/knowledge/` persist (they ARE the milestone's knowledge output).
-
-**Present cleanup summary:**
-
-```
-Raw artifacts cleaned from phase directories
-Knowledge files persist in .planning/knowledge/
-```
-
-Continue to gather_stats step.
+Proceed directly to gather_stats step.
 
 </step>
 
@@ -478,7 +463,7 @@ Extract completed milestone details and create archive file.
    ✅ ROADMAP.md deleted (fresh one for next milestone)
    ```
 
-**Note:** Phase directories (`.planning/phases/`) are NOT deleted. They accumulate across milestones as the raw execution history. Phase numbering continues (v1.0 phases 1-4, v1.1 phases 5-8, etc.).
+**Note:** Phase directories are moved to `milestones/v[X.Y]/phases/` by the archive_and_cleanup_phases step. After milestone completion, `.planning/phases/` contains only the next milestone's work. Phase numbering continues (v1.0 phases 1-4, v1.1 phases 5-8, etc.).
 
 </step>
 
@@ -597,6 +582,34 @@ If archived:
 
 </step>
 
+<step name="archive_and_cleanup_phases">
+
+Consolidate phase summaries, delete raw artifacts, and move phase directories to the milestone archive. This runs after all steps that read summaries (extract_accomplishments, evolve_project_full_review) and after archive_milestone creates the milestone directory.
+
+```bash
+~/.claude/mindsystem/scripts/archive-milestone-phases.sh $PHASE_START $PHASE_END v[X.Y]
+```
+
+Verify archive:
+
+```bash
+ls .planning/milestones/v[X.Y]/PHASE-SUMMARIES.md
+ls .planning/milestones/v[X.Y]/phases/
+```
+
+Present:
+
+```
+✅ Phase summaries consolidated to milestones/v[X.Y]/PHASE-SUMMARIES.md
+✅ Raw artifacts deleted from phase directories
+✅ Phase directories moved to milestones/v[X.Y]/phases/
+✅ .planning/phases/ clean for next milestone
+```
+
+Knowledge files in `.planning/knowledge/` persist (they ARE the milestone's knowledge output).
+
+</step>
+
 <step name="update_state">
 
 Update STATE.md to reflect milestone completion.
@@ -686,12 +699,15 @@ chore: complete v[X.Y] milestone
 Archived to milestones/v[X.Y]/:
 - ROADMAP.md
 - REQUIREMENTS.md
+- PHASE-SUMMARIES.md (consolidated from phase directories)
+- phases/ (phase directories moved from .planning/phases/)
 - MILESTONE-AUDIT.md (if audit was run)
 - CONTEXT.md (if milestone context existed)
 - research/ (if research existed)
 
 Cleaned:
-- Raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- Raw phase artifacts deleted (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- Phase directories moved to milestone archive
 - Knowledge files persist in .planning/knowledge/
 
 Deleted (fresh for next milestone):
@@ -792,7 +808,10 @@ If yes → milestone. If no → keep working.
 
 Milestone completion is successful when:
 
-- [ ] Raw artifacts cleaned from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- [ ] Phase summaries consolidated to milestones/v[X.Y]/PHASE-SUMMARIES.md
+- [ ] Raw artifacts deleted from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- [ ] Phase directories moved to milestones/v[X.Y]/phases/
+- [ ] .planning/phases/ clean (only next milestone's phases remain)
 - [ ] Knowledge files persist in .planning/knowledge/
 - [ ] MILESTONES.md entry created with stats and accomplishments
 - [ ] PROJECT.md full evolution review completed

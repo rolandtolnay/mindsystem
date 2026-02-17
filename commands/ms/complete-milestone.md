@@ -68,14 +68,6 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Present milestone scope and stats
    - Wait for confirmation
 
-1.5. **Clean up raw artifacts:**
-
-   Delete remaining raw artifacts from phase directories. Knowledge files are already current from phase-level consolidation in execute-phase.
-
-   ```bash
-   ~/.claude/mindsystem/scripts/cleanup-phase-artifacts.sh $PHASE_START $PHASE_END
-   ```
-
 2. **Gather stats:**
 
    - Count phases, plans, tasks
@@ -115,6 +107,14 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Add "Next Milestone Goals" section
    - Archive previous content in `<details>` (if v1.1+)
 
+6.5. **Archive and cleanup phases:**
+
+   Consolidate phase summaries, delete raw artifacts, and move phase directories to milestone archive. Runs after all steps that read summaries.
+
+   ```bash
+   ~/.claude/mindsystem/scripts/archive-milestone-phases.sh $PHASE_START $PHASE_END v{{version}}
+   ```
+
 7. **Commit and tag:**
 
    - Stage: MILESTONES.md, PROJECT.md, ROADMAP.md, STATE.md, archive files
@@ -133,7 +133,10 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 <success_criteria>
 
-- Raw artifacts cleaned from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
+- Phase summaries consolidated to `.planning/milestones/v{{version}}/PHASE-SUMMARIES.md`
+- Raw artifacts deleted from phase directories
+- Phase directories moved to `.planning/milestones/v{{version}}/phases/`
+- `.planning/phases/` clean for next milestone
 - Milestone archived to `.planning/milestones/v{{version}}/ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}/REQUIREMENTS.md`
 - Research archived to `.planning/milestones/v{{version}}/research/` (if existed)
