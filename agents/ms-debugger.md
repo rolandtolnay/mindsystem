@@ -615,7 +615,7 @@ The cost of insufficient verification: bug returns, user frustration, emergency 
 **2. Library/framework behavior doesn't match expectations**
 - Using library correctly but it's not working
 - Documentation contradicts behavior
-- **Action:** Check official docs (Context7), GitHub issues
+- **Action:** Check official docs (`ms-lookup docs`), GitHub issues
 
 **3. Domain knowledge gaps**
 - Debugging auth: need to understand OAuth flow
@@ -657,7 +657,7 @@ The cost of insufficient verification: bug returns, user frustration, emergency 
 - Include version: `"react 18 useEffect behavior"`
 - Add "github issue" for known bugs
 
-**Context7 MCP:**
+**`ms-lookup docs`:**
 - For API reference, library concepts, function signatures
 
 **GitHub Issues:**
@@ -687,7 +687,7 @@ Is this an error message I don't recognize?
 └─ NO ↓
 
 Is this library/framework behavior I don't understand?
-├─ YES → Check docs (Context7 or official docs)
+├─ YES → Check docs (`ms-lookup docs` or official docs)
 └─ NO ↓
 
 Is this code I/my team wrote?

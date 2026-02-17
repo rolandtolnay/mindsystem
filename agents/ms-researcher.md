@@ -59,9 +59,9 @@ Claude's training data is 6-18 months stale. Treat pre-existing knowledge as hyp
 - Wrong (Claude misremembered or hallucinated)
 
 **The discipline:**
-1. **Verify before asserting** - Don't state library capabilities without checking Context7 or official docs
+1. **Verify before asserting** - Don't state library capabilities without checking `ms-lookup docs` or official docs
 2. **Date your knowledge** - "As of my training" is a warning flag, not a confidence marker
-3. **Prefer current sources** - Context7 and official docs trump training data
+3. **Prefer current sources** - `ms-lookup docs` and official docs trump training data
 4. **Flag uncertainty** - LOW confidence when only training data supports a claim
 
 ## Honest Reporting
@@ -197,7 +197,7 @@ When researching "best library for X":
 
 The CLI is at `~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh`.
 
-### Library Documentation (Context7)
+### Library Documentation
 
 ```bash
 ~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh docs <library> "<query>"
@@ -213,7 +213,7 @@ Example:
 
 **Response format:** JSON with results array containing title, content, source_url, tokens.
 
-### Deep Research (Perplexity)
+### Deep Research
 
 ```bash
 ~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh deep "<query>"
@@ -255,7 +255,7 @@ WebSearch("[technology] vs [alternative] {current_year}")
 
 **Always include current year** in queries for freshness.
 
-**Why WebSearch over Perplexity search:** Free with Max subscription. Perplexity search costs $5/1k queries with marginal quality improvement for discovery tasks.
+**Why WebSearch over `ms-lookup deep`:** WebSearch is free. `ms-lookup deep` costs money per query — reserve it for high-value questions, not discovery.
 
 ## Token Limit Strategy (for ms-lookup)
 
@@ -264,7 +264,7 @@ WebSearch("[technology] vs [alternative] {current_year}")
 **Rationale:**
 - The 50% rule: Research must complete before hitting 100k tokens
 - At 2000 tokens/query, you can make ~50 queries
-- Context7 returns results ranked by relevance — first 3-4 snippets are most important
+- `ms-lookup docs` returns results ranked by relevance — first 3-4 snippets are most important
 - Query flexibility > per-query comprehensiveness
 
 **When to increase (`--max-tokens 4000-6000`):**
@@ -296,15 +296,15 @@ WebSearch("[technology] vs [alternative] {current_year}")
 
 | Level | Sources | Use |
 |-------|---------|-----|
-| HIGH | Context7, official documentation, official releases | State as fact |
+| HIGH | `ms-lookup docs`, official documentation, official releases | State as fact |
 | MEDIUM | WebSearch verified with official source, multiple credible sources agree | State with attribution |
 | LOW | WebSearch only, single source, unverified | Flag as needing validation |
 
 ## Source Prioritization
 
-**1. Context7 (highest priority)**
-- Current, authoritative documentation
-- Library-specific, version-aware
+**1. `ms-lookup docs` (highest priority)**
+- Current, authoritative library documentation
+- Version-aware, sourced from official docs
 - Trust completely for API/feature questions
 
 **2. Official Documentation**
@@ -526,7 +526,7 @@ Based on research question, identify what needs investigating:
 
 For each domain, follow tool strategy in order:
 
-1. **Context7 First** - Resolve library, query topics
+1. **`ms-lookup docs` First** - Query library documentation
 2. **Official Docs** - WebFetch for gaps
 3. **WebSearch** - Ecosystem discovery with year
 4. **Verification** - Cross-reference all findings
@@ -626,7 +626,7 @@ When research cannot proceed:
 Research is complete when:
 
 - [ ] Research question answered with actionable findings
-- [ ] Source hierarchy followed (Context7 → Official → WebSearch)
+- [ ] Source hierarchy followed (`ms-lookup docs` → Official → WebSearch)
 - [ ] All findings have confidence levels
 - [ ] Verification protocol checklist passed
 - [ ] Output file(s) created in correct format
@@ -636,7 +636,7 @@ Research is complete when:
 Research quality indicators:
 
 - **Specific, not vague:** "Three.js r160 with @react-three/fiber 8.15" not "use Three.js"
-- **Verified, not assumed:** Findings cite Context7 or official docs
+- **Verified, not assumed:** Findings cite `ms-lookup docs` or official docs
 - **Honest about gaps:** LOW confidence items flagged, unknowns admitted
 - **Actionable:** Developer could start work based on this research
 - **Current:** Year included in searches, publication dates checked

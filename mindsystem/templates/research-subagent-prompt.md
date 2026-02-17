@@ -22,7 +22,7 @@ Templates for the 3 parallel agents spawned by `/ms:research-phase`. The orchest
 ## Template 1: External Docs (ms-researcher)
 
 **Focus:** Library documentation, APIs, verified code examples
-**Tools emphasized:** ms-lookup docs (Context7), ms-lookup deep (Perplexity), WebSearch, WebFetch
+**Tools emphasized:** ms-lookup docs, ms-lookup deep, WebSearch, WebFetch
 **Returns:** Structured findings (not files)
 
 ```markdown
@@ -118,7 +118,7 @@ The agent's built-in `<what_to_scan>` section handles the systematic scan checkl
 ## Template 3: Best Practices (ms-researcher)
 
 **Focus:** Community consensus, pitfalls, SOTA
-**Tools emphasized:** ms-lookup deep (Perplexity), WebSearch
+**Tools emphasized:** ms-lookup deep, WebSearch
 **Returns:** Structured findings (not files)
 
 ```markdown

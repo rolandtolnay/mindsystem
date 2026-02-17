@@ -25,6 +25,16 @@ class Context7Client:
                 ],
             )
 
+    @staticmethod
+    def _extract_error_body(response: httpx.Response) -> str:
+        """Extract human-readable error message from response."""
+        try:
+            data = response.json()
+            # Context7 style: {"error": "code", "message": "..."}
+            return data.get("message", data.get("error", response.text[:200]))
+        except Exception:
+            return response.text[:200]
+
     def resolve_library(self, library_name: str, query: str) -> dict:
         """Resolve library name to Context7 library ID.
 
@@ -50,21 +60,22 @@ class Context7Client:
                 response.raise_for_status()
                 data = response.json()
         except httpx.HTTPStatusError as e:
+            body = self._extract_error_body(e.response)
             if e.response.status_code == 401:
                 raise MsLookupError(
                     ErrorCode.MISSING_API_KEY,
-                    "Invalid CONTEXT7_API_KEY",
+                    f"Invalid CONTEXT7_API_KEY — {body}",
                     suggestions=["Check your API key at https://context7.com/dashboard"],
                 )
             elif e.response.status_code == 429:
                 raise MsLookupError(
                     ErrorCode.RATE_LIMITED,
-                    "Context7 API rate limit exceeded",
+                    f"Context7 API rate limited — {body}",
                     suggestions=["Wait a moment and try again", "Use --no-cache sparingly"],
                 )
             raise MsLookupError(
                 ErrorCode.API_ERROR,
-                f"Context7 API error: {e.response.status_code}",
+                f"Context7 API error ({e.response.status_code}): {body}",
             )
         except httpx.RequestError as e:
             raise MsLookupError(
@@ -122,6 +133,7 @@ class Context7Client:
                     # Plain text/markdown response - wrap in a structure
                     data = {"content": response.text, "format": "markdown"}
         except httpx.HTTPStatusError as e:
+            body = self._extract_error_body(e.response)
             if e.response.status_code == 404:
                 raise MsLookupError(
                     ErrorCode.LIBRARY_NOT_FOUND,
@@ -130,11 +142,11 @@ class Context7Client:
             elif e.response.status_code == 429:
                 raise MsLookupError(
                     ErrorCode.RATE_LIMITED,
-                    "Context7 API rate limit exceeded",
+                    f"Context7 API rate limited — {body}",
                 )
             raise MsLookupError(
                 ErrorCode.API_ERROR,
-                f"Context7 API error: {e.response.status_code}",
+                f"Context7 API error ({e.response.status_code}): {body}",
             )
         except httpx.RequestError as e:
             raise MsLookupError(

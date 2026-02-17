@@ -81,21 +81,22 @@ class PerplexityClient:
                 response.raise_for_status()
                 data = response.json()
         except httpx.HTTPStatusError as e:
+            body = self._extract_error_body(e.response)
             if e.response.status_code == 401:
                 raise MsLookupError(
                     ErrorCode.MISSING_API_KEY,
-                    "Invalid PERPLEXITY_API_KEY",
+                    f"Invalid PERPLEXITY_API_KEY — {body}",
                     suggestions=["Check your API key at https://docs.perplexity.ai/"],
                 )
             elif e.response.status_code == 429:
                 raise MsLookupError(
                     ErrorCode.RATE_LIMITED,
-                    "Perplexity API rate limit exceeded",
+                    f"Perplexity API rate limited — {body}",
                     suggestions=["Wait a moment and try again"],
                 )
             raise MsLookupError(
                 ErrorCode.API_ERROR,
-                f"Perplexity API error: {e.response.status_code}",
+                f"Perplexity API error ({e.response.status_code}): {body}",
             )
         except httpx.RequestError as e:
             raise MsLookupError(
@@ -104,6 +105,19 @@ class PerplexityClient:
             )
 
         return data
+
+    @staticmethod
+    def _extract_error_body(response: httpx.Response) -> str:
+        """Extract human-readable error message from response."""
+        try:
+            data = response.json()
+            # OpenAI-style: {"error": {"message": "..."}}
+            if isinstance(data.get("error"), dict):
+                return data["error"].get("message", str(data["error"]))
+            # Simple: {"error": "...", "message": "..."}
+            return data.get("message", data.get("error", response.text[:200]))
+        except Exception:
+            return response.text[:200]
 
     def _strip_think_tags(self, content: str) -> str:
         """Remove <think>...</think> blocks from response."""
