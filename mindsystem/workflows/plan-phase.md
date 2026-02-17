@@ -283,49 +283,15 @@ uv run ~/.claude/mindsystem/scripts/scan-planning-context.py \
   ${SUBSYSTEM:+--subsystem "${SUBSYSTEM}"}
 ```
 
-**3. Parse JSON output.** Check `success` field. If the script fails or returns non-JSON, fall back to manual scanning (read SUMMARY frontmatter with sed as before). The scanner handles missing directories gracefully — check `sources.*.skipped` for skip reasons.
+The scanner outputs formatted markdown with sections for patterns, learnings,
+summaries, knowledge files, and pending todos. Each section is omitted if empty.
+If the script fails, fall back to manual scanning.
 
-**4. Present established patterns to user:**
+**3. Conditionally read full summaries** — from "Summaries Needing Full Read" section, read each file. For "Other Relevant Summaries", read full body only if frontmatter context isn't sufficient (judgment).
 
-From `aggregated.patterns_established`, display:
+**4. Read knowledge files** — from "Knowledge Files to Read" section, read each file.
 
-```
-### Established Patterns to Maintain
-- [Pattern: description] (from phase XX)
-```
-
-If empty, skip.
-
-**5. Conditionally read full summaries.**
-
-Read full SUMMARY.md body ONLY for summaries where:
-- `relevance` is HIGH AND `has_readiness_warnings` is true
-- OR frontmatter alone doesn't provide enough context for task breakdown (use judgment)
-
-Extract from full reads: "Next Phase Readiness" warnings, "Issues Encountered", detailed accomplishments.
-
-Summaries scored MEDIUM or HIGH without readiness warnings → frontmatter data in JSON is sufficient (tech stack, patterns, key files, decisions already aggregated).
-
-**6. Present matched learnings:**
-
-**From `debug_learnings`** — present as warnings:
-
-```
-### Previous Debug Sessions in This Area
-- **{slug}** ({subsystem}): {root_cause} — Fix: {resolution}
-```
-
-**From `adhoc_learnings`** — extract entries with non-empty `learnings` arrays for handoff context.
-
-If neither source has matches, skip.
-
-**7. Read knowledge files:**
-
-For each entry in `knowledge_files` where `matched` is true, read the full file. Knowledge files are prose (no frontmatter) so the LLM must read them to extract decisions, architecture, pitfalls.
-
-**8. Assess pending todos:**
-
-From `pending_todos` frontmatter in JSON, assess each todo's relevance. Read full body only for todos matching current phase subsystem/tags.
+**5. Assess pending todos** — from "Pending Todos" section, assess relevance. Read full body for relevant ones.
 
 **From STATE.md:** Decisions → constrain approach. Pending todos → candidates. Blockers → may need to address.
 
@@ -337,13 +303,13 @@ From `pending_todos` frontmatter in JSON, assess each todo's relevance. Read ful
 
 **Track for handoff to ms-plan-writer:**
 - Which summaries were selected (for @context references)
-- Tech stack available (from `aggregated.tech_stack_added`)
-- Established patterns (from `aggregated.patterns_established`)
-- Key files to reference (from `aggregated.key_files_created` + `key_files_modified`)
-- Applicable decisions (from `aggregated.key_decisions` + full summary reads)
+- Tech stack available (from formatted output)
+- Established patterns (from formatted output)
+- Key files to reference (from formatted output)
+- Applicable decisions (from formatted output + full summary reads)
 - Todos being addressed (from pending todos)
 - Concerns being verified (from "Next Phase Readiness" in full reads)
-- Matched learnings (from `debug_learnings`, `adhoc_learnings`, patterns, knowledge files)
+- Matched learnings (from formatted output + knowledge files)
 </step>
 
 <step name="gather_phase_context">

@@ -343,6 +343,7 @@ def scan_debug_docs(
         results.append(
             {
                 "path": str(path),
+                "slug": path.stem,
                 "subsystem": fm.get("subsystem", ""),
                 "root_cause": fm.get("root_cause", ""),
                 "resolution": fm.get("resolution", ""),
@@ -553,6 +554,145 @@ def aggregate_from_summaries(
 
 
 # ---------------------------------------------------------------------------
+# Markdown formatting
+# ---------------------------------------------------------------------------
+
+
+def format_markdown(output: dict[str, Any]) -> str:
+    """Format scanner output as readable markdown for LLM consumption."""
+    sections: list[str] = []
+    agg = output.get("aggregated", {})
+
+    # --- Established Patterns ---
+    patterns = agg.get("patterns_established", [])
+    if patterns:
+        lines = ["### Established Patterns"]
+        lines.extend(f"- {p}" for p in patterns)
+        sections.append("\n".join(lines))
+
+    # --- Tech Stack ---
+    tech = agg.get("tech_stack_added", [])
+    if tech:
+        sections.append(f"### Tech Stack\n{', '.join(tech)}")
+
+    # --- Key Decisions ---
+    decisions = agg.get("key_decisions", [])
+    if decisions:
+        lines = ["### Key Decisions"]
+        lines.extend(f"- {d}" for d in decisions)
+        sections.append("\n".join(lines))
+
+    # --- Key Files ---
+    created = agg.get("key_files_created", [])
+    modified = agg.get("key_files_modified", [])
+    if created or modified:
+        lines = ["### Key Files"]
+        if created:
+            lines.append("**Created:**")
+            lines.extend(f"- `{f}`" for f in created)
+        if modified:
+            lines.append("**Modified:**")
+            lines.extend(f"- `{f}`" for f in modified)
+        sections.append("\n".join(lines))
+
+    # --- Debug Learnings ---
+    debug = output.get("debug_learnings", [])
+    if debug:
+        lines = ["### Debug Learnings"]
+        for d in debug:
+            slug = d.get("slug", "unknown")
+            sub = d.get("subsystem", "")
+            rc = d.get("root_cause", "")
+            res = d.get("resolution", "")
+            lines.append(f"- **{slug}** ({sub}): {rc} — Fix: {res}")
+        sections.append("\n".join(lines))
+
+    # --- Adhoc Learnings ---
+    adhoc_entries = [
+        a for a in output.get("adhoc_learnings", []) if a.get("learnings")
+    ]
+    if adhoc_entries:
+        lines = ["### Adhoc Learnings"]
+        for a in adhoc_entries:
+            sub = a.get("subsystem", "")
+            path = a.get("path", "")
+            label = sub or Path(path).stem if path else "unknown"
+            lines.append(f"- **{label}**")
+            for learning in a["learnings"]:
+                lines.append(f"  - {learning}")
+        sections.append("\n".join(lines))
+
+    # --- Summaries ---
+    summaries = output.get("summaries", [])
+    needs_read = [
+        s
+        for s in summaries
+        if s.get("relevance") == "HIGH" and s.get("has_readiness_warnings")
+    ]
+    other_relevant = [
+        s
+        for s in summaries
+        if s.get("relevance") in ("HIGH", "MEDIUM")
+        and not s.get("has_readiness_warnings")
+    ]
+
+    if needs_read:
+        lines = ["### Summaries Needing Full Read"]
+        for s in needs_read:
+            lines.append(f"- `{s['path']}`")
+        sections.append("\n".join(lines))
+
+    if other_relevant:
+        lines = ["### Other Relevant Summaries"]
+        for s in other_relevant:
+            lines.append(f"- `{s['path']}` [{s.get('relevance', '')}]")
+        sections.append("\n".join(lines))
+
+    # --- Knowledge Files ---
+    matched_knowledge = [
+        k for k in output.get("knowledge_files", []) if k.get("matched")
+    ]
+    if matched_knowledge:
+        lines = ["### Knowledge Files to Read"]
+        for k in matched_knowledge:
+            lines.append(f"- `{k['path']}`")
+        sections.append("\n".join(lines))
+
+    # --- Pending Todos ---
+    todos = output.get("pending_todos", [])
+    if todos:
+        lines = ["### Pending Todos"]
+        for t in todos:
+            title = t.get("title", "untitled")
+            priority = t.get("priority", "")
+            sub = t.get("subsystem", "")
+            path = t.get("path", "")
+            lines.append(f"- **{title}** [{priority}] ({sub}) — `{path}`")
+        sections.append("\n".join(lines))
+
+    # --- Scanner Info ---
+    sources = output.get("sources", {})
+    parse_errors = sources.get("parse_errors", [])
+    info_lines = ["### Scanner Info"]
+    for name, src in sources.items():
+        if name == "parse_errors" or not isinstance(src, dict):
+            continue
+        scanned = src.get("scanned", 0)
+        skipped = src.get("skipped")
+        if skipped:
+            info_lines.append(f"- {name}: skipped ({skipped})")
+        else:
+            info_lines.append(f"- {name}: {scanned} scanned")
+    if parse_errors:
+        info_lines.append("**Parse errors:**")
+        for err in parse_errors:
+            info_lines.append(f"- `{err.get('path', '')}`: {err.get('error', '')}")
+    sections.append("\n".join(info_lines))
+
+    return "\n\n".join(sections)
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -583,6 +723,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help="Comma-separated keywords for tag matching",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output raw JSON (default: formatted markdown)",
+    )
     return parser
 
 
@@ -604,40 +749,42 @@ def main() -> None:
 
     planning = find_planning_dir()
     if planning is None:
-        # No .planning/ directory — output valid JSON with all sources skipped
-        output: dict[str, Any] = {
-            "success": True,
-            "target": {
-                "phase": phase,
-                "phase_name": phase_name,
-                "subsystems": subsystems,
-                "keywords": keywords,
-            },
-            "sources": {
-                "summaries": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
-                "debug_docs": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
-                "adhoc_summaries": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
-                "completed_todos": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
-                "pending_todos": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
-                "knowledge_files": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
-                "parse_errors": [],
-            },
-            "summaries": [],
-            "debug_learnings": [],
-            "adhoc_learnings": [],
-            "completed_todos": [],
-            "pending_todos": [],
-            "knowledge_files": [],
-            "aggregated": {
-                "tech_stack_added": [],
-                "patterns_established": [],
-                "key_files_created": [],
-                "key_files_modified": [],
-                "key_decisions": [],
-            },
-        }
-        json.dump(output, sys.stdout, indent=2, cls=_SafeEncoder)
-        sys.stdout.write("\n")
+        if args.json:
+            output: dict[str, Any] = {
+                "success": True,
+                "target": {
+                    "phase": phase,
+                    "phase_name": phase_name,
+                    "subsystems": subsystems,
+                    "keywords": keywords,
+                },
+                "sources": {
+                    "summaries": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
+                    "debug_docs": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
+                    "adhoc_summaries": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
+                    "completed_todos": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
+                    "pending_todos": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
+                    "knowledge_files": {"dir": "", "scanned": 0, "skipped": ".planning/ not found"},
+                    "parse_errors": [],
+                },
+                "summaries": [],
+                "debug_learnings": [],
+                "adhoc_learnings": [],
+                "completed_todos": [],
+                "pending_todos": [],
+                "knowledge_files": [],
+                "aggregated": {
+                    "tech_stack_added": [],
+                    "patterns_established": [],
+                    "key_files_created": [],
+                    "key_files_modified": [],
+                    "key_decisions": [],
+                },
+            }
+            json.dump(output, sys.stdout, indent=2, cls=_SafeEncoder)
+            sys.stdout.write("\n")
+        else:
+            print("No .planning/ directory found. No prior context available.")
         return
 
     parse_errors: list[dict[str, str]] = []
@@ -681,8 +828,11 @@ def main() -> None:
         "aggregated": aggregated,
     }
 
-    json.dump(output, sys.stdout, indent=2, cls=_SafeEncoder)
-    sys.stdout.write("\n")
+    if args.json:
+        json.dump(output, sys.stdout, indent=2, cls=_SafeEncoder)
+        sys.stdout.write("\n")
+    else:
+        print(format_markdown(output))
 
 
 if __name__ == "__main__":

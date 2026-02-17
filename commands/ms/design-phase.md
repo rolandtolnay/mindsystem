@@ -72,11 +72,30 @@ Wait for response and act accordingly.
 
 **If doesn't exist:** Continue to gather context.
 
-## 3. Gather Context Chain
+## 3. Discover Relevant Skills
+
+Before gathering context, check for skills that provide design-relevant conventions.
+
+**3a. Scan available skills:**
+
+Scan skills in your system-reminder for matches. Look for skills related to:
+- The platform or framework (Flutter, React, web, etc.)
+- UI conventions, design systems, or component patterns
+- The specific domain of this phase (from the ROADMAP.md phase description extracted in step 1)
+
+**3b. Confirm with user:**
+
+Use AskUserQuestion to present findings. Always include an escape hatch for the user to name a skill manually.
+
+**3c. Load selected skills:**
+
+Invoke each confirmed skill via the Skill tool. Extract aesthetic patterns (colors, components, spacing, typography) from loaded content for the `<existing_aesthetic>` block in step 6.
+
+## 4. Gather Context Chain
 
 Load context in order of priority:
 
-**3a. Mandatory context:**
+**4a. Mandatory context:**
 
 ```bash
 # Load PROJECT.md for product context
@@ -97,7 +116,7 @@ Extract from ROADMAP.md:
 - Success criteria
 - Requirements mapped
 
-**3b. Optional context - CONTEXT.md (from discuss-phase):**
+**4b. Optional context - CONTEXT.md (from discuss-phase):**
 
 ```bash
 cat .planning/phases/${PHASE}-*/${PHASE}-CONTEXT.md 2>/dev/null
@@ -108,7 +127,7 @@ If exists, extract:
 - What Must Be Nailed (essentials)
 - Specific Ideas (references to products)
 
-**3b2. Optional context — prior knowledge:**
+**4b2. Optional context — prior knowledge:**
 
 Match subsystem(s) to this phase by comparing ROADMAP phase description against subsystem names in config.json. Load matching knowledge files:
 
@@ -125,7 +144,7 @@ If knowledge files exist, extract:
 
 Pass the extracted knowledge to ms-designer in the design prompt (see step 6 `<prior_knowledge>` block).
 
-**3c. Optional context - codebase analysis:**
+**4c. Optional context - codebase analysis:**
 
 ```bash
 # Platform detection
@@ -144,16 +163,6 @@ grep -r "colors\|theme\|spacing" src/ --include="*.ts" --include="*.dart" 2>/dev
 ```
 
 Document discovered patterns for the designer.
-
-## 4. Load Project Skills
-
-Scan the skill list in your system message for skills matching this phase's technology or domain. Invoke each match via the Skill tool before proceeding — skills contain conventions and patterns that change what you design for.
-
-- One clear match → invoke it directly
-- Multiple candidates → use AskUserQuestion to let the user choose
-- No match → proceed without
-
-Extract aesthetic patterns (colors, components, spacing, typography) from loaded skill content for the `<existing_aesthetic>` block passed to ms-designer.
 
 ## 5. Adaptive Q&A (If Gaps Exist)
 
@@ -426,16 +435,12 @@ Update `.planning/STATE.md` Last Command field:
 </process>
 
 <success_criteria>
-- [ ] Phase validated against roadmap
-- [ ] Existing design checked and handled appropriately
-- [ ] Context chain loaded (PROJECT.md, ROADMAP.md, CONTEXT.md if exists)
-- [ ] Project UI skill discovered and loaded if exists
-- [ ] Codebase analyzed for existing patterns
-- [ ] Adaptive Q&A completed if gaps existed
+- [ ] Available skills scanned, surfaced via AskUserQuestion, and loaded via Skill tool
+- [ ] Codebase analyzed for existing patterns (step 4c)
+- [ ] Adaptive Q&A completed if context gaps existed
 - [ ] Mockup generation offered if phase has significant new UI
 - [ ] Mockup direction extracted and passed to ms-designer (if generated)
 - [ ] ms-designer spawned with quality-forcing patterns
-- [ ] DESIGN.md created with all 7 sections
-- [ ] DESIGN.md committed
+- [ ] DESIGN.md created with all 7 sections and committed
 - [ ] User informed of refinement options and next steps
 </success_criteria>

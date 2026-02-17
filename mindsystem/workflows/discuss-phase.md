@@ -133,10 +133,10 @@ Based on their response, use AskUserQuestion:
 
 **3. Sharpen the core:**
 
-Use AskUserQuestion:
+Use AskUserQuestion with multiSelect: true:
 - header: "Essential"
-- question: "What's the most important part of this phase?"
-- options: Key aspects they've mentioned + "All equally important" + "Something else"
+- question: "What's most important to nail in this phase? Select all that apply."
+- options: Key aspects they've mentioned
 
 **4. Capture specifics (optional):**
 
