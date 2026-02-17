@@ -6,6 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.18.0] - 2026-02-17
+
+### Added
+- Reusable shell scripts for milestone completion: stats gathering (`gather-milestone-stats.sh`) and phase archival (`archive-milestone-phases.sh`)
+
+### Changed
+- `complete-milestone` defers phase directory archival until after consolidation, preserving artifact access during stats and summary-reading steps
+- Pre-work routing reordered to match priority logic (Discuss → Design → Research)
+
+### Fixed
+- `ms-lookup` surfaces real API errors instead of generic failures; agent templates reference functional tool names instead of MCP service names
+- Removed vestigial reorganize step from `complete-milestone` that operated on an already-archived ROADMAP
+- Reduced context waste across multiple commands (`complete-milestone`, `extract-pattern`) by trimming prompt fluff and reordering success criteria
+
+### Removed
+- Orphaned `cleanup-phase-artifacts.sh` (superseded by `archive-milestone-phases.sh`)
+
 ## [3.17.1] - 2026-02-15
 
 ### Changed
@@ -464,7 +481,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.0...HEAD
+[3.18.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.1...v3.18.0
 [3.17.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.0...v3.17.1
 [3.17.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.2...v3.17.0
 [3.16.2]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.1...v3.16.2
