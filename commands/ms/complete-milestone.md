@@ -64,8 +64,6 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 1. **Verify readiness and gather stats:**
 
-   Run the stats script to check readiness and collect milestone statistics:
-
    ```bash
    ~/.claude/mindsystem/scripts/gather-milestone-stats.sh $PHASE_START $PHASE_END
    ```
@@ -77,81 +75,82 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
    - Read all phase SUMMARY.md files in milestone range
    - Extract 4-6 key accomplishments
-   - Present for approval
 
-3. **Archive milestone:**
+3. **Create MILESTONES.md entry:**
+
+   - Create or update `.planning/MILESTONES.md` using `templates/milestone.md`
+   - Prepend new entry (reverse chronological order)
+
+4. **Update PROJECT.md:**
+
+   - Full evolution review (What This Is, Core Value, Requirements audit, Key Decisions, Context)
+   - Move all shipped requirements to Validated
+   - Update "Last updated" footer
+
+5. **Reorganize ROADMAP.md:**
+
+   - Add milestone headers and collapse completed phases
+   - One-line summary with `<details>` block for completed milestone
+
+6. **Archive milestone:**
 
    - Create `.planning/milestones/v{{version}}/` directory
-   - Create `.planning/milestones/v{{version}}/ROADMAP.md`
-   - Extract full phase details from ROADMAP.md
-   - Fill milestone-archive.md template
-   - Update ROADMAP.md to one-line summary with link
+   - Create `.planning/milestones/v{{version}}/ROADMAP.md` from template
+   - Delete ROADMAP.md
 
-4. **Archive requirements:**
+7. **Archive requirements:**
 
    - Create `.planning/milestones/v{{version}}/REQUIREMENTS.md`
-   - Mark all v1 requirements as complete (checkboxes checked)
-   - Note requirement outcomes (validated, adjusted, dropped)
-   - Delete `.planning/REQUIREMENTS.md` (fresh one created for next milestone)
+   - Mark all requirements as complete with outcomes
+   - Delete `.planning/REQUIREMENTS.md`
 
-5. **Archive milestone files:**
-
-   Archive optional files (audit, context, research) to milestone directory:
+8. **Archive milestone files:**
 
    ```bash
    ~/.claude/mindsystem/scripts/archive-milestone-files.sh v{{version}}
    ```
 
-6. **Update PROJECT.md:**
-
-   - Full evolution review (What This Is, Core Value, Requirements audit, Key Decisions)
-   - Update "Last updated" footer
-
-7. **Archive and cleanup phases:**
-
-   Consolidate phase summaries, delete raw artifacts, and move phase directories to milestone archive. Runs after all steps that read summaries.
+9. **Archive and cleanup phases:**
 
    ```bash
    ~/.claude/mindsystem/scripts/archive-milestone-phases.sh $PHASE_START $PHASE_END v{{version}}
    ```
 
-8. **Commit and tag:**
+10. **Update STATE.md:**
 
-   - Stage: MILESTONES.md, PROJECT.md, ROADMAP.md, STATE.md, archive files
-   - Commit: `chore: archive v{{version}} milestone`
-   - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
-   - Ask about pushing tag
+    - Update project reference with current core value and next focus
+    - Reset current position for next milestone
 
-9. **Offer next steps:**
-   - `/ms:new-milestone` — discover goals and update PROJECT.md (includes optional discovery mode)
+11. **Commit and tag:**
 
-10. **Update last command**
-    - Update `.planning/STATE.md` Last Command field
+    - Stage: MILESTONES.md, PROJECT.md, STATE.md, archive files, deletions
+    - Commit: `chore: archive v{{version}} milestone`
+    - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
+    - Ask about pushing tag
+
+12. **Offer next steps:**
+    - `/ms:new-milestone` — discover goals and update PROJECT.md
+
+13. **Update last command:**
     - Format: `Last Command: ms:complete-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
 
 </process>
 
 <success_criteria>
 
+- PROJECT.md full evolution review completed (What This Is, Core Value, Requirements, Key Decisions, Context)
+- All shipped requirements moved to Validated in PROJECT.md
+- Key Decisions updated with outcomes
+- ROADMAP.md reorganized with milestone grouping
 - Milestone archived to `.planning/milestones/v{{version}}/ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}/REQUIREMENTS.md`
-- Optional files archived (audit, context, research — whichever existed)
-- Phase summaries consolidated, artifacts deleted, phase dirs moved to archive
-- `.planning/phases/` clean for next milestone
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)
-- PROJECT.md full evolution review completed
 - Git tag v{{version}} created
-- Commit successful
-- User knows next steps (/ms:new-milestone)
   </success_criteria>
 
 <critical_rules>
 
-- **Load workflow first:** Read complete-milestone.md before executing
 - **Verify completion:** All phases must have SUMMARY.md files
-- **User confirmation:** Wait for approval at verification gates
 - **Archive before deleting:** Always create archive files (ROADMAP, REQUIREMENTS) before updating/deleting originals
 - **One-line summary:** Collapsed milestone in ROADMAP.md should be single line with link
-- **Context efficiency:** Archive keeps ROADMAP.md and REQUIREMENTS.md constant size per milestone
-- **Fresh requirements:** Next milestone starts with `/ms:create-roadmap`, not reusing old file
   </critical_rules>

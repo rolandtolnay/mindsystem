@@ -2,8 +2,6 @@
 
 Mark a shipped version (v1.0, v1.1, v2.0) as complete. This creates a historical record in MILESTONES.md, performs full PROJECT.md evolution review, reorganizes ROADMAP.md with milestone groupings, and tags the release in git.
 
-This is the ritual that separates "development" from "shipped."
-
 </purpose>
 
 <required_reading>
@@ -31,15 +29,6 @@ When a milestone completes, this workflow:
 7. Performs full PROJECT.md evolution review
 8. Routes to `/ms:new-milestone` for next milestone
 
-Knowledge files in `.planning/knowledge/` persist across milestones (maintained by phase-level consolidation in execute-phase).
-
-**Context Efficiency:**
-
-- Completed milestones: One line each (~50 tokens)
-- Full details: In archive files (loaded only when needed)
-- Result: ROADMAP.md stays constant size forever
-- Result: REQUIREMENTS.md is always milestone-scoped (not cumulative)
-
 **Archive Format:**
 
 **ROADMAP archive** uses `templates/milestone-archive.md` template with:
@@ -62,7 +51,7 @@ Knowledge files in `.planning/knowledge/` persist across milestones (maintained 
 
 <step name="verify_readiness">
 
-Check milestone readiness and gather statistics:
+Read roadmap to determine milestone phase range (`PHASE_START`, `PHASE_END`) for the stats script:
 
 ```bash
 cat .planning/ROADMAP.md
@@ -679,64 +668,18 @@ Tag: v[X.Y]
 
 </process>
 
-<milestone_naming>
-
-**Version conventions:**
-- **v1.0** — Initial MVP
-- **v1.1, v1.2, v1.3** — Minor updates, new features, fixes
-- **v2.0, v3.0** — Major rewrites, breaking changes, significant new direction
-
-**Name conventions:**
-- v1.0 MVP
-- v1.1 Security
-- v1.2 Performance
-- v2.0 Redesign
-- v2.0 iOS Launch
-
-Keep names short (1-2 words describing the focus).
-
-</milestone_naming>
-
-<what_qualifies>
-
-**Create milestones for:**
-- Initial release (v1.0)
-- Public releases
-- Major feature sets shipped
-- Before archiving planning
-
-**Don't create milestones for:**
-- Every phase completion (too granular)
-- Work in progress (wait until shipped)
-- Internal dev iterations (unless truly shipped internally)
-
-If uncertain, ask: "Is this deployed/usable/shipped in some form?"
-If yes → milestone. If no → keep working.
-
-</what_qualifies>
-
 <success_criteria>
 
-Milestone completion is successful when:
+Milestone completion is successful when (ordered by skip risk):
 
-- [ ] Phase summaries consolidated to milestones/v[X.Y]/PHASE-SUMMARIES.md
-- [ ] Raw artifacts deleted from phase directories (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
-- [ ] Phase directories moved to milestones/v[X.Y]/phases/
-- [ ] .planning/phases/ clean (only next milestone's phases remain)
-- [ ] Knowledge files persist in .planning/knowledge/
-- [ ] MILESTONES.md entry created with stats and accomplishments
-- [ ] PROJECT.md full evolution review completed
+- [ ] PROJECT.md full evolution review completed (What This Is, Core Value, Requirements, Key Decisions, Context)
 - [ ] All shipped requirements moved to Validated in PROJECT.md
 - [ ] Key Decisions updated with outcomes
 - [ ] ROADMAP.md reorganized with milestone grouping
-- [ ] Milestone directory created (milestones/v[X.Y]/)
+- [ ] MILESTONES.md entry created with stats and accomplishments
 - [ ] Roadmap archive created (milestones/v[X.Y]/ROADMAP.md)
 - [ ] Requirements archive created (milestones/v[X.Y]/REQUIREMENTS.md)
-- [ ] Optional files archived (audit, context, research — whichever existed)
 - [ ] REQUIREMENTS.md deleted (fresh for next milestone)
 - [ ] STATE.md updated with fresh project reference
-- [ ] Git tag created (v[X.Y])
-- [ ] Milestone commit made (includes archive files and deletion)
-- [ ] User knows next steps (starting with /ms:new-milestone)
 
 </success_criteria>
