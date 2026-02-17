@@ -25,15 +25,11 @@ When a milestone completes, this workflow:
 1. Creates `.planning/milestones/v[X.Y]/` directory for all archive files
 2. Extracts full milestone details to `.planning/milestones/v[X.Y]/ROADMAP.md`
 3. Archives requirements to `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
-4. Archives milestone context to `.planning/milestones/v[X.Y]/CONTEXT.md`
-5. Archives research files to `.planning/milestones/v[X.Y]/research/` (if exists)
-6. Consolidates phase summaries to `.planning/milestones/v[X.Y]/PHASE-SUMMARIES.md`
-7. Deletes raw phase artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
-8. Moves phase directories to `.planning/milestones/v[X.Y]/phases/`
-9. Updates ROADMAP.md to replace milestone details with one-line summary
-10. Deletes REQUIREMENTS.md (fresh one created for next milestone)
-11. Performs full PROJECT.md evolution review
-12. Routes to `/ms:new-milestone` for next milestone
+4. Archives milestone files via script (audit, context, research — whichever exist)
+5. Consolidates phase summaries, deletes artifacts, moves phase dirs via script
+6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
+7. Performs full PROJECT.md evolution review
+8. Routes to `/ms:new-milestone` for next milestone
 
 Knowledge files in `.planning/knowledge/` persist across milestones (maintained by phase-level consolidation in execute-phase).
 
@@ -66,32 +62,10 @@ Knowledge files in `.planning/knowledge/` persist across milestones (maintained 
 
 <step name="verify_readiness">
 
-Check if milestone is truly complete:
+Check milestone readiness and gather statistics:
 
 ```bash
 cat .planning/ROADMAP.md
-ls .planning/phases/*/SUMMARY.md 2>/dev/null | wc -l
-```
-
-**Questions to ask:**
-
-- Which phases belong to this milestone?
-- Are all those phases complete (all plans have summaries)?
-- Has the work been tested/validated?
-- Is this ready to ship/tag?
-
-Present:
-
-```
-Milestone: [Name from user, e.g., "v1.0 MVP"]
-
-Appears to include:
-- Phase 1: Foundation (2/2 plans complete)
-- Phase 2: Authentication (2/2 plans complete)
-- Phase 3: Core Features (3/3 plans complete)
-- Phase 4: Polish (1/1 plan complete)
-
-Total: 4 phases, 8 plans, all complete
 ```
 
 <config-check>
@@ -102,52 +76,29 @@ cat .planning/config.json 2>/dev/null
 
 </config-check>
 
+Run the stats script to get readiness status and git statistics:
+
+```bash
+~/.claude/mindsystem/scripts/gather-milestone-stats.sh $PHASE_START $PHASE_END
+```
+
+The script outputs:
+- **Readiness:** Phase/plan counts, completeness, list of incomplete plans
+- **Git Stats:** Commit range, timeline, diff stats
+
+If status is NOT READY, stop and report which plans are incomplete.
+
+If status is READY, present the combined output:
+
 ```
 ⚡ Auto-approved: Milestone scope verification
 
-[Show breakdown summary without prompting]
-
-Proceeding to stats gathering...
+Milestone: [Name from ROADMAP.md]
+[Script readiness output — phases, plans, completeness]
+[Script git stats — range, timeline, changes]
 ```
 
-Proceed directly to gather_stats step.
-
-</step>
-
-<step name="gather_stats">
-
-Calculate milestone statistics:
-
-```bash
-# Count phases and plans in milestone
-# (user specified or detected from roadmap)
-
-# Find git range
-git log --oneline --grep="feat(" | head -20
-
-# Count files modified in range
-git diff --stat FIRST_COMMIT..LAST_COMMIT | tail -1
-
-# Count LOC (adapt to language)
-find . -name "*.swift" -o -name "*.ts" -o -name "*.py" | xargs wc -l 2>/dev/null
-
-# Calculate timeline
-git log --format="%ai" FIRST_COMMIT | tail -1  # Start date
-git log --format="%ai" LAST_COMMIT | head -1   # End date
-```
-
-Present summary:
-
-```
-Milestone Stats:
-- Phases: [X-Y]
-- Plans: [Z] total
-- Tasks: [N] total (estimated from phase summaries)
-- Files modified: [M]
-- Lines of code: [LOC] [language]
-- Timeline: [Days] days ([Start] → [End])
-- Git range: feat(XX-XX) → feat(YY-YY)
-```
+Proceed directly to extract_accomplishments step.
 
 </step>
 
@@ -530,55 +481,15 @@ Archive requirements and prepare for fresh requirements in next milestone.
 
 </step>
 
-<step name="archive_audit">
+<step name="archive_milestone_files">
 
-Move the milestone audit file to the archive (if it exists):
-
-```bash
-# Move audit to milestone folder (if exists)
-[ -f .planning/v[X.Y]-MILESTONE-AUDIT.md ] && mv .planning/v[X.Y]-MILESTONE-AUDIT.md .planning/milestones/v[X.Y]/MILESTONE-AUDIT.md
-```
-
-Confirm:
-```
-✅ Audit archived to milestones/v[X.Y]/MILESTONE-AUDIT.md
-```
-
-(Skip silently if no audit file exists — audit is optional)
-
-</step>
-
-<step name="archive_context">
-
-Archive the milestone context file (if it exists):
+Archive optional milestone files (audit, context, research) to the milestone directory:
 
 ```bash
-[ -f .planning/MILESTONE-CONTEXT.md ] && mv .planning/MILESTONE-CONTEXT.md .planning/milestones/v[X.Y]/CONTEXT.md
+~/.claude/mindsystem/scripts/archive-milestone-files.sh v[X.Y]
 ```
 
-If archived:
-```
-✅ Context archived to milestones/v[X.Y]/CONTEXT.md
-```
-
-(Skip silently if no context file exists)
-
-</step>
-
-<step name="archive_research">
-
-Archive research files to milestone (if research directory exists):
-
-```bash
-[ -d .planning/research ] && mv .planning/research .planning/milestones/v[X.Y]/research
-```
-
-If archived:
-```
-✅ Research archived to milestones/v[X.Y]/research/
-```
-
-(Skip silently if no research directory exists)
+The script moves whichever files exist and reports what was archived. Files that don't exist are skipped silently.
 
 </step>
 
@@ -821,12 +732,11 @@ Milestone completion is successful when:
 - [ ] Milestone directory created (milestones/v[X.Y]/)
 - [ ] Roadmap archive created (milestones/v[X.Y]/ROADMAP.md)
 - [ ] Requirements archive created (milestones/v[X.Y]/REQUIREMENTS.md)
-- [ ] Research archived to milestone (milestones/v[X.Y]/research/) if .planning/research/ existed
+- [ ] Optional files archived (audit, context, research — whichever existed)
 - [ ] REQUIREMENTS.md deleted (fresh for next milestone)
 - [ ] STATE.md updated with fresh project reference
 - [ ] Git tag created (v[X.Y])
 - [ ] Milestone commit made (includes archive files and deletion)
-- [ ] Context archive created if MILESTONE-CONTEXT.md existed
 - [ ] User knows next steps (starting with /ms:new-milestone)
 
 </success_criteria>
