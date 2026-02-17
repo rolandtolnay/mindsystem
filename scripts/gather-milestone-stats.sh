@@ -125,6 +125,23 @@ for i in $(seq "$START" "$END"); do
   fi
 done
 
+# Also capture decimal phase commits (e.g., 02.1 inserted phases)
+for dir in "$PHASES_DIR"/*/; do
+  [ -d "$dir" ] || continue
+  dirname=$(basename "$dir")
+  phase_num="${dirname%%-*}"
+  case "$phase_num" in
+    *.*) # Decimal phase — not captured by seq
+      if in_range "$phase_num"; then
+        commits=$(git log --all --format="%H %ai %s" --grep="($phase_num-" 2>/dev/null || true)
+        if [ -n "$commits" ]; then
+          ALL_COMMITS+="$commits"$'\n'
+        fi
+      fi
+      ;;
+  esac
+done
+
 # Remove empty lines, deduplicate, sort by date
 ALL_COMMITS=$(echo "$ALL_COMMITS" | grep -v '^$' | sort -u -k2,3)
 

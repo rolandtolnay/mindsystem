@@ -10,7 +10,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/ms-lookup"
 
-if command -v uv &> /dev/null; then
+if command -v uv > /dev/null 2>&1; then
   # Prefer uv if available (faster)
   uv sync --quiet 2>/dev/null
   uv run python -m ms_lookup "$@"

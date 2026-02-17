@@ -87,51 +87,46 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Move all shipped requirements to Validated
    - Update "Last updated" footer
 
-5. **Reorganize ROADMAP.md:**
-
-   - Add milestone headers and collapse completed phases
-   - One-line summary with `<details>` block for completed milestone
-
-6. **Archive milestone:**
+5. **Archive milestone:**
 
    - Create `.planning/milestones/v{{version}}/` directory
    - Create `.planning/milestones/v{{version}}/ROADMAP.md` from template
    - Delete ROADMAP.md
 
-7. **Archive requirements:**
+6. **Archive requirements:**
 
    - Create `.planning/milestones/v{{version}}/REQUIREMENTS.md`
    - Mark all requirements as complete with outcomes
    - Delete `.planning/REQUIREMENTS.md`
 
-8. **Archive milestone files:**
+7. **Archive milestone files:**
 
    ```bash
    ~/.claude/mindsystem/scripts/archive-milestone-files.sh v{{version}}
    ```
 
-9. **Archive and cleanup phases:**
+8. **Archive and cleanup phases:**
 
    ```bash
    ~/.claude/mindsystem/scripts/archive-milestone-phases.sh $PHASE_START $PHASE_END v{{version}}
    ```
 
-10. **Update STATE.md:**
+9. **Update STATE.md:**
 
     - Update project reference with current core value and next focus
     - Reset current position for next milestone
 
-11. **Commit and tag:**
+10. **Commit and tag:**
 
     - Stage: MILESTONES.md, PROJECT.md, STATE.md, archive files, deletions
     - Commit: `chore: archive v{{version}} milestone`
     - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
     - Ask about pushing tag
 
-12. **Offer next steps:**
+11. **Offer next steps:**
     - `/ms:new-milestone` — discover goals and update PROJECT.md
 
-13. **Update last command:**
+12. **Update last command:**
     - Format: `Last Command: ms:complete-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
 
 </process>
@@ -141,7 +136,6 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 - PROJECT.md full evolution review completed (What This Is, Core Value, Requirements, Key Decisions, Context)
 - All shipped requirements moved to Validated in PROJECT.md
 - Key Decisions updated with outcomes
-- ROADMAP.md reorganized with milestone grouping
 - Milestone archived to `.planning/milestones/v{{version}}/ROADMAP.md`
 - Requirements archived to `.planning/milestones/v{{version}}/REQUIREMENTS.md`
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)

@@ -70,13 +70,13 @@ fi
 # --- Check 3 (warning): File conflicts within waves ---
 CURRENT_WAVE=""
 WAVE_COUNT=0
-declare -A WAVE_FILES
+CURRENT_WAVE_FILES=""
 
 while IFS= read -r line; do
   if echo "$line" | grep -qE '^## Wave [0-9]+'; then
     CURRENT_WAVE=$(echo "$line" | grep -oE '[0-9]+')
     WAVE_COUNT=$((WAVE_COUNT + 1))
-    WAVE_FILES[$CURRENT_WAVE]=""
+    CURRENT_WAVE_FILES=""
   elif [ -n "$CURRENT_WAVE" ]; then
     PLAN_FILE=$(echo "$line" | grep -oE '[0-9][0-9.]*-[0-9]+-PLAN\.md' || true)
     if [ -n "$PLAN_FILE" ] && [ -f "$PHASE_DIR/$PLAN_FILE" ]; then
@@ -84,11 +84,10 @@ while IFS= read -r line; do
       FILE_PATHS=$(grep -E '^\*\*Files:\*\*' "$PHASE_DIR/$PLAN_FILE" | sed 's/\*\*Files:\*\*//g' | tr ',' '\n' | sed 's/`//g; s/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' || true)
       while IFS= read -r fpath; do
         [ -z "$fpath" ] && continue
-        EXISTING="${WAVE_FILES[$CURRENT_WAVE]}"
-        if echo "$EXISTING" | grep -qF "|$fpath|"; then
+        if echo "$CURRENT_WAVE_FILES" | grep -qF "|$fpath|"; then
           echo "WARNING: File '$fpath' appears in multiple plans within Wave $CURRENT_WAVE"
         else
-          WAVE_FILES[$CURRENT_WAVE]="${EXISTING}|$fpath|"
+          CURRENT_WAVE_FILES="${CURRENT_WAVE_FILES}|$fpath|"
         fi
       done <<< "$FILE_PATHS"
     fi

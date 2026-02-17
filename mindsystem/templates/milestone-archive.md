@@ -89,7 +89,7 @@ Plans:
 
 ---
 
-_For current project status, see .planning/ROADMAP.md_
+_For current project status, see .planning/PROJECT.md_
 
 ---
 
@@ -117,7 +117,7 @@ _For current project status, see .planning/ROADMAP.md_
 
 **After archiving:**
 
-- Update ROADMAP.md to collapse completed milestone in `<details>` tag
-- Update PROJECT.md to brownfield format with Current State section
+- Delete ROADMAP.md (fresh one created for next milestone via `/ms:create-roadmap`)
+- Update PROJECT.md with full evolution review
 - Continue phase numbering in next milestone (never restart at 01)
   </guidelines>
