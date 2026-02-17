@@ -1,7 +1,7 @@
 ---
 name: ms:review-design
-description: Audit and improve design of already-implemented features using quality-forcing principles
-argument-hint: "[phase, file path, feature name, or description]"
+description: Review a screen's design like a designer friend would — focused, practical, high-impact
+argument-hint: "[screenshot path, file path, feature name, or description]"
 allowed-tools:
   - Read
   - Write
@@ -9,27 +9,23 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - Skill
   - AskUserQuestion
 ---
 
 <objective>
-Review and improve the design of already-implemented features, applying the same quality-forcing principles used in `/ms:design-phase`.
+Review the design of an existing screen or flow the way a designer friend would: understand what the screen is trying to do, simulate the user experience, and suggest the 3-5 highest-impact improvements.
+
+Not a comprehensive audit. Not a redesign. A focused review that finds what matters most and fixes it.
 
 **When to use:**
-- Features implemented before Mindsystem was added (no DESIGN.md exists)
-- Features where `/ms:design-phase` was skipped
-- Periodic design quality audits on existing code
-- After receiving user feedback that UI "feels off"
+- A screen "feels off" but you can't pinpoint why
+- After implementing a feature, before shipping
+- Periodic quality pass on existing screens
 
-**What this does:**
-1. Identifies target code from arguments
-2. Analyzes against design quality criteria
-3. Presents improvements with benefits and trade-offs
-4. Applies user-approved changes
-5. Runs platform-specific verification
-6. Creates DESIGN-REVIEW.md report
-
-**Not a replacement for:** `/ms:design-phase` — use that BEFORE implementing new features.
+**Input modes:**
+- **Screenshot + code** (best): Provide a screenshot path. Visual input lets you reason about hierarchy, whitespace, and flow directly instead of reconstructing from code.
+- **Code only** (good): Reconstruct the screen mentally from the widget/component tree and reason about the user experience from there.
 </objective>
 
 <context>
@@ -42,447 +38,162 @@ $ARGUMENTS
 
 <process>
 
-## Phase 1: Identify Target Code
+## Step 1: Identify Target
 
-### Step 1.1: Parse Arguments
+Parse `$ARGUMENTS`:
 
-Analyze `$ARGUMENTS` to determine what code to review:
-
-- **Phase number** (e.g., `4`, `04`) → Find phase directory, read SUMMARY.md files for implemented code
-- **File path** (e.g., `lib/features/home/home_screen.dart`) → Read and analyze that file
-- **Feature/area name** (e.g., `home feature`, `authentication`) → Search for relevant files in that area
-- **Description** (e.g., `the code I just wrote`) → Check recent git changes or conversation context
-- **Empty or unclear** → Use AskUserQuestion:
+- **Screenshot path** (image file) → Read the image. Identify and read the corresponding code files.
+- **File path** → Read that file and related files in the same feature (widgets, providers, models)
+- **Feature/area name** → Search for relevant files
+- **Phase number** → Find phase directory, read SUMMARY.md for implemented files
+- **Description** → Check recent git changes or conversation context
+- **Empty or unclear** → AskUserQuestion:
 
 ```
-Question: "What code should I review for design improvements?"
+Question: "What should I review?"
 Options:
-- "Uncommitted changes" - Review files with uncommitted modifications
-- "Specific file" - I'll provide a file path
-- "Recent feature work" - Review files from recent commits
-- "Mindsystem phase" - Review all code from a specific phase
+- "I'll share a screenshot" - Paste or provide a path to a screenshot
+- "Specific screen" - I'll provide a file path or feature name
+- "Recent work" - Review files from recent commits
 ```
 
-### Step 1.2: Resolve Phase Directory (if phase-based)
+If no screenshot was provided, ask once:
 
-```bash
-# Find phase directory
-PHASE_DIR=$(ls -d .planning/phases/${PHASE_ARG}-* 2>/dev/null | head -1)
-
-# Find SUMMARY files to identify implemented code
-ls "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
+```
+Question: "Do you have a screenshot? It significantly improves review quality."
+Options:
+- "Yes, let me share it" - Paste or provide a path
+- "No, review from code" - Analyze implementation files directly
 ```
 
-Parse SUMMARY.md files to extract:
-- Files created/modified
-- Features implemented
-- Components added
+Read all relevant code files for the target screen/flow.
 
-### Step 1.3: Gather Target Files
+## Step 2: Understand the Screen's Job
 
-Based on scope:
-- Read target file(s)
-- For features, also read related files (widgets, providers, models)
-- For phases, collect all files mentioned in SUMMARY.md
+Before analyzing, establish what this screen is trying to accomplish.
 
-Store file list for analysis.
+**Load context:**
+- Read `.planning/PROJECT.md` for product type, core value, target audience
+- If phase-based, grep `.planning/ROADMAP.md` for phase requirements
+- Glob for existing DESIGN.md in `.planning/phases/` for design intent
+- Check available skills for one matching `*-ui` or `*-design` in name or description — if found, invoke via Skill tool for existing patterns
 
-## Phase 2: Load Context Chain
+**State the screen's job in one sentence:**
+> "This screen helps the user [accomplish X]."
 
-### Step 2.1: Mandatory Context
+This sentence filters every subsequent suggestion. An improvement that doesn't make the screen better at its job doesn't make the cut.
 
-```bash
-# Load PROJECT.md for product context
-cat .planning/PROJECT.md 2>/dev/null
+## Step 3: Experience Simulation
 
-# Load ROADMAP.md for phase requirements (if phase-based)
-grep -A30 "Phase ${PHASE_ARG}:" .planning/ROADMAP.md 2>/dev/null
-```
+Walk through the screen as a user. This is the core analysis — a simulation, not a checklist. Do not organize findings by design categories.
 
-Extract from PROJECT.md:
-- What This Is (product type → determines commercial benchmark)
-- Core Value (design must serve this)
-- Context (target audience)
-- Constraints (platform, technical limits)
+**If screenshot available**, look at it and answer:
+1. What draws my eye first? Is that the most important element on this screen?
+2. Can I immediately tell what this screen wants me to do?
+3. Where does my attention flow after the first element? Is the reading order clear?
+4. What feels cluttered, or where are elements competing for attention that shouldn't be?
+5. Is there enough breathing room around important content?
+6. Does the text help me understand what to do, or is it vague/jargon-heavy?
+7. Are unrelated elements sitting close enough to feel grouped, or related elements spread far enough apart to feel disconnected?
+8. Does this feel like a native app screen, or like a web form wearing a native shell?
+9. If I'm a new user, would I know how to complete the primary action?
 
-### Step 2.2: Check for Existing DESIGN.md
+**If code only**, reconstruct the screen from the widget/component tree, then answer the same questions. Pay special attention to:
+- Widget nesting depth as proxy for visual complexity
+- Padding/margin values for whitespace
+- String literals for copy quality
+- Button/action placement for flow
+- Conditional rendering for state completeness (loading, empty, error)
 
-```bash
-# Check for existing design
-ls .planning/phases/${PHASE_ARG}-*/*-DESIGN.md 2>/dev/null
-```
+## Step 4: Top 3-5 Improvements
 
-**If exists:** Load as baseline for comparison
-**If not exists:** Flag for retroactive creation
+From the simulation, select only the 3-5 changes with the highest user impact.
 
-### Step 2.3: Optional Context
+**Filtering question:** "If I could only change ONE thing, what would make the biggest difference to a user?" Then the next, then the next. Stop at 5.
 
-**Project UI skill (if exists):**
+**Priority order:**
+1. **Flow friction** — user can't complete their primary task intuitively
+2. **Hierarchy/attention** — wrong thing dominates, or user can't find what they need
+3. **Density/whitespace** — screen feels cramped, overwhelming, or unbalanced
+4. **Copy/labeling** — user doesn't understand what something means or what to do next
+5. **Missing states** — user hits a dead end (no loading feedback, unhelpful empty state, cryptic error)
 
-Check your available skills for one that provides domain expertise relevant to this project's UI implementation patterns. If found, invoke it via the Skill tool and use as authoritative source for existing patterns.
-
-**Codebase analysis:**
-- Detect platform (Flutter, React, etc.)
-- Find existing component/theme files
-- Document discovered patterns
-
-## Phase 3: Analyze for Design Improvements
-
-Review target code against these quality dimensions:
-
-### 3.1: Visual Quality
-
-Apply quality-forcing patterns from `ai-driven-ui-design-system.md`:
-
-**Commercial benchmark check:**
-> "Does this look like a commercial $50-200 [product type] — intentional decisions, not defaults?"
-
-**Anti-pattern detection:**
-- Generic dark gray with blue accents (unless specifically requested)
-- Default spacing with no intentional rhythm
-- Controls that look like styled HTML inputs
-- Typography using only system fonts without spacing compensation
-- Elements that appear positioned without thought
-
-**Check for:**
-- Color palette character (distinctive vs generic)
-- Intentional spacing (consistent scale vs arbitrary)
-- Visual hierarchy (size/weight/contrast differentiation)
-- Refined controls (proper states, sizing, polish)
-
-### 3.2: UX Flows
-
-**Check for:**
-- Complete user journeys (entry → action → feedback → completion)
-- Loading states (skeleton, spinner, or progressive)
-- Error states (clear messages, recovery path)
-- Empty states (helpful guidance when no data)
-- Edge cases (offline, timeout, validation)
-
-### 3.3: Platform Compliance
-
-**Flutter/Mobile:**
-- Touch targets ≥ 48dp (Android) / 44pt (iOS)
-- Safe area insets respected
-- Text sizes ≥ 16sp for body text
-- Contrast ratios meet WCAG AA (4.5:1 body, 3:1 large)
-
-**Web:**
-- Touch targets ≥ 44px for interactive elements
-- Keyboard navigation functional
-- Focus states visible
-- Responsive breakpoints defined
-
-### 3.4: Code Organization
-
-**Flutter-specific (from simplify-flutter patterns):**
-- Large `build()` methods → extract to local variables or builder methods
-- Complex subtrees → separate widget files
-- Scattered boolean flags → sealed class variants
-- Manual try-catch → `AsyncValue.guard()`
-- Mutation patterns → immutable methods
-
-**General:**
-- Consistent naming conventions
-- Related logic grouped together
-- Clear separation of concerns
-
-### 3.5: Pattern Alignment
-
-If project UI skill or codebase patterns exist:
-- Check for consistent color usage
-- Check for consistent component patterns
-- Check for consistent spacing scale
-- Identify deviations that should be aligned
-
-## Phase 4: Create Retroactive DESIGN.md (If Missing)
-
-**If no existing DESIGN.md:**
-
-Document current implementation patterns:
-
-```bash
-mkdir -p "$PHASE_DIR"
-```
-
-Create `{phase}-DESIGN.md` following the standard template:
-
-1. **Visual Identity** — Extract philosophy from implemented code
-2. **Screen Layouts** — Create ASCII wireframes from actual screens
-3. **Component Specifications** — Document existing component patterns
-4. **UX Flows** — Map current user journeys
-5. **Design System Decisions** — Extract colors, typography, spacing with rationale
-6. **Platform-Specific Notes** — Document current responsive/platform handling
-7. **Verification Criteria** — Define observable behaviors
-
-Write to: `.planning/phases/{phase}-{slug}/{phase}-DESIGN.md`
-
-## Phase 5: Present Improvements
-
-For each identified improvement, document:
-
-### Improvement Format
+**Frame each as a user experience story:**
 
 ```markdown
-### [Category]: [Brief Description]
+### 1. [Brief description of what changes]
 
-**Current state:**
-[What exists now]
+**What a user experiences:** [The friction or confusion from the user's perspective]
 
-**Proposed change:**
-[What should change]
+**Suggested fix:** [Specific, implementable change — layout shift, text rewrite, element repositioning, spacing adjustment, visual weight change]
 
-**Benefits:**
-- [Benefit 1]
-- [Benefit 2]
-
-**Trade-offs:**
-- [Any functionality lost or changed]
-- [Migration effort if significant]
-- [Risk factors]
-
-**Affected files:**
-- [file1.dart]
-- [file2.dart]
-
-**Effort:** [low | medium | high]
+**Files:** `path/to/file` (lines ~N-M)
 ```
 
-### Categories
+Good framing: "The primary action button competes with 3 secondary actions at equal visual weight — a user has to read all four to find what they came here to do."
 
-Group improvements by:
-1. **Visual Quality** — Color, spacing, typography, hierarchy
-2. **UX Completeness** — States, flows, error handling
-3. **Platform Compliance** — Touch targets, accessibility
-4. **Code Organization** — Widget extraction, pattern consistency
-5. **Pattern Alignment** — Consistency with existing design system
+Bad framing: "Button color should be changed from gray to blue for better contrast."
 
-### Present to User
-
-Display all improvements with summary:
+## Step 5: Present and Confirm
 
 ```markdown
-## Design Review: [Scope]
+## Design Review: [Screen/Feature Name]
 
-Found **N improvements** across M files.
+**Screen's job:** [one-sentence job]
 
-### Summary
+**Top [N] improvements** (highest user impact first):
 
-| Category | Count | Effort |
-|----------|-------|--------|
-| Visual Quality | X | [avg effort] |
-| UX Completeness | X | [avg effort] |
-| Platform Compliance | X | [avg effort] |
-| Code Organization | X | [avg effort] |
-| Pattern Alignment | X | [avg effort] |
-
-### Improvements
-
-[List all improvements with full details]
+[improvements from Step 4]
 ```
 
-### User Selection
-
-Use AskUserQuestion to confirm scope:
+Use AskUserQuestion:
 
 ```
 Question: "Which improvements should I apply?"
 Options:
-- "All improvements" - Apply everything identified
-- "Visual + UX only" - Focus on user-facing changes
-- "Platform compliance only" - Fix accessibility/sizing issues
-- "Let me select" - I'll specify which ones
+- "Apply all" - Implement all suggested changes
+- "Let me pick" - I'll specify which ones
+- "Report only" - No code changes needed
 ```
 
-If "Let me select": Present numbered list, ask for comma-separated numbers.
-
-## Phase 6: Apply Approved Changes
+## Step 6: Apply Approved Changes
 
 For each approved improvement:
+1. Read current file state
+2. Apply the change via Edit tool
+3. Log what changed
 
-1. **Read current file state**
-2. **Apply the change** using Edit tool
-3. **Log what was changed** for summary
+One logical change at a time. Preserve public APIs and test expectations.
 
-**Apply principles:**
-- One logical change at a time
-- Preserve all public APIs
-- Maintain existing test coverage expectations
-- Don't introduce new dependencies without flagging
+## Step 7: Verify and Summarize
 
-## Phase 7: Run Verification
+Run platform-appropriate static analysis and tests. If failures occur, identify which change caused it and offer to revert.
 
-### Step 7.1: Detect Platform
-
-```bash
-# Flutter
-if [ -f "pubspec.yaml" ]; then
-  echo "Platform: Flutter"
-fi
-
-# Web (Node/npm)
-if [ -f "package.json" ]; then
-  echo "Platform: Web"
-fi
-```
-
-### Step 7.2: Run Platform-Specific Checks
-
-**Flutter:**
-```bash
-flutter analyze
-flutter test
-```
-
-**Web (React/Next/etc.):**
-```bash
-npm run lint 2>/dev/null || npx eslint . 2>/dev/null
-npm test 2>/dev/null || echo "No test script"
-```
-
-### Step 7.3: Handle Failures
-
-If verification fails:
-1. Identify which change caused the failure
-2. Offer to revert that specific change
-3. Re-run verification
-
-## Phase 8: Write Design Review Report
-
-Write to: `.planning/phases/{phase}-{slug}/{phase}-DESIGN-REVIEW.md`
+Present:
 
 ```markdown
----
-status: complete
-phase: XX-name
-reviewed: [ISO timestamp]
-scope: [files/features reviewed]
----
+## Review Complete
 
-# Design Review: Phase [X] - [Name]
+**Screen:** [name]
+**Applied:** N improvements
 
-**Reviewed:** [date]
-**Scope:** [what was reviewed]
-**Platform:** [detected platform]
+### Changes
+- `path/to/file`: [what changed]
 
-## Review Summary
-
-| Category | Found | Applied | Skipped |
-|----------|-------|---------|---------|
-| Visual Quality | X | X | X |
-| UX Completeness | X | X | X |
-| Platform Compliance | X | X | X |
-| Code Organization | X | X | X |
-| Pattern Alignment | X | X | X |
-
-**Total:** X improvements identified, Y applied, Z skipped
-
-## Changes Applied
-
-### 1. [Category]: [Description]
-
-**File:** `path/to/file`
-**Change:** [what was changed]
-**Rationale:** [why this improves design]
-
-### 2. [Next change...]
-
-## Improvements Skipped
-
-[If any were skipped by user choice]
-
-### 1. [Category]: [Description]
-
-**Reason skipped:** [user's reason or "Not selected"]
-
-## Verification Results
-
-- **flutter analyze:** [pass/fail]
-- **flutter test:** [pass/fail]
-
-[If failures, document what was reverted]
-
-## Remaining Recommendations
-
-[Any improvements that couldn't be auto-applied or need manual attention]
-
-## Retroactive Documentation
-
-[If DESIGN.md was created]
-- Created: `.planning/phases/{phase}-{slug}/{phase}-DESIGN.md`
-- Documents current implementation patterns for future reference
-
----
-
-*Review completed: [timestamp]*
+### Next
+Run the app and check this screen — [describe the expected visual difference in one sentence].
 ```
 
-## Phase 9: Present Results
+## Step 8: Update Last Command
 
-```markdown
-## Design Review Complete
-
-**Scope:** [what was reviewed]
-**Improvements:** X applied, Y skipped
-
-### Verification
-- flutter analyze: [pass/fail]
-- flutter test: [pass/fail]
-
-### Files Modified
-- [list of files changed]
-
-### Report
-`.planning/phases/{phase}-{slug}/{phase}-DESIGN-REVIEW.md`
-
----
-
-## Next Steps
-
-- Review changes in editor
-- Run app to verify visual changes
-- Commit when satisfied: `git add . && git commit -m "design: apply review improvements"`
-```
-
-## Phase 10: Update Last Command
-
-Update `.planning/STATE.md` Last Command field:
-- Find line starting with `Last Command:` in Current Position section
-- Replace with: `Last Command: ms:review-design $ARGUMENTS | YYYY-MM-DD HH:MM`
-- If line doesn't exist, add it after `Status:` line
+Run: `sed -i '' "s/^Last Command:.*/Last Command: ms:review-design $ARGUMENTS | $(date '+%Y-%m-%d %H:%M')/" .planning/STATE.md`
 
 </process>
 
-<quality_forcing>
-Apply these patterns throughout the review:
-
-**Commercial Benchmark:**
-> "This must look like a commercial $50-200 [product type] — intentional decisions, not defaults."
-
-**Pre-emptive Criticism:**
-> "Assume someone will say 'This looks like generic AI output.' Does the current design prove them wrong?"
-
-**Accountability Check:**
-> "Could a professional designer look at this and say it's skilled work?"
-
-**Explicit Anti-Patterns:**
-- Generic dark gray + blue accents
-- Default spacing with no rhythm
-- Controls that look like styled HTML inputs
-- Same-sized everything (no hierarchy)
-- Centered everything (lazy layout)
-</quality_forcing>
-
 <success_criteria>
-- [ ] Target code scope clarified (via arguments or AskUserQuestion)
-- [ ] Context chain loaded (PROJECT.md, DESIGN.md if exists, project UI skill)
-- [ ] Code analyzed across all quality dimensions
-- [ ] Retroactive DESIGN.md created if missing
-- [ ] Improvements presented with benefits AND trade-offs
-- [ ] User selected which improvements to apply
-- [ ] Approved changes applied to code
-- [ ] Platform-specific verification run (analyze/test)
-- [ ] Failures handled (revert problematic changes)
-- [ ] DESIGN-REVIEW.md report written to phase directory
-- [ ] Clear summary provided with next steps
+- [ ] Improvements framed as user experience stories, not property changes
+- [ ] Screen's job identified in one sentence — every suggestion filtered through it
+- [ ] Experience simulation performed (screenshot or code-based walkthrough)
+- [ ] Maximum 5 improvements, prioritized by user impact
+- [ ] Approved changes applied and verified
 </success_criteria>
