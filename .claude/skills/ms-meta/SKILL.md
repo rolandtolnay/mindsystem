@@ -69,6 +69,8 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 **Goal-backward planning.** Don't ask "what should we build?" — ask "what must be TRUE for the goal to be achieved?" This produces verifiable requirements, not vague task lists.
 
 **Dream extraction, not requirements gathering.** Project initialization is collaborative thinking to help users discover and articulate what they want. Follow the thread, challenge vagueness, make abstract concrete.
+
+**Artifact discipline.** Every artifact earns its place; every line earns its place within it. No redundant information across artifacts — if data exists in one canonical source, don't duplicate it elsewhere. Relevance is measured by consumption: who reads this, when, and what decision does it inform? Posterity is valid only when non-deducible from other existing sources. Planning artifacts (ROADMAP.md, REQUIREMENTS.md) are milestone-scoped and recreated fresh each milestone — history lives in purpose-built archives and MILESTONES.md, not in cumulative documents that grow unboundedly.
 </philosophy>
 
 <context_engineering>

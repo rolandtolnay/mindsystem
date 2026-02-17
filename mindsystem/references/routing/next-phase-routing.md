@@ -66,9 +66,9 @@ ELSE:
 
 | Pre-work | Status | Topics/Focus |
 |----------|--------|--------------|
-| Research | Likely | {research topics} |
 | Discuss | Likely | {discuss topics} |
 | Design | Likely | {design focus} |
+| Research | Likely | {research topics} |
 
 {If all Unlikely: "No pre-work flagged — ready to plan directly."}
 
