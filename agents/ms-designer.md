@@ -380,8 +380,7 @@ Design is complete when:
 - [ ] Non-obvious behaviors documented in Behavior notes
 - [ ] Implementation hints provided per screen (reuse, gotchas, responsive)
 - [ ] Self-review checklist passed (no generic/arbitrary answers)
-- [ ] **Mathematical validation passed (bounds, touch targets, spacing, contrast)**
-- [ ] DESIGN.md written to phase directory
+- [ ] **Mathematical validation passed (bounds, touch targets, spacing, contrast) and DESIGN.md written to phase directory**
 
 Quality indicators:
 - **Specific:** Hex codes, pixel values, font weights — not vague descriptions

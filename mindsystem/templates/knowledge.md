@@ -54,7 +54,7 @@ Template for `.planning/knowledge/{subsystem}.md` — per-subsystem knowledge fi
 |---------|----------|-----------------|
 | **Decisions** | Choices with rationale (the "because" part) | CONTEXT.md locked decisions, RESEARCH.md recommendations, PLAN.md approach rationale, SUMMARY.md key-decisions |
 | **Architecture** | How the subsystem works, structural patterns | RESEARCH.md architecture patterns, PLAN.md implementation details, SUMMARY.md accomplishments |
-| **Design** | Visual/UX specs, interaction patterns, design tokens | DESIGN.md component specs, UX flows, color/spacing values |
+| **Design** | Visual/UX specs, interaction patterns, design tokens | DESIGN.md wireframe layouts, states tables, behavior notes, design tokens |
 | **Pitfalls** | What to watch out for, operational patterns | RESEARCH.md common pitfalls, SUMMARY.md issues/deviations, debug resolutions, adhoc learnings |
 | **Key Files** | Important file paths for this subsystem | SUMMARY.md key-files, PLAN.md file targets |
 
