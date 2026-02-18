@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.18.1] - 2026-02-18
+
+### Changed
+- Design template simplified to wireframe-centric format — less context spent on structural overhead, same output quality
+- Plan-writer uses budget-weighted task grouping — right-sized plans reduce redundant executor agents while staying within context budget
+- Review-design command refocused on practical screen-level improvements
+- Planning context scanning simplified with streamlined design skill discovery
+
 ## [3.18.0] - 2026-02-17
 
 ### Added
@@ -481,7 +489,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.1...HEAD
+[3.18.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.0...v3.18.1
 [3.18.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.1...v3.18.0
 [3.17.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.0...v3.17.1
 [3.17.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.16.2...v3.17.0
