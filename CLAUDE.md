@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-> **Contributor guidelines.** For Mindsystem concepts, architecture, and deep knowledge, invoke `ms-meta` skill.
+> **Contributor guidelines.** Covers rules for developing Mindsystem.
+
+**Before making any Mindsystem changes, load the `ms-meta` skill** (unless already loaded in this context). It contains architecture knowledge, design principles, and conventions required to make correct decisions.
 
 This document contains rules that affect every output when developing Mindsystem.
 
@@ -12,7 +14,7 @@ Mindsystem is a **meta-prompting system** where every file is both implementatio
 - **Context engineering** (manage Claude's context window deliberately)
 - **Plans as prompts** (PLAN.md files are executable, not documents to transform)
 
-Design principles (modularity, main context for collaboration, script+prompt hybrid, user as collaborator) govern all Mindsystem decisions. Invoke `ms-meta` skill for the full philosophy.
+Design principles (modularity, main context for collaboration, script+prompt hybrid, user as collaborator) govern all Mindsystem decisions.
 
 ---
 
@@ -30,6 +32,8 @@ Mindsystem is distributed via `npx mindsystem-cc`. During development, the user 
 | `scripts/` | Shell scripts (copied to `~/.claude/mindsystem/scripts/` on install) |
 
 **Never write to `~/.claude/` directly.** Always modify files in this repository.
+
+**Linear tickets:** References like `MIN-123` are Linear issue IDs. Load the `linear` skill to read, update, or comment on them.
 
 **WARNING:** The `.claude/` directory in the repo root contains tracked project-specific files (settings, custom commands). Do NOT delete it when testing local installations with `npx . --local`. Use a different test directory or restore with `git restore .claude/` if accidentally deleted.
 
@@ -185,7 +189,6 @@ cookie. Return 200. On mismatch, return 401.
 **Separate orchestration from execution:** Plans contain only what the executor needs (Context, Changes, Verification, Must-Haves). Wave grouping and dependencies live in `EXECUTION-ORDER.md`.
 
 **Budget principles:**
-- @-reference essential files; read instructions for conditional files
 - Deterministic operations (STATE updates, validation) belong in scripts, not prompts
 - Load detailed references only when triggered (e.g., TDD reference only for TDD plans)
 - Independent plans don't need chained SUMMARY references
@@ -312,10 +315,9 @@ Include escape hatch: "Something else", "Let me describe"
 
 1. **XML for commands/workflows, pure Markdown for plans**
 2. **@-references are eagerly loaded** — use read instructions for conditional files
-3. **Imperative, brief, technical** — no filler, no sycophancy
+3. **Imperative, brief, technical** — no filler, sycophancy, or temporal language
 4. **Solo developer + Claude** — no enterprise patterns
-5. **Temporal language banned** — current state only
-6. **Atomic commits** — Git history as context source
-7. **AskUserQuestion for all exploration** — always options
-8. **Verify after automation** — automate first, verify after
-9. **Separate orchestration from execution** — plans carry execution content only
+5. **Atomic commits** — Git history as context source
+6. **AskUserQuestion for all exploration** — always options
+7. **Verify after automation** — automate first, verify after
+8. **Separate orchestration from execution** — plans carry execution content only
