@@ -153,13 +153,7 @@ Wave assignments are written to EXECUTION-ORDER.md, not to individual plans.
 <step name="group_into_plans">
 **Group tasks into plans using budget-based packing per wave.**
 
-**1. Classify task weight** from action description, file count, domain complexity:
-
-| Weight | Marginal Cost | Indicators |
-|--------|---------------|------------|
-| Light (L) | ~5-8% | One-line fixes, config, dead code, renaming, single-file edits |
-| Medium (M) | ~10-15% | CRUD endpoints, widget extraction, single-file refactoring |
-| Heavy (H) | ~20-25% | Complex logic, architecture changes, multi-file integrations |
+**1. Classify task weight** (L/M/H) from action description, file count, domain complexity using the weight table in scope-estimation.md.
 
 **2. Greedy budget packing per wave:**
 ```
@@ -430,8 +424,6 @@ Return structured markdown to orchestrator:
 | 01 | 3 (L+L+M) | ~25% | Merged light fixes with medium refactor |
 | 02 | 2 (M+M) | ~25% | Vertical slice: model + API |
 
-Present only when consolidation occurred or grouping is non-obvious. Omit for straightforward groupings.
-
 ### Risk Assessment
 
 **Score:** {score}/100 ({tier})
@@ -447,6 +439,8 @@ Present only when consolidation occurred or grouping is non-obvious. Omit for st
 - `.planning/phases/{phase_dir}/{phase}-02-PLAN.md`
 - ...
 ```
+
+**Include Grouping Rationale** only when consolidation occurred or grouping is non-obvious. Omit for straightforward groupings.
 
 The orchestrator parses this to present risk via AskUserQuestion and offer next steps.
 </output_format>
@@ -483,7 +477,7 @@ Plan writing complete when:
 - [ ] References loaded (phase-prompt, plan-format, scope-estimation, + tdd if needed)
 - [ ] Dependency graph built from needs/creates
 - [ ] Waves assigned (all roots wave 1, dependents correct)
-- [ ] Tasks grouped into plans (budget-based, marginal costs 25-35%)
+- [ ] Tasks grouped into plans (budget-based, target 25-35% marginal, consolidate under 15%)
 - [ ] Must-haves derived as markdown checklists
 - [ ] PLAN.md files written with pure markdown format
 - [ ] EXECUTION-ORDER.md generated with wave groups

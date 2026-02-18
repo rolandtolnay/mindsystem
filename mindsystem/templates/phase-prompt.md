@@ -18,15 +18,9 @@ read `~/.claude/mindsystem/references/plan-format.md`.
 
 **Plan sizing — budget-based grouping:**
 
-Each executor burns ~15-20% fixed overhead. Available budget per plan: ~30-35% marginal cost.
+Each executor burns ~15-20% fixed overhead. Available budget per plan: ~30-35% marginal cost. Weight classifications (Light/Medium/Heavy) and marginal costs defined in scope-estimation.md.
 
-| Weight | Marginal Cost | Examples |
-|--------|---------------|----------|
-| Light | ~5-8% | One-line fixes, config, dead code, renaming |
-| Medium | ~10-15% | CRUD, widget extraction, single-file refactoring |
-| Heavy | ~20-25% | Complex logic, architecture, multi-file integrations |
-
-Grouping rule: `sum(marginal_costs) <= 30-35%`. Plans under ~15% marginal → consolidate with related same-wave work.
+Grouping rule: `sum(marginal_costs) <= 35%`. Target 25-35% per plan. Plans under ~15% marginal → consolidate with related same-wave work.
 
 **When to split:**
 

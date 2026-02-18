@@ -662,7 +662,7 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] PLAN file(s) created with pure markdown format
 - [ ] EXECUTION-ORDER.md created with wave groups
 - [ ] Each plan: Must-Haves section with observable truths
-- [ ] Each plan: budget-based grouping (marginal costs 15-35%)
+- [ ] Each plan: budget-based grouping (target 25-35% marginal, consolidate under 15%)
 - [ ] Wave structure maximizes parallelism
 - [ ] PLAN file(s) committed to git
 - [ ] Risk assessment presented (score + top factors)

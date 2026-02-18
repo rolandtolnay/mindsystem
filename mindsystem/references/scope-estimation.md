@@ -43,7 +43,7 @@ Why 50% not 80%?
 <tdd_plans>
 **TDD features get their own plans. Target ~40% context.**
 
-TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than linear task execution. TDD features are inherently heavy-weight (~25-40% marginal) and naturally get dedicated plans through budget calculation.
+TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than linear task execution. TDD features are inherently heavy-weight (~25-40% marginal) and are always isolated into dedicated plans.
 
 | TDD Feature Complexity | Context Usage |
 |------------------------|---------------|
@@ -202,7 +202,7 @@ Waves: [01, 02, 03] (all parallel)
 | 3 medium tasks | 3M | ~35% | ~18% | ~53% (risky) |
 | 2 heavy tasks | 2H | ~45% | ~18% | ~63% (split) |
 
-**Executor overhead:** ~2,400 tokens (down from ~6,900 in previous versions), freeing ~4,500 tokens per plan for code quality.
+**Executor overhead:** ~2,400 tokens fixed cost.
 </estimating_context>
 
 <summary>
