@@ -33,7 +33,7 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 
 **The 50% rule:** Plans should complete within ~50% context usage. Stop BEFORE quality degrades, not at context limit.
 
-**Solution:** Budget-aware grouping. Plans stay budget-constrained (marginal costs within 30-35%). Each plan executes in a fresh subagent with 200k tokens purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
+**Solution:** Budget-aware consolidation. Plans stay budget-constrained (sum of weights within 45%). Each plan executes in a fresh subagent with 200k tokens purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
 </what_mindsystem_is>
 
 <philosophy>
@@ -222,7 +222,7 @@ mindsystem/
 - **Judgment logic in scripts** — scripts do mechanical operations, prompts do reasoning
 - **Reflexive SUMMARY chaining** — independent plans don't need prior SUMMARY references
 - **Horizontal splitting** — split plans by vertical feature slices, not by layer (model/API/UI)
-- **Context inflation** — plans with >3 tasks, @-references to files not needed for current path
+- **Context inflation** — plans exceeding 45% budget, @-references to files not needed for current path
 - **Manual gates for automatable work** — if Claude can verify it, don't ask the user
 - **Orchestration in plans** — wave numbers, dependencies, and file ownership metadata belong in EXECUTION-ORDER.md, not in individual plan files
 - **XML/YAML in plans** — plans use pure markdown; XML containers and YAML frontmatter are overhead that doesn't improve code output

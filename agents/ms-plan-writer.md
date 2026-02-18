@@ -168,7 +168,7 @@ For each wave:
       Continue
 
     task_cost = marginal_cost(task.weight)
-    If current_budget + task_cost > 35% AND current_plan not empty:
+    If current_budget + task_cost > 45% AND current_plan not empty:
       Finalize current_plan
       current_plan = new plan
       current_budget = 0
@@ -182,7 +182,7 @@ For each wave:
       current_budget = task_cost
 ```
 
-**3. Minimum threshold check:** Plans under ~15% marginal → merge with adjacent same-wave plan if no file conflicts and combined budget <= 35%.
+**3. Minimum threshold check:** Plans under ~10% → merge with adjacent same-wave plan if no file conflicts and combined budget <= 45%.
 
 **4. File ownership constraint:** Tasks sharing files must be in the same plan.
 
@@ -216,14 +216,14 @@ The verifier derives artifacts and key_links from the plan's ## Changes section.
 **Verify each plan fits context budget.**
 
 Per plan:
-- Sum marginal costs (target: 25-35%)
-- Check minimum threshold (plans under ~15% → consolidate)
+- Sum weights (target: 25-45%)
+- Check minimum threshold (plans under ~10% → consolidate)
 - Count files modified (max: 10)
 
 If any plan exceeds:
-- Marginal cost > 35%: Split by feature affinity
+- Budget > 45%: Split by feature affinity
 - 10+ files: Split by subsystem
-- Under 15% marginal: Merge with related same-wave plan
+- Under 10%: Merge with related same-wave plan
 </step>
 
 <step name="write_plan_files">
@@ -351,11 +351,11 @@ Capture commit hash for return.
 score = 0
 factors = []
 
-# Marginal cost per plan (>35%)
-max_marginal = max(marginal_cost_sum for each plan)
-if max_marginal > 35:
+# Budget per plan (>45%)
+max_budget = max(budget_sum for each plan)
+if max_budget > 45:
   score += 15
-  factors.append(f"Plan exceeds 35% marginal cost ({max_marginal}%)")
+  factors.append(f"Plan exceeds 45% budget ({max_budget}%)")
 
 # Plan count (5+ plans in phase)
 if plan_count >= 5:
@@ -421,8 +421,8 @@ Return structured markdown to orchestrator:
 
 | Plan | Tasks | Est. Marginal | Notes |
 |------|-------|---------------|-------|
-| 01 | 3 (L+L+M) | ~25% | Merged light fixes with medium refactor |
-| 02 | 2 (M+M) | ~25% | Vertical slice: model + API |
+| 01 | 4 (L+L+L+M) | ~25% | Merged light fixes with medium refactor |
+| 02 | 3 (M+M+M) | ~30% | Vertical slice: model + API + tests |
 
 ### Risk Assessment
 
@@ -459,7 +459,7 @@ Bad: Plan 01 = all models, Plan 02 = all APIs
 Good: Plan 01 = User (model + API), Plan 02 = Product (model + API)
 
 **DO NOT exceed scope limits.**
-Marginal cost > 35% → split. Single light task alone → consolidate. Files > 10 → split.
+Budget > 45% → split. Single light task alone → consolidate. Files > 10 → split.
 
 **DO NOT write implementation-focused truths.**
 Bad: "bcrypt library installed"
@@ -477,7 +477,7 @@ Plan writing complete when:
 - [ ] References loaded (phase-prompt, plan-format, scope-estimation, + tdd if needed)
 - [ ] Dependency graph built from needs/creates
 - [ ] Waves assigned (all roots wave 1, dependents correct)
-- [ ] Tasks grouped into plans (budget-based, target 25-35% marginal, consolidate under 15%)
+- [ ] Tasks grouped into plans (budget-based, target 25-45%, consolidate under 10%)
 - [ ] Must-haves derived as markdown checklists
 - [ ] PLAN.md files written with pure markdown format
 - [ ] EXECUTION-ORDER.md generated with wave groups

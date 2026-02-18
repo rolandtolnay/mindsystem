@@ -180,7 +180,7 @@ None — all verifiable items checked programmatically.
 **Fix plan generation:**
 - Only generate if gaps_found
 - Group related fixes into single plans
-- Budget-based grouping (marginal costs within 30-35%)
+- Budget-based grouping (weights within 45%)
 - Include verification task in each plan
 
 ---

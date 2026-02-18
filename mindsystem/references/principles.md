@@ -33,10 +33,10 @@ Plans must complete within reasonable context usage.
 - 50-70% context: Degrading quality
 - 70%+ context: Poor quality
 
-**Solution:** Aggressive atomicity - split into small, focused plans.
-- Budget-based grouping (marginal costs within 30-35%)
+**Solution:** Budget-aware consolidation - prefer larger plans, calibrate from real data.
+- Budget-based grouping (sum of weights within 45%)
 - Each plan independently executable
-- Consolidate plans under ~15% marginal with related work
+- Consolidate plans under ~10% with related work
 </scope_control>
 
 <claude_automates>

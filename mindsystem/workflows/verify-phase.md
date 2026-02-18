@@ -532,7 +532,7 @@ Group related gaps into fix plans:
 ```
 
 3. **Keep plans focused:**
-   - Budget-based grouping (marginal costs within 30-35%)
+   - Budget-based grouping (weights within 45%)
    - Single concern per plan
    - Include verification task
 

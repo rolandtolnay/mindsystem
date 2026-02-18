@@ -27,17 +27,17 @@ Why 50% not 80%?
 </context_target>
 
 <task_rule>
-**Budget-based grouping. Each executor burns ~15-20% fixed overhead (prompt, workflow, project refs, shared file reads). Available budget per plan: ~30-35% marginal cost.**
+**Budget-based grouping.** Classify tasks by weight, then pack plans until budget full.
 
-| Weight | Marginal Cost | Examples |
-|--------|---------------|----------|
-| Light | ~5-8% | One-line fixes, config changes, dead code removal, renaming |
-| Medium | ~10-15% | CRUD endpoints, widget extraction, single-file refactoring |
-| Heavy | ~20-25% | Complex business logic, architecture changes, multi-file integrations |
+| Weight | Cost | Examples |
+|--------|------|----------|
+| Light | 5% | One-line fixes, config changes, dead code removal, renaming |
+| Medium | 10% | CRUD endpoints, widget extraction, single-file refactoring |
+| Heavy | 20% | Complex business logic, architecture changes, multi-file integrations |
 
-**Grouping rule:** `sum(marginal_costs) <= 30-35%`. Pack tasks by feature affinity until budget full.
+**Grouping rule:** `sum(weights) <= 45%`. Pack tasks by feature affinity until budget full. Bias toward consolidation — fewer plans, less overhead.
 
-**Minimum plan threshold:** Plans under ~15% marginal cost → consolidate with related work in the same wave. A single light task alone wastes executor overhead.
+**Minimum plan threshold:** Plans under ~10% → consolidate with related work in the same wave. A single light task alone wastes executor overhead.
 </task_rule>
 
 <tdd_plans>
@@ -64,7 +64,7 @@ See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 <split_signals>
 
 <always_split>
-- **Marginal cost sum exceeds 35%** - Budget overflow regardless of task count
+- **Budget sum exceeds 45%** - Budget overflow regardless of task count
 - **Multiple subsystems** - DB + API + UI = separate plans
 - **Any task with >5 file modifications** - Split by file groups
 - **Discovery + verification in separate plans** - Don't mix exploratory and implementation work
@@ -165,11 +165,10 @@ Result: Task 1-3 good, Task 4-5 degrading, Task 6-8 rushed
 
 **Good - Budget-aware plans:**
 ```
-Plan 1: "Auth Database + Config" (3L+1M = ~28% marginal)
-Plan 2: "Auth API Core" (2M = ~25% marginal)
-Plan 3: "Auth API Protection" (1H = ~22% marginal)
-Plan 4: "Auth UI Components" (2M = ~25% marginal)
-Each: marginal within 30-35%, peak quality, atomic commits
+Plan 1: "Auth Database + Config" (4L+1M = ~30%)
+Plan 2: "Auth API" (3M = ~30%)
+Plan 3: "Auth UI" (1H+1M = ~30%)
+Each: within 45% budget, peak quality, atomic commits
 ```
 
 **Bad - Horizontal layers (sequential):**
@@ -192,31 +191,21 @@ Waves: [01, 02, 03] (all parallel)
 </anti_patterns>
 
 <estimating_context>
-**Budget math:** Fixed overhead (~15-20%) + sum(marginal costs) = total context usage. Target total under 50%.
-
-| Scenario | Tasks | Marginal | Fixed | Total |
-|----------|-------|----------|-------|-------|
-| 4 light fixes | 4L | ~24% | ~18% | ~42% |
-| 2 medium tasks | 2M | ~25% | ~18% | ~43% |
-| 1 heavy + 1 light | H+L | ~28% | ~18% | ~46% |
-| 3 medium tasks | 3M | ~35% | ~18% | ~53% (risky) |
-| 2 heavy tasks | 2H | ~45% | ~18% | ~63% (split) |
-
-**Executor overhead:** ~2,400 tokens fixed cost.
+Weight estimates are heuristics for the plan-writer to bias toward consolidation, not precise predictions. Actual context usage depends on model, task complexity, file sizes, and context window. Calibrate from real execution data — when plans consistently finish with headroom, pack more aggressively.
 </estimating_context>
 
 <summary>
-**Budget-based grouping, 50% context target:**
+**Budget-aware consolidation, 50% context target:**
 - All tasks: Peak quality
 - Git: Atomic per-task commits
 - Parallel by default: Fresh context per subagent
 
-**The principle:** Budget-aware consolidation. Fewer executors, same quality, less overhead.
+**The principle:** Fewer executors, same quality, less overhead. Bias toward consolidation.
 
 **The rules:**
-- Group by marginal cost budget (sum <= 30-35%), not by fixed task count.
-- Consolidate plans under ~15% marginal with related same-wave work.
-- Split when marginal cost sum exceeds 35%.
+- Group by weight budget (`sum(weights) <= 45%`), not by fixed task count.
+- Consolidate plans under ~10% with related same-wave work.
+- Split when budget sum exceeds 45%.
 - Vertical slices over horizontal layers.
 - Dependencies centralized in EXECUTION-ORDER.md.
 - Autonomous plans get parallel execution.
