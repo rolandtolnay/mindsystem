@@ -27,21 +27,23 @@ Why 50% not 80%?
 </context_target>
 
 <task_rule>
-**Each plan: 2-3 tasks maximum. Stay under 50% context.**
+**Budget-based grouping. Each executor burns ~15-20% fixed overhead (prompt, workflow, project refs, shared file reads). Available budget per plan: ~30-35% marginal cost.**
 
-| Task Complexity | Tasks/Plan | Context/Task | Total |
-|-----------------|------------|--------------|-------|
-| Simple (CRUD, config) | 3 | ~10-15% | ~30-45% |
-| Complex (auth, payments) | 2-3 | ~15-25% | ~40-50% |
-| Very complex (migrations, refactors) | 1-2 | ~30-40% | ~30-50% |
+| Weight | Marginal Cost | Examples |
+|--------|---------------|----------|
+| Light | ~5-8% | One-line fixes, config changes, dead code removal, renaming |
+| Medium | ~10-15% | CRUD endpoints, widget extraction, single-file refactoring |
+| Heavy | ~20-25% | Complex business logic, architecture changes, multi-file integrations |
 
-**Default to 3 tasks for simple-medium work, 2 for complex.** Executor overhead reduction creates headroom for the third task.
+**Grouping rule:** `sum(marginal_costs) <= 30-35%`. Pack tasks by feature affinity until budget full.
+
+**Minimum plan threshold:** Plans under ~15% marginal cost → consolidate with related work in the same wave. A single light task alone wastes executor overhead.
 </task_rule>
 
 <tdd_plans>
 **TDD features get their own plans. Target ~40% context.**
 
-TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than linear task execution.
+TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than linear task execution. TDD features are inherently heavy-weight (~25-40% marginal) and naturally get dedicated plans through budget calculation.
 
 | TDD Feature Complexity | Context Usage |
 |------------------------|---------------|
@@ -62,7 +64,7 @@ See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 <split_signals>
 
 <always_split>
-- **More than 3 tasks** - Even if tasks seem small
+- **Marginal cost sum exceeds 35%** - Budget overflow regardless of task count
 - **Multiple subsystems** - DB + API + UI = separate plans
 - **Any task with >5 file modifications** - Split by file groups
 - **Discovery + verification in separate plans** - Don't mix exploratory and implementation work
@@ -161,13 +163,13 @@ Tasks: 8 (models, migrations, API, JWT, middleware, hashing, login form, registe
 Result: Task 1-3 good, Task 4-5 degrading, Task 6-8 rushed
 ```
 
-**Good - Atomic plans:**
+**Good - Budget-aware plans:**
 ```
-Plan 1: "Auth Database Models" (2 tasks)
-Plan 2: "Auth API Core" (3 tasks)
-Plan 3: "Auth API Protection" (2 tasks)
-Plan 4: "Auth UI Components" (2 tasks)
-Each: 30-40% context, peak quality, atomic commits
+Plan 1: "Auth Database + Config" (3L+1M = ~28% marginal)
+Plan 2: "Auth API Core" (2M = ~25% marginal)
+Plan 3: "Auth API Protection" (1H = ~22% marginal)
+Plan 4: "Auth UI Components" (2M = ~25% marginal)
+Each: marginal within 30-35%, peak quality, atomic commits
 ```
 
 **Bad - Horizontal layers (sequential):**
@@ -190,35 +192,31 @@ Waves: [01, 02, 03] (all parallel)
 </anti_patterns>
 
 <estimating_context>
-| Files Modified | Context Impact |
-|----------------|----------------|
-| 0-3 files | ~10-15% (small) |
-| 4-6 files | ~20-30% (medium) |
-| 7+ files | ~40%+ (large - split) |
+**Budget math:** Fixed overhead (~15-20%) + sum(marginal costs) = total context usage. Target total under 50%.
 
-| Complexity | Context/Task |
-|------------|--------------|
-| Simple CRUD | ~15% |
-| Business logic | ~25% |
-| Complex algorithms | ~40% |
-| Domain modeling | ~35% |
-
-**2 tasks:** Simple ~30%, Medium ~50%, Complex ~80% (split)
-**3 tasks:** Simple ~45%, Medium ~75% (risky), Complex 120% (impossible)
+| Scenario | Tasks | Marginal | Fixed | Total |
+|----------|-------|----------|-------|-------|
+| 4 light fixes | 4L | ~24% | ~18% | ~42% |
+| 2 medium tasks | 2M | ~25% | ~18% | ~43% |
+| 1 heavy + 1 light | H+L | ~28% | ~18% | ~46% |
+| 3 medium tasks | 3M | ~35% | ~18% | ~53% (risky) |
+| 2 heavy tasks | 2H | ~45% | ~18% | ~63% (split) |
 
 **Executor overhead:** ~2,400 tokens (down from ~6,900 in previous versions), freeing ~4,500 tokens per plan for code quality.
 </estimating_context>
 
 <summary>
-**2-3 tasks, 50% context target:**
+**Budget-based grouping, 50% context target:**
 - All tasks: Peak quality
 - Git: Atomic per-task commits
 - Parallel by default: Fresh context per subagent
 
-**The principle:** Aggressive atomicity. More plans, smaller scope, consistent quality.
+**The principle:** Budget-aware consolidation. Fewer executors, same quality, less overhead.
 
 **The rules:**
-- If in doubt, split. Quality over consolidation.
+- Group by marginal cost budget (sum <= 30-35%), not by fixed task count.
+- Consolidate plans under ~15% marginal with related same-wave work.
+- Split when marginal cost sum exceeds 35%.
 - Vertical slices over horizontal layers.
 - Dependencies centralized in EXECUTION-ORDER.md.
 - Autonomous plans get parallel execution.

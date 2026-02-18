@@ -483,7 +483,7 @@ Task(
 The subagent handles:
 - Building dependency graph from needs/creates
 - Assigning wave numbers
-- Grouping tasks into plans (2-3 changes per plan)
+- Grouping tasks into plans (budget-based, ~30-35% marginal cost target)
 - Deriving Must-Haves (goal-backward)
 - Estimating scope, splitting if needed
 - Writing PLAN.md files + EXECUTION-ORDER.md
@@ -525,6 +525,7 @@ Extract:
 - `plan_count`: Number of plans created
 - `wave_count`: Number of waves
 - `wave_structure`: Wave-to-plan mapping
+- `grouping_rationale`: Optional table showing task weights and consolidation notes
 - `risk_score`: 0-100
 - `risk_tier`: "skip" | "optional" | "verify"
 - `risk_factors`: Top contributing factors
@@ -602,6 +603,11 @@ Wave 1 (parallel): {plan-01}, {plan-02}
 Wave 2: {plan-03}
 ...
 
+{If grouping_rationale present, insert here:}
+
+## Grouping Notes
+{grouping_rationale table from plan-writer}
+
 ---
 
 ## Next Up
@@ -656,7 +662,7 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] PLAN file(s) created with pure markdown format
 - [ ] EXECUTION-ORDER.md created with wave groups
 - [ ] Each plan: Must-Haves section with observable truths
-- [ ] Each plan: 2-3 changes (~50% context)
+- [ ] Each plan: budget-based grouping (marginal costs 15-35%)
 - [ ] Wave structure maximizes parallelism
 - [ ] PLAN file(s) committed to git
 - [ ] Risk assessment presented (score + top factors)

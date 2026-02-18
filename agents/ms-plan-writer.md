@@ -151,23 +151,48 @@ Wave assignments are written to EXECUTION-ORDER.md, not to individual plans.
 </step>
 
 <step name="group_into_plans">
-**Group tasks into plans based on wave and feature affinity.**
+**Group tasks into plans using budget-based packing per wave.**
 
-Rules:
-1. **Same-wave tasks with no file conflicts → parallel plans**
-2. **Tasks with shared files → same plan**
-3. **TDD candidates → dedicated plans (one feature per TDD plan)**
-4. **2-3 tasks per plan, ~50% context target**
-5. **Default to 3 tasks for simple-medium work, 2 for complex**
+**1. Classify task weight** from action description, file count, domain complexity:
 
-Grouping algorithm:
+| Weight | Marginal Cost | Indicators |
+|--------|---------------|------------|
+| Light (L) | ~5-8% | One-line fixes, config, dead code, renaming, single-file edits |
+| Medium (M) | ~10-15% | CRUD endpoints, widget extraction, single-file refactoring |
+| Heavy (H) | ~20-25% | Complex logic, architecture changes, multi-file integrations |
+
+**2. Greedy budget packing per wave:**
 ```
-1. Start with Wave 1 tasks (no dependencies)
-2. Group by feature affinity (vertical slice)
-3. Check file ownership (no conflicts)
-4. Move to Wave 2, repeat
-5. Continue until all tasks assigned
+For each wave:
+  Sort tasks by feature affinity (vertical slice)
+  current_plan = new plan
+  current_budget = 0
+
+  For each task:
+    If task.tdd_candidate:
+      Create dedicated plan for this task (TDD plans always standalone)
+      Continue
+
+    task_cost = marginal_cost(task.weight)
+    If current_budget + task_cost > 35% AND current_plan not empty:
+      Finalize current_plan
+      current_plan = new plan
+      current_budget = 0
+
+    If no file conflicts with current_plan:
+      Add task to current_plan
+      current_budget += task_cost
+    Else:
+      Finalize current_plan
+      current_plan = new plan with this task
+      current_budget = task_cost
 ```
+
+**3. Minimum threshold check:** Plans under ~15% marginal → merge with adjacent same-wave plan if no file conflicts and combined budget <= 35%.
+
+**4. File ownership constraint:** Tasks sharing files must be in the same plan.
+
+**5. Record grouping rationale** for each plan (weight classification, budget total, merge decisions).
 
 **Plan assignment:**
 - Each plan gets a sequential number (01, 02, 03...)
@@ -197,16 +222,14 @@ The verifier derives artifacts and key_links from the plan's ## Changes section.
 **Verify each plan fits context budget.**
 
 Per plan:
-- Count tasks (target: 2-3, max: 3)
-- Count files modified (target: 5-8, max: 10)
-- Estimate context usage (target: ~50%)
+- Sum marginal costs (target: 25-35%)
+- Check minimum threshold (plans under ~15% → consolidate)
+- Count files modified (max: 10)
 
 If any plan exceeds:
-- 4+ tasks: Split by feature
+- Marginal cost > 35%: Split by feature affinity
 - 10+ files: Split by subsystem
-- Complex domain (auth, payments): Consider extra split
-
-Default to 3 tasks for simple-medium work, 2 for complex. Executor overhead reduction creates headroom for the third task.
+- Under 15% marginal: Merge with related same-wave plan
 </step>
 
 <step name="write_plan_files">
@@ -334,11 +357,11 @@ Capture commit hash for return.
 score = 0
 factors = []
 
-# Task count (4+ tasks in any plan)
-max_tasks = max(task_count for each plan)
-if max_tasks >= 4:
+# Marginal cost per plan (>35%)
+max_marginal = max(marginal_cost_sum for each plan)
+if max_marginal > 35:
   score += 15
-  factors.append(f"Plan has {max_tasks} tasks")
+  factors.append(f"Plan exceeds 35% marginal cost ({max_marginal}%)")
 
 # Plan count (5+ plans in phase)
 if plan_count >= 5:
@@ -400,6 +423,15 @@ Return structured markdown to orchestrator:
 | 1 | 01, 02 | None (parallel) |
 | 2 | 03 | Waits for 01, 02 |
 
+### Grouping Rationale
+
+| Plan | Tasks | Est. Marginal | Notes |
+|------|-------|---------------|-------|
+| 01 | 3 (L+L+M) | ~25% | Merged light fixes with medium refactor |
+| 02 | 2 (M+M) | ~25% | Vertical slice: model + API |
+
+Present only when consolidation occurred or grouping is non-obvious. Omit for straightforward groupings.
+
 ### Risk Assessment
 
 **Score:** {score}/100 ({tier})
@@ -433,7 +465,7 @@ Bad: Plan 01 = all models, Plan 02 = all APIs
 Good: Plan 01 = User (model + API), Plan 02 = Product (model + API)
 
 **DO NOT exceed scope limits.**
-4+ tasks per plan → split. Complex domains → split. Files > 10 → split.
+Marginal cost > 35% → split. Single light task alone → consolidate. Files > 10 → split.
 
 **DO NOT write implementation-focused truths.**
 Bad: "bcrypt library installed"
@@ -451,7 +483,7 @@ Plan writing complete when:
 - [ ] References loaded (phase-prompt, plan-format, scope-estimation, + tdd if needed)
 - [ ] Dependency graph built from needs/creates
 - [ ] Waves assigned (all roots wave 1, dependents correct)
-- [ ] Tasks grouped into plans (2-3 tasks, ~50% context)
+- [ ] Tasks grouped into plans (budget-based, marginal costs 25-35%)
 - [ ] Must-haves derived as markdown checklists
 - [ ] PLAN.md files written with pure markdown format
 - [ ] EXECUTION-ORDER.md generated with wave groups

@@ -532,7 +532,7 @@ Group related gaps into fix plans:
 ```
 
 3. **Keep plans focused:**
-   - 2-3 tasks per plan
+   - Budget-based grouping (marginal costs within 30-35%)
    - Single concern per plan
    - Include verification task
 

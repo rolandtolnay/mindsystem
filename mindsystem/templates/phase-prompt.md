@@ -16,19 +16,24 @@ read `~/.claude/mindsystem/references/plan-format.md`.
 
 ## Scope Guidance
 
-**Plan sizing:**
+**Plan sizing — budget-based grouping:**
 
-- 2-3 tasks per plan, ~50% context usage maximum
-- Default to 3 tasks for simple-medium work, 2 for complex
-- Executor overhead reduction creates headroom for the third task
-- Complex phases: Multiple focused plans, not one large plan
+Each executor burns ~15-20% fixed overhead. Available budget per plan: ~30-35% marginal cost.
+
+| Weight | Marginal Cost | Examples |
+|--------|---------------|----------|
+| Light | ~5-8% | One-line fixes, config, dead code, renaming |
+| Medium | ~10-15% | CRUD, widget extraction, single-file refactoring |
+| Heavy | ~20-25% | Complex logic, architecture, multi-file integrations |
+
+Grouping rule: `sum(marginal_costs) <= 30-35%`. Plans under ~15% marginal → consolidate with related same-wave work.
 
 **When to split:**
 
 - Different subsystems (auth vs API vs UI)
-- More than 3 tasks
+- Marginal cost sum exceeds 35%
 - Risk of context overflow
-- TDD candidates — separate plans
+- TDD candidates — separate plans (inherently heavy-weight)
 
 **Vertical slices preferred:**
 

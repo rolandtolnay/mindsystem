@@ -34,9 +34,9 @@ Plans must complete within reasonable context usage.
 - 70%+ context: Poor quality
 
 **Solution:** Aggressive atomicity - split into small, focused plans.
-- 2-3 tasks per plan maximum
+- Budget-based grouping (marginal costs within 30-35%)
 - Each plan independently executable
-- Better to have many small plans than few large ones
+- Consolidate plans under ~15% marginal with related work
 </scope_control>
 
 <claude_automates>

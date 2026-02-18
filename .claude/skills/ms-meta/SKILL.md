@@ -33,7 +33,7 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 
 **The 50% rule:** Plans should complete within ~50% context usage. Stop BEFORE quality degrades, not at context limit.
 
-**Solution:** Aggressive atomicity. Plans stay small (3 tasks max). Each plan executes in a fresh subagent with 200k tokens purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
+**Solution:** Budget-aware grouping. Plans stay budget-constrained (marginal costs within 30-35%). Each plan executes in a fresh subagent with 200k tokens purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
 </what_mindsystem_is>
 
 <philosophy>
