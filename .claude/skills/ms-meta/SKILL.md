@@ -60,7 +60,7 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 - **Granularity** — Separate commands for research, requirements, planning, execution
 - **Transparency** — No hidden delegation or background orchestration
 
-**Solo developer + Claude workflow.** No enterprise patterns (sprint ceremonies, RACI matrices, stakeholder management). User is the visionary. Claude is the builder.
+**Minimal ceremony.** No process overhead that doesn't improve output — sprint ceremonies, RACI matrices, stakeholder management, time estimates. This applies regardless of team size. User is the visionary. Claude is the builder.
 
 **Plans ARE prompts.** PLAN.md is not a document that gets transformed — it IS the executable prompt. Plans optimize for a single intelligent reader executing in one context: ~90% actionable content (Context, Changes, Verification, Must-Haves), ~10% structure. Orchestration metadata (wave grouping, dependencies) lives separately in EXECUTION-ORDER.md, not in individual plans.
 
@@ -68,7 +68,7 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 
 **Goal-backward planning.** Don't ask "what should we build?" — ask "what must be TRUE for the goal to be achieved?" This produces verifiable requirements, not vague task lists.
 
-**Dream extraction, not requirements gathering.** Project initialization is collaborative thinking to help users discover and articulate what they want. Follow the thread, challenge vagueness, make abstract concrete.
+**Dream extraction, not requirements gathering.** Discovery phases (new-milestone, discuss-phase, new-project) act as an experienced product owner and business analyst working with a visionary leader. The user often needs guidance articulating ideas, thinking through the right questions, confronting constraints, and grounding abstractions into what's buildable. The system amplifies everything in the user's head through collaborative dialogue — not forms or checklists. Make the user excited to talk about their ideas, then transform that dialogue into structured requirements and specification.
 
 **Artifact discipline.** Every artifact earns its place; every line earns its place within it. No redundant information across artifacts — if data exists in one canonical source, don't duplicate it elsewhere. Relevance is measured by consumption: who reads this, when, and what decision does it inform? Posterity is valid only when non-deducible from other existing sources. Planning artifacts (ROADMAP.md, REQUIREMENTS.md) are milestone-scoped and recreated fresh each milestone — history lives in purpose-built archives and MILESTONES.md, not in cumulative documents that grow unboundedly.
 </philosophy>
@@ -81,10 +81,6 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 **Instruction-following budget (~150-250).** Reasoning models follow ~150-250 behavioral instructions before sharp threshold decay; standard frontier models show linear decay from much earlier; smaller models show exponential decay (IFScale, July 2025). At 500 instructions, even the best models hit ~68% compliance. Instructions have negative dependencies — simultaneous compliance is harder than individual probabilities predict. Reference data (when task-relevant) and structural markers cause less interference because they're retrieved, not obeyed. Motivational fluff ("this is important", "thoroughness matters") adds context load without behavioral change. Corrective rationale ("never use ellipses — TTS can't pronounce them") earns its place by encoding causal chains that enable generalization. When designing commands, workflows, or agents, every behavioral instruction must earn its place by measurably changing output in the runtime context.
 
 **Positional attention bias.** LLMs bias toward instructions at the beginning and end of prompts. The middle is the attention trough — instructions buried there are most likely skipped. Place objectives and critical constraints at the beginning, success criteria and key reinforcement at the end, elaboration and process details in the middle (kept lean). This is why Mindsystem commands use `<objective>` first and `<success_criteria>` last. Restating a critical instruction at the end isn't redundancy — it's peripheral reinforcement.
-
-**Separation of orchestration from execution.** Plans serve the executor (needs Context, Changes, Verification, Must-Haves). The orchestrator needs wave grouping, dependencies, and file conflict data. Mixing these means the executor loads orchestration metadata it doesn't need. Solution: plans carry only execution content; orchestration lives in EXECUTION-ORDER.md.
-
-**Plans as context-optimized prompts.** Pure markdown (no XML containers, no YAML frontmatter) achieves the same or better executor results with less structural overhead. Executor workflow stays lean (~350 lines) with summary creation as inline instructions (~20 lines) rather than a separate template.
 
 ### Latency-Quality Spectrum
 
@@ -146,16 +142,43 @@ mindsystem/
 
 **Installation:** `npx mindsystem-cc` copies to `~/.claude/` (global) or `.claude/` (local).
 
-### Core Workflow
+### Core Workflow — Milestone Lifecycle
 
-1. `/ms:new-project` → Questions → PROJECT.md
-2. `/ms:research-project` (optional) → .planning/research/ (archived to milestones/v[X.Y]/research/ during complete-milestone)
-3. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
-4. `/ms:discuss-phase N` (optional) → Gather context before planning
-5. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
-6. `/ms:plan-phase N` → Creates PLAN.md files + EXECUTION-ORDER.md (main context, with user)
+1. `/ms:new-milestone` → Discover what to build, update PROJECT.md
+2. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
+
+**Per phase (repeat for each):**
+
+3. `/ms:discuss-phase N` (optional) → Gather context before planning
+4. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
+5. `/ms:research-phase N` (optional) → Research implementation approach
+6. `/ms:plan-phase N` → PLAN.md files + EXECUTION-ORDER.md
 7. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
-8. `/ms:verify-work N` (optional) → UAT verification with inline fixing
+8. `/ms:verify-work N` (optional) → UAT verification with mock generation and inline fixing
+
+**After all phases:**
+
+9. `/ms:audit-milestone` → Verify milestone completion against original intent
+10. `/ms:complete-milestone` → Archive milestone, prepare for next version
+
+### Artifact Flow
+
+| Artifact | Produced by | Consumed by |
+|----------|------------|-------------|
+| PROJECT.md | new-project, new-milestone | create-roadmap, plan-phase, execute-phase, design-phase |
+| MILESTONES.md | complete-milestone | progress, new-milestone |
+| REQUIREMENTS.md | ms-roadmapper (create-roadmap) | plan-phase, audit-milestone, ms-verifier |
+| ROADMAP.md | ms-roadmapper (create-roadmap) | progress, plan-phase, execute-phase, audit-milestone |
+| STATE.md | ms-roadmapper (init), update-state script | progress, plan-phase, execute-phase, verify-work |
+| CONTEXT.md | discuss-phase | plan-phase, ms-plan-writer, ms-designer |
+| DESIGN.md | ms-designer (design-phase) | plan-phase, ms-executor |
+| PLAN.md | ms-plan-writer (plan-phase) | ms-executor, ms-verifier, verify-work |
+| EXECUTION-ORDER.md | ms-plan-writer (plan-phase) | execute-phase, validate-execution-order script |
+| SUMMARY.md | ms-executor (execute-phase) | progress, verify-work, audit-milestone, dependent plans |
+| VERIFICATION.md | ms-verifier (execute-phase) | progress, plan-phase (gap closure), audit-milestone |
+| UAT.md | verify-work | progress, audit-milestone |
+| MILESTONE-AUDIT.md | audit-milestone | complete-milestone |
+| knowledge/*.md | ms-consolidator (execute-phase) | future phase planning |
 </architecture>
 
 <change_propagation>
@@ -210,14 +233,22 @@ Read source files directly for detailed knowledge:
 
 | Topic | Read |
 |-------|------|
-| Health checks & config healing | `commands/ms/doctor.md` |
+| Project initialization | `commands/ms/new-project.md` |
+| Milestone discovery | `commands/ms/new-milestone.md` |
+| Roadmap creation | `commands/ms/create-roadmap.md` |
+| Phase discussion | `mindsystem/workflows/discuss-phase.md` |
+| Design specification | `commands/ms/design-phase.md` |
+| Phase research | `commands/ms/research-phase.md` |
+| Phase planning | `mindsystem/workflows/plan-phase.md` |
+| Plan format & anatomy | `mindsystem/references/plan-format.md` |
+| Plan conventions | `.claude/skills/ms-meta/references/conventions.md` |
 | Execution orchestration | `mindsystem/workflows/execute-phase.md` |
 | Plan execution (in subagent) | `mindsystem/workflows/execute-plan.md` |
-| Plan format & anatomy | `mindsystem/references/plan-format.md` |
-| Phase planning | `mindsystem/workflows/plan-phase.md` |
 | Verification protocol | `mindsystem/workflows/verify-phase.md` |
+| Milestone audit | `commands/ms/audit-milestone.md` |
+| Milestone completion | `mindsystem/workflows/complete-milestone.md` |
 | Code review (generic) | `agents/ms-code-simplifier.md` |
-| Plan conventions | `.claude/skills/ms-meta/references/conventions.md` |
+| Health checks & config healing | `commands/ms/doctor.md` |
 | All agents | `ls agents/` |
 | All commands | `ls commands/ms/` |
 | All workflows | `ls mindsystem/workflows/` |
