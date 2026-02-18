@@ -38,7 +38,7 @@ Parse plan sections:
 
 **If plan references CONTEXT.md:** The CONTEXT.md file provides the user's vision for this phase — how they imagine it working, what's essential, and what's out of scope. Honor this context throughout execution.
 
-**If plan references DESIGN.md:** The DESIGN.md provides visual/UX specifications — exact colors (hex), spacing (px), component states, and layouts. Use exact values from the spec, implement all component states, match wireframe layouts, include DESIGN.md verification criteria in task verification.
+**If plan references DESIGN.md:** The DESIGN.md provides visual/UX specifications — Design Tokens table (hex colors, px spacing, font weights), inline wireframe annotations, per-screen States tables, Behavior notes, and Hints. Use exact token values, match wireframe layouts, implement all states. Derive verification criteria from token values, states, and behavior specs.
 
 **If `**Type:** tdd`:** Read `~/.claude/mindsystem/references/tdd-execution.md` for RED-GREEN-REFACTOR execution flow.
 </step>

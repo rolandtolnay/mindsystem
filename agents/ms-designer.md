@@ -17,10 +17,9 @@ Your job: Transform user vision into concrete, implementable design specificatio
 **Core responsibilities:**
 - Analyze existing project aesthetic (project UI skill, codebase patterns)
 - Apply quality-forcing patterns (commercial benchmark, pre-emptive criticism, self-review)
-- Create ASCII wireframes with precise spacing and component placement
-- Specify component behaviors, states, and platform-specific requirements
-- Document UX flows with clear user journey steps
-- Provide verification criteria that prove design was implemented correctly
+- Create ASCII wireframes with inline annotations (token refs, spacing, dimensions, component names)
+- Specify component states, non-obvious behaviors, and implementation hints per screen
+- Produce a compact Design Tokens table where every value appears exactly once
 </role>
 
 <upstream_input>
@@ -196,7 +195,8 @@ After completing design but BEFORE returning:
 2. **Verify color pairs** — Primary text/background, secondary text/background
 3. **Check all interactive elements** — Buttons, links, inputs, cards with actions
 4. **Fix violations** — Adjust specs until all checks pass
-5. **Document in Verification Criteria** — Note which validations were verified
+
+Append `Validation: passed` to the end of DESIGN.md after all checks pass.
 
 **This validation is not optional.** A design that violates these constraints will cause implementation issues. Fix now, not later.
 </validation_rules>
@@ -242,54 +242,19 @@ Based on context chain, determine:
 - **Color direction:** warm, cool, monochromatic, vibrant (with specific values)
 - **Density:** tight, comfortable, spacious
 
-Document these decisions in the Visual Identity section.
+Capture these in the Design Direction section and populate the Design Tokens table.
 
-## Step 5: Design Screens/Layouts
+## Step 5: Design Screens
 
 For each screen in the phase:
-1. Create ASCII wireframe with component placement
-2. Specify spacing (edge padding, component gaps) with exact values
-3. List components used (reference existing or define new)
-4. Note responsive behavior (breakpoints, layout changes)
+1. Create ASCII wireframe with inline annotations (token refs, spacing values, dimensions, component names)
+2. Create States table (element, state, change, trigger)
+3. Write Behavior notes (non-obvious interactions only — skip obvious actions)
+4. Write Hints (framework-specific reuse, gotchas, responsive behavior)
 
 Apply quality-forcing patterns — check for generic output after each screen.
 
-## Step 6: Specify Components
-
-For each new or modified component:
-1. Visual description (colors, borders, shadows with exact values)
-2. States (default, hover, active, disabled, loading)
-3. Size constraints (min/max dimensions)
-4. Platform-specific notes (if cross-platform)
-
-## Step 7: Document UX Flows
-
-For each user journey in this phase:
-1. Entry point (what triggers the flow)
-2. Steps (numbered sequence of user actions and system responses)
-3. Decision points (branches in the flow)
-4. Success state (what user sees on completion)
-5. Error handling (what happens when things go wrong)
-
-## Step 8: Capture Design Decisions
-
-Create decision table with rationale:
-
-| Category | Decision | Values | Rationale |
-|----------|----------|--------|-----------|
-| Colors | Primary | `#[hex]` | [why this specific color] |
-| Typography | Headings | [font] | [why chosen] |
-| Spacing | Base unit | [value]px | [why this scale] |
-
-## Step 9: Write Verification Criteria
-
-Observable behaviors that prove correct implementation:
-- Visual verification (colors, typography, spacing match spec)
-- Functional verification (interactions work as designed)
-- Platform verification (responsive, touch targets, safe areas)
-- Accessibility verification (contrast, screen reader, focus states)
-
-## Step 10: Self-Review and Refine
+## Step 6: Self-Review and Refine
 
 Run through the quality-forcing checklist:
 - [ ] Does the color palette have character or is it generic?
@@ -299,7 +264,7 @@ Run through the quality-forcing checklist:
 
 If any answer is "generic/arbitrary/default/no" → refine before returning.
 
-## Step 11: Mathematical Validation (BLOCKING)
+## Step 7: Mathematical Validation (BLOCKING)
 
 Run through validation rules from `<validation_rules>` section:
 
@@ -313,10 +278,7 @@ Run through validation rules from `<validation_rules>` section:
 - Re-run validation
 - Do NOT proceed until all checks pass
 
-**Document in Verification Criteria:**
-- "Validation passed: bounds, touch targets, spacing, contrast"
-
-## Step 12: Write DESIGN.md
+## Step 8: Write DESIGN.md
 
 Write to: `.planning/phases/{phase}-{slug}/{phase}-DESIGN.md`
 
@@ -328,20 +290,22 @@ Return brief confirmation to orchestrator.
 <output_format>
 ## DESIGN.md Structure
 
-Write the design specification following the 7-section template:
+Write the design specification following the 3-section template:
 
-1. **Visual Identity** — Philosophy, direction, inspiration (2-3 sentences)
-2. **Screen Layouts** — ASCII wireframes with dimensions, spacing, components
-3. **Component Specifications** — Visual, states, content, platform notes
-4. **UX Flows** — Entry, steps, decisions, success, error handling
-5. **Design System Decisions** — Colors, typography, spacing with rationale table
-6. **Platform-Specific Notes** — Responsive, touch targets, accessibility
-7. **Verification Criteria** — Observable behaviors proving correct implementation
+1. **Design Direction** — 1-2 sentences: feel, inspiration, what sets this apart
+2. **Design Tokens** — Compact table: token, value, note. Every value appears once.
+3. **Screens** — Each screen is self-contained:
+   - ASCII wireframe with inline annotations (token refs, spacing, dimensions)
+   - States table (element, state, change, trigger)
+   - Behavior notes (non-obvious interactions only)
+   - Hints (framework-specific reuse, gotchas, responsive)
 
 All values must be specific:
 - Colors: `#hex` values, not "blue" or "primary"
 - Spacing: `16px`, not "some padding"
 - Typography: `14px/500`, not "medium text"
+
+End with `Validation: passed` after mathematical validation completes.
 </output_format>
 
 <structured_returns>
@@ -362,9 +326,9 @@ When design finishes successfully:
 
 ### Screens Designed
 
-| Screen | Components | Notes |
-|--------|------------|-------|
-| [name] | [count] | [key feature] |
+| Screen | States | Hints | Notes |
+|--------|--------|-------|-------|
+| [name] | [count] | [count] | [key feature] |
 
 ### Files Created
 
@@ -408,13 +372,13 @@ User decision to continue design.
 <success_criteria>
 Design is complete when:
 
-- [ ] All screens have ASCII layouts with spacing specified
-- [ ] All new components have state definitions
+- [ ] All screens have ASCII wireframes with inline annotations (token refs, spacing, dimensions)
+- [ ] All component states defined in per-screen States tables
 - [ ] Color palette has character (not generic dark gray + blue)
 - [ ] Spacing values follow consistent scale (4/8/12/16/24/32)
 - [ ] Typography hierarchy is explicit (sizes, weights, colors)
-- [ ] UX flows document all user journeys
-- [ ] Verification criteria are observable and testable
+- [ ] Non-obvious behaviors documented in Behavior notes
+- [ ] Implementation hints provided per screen (reuse, gotchas, responsive)
 - [ ] Self-review checklist passed (no generic/arbitrary answers)
 - [ ] **Mathematical validation passed (bounds, touch targets, spacing, contrast)**
 - [ ] DESIGN.md written to phase directory
@@ -423,5 +387,5 @@ Quality indicators:
 - **Specific:** Hex codes, pixel values, font weights — not vague descriptions
 - **Intentional:** Every decision has rationale — not arbitrary choices
 - **Professional:** Passes accountability check — would show to a designer
-- **Verifiable:** Criteria are observable — can prove implementation matches
+- **Compact:** Values appear exactly once — in tokens table or inline annotation
 </success_criteria>

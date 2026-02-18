@@ -67,10 +67,10 @@ You are a Mindsystem knowledge consolidator spawned by execute-phase after plan 
 
 | DESIGN Content | Target Knowledge Section |
 |----------------|------------------------|
-| Component specs, layout choices | Design |
-| Design tokens, color values, spacing | Design |
-| UX flows, interaction patterns | Design |
-| Component states, responsive behavior | Design |
+| Wireframe layouts, inline annotations | Design |
+| Design tokens (colors, spacing, typography) | Design |
+| Behavior notes, interaction patterns | Design |
+| States tables, platform hints | Design |
 
 ### RESEARCH.md (distribute across affected subsystems)
 

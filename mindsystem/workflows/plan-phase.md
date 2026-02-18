@@ -342,10 +342,10 @@ cat .planning/phases/XX-name/${PHASE}-DESIGN.md 2>/dev/null
 **If CONTEXT.md exists:** Honor vision, prioritize essential, respect boundaries, incorporate specifics. Track that CONTEXT.md exists for risk scoring.
 
 **If DESIGN.md exists:**
-- Tasks reference specific screens/components from design
-- Verification criteria include design verification items
+- Tasks reference specific screens from design (wireframe + states + behavior + hints)
+- Verification criteria inferred from States tables, Behavior notes, and token values
 - Must-Haves include design-specified observable behaviors
-- Task actions specify exact values (colors, spacing) from design
+- Task actions specify exact values (colors, spacing) from Design Tokens table
 
 **If none exist:** Suggest /ms:research-phase for niche domains, /ms:discuss-phase for simpler domains, or proceed with roadmap only.
 </step>

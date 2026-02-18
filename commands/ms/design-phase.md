@@ -343,13 +343,11 @@ Generate: DESIGN.md following template structure
 Location: .planning/phases/{phase}-{slug}/{phase}-DESIGN.md
 
 Required sections:
-1. Visual Identity (philosophy, direction, inspiration)
-2. Screen Layouts (ASCII wireframes with dimensions)
-3. Component Specifications (visual, states, content)
-4. UX Flows (entry, steps, decisions, completion, errors)
-5. Design System Decisions (colors, typography, spacing with rationale)
-6. Platform-Specific Notes (responsive, touch targets, accessibility)
-7. Verification Criteria (observable behaviors proving correct implementation)
+1. Design Direction (1-2 sentences: feel, inspiration)
+2. Design Tokens (compact table: token, value, note)
+3. Screens (per screen: wireframe with inline annotations, States table, Behavior notes, Hints)
+
+Verification criteria are not a section — plan writer derives from specs.
 </output_specification>
 ```
 
@@ -441,6 +439,6 @@ Update `.planning/STATE.md` Last Command field:
 - [ ] Mockup generation offered if phase has significant new UI
 - [ ] Mockup direction extracted and passed to ms-designer (if generated)
 - [ ] ms-designer spawned with quality-forcing patterns
-- [ ] DESIGN.md created with all 7 sections and committed
+- [ ] DESIGN.md created with Design Direction, Design Tokens, and Screens sections and committed
 - [ ] User informed of refinement options and next steps
 </success_criteria>

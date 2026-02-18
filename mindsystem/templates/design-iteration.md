@@ -27,11 +27,11 @@ Iteration: v[N] (previous: v[N-1])
 <previous_design>
 [Include key sections from current DESIGN.md that are relevant to the changes]
 
-Visual Identity:
-[Current visual identity section]
+Design Direction:
+[Current design direction]
 
-Relevant screens/components:
-[Sections being modified]
+Relevant screens (wireframe + states + behavior + hints):
+[Screens being modified]
 </previous_design>
 
 <feedback_on_previous>
@@ -87,14 +87,14 @@ Iteration: v2 (previous: v1)
 </iteration_context>
 
 <previous_design>
-Visual Identity:
-Professional analytics dashboard with dark mode. Deep navy background (#0a0f1a) with amber accent (#F59E0B).
+Design Direction:
+Professional analytics dashboard with dark mode. Deep navy background instead of generic black, amber accent for energy.
 
-Design System Colors:
-- Primary: #0a0f1a
-- Secondary: #1a1f2e
-- Text: #ffffff
-- Accent: #F59E0B
+Design Tokens (relevant):
+- bg-primary: #0a0f1a
+- bg-surface: #1a1f2e
+- text-primary: #ffffff
+- accent: #F59E0B
 </previous_design>
 
 <feedback_on_previous>
@@ -139,7 +139,7 @@ Iteration: v3 (previous: v2)
 </iteration_context>
 
 <previous_design>
-Screen Layout (Kanban Board):
+Kanban Board screen (wireframe):
 +------------------------------------------+
 | [Header]                                 |
 +------------------------------------------+

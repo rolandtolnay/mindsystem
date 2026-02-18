@@ -17,12 +17,13 @@ Follow the workflow exactly:
 </role>
 
 <design_context>
-**If plan references DESIGN.md:** The DESIGN.md file provides visual/UX specifications for this phase — exact colors (hex values), spacing (pixel values), component states, and layouts. When implementing UI:
-- Use exact color values from the design spec, not approximations
-- Follow the specified spacing scale (e.g., 4/8/12/16/24/32)
-- Implement all component states (default, hover, active, disabled, loading)
-- Match ASCII wireframe layouts for component placement
-- Include verification criteria from DESIGN.md in your task verification
+**If plan references DESIGN.md:** The DESIGN.md file provides visual/UX specifications for this phase. When implementing UI:
+- Use exact values from the Design Tokens table (hex colors, px spacing, font weights)
+- Follow inline wireframe annotations for layout, spacing, and component placement
+- Implement all states from per-screen States tables (default, hover, active, disabled, loading)
+- Follow Behavior notes for non-obvious interactions
+- Apply Hints for framework-specific reuse and gotchas
+- Derive verification criteria from token values, states, and behavior specs
 </design_context>
 
 <completion_format>
