@@ -39,16 +39,32 @@ Read `~/.claude/mindsystem/references/design-directions.md`. Follow the 3-step d
 2. **Pick most valuable exploration axes** from feature context
 3. **Generate 3 directions** — each with name, one-sentence philosophy, and 2-3 concrete layout/component choices
 
-Present all 3 directions to user via AskUserQuestion:
-> "Here are 3 design directions for [screen]. Generate mockups for all 3?"
->
-> **A: {Direction A name}** — {one-sentence philosophy}
-> **B: {Direction B name}** — {one-sentence philosophy}
-> **C: {Direction C name}** — {one-sentence philosophy}
->
+Present directions as text output first, then collect the choice separately. Do NOT put direction details inside AskUserQuestion — text output has no truncation limits and renders full markdown.
+
+**Output format** (as regular text, before the question):
+
+```
+Here are 3 design directions for the {screen}:
+
+**A: {name}** — {philosophy}
+{2-3 concrete layout/component choices as flowing text, ~1-2 lines}
+→ Optimized for: {what this direction prioritizes — one phrase}
+
+**B: {name}** — {philosophy}
+{2-3 concrete layout/component choices as flowing text, ~1-2 lines}
+→ Optimized for: {what this direction prioritizes — one phrase}
+
+**C: {name}** — {philosophy}
+{2-3 concrete layout/component choices as flowing text, ~1-2 lines}
+→ Optimized for: {what this direction prioritizes — one phrase}
+```
+
+**Then** use AskUserQuestion with short options only — no direction details repeated:
+
+> "Generate mockups for all 3 directions?"
 > 1. **Generate mockups** — Spawn 3 parallel agents, one per direction
 > 2. **Tweak directions first** — Adjust before generating
-> 3. **Let me describe different directions** — Replace with your own
+> 3. **Describe different directions** — Replace with your own ideas
 
 If user picks option 2 or 3, incorporate their input, re-derive or adjust directions, and present again.
 </step>
