@@ -102,7 +102,7 @@ ELSE:
 
 | Pre-work | Recommended | Status |
 |----------|-------------|--------|
-| Discuss | Unlikely | - |
+| Discuss | Unlikely | ✓ Done |
 | Design | Unlikely | - |
 | Research | Likely | ✓ Done |
 
