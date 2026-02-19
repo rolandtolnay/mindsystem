@@ -70,11 +70,9 @@ Output the subagent's response directly to the user.
 </process>
 
 <success_criteria>
-- [ ] Installed version read from VERSION file
-- [ ] Changelog fetched via curl (or graceful fallback to local)
+- [ ] Delegated to Haiku subagent (no main-agent token waste)
 - [ ] Only versions ≤ installed version displayed
 - [ ] Versions displayed oldest first, newest last
 - [ ] Clean bullet format with category prefixes
 - [ ] Update status shown as single line at end
-- [ ] Delegated to Haiku subagent (no main-agent token waste)
 </success_criteria>
