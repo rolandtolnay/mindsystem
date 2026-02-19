@@ -8,19 +8,19 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - Task
   - AskUserQuestion
 ---
 
 <objective>
-Run health checks on project configuration. Detect and fix configuration issues.
-
-V1 check: subsystem vocabulary setup and validation. Ensures `.planning/config.json` has a canonical `subsystems` array and all artifacts use values from it.
+Run comprehensive health checks on project configuration. Detect and fix structural drift across 6 categories: subsystem vocabulary, milestone directory structure, phase archival, knowledge files, phase summaries, and PLAN cleanup.
 
 Idempotent — safe to run repeatedly.
 </objective>
 
 <context>
 @.planning/config.json
+@.planning/MILESTONES.md
 </context>
 
 <process>
@@ -64,55 +64,98 @@ Write to `.planning/config.json`. Log: "Created config.json with empty subsystem
 Proceed to next step.
 </step>
 
-<step name="read_current_subsystems">
+<step name="run_scan">
+Run the diagnostic scan:
+
 ```bash
-jq -r '.subsystems // [] | length' .planning/config.json
+~/.claude/mindsystem/scripts/doctor-scan.sh
 ```
 
-- If 0 → **State A**: no subsystems configured. Go to `audit_existing_usage`.
-- If >0 → **State B**: subsystems exist. Go to `validate_vocabulary`.
+Capture the full output. Parse each check's Status (PASS/FAIL/SKIP) and detail lines.
 </step>
 
-<step name="audit_existing_usage">
-**State A only.** Scan all artifact types for existing free-form `subsystem:` values.
+<step name="present_results">
+Display results as a markdown table:
+
+```
+## Doctor Report
+
+| Check                    | Result | Details                          |
+|--------------------------|--------|----------------------------------|
+| Subsystem vocabulary     | PASS   | 9 subsystems, all artifacts OK   |
+| Milestone directories    | FAIL   | 2 flat files need restructuring  |
+| Phase archival           | FAIL   | 8 orphaned phase directories     |
+| Knowledge files          | FAIL   | Directory missing                |
+| Phase summaries          | FAIL   | 2 milestones missing summaries   |
+| PLAN cleanup             | FAIL   | 9 leftover PLAN.md files         |
+```
+
+Populate Result and Details from scan output. Use concise detail summaries.
+
+If all PASS → go to `report`.
+If any FAIL → go to `confirm_action`.
+</step>
+
+<step name="confirm_action">
+Use AskUserQuestion:
+- header: "Fix issues"
+- question: "How would you like to handle the failed checks?"
+- options:
+  - "Fix all" — apply all fixes in dependency order
+  - "Review each" — present each failed check individually for decision
+  - "Skip" — leave as-is, report only
+
+If "Skip" → go to `report`.
+
+If "Review each" → present each failed check with its details and offer "Fix" / "Skip" per check. Only run fixes for accepted checks.
+
+Apply fixes in dependency order (steps 6-10 below). Skip any fix whose check passed or was skipped by user.
+</step>
+
+<step name="fix_subsystems">
+**Only if Subsystem Vocabulary failed.**
+
+If subsystems array is empty (State A):
+
+1. Scan all artifacts for existing values:
 
 ```bash
 ~/.claude/mindsystem/scripts/scan-artifact-subsystems.sh --values-only
 ```
 
-Collect all unique values found. Note count of artifacts scanned and values found.
-</step>
+2. Read `.planning/PROJECT.md` and `.planning/ROADMAP.md`.
 
-<step name="derive_and_confirm">
-**State A only.** Read `.planning/PROJECT.md` and `.planning/ROADMAP.md`.
+3. Derive 5-12 canonical subsystem identifiers from:
+   - Unique values found in artifacts
+   - Project domain from PROJECT.md
+   - Phase structure from ROADMAP.md
 
-Derive 5-12 canonical subsystem identifiers from:
+   Rules:
+   - Lowercase, single-word or hyphenated (e.g., "auth", "real-time", "ui")
+   - Merge synonyms into one canonical value (pick shortest/most common)
+   - Cover all existing usage plus obvious gaps
+   - Include infrastructure-level subsystems if relevant (api, database, infra, testing)
 
-1. Unique values found in `audit_existing_usage`
-2. Project domain from PROJECT.md
-3. Phase structure from ROADMAP.md
+4. Present the proposed list with merge mappings (e.g., "authentication" -> "auth").
 
-Rules:
-- Lowercase, single-word or hyphenated (e.g., "auth", "real-time", "ui")
-- Merge synonyms into one canonical value (pick shortest/most common)
-- Cover all existing usage plus obvious gaps
-- Include infrastructure-level subsystems if relevant (api, database, infra, testing)
+5. Use AskUserQuestion:
+   - header: "Subsystems"
+   - question: "These subsystems were derived from your project. Look good?"
+   - options:
+     - "Looks good" — accept and apply
+     - "Add/remove some" — iterate on the list
+     - "Start over" — re-derive from scratch
 
-Present the proposed list with merge mappings (e.g., "authentication" -> "auth").
+6. After confirmation: update `config.json` (subsystems as first field), standardize existing artifact `subsystem:` fields using Edit tool.
 
-Use AskUserQuestion:
-- header: "Subsystems"
-- question: "These subsystems were derived from your project. Look good?"
-- options:
-  - "Looks good" — accept and apply
-  - "Add/remove some" — iterate on the list
-  - "Start over" — re-derive from scratch
+If subsystems exist but artifacts have mismatches (State B):
 
-After confirmation:
+1. Classify each artifact as OK/MISMATCH/MISSING.
+2. For MISMATCH: propose closest canonical value.
+3. For MISSING: propose based on artifact content/path.
+4. Apply fixes using Edit tool.
 
-1. Update `config.json` — set `subsystems` array as first field
-2. If existing artifacts had free-form values, standardize each `subsystem:` field to the canonical value using the Edit tool (only modify the `subsystem:` line, never body content)
-3. Commit all changes:
+Commit:
 
 ```bash
 git add .planning/config.json
@@ -126,99 +169,184 @@ git add .planning/todos/done/*.md 2>/dev/null
 
 ```bash
 git commit -m "$(cat <<'EOF'
-chore: initialize subsystem vocabulary
+chore(doctor): fix subsystem vocabulary
 
-Added subsystems array to config.json and standardized existing artifact values.
+Standardized subsystem configuration and artifact values.
 EOF
 )"
 ```
 </step>
 
-<step name="validate_vocabulary">
-**State B only.** Read canonical list from config.json:
+<step name="fix_milestone_dirs">
+**Only if Milestone Directory Structure failed.**
+
+For each flat file like `milestones/v0.1-ROADMAP.md`:
+
+1. Extract version prefix (e.g., `v0.1`).
+2. Create versioned directory if it doesn't exist: `mkdir -p .planning/milestones/v0.1`
+3. `git mv` the file, stripping the version prefix from the filename:
+   `git mv .planning/milestones/v0.1-ROADMAP.md .planning/milestones/v0.1/ROADMAP.md`
+
+Commit:
 
 ```bash
-jq -r '.subsystems[]' .planning/config.json
-```
-
-Scan all artifacts for `subsystem:` values. Extract from YAML frontmatter:
-
-```bash
-~/.claude/mindsystem/scripts/scan-artifact-subsystems.sh
-```
-
-Classify each artifact's `subsystem:` value:
-- **OK** — value is in canonical list
-- **MISMATCH** — value exists but not in canonical list
-- **MISSING** — no `subsystem:` field found
-
-Display results grouped by status. If all OK:
-
-```
-## Subsystem Vocabulary
-
-PASS — all N artifacts use canonical subsystem values.
-```
-
-Go to `report`.
-
-If MISMATCH or MISSING found, use AskUserQuestion:
-- header: "Fix issues"
-- question: "Found N issues (X mismatches, Y missing). How to proceed?"
-- options:
-  - "Fix all" — apply best-match canonical values to all issues
-  - "Review each" — present each issue individually for decision
-  - "Skip" — leave as-is
-
-For fixes:
-- MISMATCH: propose closest canonical value (fuzzy match on prefix/synonym)
-- MISSING: propose based on artifact content/path context
-
-Apply fixes using Edit tool. Commit:
-
-```bash
-git add .planning/phases/*/*-SUMMARY.md 2>/dev/null
-git add .planning/adhoc/*-SUMMARY.md 2>/dev/null
-git add .planning/debug/*.md 2>/dev/null
-git add .planning/debug/resolved/*.md 2>/dev/null
-git add .planning/todos/pending/*.md 2>/dev/null
-git add .planning/todos/done/*.md 2>/dev/null
+git add .planning/milestones/
 ```
 
 ```bash
 git commit -m "$(cat <<'EOF'
-chore: fix subsystem vocabulary mismatches
+chore(doctor): restructure milestone directories
 
-Standardized artifact subsystem values to canonical vocabulary.
+Moved flat milestone files into versioned directories.
 EOF
 )"
 ```
 </step>
 
+<step name="fix_phase_archival">
+**Only if Phase Archival failed.**
+
+Parse MILESTONES.md for completed milestones and their phase ranges (`**Phases completed:** X-Y`).
+
+For each completed milestone with orphaned phases in `.planning/phases/`:
+
+1. Determine the version and phase range from MILESTONES.md.
+2. Ensure the milestone directory exists: `mkdir -p .planning/milestones/{version}`
+3. Run the archive script:
+
+```bash
+~/.claude/mindsystem/scripts/archive-milestone-phases.sh <start> <end> <version>
+```
+
+This simultaneously:
+- Consolidates PHASE-SUMMARIES.md (fixes Phase Summaries check)
+- Deletes raw artifacts (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION)
+- Moves phase directories to milestone archive
+
+**If MILESTONES.md doesn't have parseable phase ranges:** Use AskUserQuestion to ask the user for the phase range for each milestone.
+
+After archive completes, clean up leftover PLAN files in archived phases (fixes PLAN Cleanup check):
+
+```bash
+find .planning/milestones/*/phases/ -name "*-PLAN.md" -delete 2>/dev/null
+```
+
+Commit:
+
+```bash
+git add .planning/phases/ .planning/milestones/
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(doctor): archive completed milestone phases
+
+Consolidated summaries, deleted raw artifacts, moved phase directories.
+EOF
+)"
+```
+</step>
+
+<step name="fix_plan_cleanup">
+**Only if PLAN Cleanup failed AND fix_phase_archival did not already handle it.**
+
+Delete leftover PLAN files in completed phase directories:
+
+```bash
+find .planning/milestones/*/phases/ -name "*-PLAN.md" -delete 2>/dev/null
+```
+
+For any leftover PLANs in `phases/` belonging to completed milestones (identified by the scan), delete those too.
+
+Commit:
+
+```bash
+git add .planning/
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(doctor): clean up leftover PLAN files
+
+Removed PLAN files from completed phase directories.
+EOF
+)"
+```
+</step>
+
+<step name="fix_knowledge">
+**Only if Knowledge Files failed.**
+
+Spawn a `general-purpose` subagent (Task tool) to generate knowledge files retroactively. Provide the subagent with:
+
+- Subsystem vocabulary from config.json
+- Instructions to read all PHASE-SUMMARIES.md from `milestones/*/PHASE-SUMMARIES.md` AND any remaining SUMMARY files in `phases/`
+- The knowledge template at `~/.claude/mindsystem/templates/knowledge.md`
+- Instructions to read any existing knowledge files and merge (rewrite semantics — current state, not append)
+- Instructions to create `.planning/knowledge/` directory if missing
+- Instructions to write `.planning/knowledge/{subsystem}.md` for each missing subsystem
+
+After subagent completes, verify files exist:
+
+```bash
+ls .planning/knowledge/*.md
+```
+
+Commit:
+
+```bash
+git add .planning/knowledge/
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(doctor): generate knowledge files
+
+Created per-subsystem knowledge files from phase summaries.
+EOF
+)"
+```
+</step>
+
+<step name="verify">
+Re-run the diagnostic scan:
+
+```bash
+~/.claude/mindsystem/scripts/doctor-scan.sh
+```
+
+All checks should now PASS. If any still fail, report which checks remain and why.
+</step>
+
 <step name="report">
-Final summary:
+Final summary table:
 
 ```
 ## Doctor Report
 
-| Check                  | Result      | Details                    |
-|------------------------|-------------|----------------------------|
-| Subsystem vocabulary   | PASS / INIT | N artifacts, M subsystems  |
+| Check                    | Result | Details                          |
+|--------------------------|--------|----------------------------------|
+| Subsystem vocabulary     | PASS   | ...                              |
+| Milestone directories    | PASS   | ...                              |
+| Phase archival           | PASS   | ...                              |
+| Knowledge files          | PASS   | ...                              |
+| Phase summaries          | PASS   | ...                              |
+| PLAN cleanup             | PASS   | ...                              |
 
 All checks passed.
 ```
 
-- **PASS**: subsystems were already configured and all artifacts validated
-- **INIT**: subsystems were initialized during this run
-- Include artifact count (how many scanned) and subsystem count
+Include counts: checks total, passed, fixed during this run.
 </step>
 
 </process>
 
 <success_criteria>
-- [ ] State A: config.json updated, existing artifacts standardized to canonical values, changes committed
-- [ ] State B issues: offers fix/review/skip, applies fixes, commits
-- [ ] Final report displayed with check name, result, and artifact/subsystem counts
-- [ ] State A: derives canonical list from audit + project context, confirms with user before applying
-- [ ] State B: all artifacts scanned and classified; reports PASS if all OK
+- [ ] Scan script runs and all 6 categories reported with PASS/FAIL/SKIP
+- [ ] Results displayed as markdown table before any action
+- [ ] User confirms fix strategy before changes (Fix all / Review each / Skip)
+- [ ] Fixes applied in dependency order: subsystems → dirs → archival → cleanup → knowledge
+- [ ] Each fix group committed atomically
+- [ ] Re-scan verifies all checks pass after fixes
+- [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>

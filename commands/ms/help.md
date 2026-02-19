@@ -377,12 +377,12 @@ Usage: `/ms:adhoc Fix auth token not refreshing on 401`
 ### Utility Commands
 
 **`/ms:doctor`**
-Health check and fix project configuration.
+Health check and fix project configuration — subsystems, milestone structure, knowledge files.
 
-- Use when: subsystems are missing, artifacts have inconsistent vocabulary, or periodic health check
-- V1: subsystem vocabulary setup and validation
-- If subsystems missing: derives from project context and guides through setup
-- If subsystems present: validates all artifacts use canonical values
+- Use when: project has structural drift, missing config, or periodic health check
+- Runs 6 checks: subsystem vocabulary, milestone directories, phase archival, knowledge files, phase summaries, PLAN cleanup
+- Presents results table, then offers to fix all issues in dependency order
+- Each fix group gets its own atomic commit
 - Idempotent — safe to run repeatedly
 
 Usage: `/ms:doctor`
