@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.19.0] - 2026-02-19
+
+### Added
+- Doctor command now performs 6 comprehensive health checks — subsystem integrity, milestone directories, phase archival, knowledge files, phase summaries, and plan cleanup — with fixes applied in dependency order
+
+### Changed
+- Plan grouping recalibrated to produce right-sized plans — effort-weighted sizing replaces uniform task count ceiling, reducing redundant executor agents while staying within context budget
+- Release notes command delegates to Haiku subagent, filters by installed version, and displays oldest-first for better reading order
+- Design phase presents directions as structured text with philosophy and concrete choices, then collects selection separately
+- Execute phase verifies phase goal achievement before code review, catching goal misses earlier
+
+### Fixed
+- Doctor command: fixed stale step references and enforced AskUserQuestion for interactive paths
+
 ## [3.18.1] - 2026-02-18
 
 ### Changed
@@ -489,7 +503,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.19.0...HEAD
+[3.19.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.1...v3.19.0
 [3.18.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.0...v3.18.1
 [3.18.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.1...v3.18.0
 [3.17.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.0...v3.17.1
