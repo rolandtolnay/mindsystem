@@ -16,17 +16,16 @@ read `~/.claude/mindsystem/references/plan-format.md`.
 
 ## Scope Guidance
 
-**Plan sizing — budget-based grouping:**
+**Plan sizing — orchestrator proposes, plan-writer validates:**
 
-Weight classifications (L: 5%, M: 10%, H: 20%) defined in scope-estimation.md.
+Weight classifications (L: 5%, M: 10%, H: 20%) defined in scope-estimation.md. The orchestrator uses these as guidance when proposing plan boundaries to the user. Target 25-45% per plan. Bias toward consolidation.
 
-Grouping rule: `sum(weights) <= 45%`. Target 25-45% per plan. Plans under ~10% → consolidate with related same-wave work. Bias toward consolidation.
+The plan-writer receives the proposed grouping and validates structurally (file conflicts, circular deps). It does NOT re-group based on budget math.
 
-**When to split:**
+**When to split (orchestrator judgment):**
 
 - Different subsystems (auth vs API vs UI)
-- Budget sum exceeds 45%
-- Risk of context overflow
+- Risk of context overflow (contextual judgment, not mechanical formula)
 - TDD candidates — separate plans (inherently heavy-weight)
 
 **Vertical slices preferred:**

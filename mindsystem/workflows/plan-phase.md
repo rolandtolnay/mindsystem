@@ -25,8 +25,8 @@ Decimal phases enable urgent work insertion without renumbering:
 Create executable phase prompts (PLAN.md files) optimized for parallel execution.
 
 **Two-stage workflow:**
-1. **Main context:** Task identification (steps 1-8) - collaborative, keeps user in loop
-2. **Subagent (ms-plan-writer):** Plan writing (dependency graph, wave assignment, PLAN.md files, risk scoring) - autonomous, heavy lifting
+1. **Main context:** Task identification + grouping proposal (steps 1-9) - collaborative, keeps user in loop
+2. **Subagent (ms-plan-writer):** Plan writing (structural validation, PLAN.md files, risk scoring) - autonomous, heavy lifting
 
 PLAN.md IS the prompt that Claude executes. Plans are grouped into execution waves based on dependencies - independent plans run in parallel, dependent plans wait for predecessors.
 </purpose>
@@ -280,7 +280,7 @@ PHASE_NAME=$(grep -A2 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null | head 
 uv run ~/.claude/mindsystem/scripts/scan-planning-context.py \
   --phase "${PHASE}" \
   --phase-name "${PHASE_NAME}" \
-  ${SUBSYSTEM:+--subsystem "${SUBSYSTEM}"}
+  ${SUBSYSTEM:+--subsystem="${SUBSYSTEM}"}
 ```
 
 The scanner outputs formatted markdown with sections for patterns, learnings,
@@ -419,6 +419,37 @@ Format: numbered list with task name, key files, dependency hint, and `[TDD]` fl
 </output_format>
 </step>
 
+<step name="propose_grouping">
+**Propose plan boundaries before handing off to the plan-writer.**
+
+After presenting the task list, analyze dependencies and propose how tasks should group into plans. This is a collaborative planning decision — the user sees it and can adjust.
+
+**Process:**
+1. Map task dependencies from needs/creates
+2. Identify independent task clusters (parallel candidates = Wave 1)
+3. Group by vertical feature affinity (not horizontal layers)
+4. Estimate context budget per group using weight heuristics (L ~5%, M ~10%, H ~20%)
+5. Target 25-45% per plan, bias toward fewer plans
+
+**Present to user:**
+
+```markdown
+### Proposed Plan Structure
+
+**Plan 01: {title}** (~{budget}%)
+Tasks: {task_ids} — {brief rationale}
+
+**Plan 02: {title}** (~{budget}%)
+Tasks: {task_ids} — {brief rationale}
+
+**Waves:** {wave structure}
+```
+
+The user may adjust, merge, or split plans. Once confirmed (or if the user proceeds without objection), pass the proposed grouping to the plan-writer.
+
+**TDD plans are always standalone** — propose them as dedicated plans regardless of budget.
+</step>
+
 <step name="handoff_to_writer">
 **Spawn ms-plan-writer subagent with task list and context.**
 
@@ -432,6 +463,14 @@ Assemble handoff payload:
 <task_list>
   {Construct full task XML from your analysis. Each task needs: id, name, type, needs, creates, tdd_candidate, action_hint, verify_hint, done_hint. Use the same XML schema the plan-writer expects.}
 </task_list>
+
+<proposed_grouping>
+  <plan id="01" title="{title}" budget="{estimated_%}" wave="{wave_number}">
+    <tasks>{comma-separated task IDs}</tasks>
+    <rationale>{why these tasks belong together}</rationale>
+  </plan>
+  <!-- More plans... -->
+</proposed_grouping>
 
 <phase_context>
   <phase_number>{PHASE}</phase_number>
@@ -482,10 +521,11 @@ Task(
 
 The subagent handles:
 - Building dependency graph from needs/creates
+- Validating proposed grouping (file conflicts, circular deps, missing dependency chains)
+- Applying proposed plan boundaries (deviates only for structural issues, not budget math)
 - Assigning wave numbers
-- Grouping tasks into plans (budget-based, ~45% cost target)
 - Deriving Must-Haves (goal-backward)
-- Estimating scope, splitting if needed
+- Estimating scope (informational, for grouping rationale)
 - Writing PLAN.md files + EXECUTION-ORDER.md
 - Git commit
 - Calculating risk score
@@ -543,24 +583,24 @@ Extract:
 **Skip tier (0-39):**
 - header: "Plan Verification"
 - question: "Risk Score: {score}/100 — Low risk\n\nPlans look straightforward. Verification optional."
-- Options: "Execute now" (first), "Verify anyway"
+- Options: "Skip verification" (first), "Verify plans"
 
 **Optional tier (40-69):**
 - header: "Plan Verification"
 - question: "Risk Score: {score}/100 — Moderate complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n\nVerification recommended but optional."
-- Options: "Verify first" (first), "Execute now", "Review plans manually"
+- Options: "Verify plans" (first), "Skip verification", "Review plans manually"
 
 **Verify tier (70-100):**
 - header: "Plan Verification Recommended"
 - question: "Risk Score: {score}/100 — Higher complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n- {factor_3}\n\nVerification strongly recommended."
-- Options: "Verify first (Recommended)" (first), "Execute anyway", "Review plans manually"
+- Options: "Verify plans (Recommended)" (first), "Skip verification", "Review plans manually"
 
 **Handle response:**
 
-**"Execute now" / "Execute anyway":**
+**"Skip verification":**
 Continue to offer_next.
 
-**"Verify first" / "Verify anyway":**
+**"Verify plans":**
 Spawn ms-plan-checker:
 
 ```
@@ -658,13 +698,10 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Mandatory discovery completed (Level 0-3)
 - [ ] Prior decisions, issues, concerns synthesized
 - [ ] Tasks identified with needs/creates dependencies
-- [ ] Task list handed off to ms-plan-writer
-- [ ] PLAN file(s) created with pure markdown format
-- [ ] EXECUTION-ORDER.md created with wave groups
-- [ ] Each plan: Must-Haves section with observable truths
-- [ ] Each plan: budget-based grouping (target 25-45%, consolidate under 10%)
-- [ ] Wave structure maximizes parallelism
-- [ ] PLAN file(s) committed to git
+- [ ] Plan grouping proposed and presented to user
+- [ ] Task list + proposed grouping handed off to ms-plan-writer
+- [ ] PLAN files + EXECUTION-ORDER.md created (pure markdown, Must-Haves, follows proposed grouping)
+- [ ] Plans committed with maximized wave parallelism
 - [ ] Risk assessment presented (score + top factors)
 - [ ] User chose verify/skip (or verified if chosen)
 - [ ] User knows next steps and wave structure

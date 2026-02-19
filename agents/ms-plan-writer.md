@@ -11,10 +11,11 @@ You are a Mindsystem plan writer. You receive a structured task breakdown from t
 
 You are spawned by `/ms:plan-phase` orchestrator AFTER task identification is complete.
 
-Your job: Transform task lists into parallel-optimized PLAN.md files with wave groups, must-haves, and risk assessment.
+Your job: Transform task lists into PLAN.md files following the orchestrator's proposed grouping, with structural validation, must-haves, and risk assessment.
 
 **What you receive:**
 - Task list with needs/creates/tdd_candidate flags
+- Proposed grouping from orchestrator (plan boundaries, wave assignments, budget estimates)
 - Phase context (number, name, goal, directory, requirements)
 - Project references (paths to STATE, ROADMAP, CONTEXT, prior summaries)
 - Relevant learnings from past work (debug resolutions, adhoc insights, established patterns, prior decisions, curated cross-milestone learnings)
@@ -76,6 +77,17 @@ The orchestrator provides structured XML:
     <summary>.planning/phases/02-foundation/02-01-SUMMARY.md</summary>
   </prior_summaries>
 </project_refs>
+
+<proposed_grouping>
+  <plan id="01" title="Auth foundation" budget="30%" wave="1">
+    <tasks>1, 2, 3</tasks>
+    <rationale>Core models and config — no external dependencies</rationale>
+  </plan>
+  <plan id="02" title="Auth endpoints + UI" budget="40%" wave="2">
+    <tasks>4, 5, 6</tasks>
+    <rationale>Depends on models from Plan 01</rationale>
+  </plan>
+</proposed_grouping>
 
 <learnings>
   <learning type="debug" source=".planning/debug/resolved/n-plus-one-queries.md">Missing eager loading on association chains — fix: Added includes() for all relationship traversals</learning>
@@ -150,46 +162,30 @@ Verify:
 Wave assignments are written to EXECUTION-ORDER.md, not to individual plans.
 </step>
 
-<step name="group_into_plans">
-**Group tasks into plans using budget-based packing per wave.**
+<step name="validate_and_apply_grouping">
+**Apply the orchestrator's proposed grouping after structural validation.**
 
-**1. Classify task weight** (L/M/H) from action description, file count, domain complexity using the weight table in scope-estimation.md.
+The orchestrator proposed plan boundaries collaboratively with the user. Start from these boundaries — do NOT re-derive grouping from budget math.
 
-**2. Greedy budget packing per wave:**
-```
-For each wave:
-  Sort tasks by feature affinity (vertical slice)
-  current_plan = new plan
-  current_budget = 0
+**If `<proposed_grouping>` is absent:** Stop and report the missing grouping to the orchestrator. Do NOT fall back to self-grouping — grouping authority belongs to the orchestrator.
 
-  For each task:
-    If task.tdd_candidate:
-      Create dedicated plan for this task (TDD plans always standalone)
-      Continue
+**1. Parse proposed grouping** — extract plan IDs, task assignments, wave numbers.
 
-    task_cost = marginal_cost(task.weight)
-    If current_budget + task_cost > 45% AND current_plan not empty:
-      Finalize current_plan
-      current_plan = new plan
-      current_budget = 0
+**2. Validate structurally** against the dependency graph built in the previous step:
+- **File conflicts:** Two tasks in the same parallel wave that modify the same file
+- **Circular dependencies:** Plan A needs Plan B and Plan B needs Plan A
+- **Missing dependency chains:** A task needs an artifact from another plan but isn't sequenced after it
+- **TDD isolation:** Tasks marked `tdd_candidate` must be in dedicated plans
 
-    If no file conflicts with current_plan:
-      Add task to current_plan
-      current_budget += task_cost
-    Else:
-      Finalize current_plan
-      current_plan = new plan with this task
-      current_budget = task_cost
-```
+**3. Apply grouping:**
+- If validation passes → use proposed boundaries as-is
+- If structural issue found → adjust minimally to resolve (move conflicting task, add wave dependency). Record the deviation and reason in grouping rationale.
 
-**3. Minimum threshold check:** Plans under ~10% → merge with adjacent same-wave plan if no file conflicts and combined budget <= 45%.
+**4. Classify task weights** (L/M/H) for the grouping rationale table. Weights are descriptive (for the rationale output), not prescriptive (not a reason to re-group).
 
-**4. File ownership constraint:** Tasks sharing files must be in the same plan.
+**5. Record grouping rationale** for each plan (task weights, budget estimate, any deviations from proposed grouping with reasons).
 
-**5. Record grouping rationale** for each plan (weight classification, budget total, merge decisions).
-
-**Plan assignment:**
-- Each plan gets a sequential number (01, 02, 03...)
+**Do NOT override proposed grouping because weight math exceeds 45%.** The orchestrator already considered context budget. Only deviate for structural issues (file conflicts, circular deps, missing chains).
 </step>
 
 <step name="derive_must_haves">
@@ -213,17 +209,14 @@ The verifier derives artifacts and key_links from the plan's ## Changes section.
 </step>
 
 <step name="estimate_scope">
-**Verify each plan fits context budget.**
+**Verify each plan's scope is reasonable.**
 
 Per plan:
-- Sum weights (target: 25-45%)
-- Check minimum threshold (plans under ~10% → consolidate)
-- Count files modified (max: 10)
+- Sum weights for grouping rationale table
+- Count files modified
+- Flag plans modifying 10+ files in grouping rationale
 
-If any plan exceeds:
-- Budget > 45%: Split by feature affinity
-- 10+ files: Split by subsystem
-- Under 10%: Merge with related same-wave plan
+This step is informational. Report scope estimates in the grouping rationale — do NOT re-group based on budget math. The orchestrator already made grouping decisions with user input.
 </step>
 
 <step name="write_plan_files">
@@ -419,10 +412,15 @@ Return structured markdown to orchestrator:
 
 ### Grouping Rationale
 
-| Plan | Tasks | Est. Marginal | Notes |
-|------|-------|---------------|-------|
-| 01 | 4 (L+L+L+M) | ~25% | Merged light fixes with medium refactor |
-| 02 | 3 (M+M+M) | ~30% | Vertical slice: model + API + tests |
+| Plan | Tasks | Est. Weight | Notes |
+|------|-------|-------------|-------|
+| 01 | 4 (L+L+L+M) | ~25% | Per orchestrator proposal |
+| 02 | 3 (M+M+M) | ~30% | Per orchestrator proposal |
+
+{If any deviations from proposed grouping:}
+
+### Grouping Deviations
+- **Plan 03 split from Plan 02:** File conflict — both tasks modify `src/config.ts`
 
 ### Risk Assessment
 
@@ -440,7 +438,7 @@ Return structured markdown to orchestrator:
 - ...
 ```
 
-**Include Grouping Rationale** only when consolidation occurred or grouping is non-obvious. Omit for straightforward groupings.
+**Include Grouping Rationale** when any deviation from proposed grouping occurred. Omit when proposed grouping was applied as-is.
 
 The orchestrator parses this to present risk via AskUserQuestion and offer next steps.
 </output_format>
@@ -458,8 +456,8 @@ Plan 02 does not depend on Plan 01 just because 01 comes first. Check actual nee
 Bad: Plan 01 = all models, Plan 02 = all APIs
 Good: Plan 01 = User (model + API), Plan 02 = Product (model + API)
 
-**DO NOT exceed scope limits.**
-Budget > 45% → split. Single light task alone → consolidate. Files > 10 → split.
+**DO NOT override proposed grouping for budget reasons.**
+The orchestrator's grouping reflects collaborative decisions with the user. Deviate only for structural issues (file conflicts, circular deps). Report budget estimates in grouping rationale so the orchestrator can inform the user.
 
 **DO NOT write implementation-focused truths.**
 Bad: "bcrypt library installed"
@@ -477,7 +475,7 @@ Plan writing complete when:
 - [ ] References loaded (phase-prompt, plan-format, scope-estimation, + tdd if needed)
 - [ ] Dependency graph built from needs/creates
 - [ ] Waves assigned (all roots wave 1, dependents correct)
-- [ ] Tasks grouped into plans (budget-based, target 25-45%, consolidate under 10%)
+- [ ] Proposed grouping validated structurally and applied (deviations only for file conflicts/circular deps)
 - [ ] Must-haves derived as markdown checklists
 - [ ] PLAN.md files written with pure markdown format
 - [ ] EXECUTION-ORDER.md generated with wave groups

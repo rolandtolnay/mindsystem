@@ -532,7 +532,7 @@ Group related gaps into fix plans:
 ```
 
 3. **Keep plans focused:**
-   - Budget-based grouping (weights within 45%)
+   - Budget-aware grouping (target 25-45% per plan)
    - Single concern per plan
    - Include verification task
 

@@ -123,7 +123,7 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 **Initial planning (v1.0):**
 - Phase count derived from actual work (not a target number)
 - Each phase delivers something coherent
-- Phases can have 1+ plans (split if budget exceeds 45% or multiple subsystems)
+- Phases can have 1+ plans (split by orchestrator judgment — multiple subsystems, context budget, vertical slices)
 - Plans use naming: {phase}-{plan}-PLAN.md (e.g., 01-02-PLAN.md)
 - No time estimates (this isn't enterprise PM)
 - Progress table updated by execute workflow

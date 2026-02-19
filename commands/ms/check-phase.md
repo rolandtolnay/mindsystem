@@ -21,7 +21,7 @@ This spawns ms-plan-checker to analyze your PLAN.md files against the phase goal
 2. **Task Completeness** — Does every change have Files, implementation details, and verification?
 3. **Dependency Correctness** — Are plan dependencies valid and acyclic?
 4. **Key Links Planned** — Are artifacts wired together, not just created in isolation?
-5. **Scope Sanity** — Will plans complete within context budget (target 25-45%)?
+5. **Scope Sanity** — Are plans reasonably sized for context budget (target 25-45%)?
 6. **Verification Derivation** — Are Must-Haves user-observable, not implementation-focused?
 7. **Context Compliance** — Do plans honor decisions from CONTEXT.md?
 </what_it_checks>

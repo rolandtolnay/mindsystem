@@ -34,9 +34,9 @@ Plans must complete within reasonable context usage.
 - 70%+ context: Poor quality
 
 **Solution:** Budget-aware consolidation - prefer larger plans, calibrate from real data.
-- Budget-based grouping (sum of weights within 45%)
+- Orchestrator proposes grouping (weight heuristics, target 25-45%), plan-writer validates structurally
 - Each plan independently executable
-- Consolidate plans under ~10% with related work
+- Bias toward consolidation — fewer plans, less overhead
 </scope_control>
 
 <claude_automates>

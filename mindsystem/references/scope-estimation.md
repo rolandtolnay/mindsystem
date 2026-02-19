@@ -27,7 +27,7 @@ Why 50% not 80%?
 </context_target>
 
 <task_rule>
-**Budget-based grouping.** Classify tasks by weight, then pack plans until budget full.
+**Budget-aware grouping.** The orchestrator proposes plan boundaries using weight heuristics and contextual judgment.
 
 | Weight | Cost | Examples |
 |--------|------|----------|
@@ -35,9 +35,9 @@ Why 50% not 80%?
 | Medium | 10% | CRUD endpoints, widget extraction, single-file refactoring |
 | Heavy | 20% | Complex business logic, architecture changes, multi-file integrations |
 
-**Grouping rule:** `sum(weights) <= 45%`. Pack tasks by feature affinity until budget full. Bias toward consolidation — fewer plans, less overhead.
+**For the orchestrator (grouping authority):** Use weight estimates as guidance when proposing plan boundaries. Target 25-45% per plan. Bias toward consolidation — fewer plans, less overhead. Consider that sequential-only work (no parallelism benefit from splitting) can be grouped more aggressively. A single light task alone wastes executor overhead — consolidate with related work.
 
-**Minimum plan threshold:** Plans under ~10% → consolidate with related work in the same wave. A single light task alone wastes executor overhead.
+**For the plan-writer (structural validation):** Classify weights for the grouping rationale table. Do NOT re-group based on budget math — the orchestrator already considered context budget with user input. Deviate only for structural issues (file conflicts, circular dependencies, missing dependency chains).
 </task_rule>
 
 <tdd_plans>
@@ -64,7 +64,6 @@ See `~/.claude/mindsystem/references/tdd.md` for TDD plan structure.
 <split_signals>
 
 <always_split>
-- **Budget sum exceeds 45%** - Budget overflow regardless of task count
 - **Multiple subsystems** - DB + API + UI = separate plans
 - **Any task with >5 file modifications** - Split by file groups
 - **Discovery + verification in separate plans** - Don't mix exploratory and implementation work
@@ -163,12 +162,11 @@ Tasks: 8 (models, migrations, API, JWT, middleware, hashing, login form, registe
 Result: Task 1-3 good, Task 4-5 degrading, Task 6-8 rushed
 ```
 
-**Good - Budget-aware plans:**
+**Good - Consolidated plans:**
 ```
-Plan 1: "Auth Database + Config" (4L+1M = ~30%)
-Plan 2: "Auth API" (3M = ~30%)
-Plan 3: "Auth UI" (1H+1M = ~30%)
-Each: within 45% budget, peak quality, atomic commits
+Plan 1: "Auth Foundation" (models + config + middleware = ~35%)
+Plan 2: "Auth Endpoints + UI" (API + forms + wiring = ~40%)
+Each: within reasonable budget, peak quality, atomic commits
 ```
 
 **Bad - Horizontal layers (sequential):**
@@ -191,7 +189,9 @@ Waves: [01, 02, 03] (all parallel)
 </anti_patterns>
 
 <estimating_context>
-Weight estimates are heuristics for the plan-writer to bias toward consolidation, not precise predictions. Actual context usage depends on model, task complexity, file sizes, and context window. Calibrate from real execution data — when plans consistently finish with headroom, pack more aggressively.
+Weight estimates are heuristics for the orchestrator's grouping judgment, not mechanical constraints. Actual context usage depends on model, task complexity, file sizes, and context window. Calibrate from real execution data — when plans consistently finish with headroom, the orchestrator should group more aggressively.
+
+The plan-writer uses weight classifications for the grouping rationale table (transparency), not as a reason to override the orchestrator's proposed boundaries.
 </estimating_context>
 
 <summary>
@@ -203,9 +203,8 @@ Weight estimates are heuristics for the plan-writer to bias toward consolidation
 **The principle:** Fewer executors, same quality, less overhead. Bias toward consolidation.
 
 **The rules:**
-- Group by weight budget (`sum(weights) <= 45%`), not by fixed task count.
-- Consolidate plans under ~10% with related same-wave work.
-- Split when budget sum exceeds 45%.
+- Orchestrator proposes grouping using weight heuristics and contextual judgment (target 25-45%).
+- Plan-writer validates structurally (file conflicts, circular deps) — deviates only for structural issues.
 - Vertical slices over horizontal layers.
 - Dependencies centralized in EXECUTION-ORDER.md.
 - Autonomous plans get parallel execution.
