@@ -144,19 +144,21 @@ When uncertain, include. The user can remove during confirmation.
 </step>
 
 <step name="confirm_changelog">
-Present the generated changelog to the user for approval via AskUserQuestion. Display the full markdown section that will be inserted into CHANGELOG.md.
+Present the generated changelog to the user for approval via AskUserQuestion with a markdown preview.
 
-If any commits were omitted by the relevance filter, list them below the changelog with a brief reason:
+Use AskUserQuestion with two options:
+- **Approve** — `markdown` parameter contains the full changelog section that will be inserted, plus any omitted commits with reasons appended after a `---` separator
+- **Edit** — User provides corrections; regenerate and re-confirm
+
+Example omitted commits format (appended to the markdown preview):
 
 ```
+---
+
 **Omitted from changelog:**
 - `abc1234 docs(ms-meta): update prompt quality principles` — reference material, no behavioral change
 - `def5678 docs(flutter-skill): add animation patterns` — Flutter-specific, not core system
 ```
-
-Options:
-- **Approve** — Proceed to write the changelog and continue the release
-- **Edit** — User provides corrections; regenerate and re-confirm
 
 Do NOT write to CHANGELOG.md until the user approves.
 </step>

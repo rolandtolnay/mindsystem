@@ -69,20 +69,20 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
    - Collect summaries from all plans
    - Report phase completion status
 
-6. **Code review (optional)**
-   - Read `code_review.phase` from config.json (default: `ms-code-simplifier`)
-   - If `"skip"`: proceed to step 7
-   - Spawn code review agent with phase file scope
-   - If changes made: commit as `refactor({phase}): code review improvements`
-
-7. **Verify phase goal**
+6. **Verify phase goal**
    - Spawn `ms-verifier` subagent with phase directory and goal
    - Verifier checks Must-Haves against actual codebase (not SUMMARY claims)
    - Creates VERIFICATION.md with detailed report
    - Route by status:
-     - `passed` → continue to step 8
+     - `passed` → continue to step 7
      - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/ms:plan-phase {X} --gaps`
+
+7. **Code review (optional)**
+   - Read `code_review.phase` from config.json (default: `ms-code-simplifier`)
+   - If `"skip"`: proceed to step 8
+   - Spawn code review agent with phase file scope
+   - If changes made: commit as `refactor({phase}): code review improvements`
 
 8. **Generate phase patch**
    - Run: `~/.claude/mindsystem/scripts/generate-phase-patch.sh ${PHASE_NUMBER}`
