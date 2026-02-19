@@ -107,9 +107,9 @@ Use AskUserQuestion:
 
 If "Skip" → go to `report`.
 
-If "Review each" → present each failed check with its details and offer "Fix" / "Skip" per check. Only run fixes for accepted checks.
+If "Review each" → use AskUserQuestion for each failed check with its details and options: "Fix" / "Skip". Only run fixes for accepted checks.
 
-Apply fixes in dependency order (steps 6-10 below). Skip any fix whose check passed or was skipped by user.
+Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_phase_archival → fix_plan_cleanup → fix_knowledge. Skip any fix whose check passed or was skipped by user.
 </step>
 
 <step name="fix_subsystems">
@@ -342,11 +342,11 @@ Include counts: checks total, passed, fixed during this run.
 </process>
 
 <success_criteria>
-- [ ] Scan script runs and all 6 categories reported with PASS/FAIL/SKIP
-- [ ] Results displayed as markdown table before any action
-- [ ] User confirms fix strategy before changes (Fix all / Review each / Skip)
-- [ ] Fixes applied in dependency order: subsystems → dirs → archival → cleanup → knowledge
 - [ ] Each fix group committed atomically
 - [ ] Re-scan verifies all checks pass after fixes
+- [ ] User confirms fix strategy before changes (Fix all / Review each / Skip)
+- [ ] Fixes applied in dependency order: subsystems → dirs → archival → cleanup → knowledge
+- [ ] Results displayed as markdown table before any action
+- [ ] All 6 categories reported with PASS/FAIL/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>
