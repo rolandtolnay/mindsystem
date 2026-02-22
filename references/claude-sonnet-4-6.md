@@ -26,6 +26,16 @@ Anthropic introduced general-purpose computer use in October 2024. [OSWorld](htt
 
 Sonnet models have made steady OSWorld gains over sixteen months. Early Sonnet 4.6 users report human-level capability in tasks like navigating complex spreadsheets and multi-step web forms across browser tabs. The model still lags behind the most skilled humans, but progress is substantial.
 
+**Claude Sonnet OSWorld and OSWorld-Verified scores over time:**
+
+| Model | Release | Score |
+|-------|---------|-------|
+| Sonnet 3.5 (new) | Oct 2024 | 14.9% |
+| Sonnet 3.7 | Feb 2025 | 28.0% |
+| Sonnet 4 | Jun 2025 | 42.2% |
+| Sonnet 4.5 | Oct 2025 | 61.4% |
+| Sonnet 4.6 | Feb 2026 | 72.5% |
+
 *Benchmark note: Scores prior to Sonnet 4.5 use original OSWorld; from 4.5 onward use OSWorld-Verified (July 2025 upgrade).*
 
 **Prompt injection resistance:** Computer use poses risks (e.g., hidden instructions on websites). Sonnet 4.6 shows major improvement over 4.5 in resistance to prompt injections, performing similarly to Opus 4.6. See [API docs](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks) for mitigation guidance.
@@ -35,6 +45,27 @@ Sonnet models have made steady OSWorld gains over sixteen months. Early Sonnet 4
 ## Evaluation and Benchmarks
 
 Sonnet 4.6 approaches Opus-level intelligence at a more practical price. Full capabilities and safety behavior in the [system card](https://anthropic.com/claude-sonnet-4-6-system-card).
+
+### Full Benchmark Comparison
+
+| Benchmark | Sonnet 4.6 | Sonnet 4.5 | Opus 4.6 | Opus 4.5 | Gemini 3 Pro | GPT-5.2 |
+|-----------|-----------|-----------|---------|---------|-------------|---------|
+| **Agentic terminal coding** (Terminal-Bench 2.0) | 59.1% | 51.0% | 65.4% | 59.8% | 56.2% (54.2% self-reported) | 64.7% (64.0% self-reported, Codex CLI) |
+| **Agentic coding** (SWE-bench Verified) | 79.6% | 77.2% | 80.8% | 80.9% | 78.0% (Flash) | 80.0% |
+| **Agentic computer use** (OSWorld-Verified) | 72.5% | 61.4% | 72.7% | 66.3% | — | 38.2% |
+| **Agentic tool use** (τ2-bench Retail) | 91.7% | 86.2% | 91.9% | 88.9% | 85.3% | 82.0% |
+| **Agentic tool use** (τ2-bench Telecom) | 97.9% | 98.0% | 99.3% | 98.2% | 98.0% | 98.7% |
+| **Scaled tool use** (MCP-Atlas) | 61.3% | 43.8% | 59.5% | 62.3% | 54.1% | 60.6% |
+| **Agentic search** (BrowseComp) | 74.7% | 43.9% | 84.0% | 67.8% | 59.2% (Deep Research) | 77.9% (Pro) |
+| **Multidisciplinary reasoning** (HLE, no tools) | 33.2% | 17.7% | 40.0% | 30.8% | 37.5% | 36.6% (Pro) |
+| **Multidisciplinary reasoning** (HLE, with tools) | 49.0% | 33.6% | 53.0% | 43.4% | 45.8% | 50.0% (Pro) |
+| **Agentic financial analysis** (Finance Agent v1.1) | 63.3% | 54.5% | 60.1% | 58.8% | 55.2% | 59.0% |
+| **Office tasks** (GDPval-AA Elo) | 1633 | 1276 | 1606 | 1416 | 1201 | 1462 |
+| **Novel problem-solving** (ARC-AGI-2) | 58.3% | 13.6% | 68.8% | 37.6% | 31.1% | 54.2% (Pro) |
+| **Graduate-level reasoning** (GPQA Diamond) | 89.9% | 83.4% | 91.3% | 87.0% | 91.9% | 93.2% (Pro) |
+| **Visual reasoning** (MMMU-Pro, no tools) | 74.5% | 63.4% | 73.9% | 70.6% | 81.0% | 79.5% |
+| **Visual reasoning** (MMMU-Pro, with tools) | 75.6% | 68.9% | 77.3% | 73.9% | — | 80.4% |
+| **Multilingual Q&A** (MMMLU) | 89.3% | 89.5% | 91.1% | 90.8% | 91.8% | 89.6% |
 
 ### Claude Code (Coding)
 
@@ -55,6 +86,12 @@ Compared to Opus 4.5 (Nov 2025 frontier model):
 1M token context holds entire codebases, lengthy contracts, or dozens of research papers. Sonnet 4.6 reasons effectively across that context—better at long-horizon planning.
 
 **Vending-Bench Arena:** Tests running a simulated business over time with competition between AI models. Sonnet 4.6 developed a distinct strategy: heavy capacity investment for the first ten simulated months, then sharp pivot to profitability in the final stretch. Finished well ahead of competitors.
+
+Simulated money balance over ~365 days:
+- Both Sonnet 4.6 and 4.5 start at ~$500
+- Sonnet 4.6 dips early (heavy investment phase), then shows sharp sustained growth from ~day 150 onward, ending at ~$5,700
+- Sonnet 4.5 grows gradually, ending at ~$2,100
+- Sonnet 4.6 finished with roughly 2.7x the balance of Sonnet 4.5
 
 ### Customer Feedback
 

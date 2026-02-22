@@ -59,25 +59,105 @@ Anthropic engineers use Claude Code daily. With Opus 4.6: more focus on the hard
 
 Industry-leading across agentic coding, computer use, tool use, search, and [finance](https://claude.com/blog/opus-4-6-finance). Full comparison table in [system card](https://www.anthropic.com/claude-opus-4-6-system-card).
 
+### Full Benchmark Comparison
+
+| Benchmark | Opus 4.6 | Opus 4.5 | Sonnet 4.5 | Gemini 3 Pro | GPT-5.2 |
+|-----------|---------|---------|-----------|-------------|---------|
+| **Agentic terminal coding** (Terminal-Bench 2.0) | **65.4%** | 59.8% | 51.0% | 56.2% (54.2% self-reported) | 64.7% (64.0% self-reported, Codex CLI) |
+| **Agentic coding** (SWE-bench Verified) | 80.8% | **80.9%** | 77.2% | 76.2% | 80.0% |
+| **Agentic computer use** (OSWorld-Verified) | **72.7%** | 66.3% | 61.4% | — | — |
+| **Agentic tool use** (τ2-bench Retail) | **91.9%** | 88.9% | 86.2% | 85.3% | 82.0% |
+| **Agentic tool use** (τ2-bench Telecom) | **99.3%** | 98.2% | 98.0% | 98.0% | 98.7% |
+| **Scaled tool use** (MCP Atlas) | 59.5% | **62.3%** | 43.8% | 54.1% | 60.6% |
+| **Agentic search** (BrowseComp) | **84.0%** | 67.8% | 43.9% | 59.2% (Deep Research) | 77.9% (Pro) |
+| **Multidisciplinary reasoning** (HLE, no tools) | **40.0%** | 30.8% | 17.7% | 37.5% | 36.6% (Pro) |
+| **Multidisciplinary reasoning** (HLE, with tools) | **53.1%** | 43.4% | 33.6% | 45.8% | 50.0% (Pro) |
+| **Agentic financial analysis** (Finance Agent) | **60.7%** | 55.9% | 54.2% | 44.1% | 56.6% (5.1) |
+| **Office tasks** (GDPval-AA Elo) | **1606** | 1416 | 1277 | 1195 | 1462 |
+| **Novel problem-solving** (ARC-AGI-2) | **68.8%** | 37.6% | 13.6% | 45.1% (Deep Thinking) | 54.2% (Pro) |
+| **Graduate-level reasoning** (GPQA Diamond) | 91.3% | 87.0% | 83.4% | 91.9% | **93.2%** (Pro) |
+| **Visual reasoning** (MMMU-Pro, no tools) | 73.9% | 70.6% | 63.4% | **81.0%** | 79.5% |
+| **Visual reasoning** (MMMU-Pro, with tools) | 77.3% | 73.9% | 68.9% | — | **80.4%** |
+| **Multilingual Q&A** (MMMLU) | 91.1% | 90.8% | 89.5% | **91.8%** | 89.6% |
+
 ### Long-Context and Retrieval
 
 Much better at retrieving relevant information from large document sets. Holds and tracks information over hundreds of thousands of tokens with less drift. Picks up buried details Opus 4.5 would miss.
 
-**Context rot:** Opus 4.6 performs markedly better. On 8-needle 1M variant of [MRCR v2](https://huggingface.co/datasets/openai/mrcr): 76% vs Sonnet 4.5's 18.5%. Qualitative shift in usable context while maintaining peak performance.
+**Long-context retrieval (MRCR v2, 8-needle):**
+
+| Model | 256k | 1M |
+|-------|------|-----|
+| Opus 4.6 | 93.0% | 76.0% |
+| Sonnet 4.5 | 10.8% | 18.5% |
+
+Qualitative shift in usable context while maintaining peak performance.
+
+**Long-context reasoning (Graphwalks, 1M tokens):**
+
+| Model | Parents | BFS |
+|-------|---------|-----|
+| Opus 4.6 | 72.0% | 38.7% |
+| Sonnet 4.5 | 50.2% | 25.6% |
 
 ### Software Engineering and Domains
 
-- **Root cause analysis:** Excels at diagnosing complex software failures
-- **Multilingual coding:** Resolves issues across programming languages
-- **Long-term coherence:** Maintains focus; earns $3,050.53 more than 4.5 on Vending-Bench 2
-- **Cybersecurity:** Finds real vulnerabilities better than any other model
-- **Life sciences:** Almost 2× better than 4.5 on computational biology, structural biology, organic chemistry, phylogenetics
+**Software failure diagnosis (OpenRCA):**
+
+| Model | Score |
+|-------|-------|
+| Opus 4.6 | 34.9% |
+| Opus 4.5 | 26.9% |
+| Sonnet 4.5 | 12.9% |
+
+**Multilingual coding (SWE-bench Multilingual):**
+
+| Model | Score |
+|-------|-------|
+| Opus 4.6 | 77.8% |
+| Opus 4.5 | 76.2% |
+
+**Long-term coherence (Vending-Bench 2, final balance):**
+
+| Model | Balance |
+|-------|---------|
+| Opus 4.6 | $8,017.59 |
+| Gemini 3 Pro | $5,478.16 |
+| Opus 4.5 | $4,967.06 |
+| Sonnet 4.5 | $3,838.74 |
+| GPT-5.2 | $3,591.33 |
+
+**Cybersecurity vulnerability reproduction (CyberGym):**
+
+| Model | Score |
+|-------|-------|
+| Opus 4.6 | 66.6% |
+| Opus 4.5 | 51.0% |
+| Sonnet 4.5 | 29.8% |
+
+**Computational biology (BioPipelineBench):**
+
+| Model | Score |
+|-------|-------|
+| Opus 4.6 | 53.1% |
+| Opus 4.5 | 28.5% |
+| Sonnet 4.5 | 19.3% |
 
 ---
 
 ## Safety
 
 Intelligence gains do not come at safety cost. Automated behavioral audit: low rates of deception, sycophancy, encouragement of delusions, cooperation with misuse. As well-aligned as Opus 4.5 (most-aligned frontier to date). Lowest over-refusal rate of any recent Claude model.
+
+**Overall misaligned behavior (1–10, lower is better):**
+
+| Model | Score |
+|-------|-------|
+| Opus 4.6 | ~1.8 |
+| Opus 4.5 | ~1.9 |
+| Haiku 4.5 | ~2.2 |
+| Sonnet 4.5 | ~2.7 |
+| Opus 4.1 | ~4.3 |
 
 Most comprehensive safety evaluations of any model: new user wellbeing tests, complex refusal tests, surreptitious harmful-action evaluations, interpretability methods.
 
