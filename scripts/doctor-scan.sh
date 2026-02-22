@@ -53,6 +53,39 @@ record_result() {
   esac
 }
 
+# --- Helper: parse phase numbers from a "Phases completed" line ---
+# Outputs one phase number per line. Handles:
+#   - Range format: "1-6" → 1 2 3 4 5 6
+#   - Comma-separated: "8, 8.3, 9, 10" → 8 8.3 9 10
+#   - Mixed (multiple milestone entries each handled independently)
+parse_phase_numbers() {
+  local line="$1"
+  local range
+  range=$(echo "$line" | grep -o '[0-9]\+-[0-9]\+' || true)
+  if [ -n "$range" ]; then
+    local range_start range_end
+    range_start=$(echo "$range" | cut -d'-' -f1)
+    range_end=$(echo "$range" | cut -d'-' -f2)
+    seq "$range_start" "$range_end"
+  else
+    echo "$line" | sed 's/.*://' | grep -oE '[0-9]+(\.[0-9]+)?' || true
+  fi
+}
+
+# --- Helper: format phase number as zero-padded directory prefix ---
+# Integer (9) → "09", Decimal (8.3) → "08.3"
+format_phase_prefix() {
+  local phase="$1"
+  if echo "$phase" | grep -q '\.'; then
+    local int_part dec_part
+    int_part=$(echo "$phase" | cut -d'.' -f1)
+    dec_part=$(echo "$phase" | cut -d'.' -f2)
+    printf "%02d.%s" "$int_part" "$dec_part"
+  else
+    printf "%02d" "$phase"
+  fi
+}
+
 # ============================================================
 # CHECK 1: Subsystem Vocabulary
 # ============================================================
@@ -176,24 +209,18 @@ else
   ORPHAN_COUNT=0
   ORPHAN_LIST=""
 
-  # Parse each milestone's phase range from MILESTONES.md
+  # Parse each milestone's completed phases from MILESTONES.md
   while IFS= read -r line; do
-    # Extract range like "1-6" or "7-8"
-    range=$(echo "$line" | grep -o '[0-9]\+-[0-9]\+')
-    [ -z "$range" ] && continue
-    range_start=$(echo "$range" | cut -d'-' -f1)
-    range_end=$(echo "$range" | cut -d'-' -f2)
-
-    # Check if any phase directories in this range still exist in phases/
-    for i in $(seq "$range_start" "$range_end"); do
-      phase_prefix=$(printf "%02d" "$i")
-      for dir in "$PHASES_DIR"/${phase_prefix}-*/; do
+    while IFS= read -r phase_num; do
+      [ -z "$phase_num" ] && continue
+      prefix=$(format_phase_prefix "$phase_num")
+      for dir in "$PHASES_DIR"/${prefix}-*/; do
         [ -d "$dir" ] || continue
         dirname=$(basename "$dir")
         ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
         ORPHAN_LIST="$ORPHAN_LIST  $dirname (should be archived)"$'\n'
       done
-    done
+    done < <(parse_phase_numbers "$line")
   done < <(grep "Phases completed" "$MILESTONES_FILE")
 
   if [ "$ORPHAN_COUNT" -gt 0 ]; then
@@ -325,19 +352,15 @@ else
 
   # Check phases/ for PLANs belonging to completed milestones
   while IFS= read -r line; do
-    range=$(echo "$line" | grep -o '[0-9]\+-[0-9]\+')
-    [ -z "$range" ] && continue
-    range_start=$(echo "$range" | cut -d'-' -f1)
-    range_end=$(echo "$range" | cut -d'-' -f2)
-
-    for i in $(seq "$range_start" "$range_end"); do
-      phase_prefix=$(printf "%02d" "$i")
-      for plan in "$PHASES_DIR"/${phase_prefix}-*/*-PLAN.md; do
+    while IFS= read -r phase_num; do
+      [ -z "$phase_num" ] && continue
+      prefix=$(format_phase_prefix "$phase_num")
+      for plan in "$PHASES_DIR"/${prefix}-*/*-PLAN.md; do
         [ -f "$plan" ] || continue
         LEFTOVER_COUNT=$((LEFTOVER_COUNT + 1))
         LEFTOVER_PLANS="$LEFTOVER_PLANS  $(echo "$plan" | sed "s|$GIT_ROOT/.planning/||")"$'\n'
       done
-    done
+    done < <(parse_phase_numbers "$line")
   done < <(grep "Phases completed" "$MILESTONES_FILE")
 
   # Check archived milestone phase directories for leftover PLANs
