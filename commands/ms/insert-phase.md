@@ -133,13 +133,36 @@ Confirm: "Created directory: $phase_dir"
 Insert the new phase entry into the roadmap:
 
 1. Find insertion point: immediately after Phase {after_phase}'s content (before next phase heading or "---")
-2. Insert new phase heading with (INSERTED) marker:
+
+2. Before writing the phase entry, analyze the description to determine pre-work flags:
+
+   **Discuss**: Likely when description mentions user-facing features, UX decisions,
+   experiential qualities, or novel features. Unlikely for backend/infra, bug fixes,
+   technical debt, or clear-cut work.
+
+   **Design**: Likely when description involves UI work, visual elements, forms,
+   dashboards, or multi-screen flows. Unlikely for backend-only, API, infrastructure,
+   or established UI patterns.
+
+   **Research**: Likely when description mentions external APIs/services, new
+   libraries/frameworks, or unclear technical approach. Unlikely for established
+   internal patterns or well-documented conventions.
+
+   Use binary Likely/Unlikely with parenthetical reason. Include topics/focus only when Likely.
+
+3. Insert new phase heading with (INSERTED) marker and pre-work flags:
 
    ```
    ### Phase {decimal_phase}: {Description} (INSERTED)
 
    **Goal:** [Urgent work - to be planned]
    **Depends on:** Phase {after_phase}
+   **Discuss**: {Likely (reason) | Unlikely (reason)}
+   **Discuss topics**: {topics} ← only if Likely
+   **Design**: {Likely (reason) | Unlikely (reason)}
+   **Design focus**: {focus} ← only if Likely
+   **Research**: {Likely (reason) | Unlikely (reason)}
+   **Research topics**: {topics} ← only if Likely
    **Plans:** 0 plans
 
    Plans:
@@ -149,7 +172,7 @@ Insert the new phase entry into the roadmap:
    [To be added during planning]
    ```
 
-3. Write updated roadmap back to file
+4. Write updated roadmap back to file
 
 The "(INSERTED)" marker helps identify decimal phases as urgent insertions.
 
@@ -183,24 +206,13 @@ Phase {decimal_phase} inserted after Phase {after_phase}:
 Roadmap updated: {roadmap-path}
 Project state updated: .planning/STATE.md
 
----
-
-## ▶ Next Up
-
-**Phase {decimal_phase}: {description}** — urgent insertion
-
-`/ms:plan-phase {decimal_phase}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- Review insertion impact: Check if Phase {next_integer} dependencies still make sense
-- Review roadmap
-
----
 ```
+
+Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions
+to present "Next Up" with pre-work context for Phase {decimal_phase}.
+
+After the "Next Up" section, add:
+- Review insertion impact: Check if Phase {next_integer} dependencies still make sense
 </step>
 
 <step name="update_last_command">

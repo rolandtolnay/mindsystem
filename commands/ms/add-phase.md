@@ -118,13 +118,36 @@ Confirm: "Created directory: $phase_dir"
 Add the new phase entry to the roadmap:
 
 1. Find the insertion point (after last phase in current milestone, before "---" separator)
-2. Insert new phase heading:
+
+2. Before writing the phase entry, analyze the description to determine pre-work flags:
+
+   **Discuss**: Likely when description mentions user-facing features, UX decisions,
+   experiential qualities, or novel features. Unlikely for backend/infra, bug fixes,
+   technical debt, or clear-cut work.
+
+   **Design**: Likely when description involves UI work, visual elements, forms,
+   dashboards, or multi-screen flows. Unlikely for backend-only, API, infrastructure,
+   or established UI patterns.
+
+   **Research**: Likely when description mentions external APIs/services, new
+   libraries/frameworks, or unclear technical approach. Unlikely for established
+   internal patterns or well-documented conventions.
+
+   Use binary Likely/Unlikely with parenthetical reason. Include topics/focus only when Likely.
+
+3. Insert new phase heading with pre-work flags:
 
    ```
    ### Phase {N}: {Description}
 
    **Goal:** [To be planned]
    **Depends on:** Phase {N-1}
+   **Discuss**: {Likely (reason) | Unlikely (reason)}
+   **Discuss topics**: {topics} ← only if Likely
+   **Design**: {Likely (reason) | Unlikely (reason)}
+   **Design focus**: {focus} ← only if Likely
+   **Research**: {Likely (reason) | Unlikely (reason)}
+   **Research topics**: {topics} ← only if Likely
    **Plans:** 0 plans
 
    Plans:
@@ -134,7 +157,7 @@ Add the new phase entry to the roadmap:
    [To be added during planning]
    ```
 
-3. Write updated roadmap back to file
+4. Write updated roadmap back to file
 
 Preserve all other content exactly (formatting, spacing, other phases).
 </step>
@@ -164,24 +187,13 @@ Phase {N} added to current milestone:
 Roadmap updated: {roadmap-path}
 Project state updated: .planning/STATE.md
 
----
-
-## ▶ Next Up
-
-**Phase {N}: {description}**
-
-`/ms:plan-phase {N}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:add-phase <description>` — add another phase
-- Review roadmap
-
----
 ```
+
+Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions
+to present "Next Up" with pre-work context for Phase {N}.
+
+After the "Next Up" section, add:
+- `/ms:add-phase <description>` — add another phase
 </step>
 
 <step name="update_last_command">
