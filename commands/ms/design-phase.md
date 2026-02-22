@@ -15,8 +15,6 @@ Create design specifications for a phase. Spawns ms-designer agent with phase co
 
 **Orchestrator role:** Parse phase, validate against roadmap, check existing design, gather context chain (CONTEXT.md → project UI skill → codebase), adaptive Q&A if gaps, spawn designer agent, enable conversational refinement.
 
-**Why subagent:** Design requires focused attention with quality-forcing patterns. Fresh 200k context for design generation. Main context reserved for user refinement conversation.
-
 **When to use:**
 - UI-heavy phases with significant new interface work
 - Novel flows/components not deducible from existing patterns
@@ -151,18 +149,18 @@ Pass the extracted knowledge to ms-designer in the design prompt (see step 6 `<p
 
 ```bash
 # Platform detection
-if [ -f "package.json" ]; then
-  echo "Platform: Web (package.json found)"
-  grep -E "react|vue|angular|svelte" package.json 2>/dev/null | head -5
-fi
-
 if [ -f "pubspec.yaml" ]; then
   echo "Platform: Flutter (pubspec.yaml found)"
+  # Search Flutter project structure
+  find lib -name "*.dart" 2>/dev/null | head -20
+  grep -r "colors\|theme\|spacing" lib/ --include="*.dart" 2>/dev/null | head -10
+elif [ -f "package.json" ]; then
+  echo "Platform: Web (package.json found)"
+  grep -E "react|vue|angular|svelte" package.json 2>/dev/null | head -5
+  # Search web project structure
+  find src -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" 2>/dev/null | head -20
+  grep -r "colors\|theme\|spacing" src/ --include="*.ts" --include="*.tsx" 2>/dev/null | head -10
 fi
-
-# Find existing component/theme files
-find src -name "*.tsx" -o -name "*.dart" 2>/dev/null | head -20
-grep -r "colors\|theme\|spacing" src/ --include="*.ts" --include="*.dart" 2>/dev/null | head -10
 ```
 
 Document discovered patterns for the designer.
@@ -205,8 +203,7 @@ Use AskUserQuestion:
 
 **If user selects "Yes":**
 
-Follow mockup-generation workflow:
-@~/.claude/mindsystem/workflows/mockup-generation.md
+Read `~/.claude/mindsystem/workflows/mockup-generation.md` and follow the mockup-generation workflow.
 
 1. Determine platform from context chain (or ask user)
 2. Identify primary screen for the phase
@@ -341,13 +338,13 @@ User preferences:
 [If mockups were NOT generated, omit this entire block.]
 </mockup_direction>
 
-<quality_expectation>
-Commercial benchmark: This design must look like a [benchmark] with intentional decisions, not defaults.
+<quality_constraints>
+Specify exact values for every design token — colors as hex, spacing in px/dp, typography with weight+size+line-height. No "appropriate", "suitable", or "as needed". Every decision must be explicit and implementable without interpretation.
 
-Pre-emptive criticism: Assume the user will say "This looks like generic AI output." Generate something that proves them wrong.
+Differentiate from platform defaults: if a color, radius, or spacing matches the default system value, choose a deliberate alternative that serves the product's identity.
 
-Accountability check: Could you show this design to a professional UI designer and claim it as skilled work? If not, it's not done.
-</quality_expectation>
+Assume the user will say "This looks like generic AI output." Generate something that proves them wrong. Could you show this design to a professional UI designer and claim it as skilled work? If not, it's not done.
+</quality_constraints>
 
 <output_specification>
 Generate: DESIGN.md following template structure
@@ -416,7 +413,7 @@ After initial generation, if user wants to refine:
 
 **For major redesigns (multiple aspects changing):**
 
-Use the iteration template from `~/.claude/mindsystem/templates/design-iteration.md`:
+Read `~/.claude/mindsystem/templates/design-iteration.md` and use the iteration template:
 
 1. Capture feedback using the structured format:
    - What worked well (KEEP)
@@ -453,4 +450,5 @@ Update `.planning/STATE.md` Last Command field:
 - [ ] ms-designer spawned with quality-forcing patterns
 - [ ] DESIGN.md created with Design Direction, Design Tokens, and Screens sections and committed
 - [ ] User informed of refinement options and next steps
+- [ ] STATE.md Last Command updated with timestamp
 </success_criteria>

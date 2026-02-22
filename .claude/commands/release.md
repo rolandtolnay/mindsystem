@@ -1,7 +1,7 @@
 ---
 name: release
 description: Auto-version based on commits, update changelog, tag, push, and publish to npm
-arguments: "[major|minor|patch|X.Y.Z]"
+argument-hint: "[major|minor|patch|X.Y.Z]"
 allowed-tools:
   - Read
   - Write
@@ -22,6 +22,10 @@ Analyze changes since last release, determine version bump (or use explicit vers
 
 Run with no arguments to auto-detect, or specify `major`, `minor`, `patch`, or explicit version.
 </objective>
+
+<context>
+$ARGUMENTS
+</context>
 
 <process>
 
@@ -47,13 +51,13 @@ git diff --stat --cached
 <step name="commit_changes">
 Stage and commit changes with conventional commit format.
 
-**Commit types (determines version bump):**
-- `feat(scope): description` — New feature → triggers MINOR
-- `fix(scope): description` — Bug fix → triggers PATCH
-- `docs(scope): description` — Documentation → triggers PATCH
-- `refactor(scope): description` — Code cleanup → triggers PATCH
-- `chore(scope): description` — Config/dependencies → triggers PATCH
-- `BREAKING CHANGE:` in body — Breaking change → triggers MAJOR
+**Commit types:**
+- `feat(scope): description` — New feature
+- `fix(scope): description` — Bug fix
+- `docs(scope): description` — Documentation
+- `refactor(scope): description` — Code cleanup
+- `chore(scope): description` — Config/dependencies
+- `BREAKING CHANGE:` in body — Breaking change
 
 **Rules:**
 - Group related changes into logical commits
@@ -81,16 +85,15 @@ If $ARGUMENTS provided:
 </step>
 
 <step name="calculate_new_version">
-Calculate new version based on current + bump type:
+Calculate and store new version based on current + bump type:
 
 ```
-Current: X.Y.Z
-- MAJOR bump → (X+1).0.0
-- MINOR bump → X.(Y+1).0
-- PATCH bump → X.Y.(Z+1)
+MAJOR bump → (X+1).0.0
+MINOR bump → X.(Y+1).0
+PATCH bump → X.Y.(Z+1)
 ```
 
-Announce the new version before proceeding.
+Store result as `VERSION` variable for all subsequent steps. Announce the new version before proceeding.
 </step>
 
 <step name="gather_ticket_context">
@@ -144,21 +147,27 @@ When uncertain, include. The user can remove during confirmation.
 </step>
 
 <step name="confirm_changelog">
-Present the generated changelog to the user for approval via AskUserQuestion with a markdown preview.
+Present the changelog as regular text output first, then collect the decision separately. Do NOT put changelog content inside AskUserQuestion — text output has no truncation limits and renders full markdown.
 
-Use AskUserQuestion with two options:
-- **Approve** — `markdown` parameter contains the full changelog section that will be inserted, plus any omitted commits with reasons appended after a `---` separator
-- **Edit** — User provides corrections; regenerate and re-confirm
-
-Example omitted commits format (appended to the markdown preview):
+**Output format** (as regular text, before the question):
 
 ```
+Here's the proposed changelog for v{VERSION}:
+
+{full changelog section}
+
 ---
 
 **Omitted from changelog:**
 - `abc1234 docs(ms-meta): update prompt quality principles` — reference material, no behavioral change
 - `def5678 docs(flutter-skill): add animation patterns` — Flutter-specific, not core system
 ```
+
+**Then** use AskUserQuestion with short options only — no changelog content repeated:
+
+> "Approve this changelog for v{VERSION}?"
+> 1. **Approve** — Insert into CHANGELOG.md and proceed
+> 2. **Edit** — Provide corrections first
 
 Do NOT write to CHANGELOG.md until the user approves.
 </step>
@@ -222,16 +231,18 @@ git push origin "v$VERSION"
 </step>
 
 <step name="show_summary">
-Display release summary:
+Show the commit log via git, then output the rest as text (avoid echoing npm commands in bash — triggers security hooks):
 
 ```bash
-echo "=== Release $VERSION complete ==="
-echo ""
 git log --oneline $(git describe --tags --abbrev=0~1 2>/dev/null || echo "HEAD~5")..HEAD
-echo ""
-echo "Tag: v$VERSION"
-echo ""
-echo "To publish to npm, run: npm publish"
+```
+
+Then output as text:
+
+```
+Release v{VERSION} complete. Tag: v{VERSION}
+
+To publish: `npm publish`
 ```
 </step>
 
