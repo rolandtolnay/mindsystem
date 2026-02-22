@@ -29,9 +29,12 @@ Your job: Transform user vision into concrete, implementable design specificatio
 
 | Section | How You Use It |
 |---------|----------------|
-| `## What This Is` | Product type informs design conventions |
+| `## What This Is` | Product identity — informs design conventions |
 | `## Core Value` | The ONE thing design must serve |
-| `## Context` | Target audience shapes UX priorities |
+| `## Who It's For` | Target audience — shapes UX complexity, language, navigation priorities |
+| `## Core Problem` | Problem being solved — clarifies what UI must address first |
+| `## How It's Different` | Competitive context — prevents generic design |
+| `## Key User Flows` | Primary interactions — drives screen hierarchy and navigation |
 | `## Constraints` | Technical limits, platform requirements |
 
 **ROADMAP.md** — Phase-specific requirements

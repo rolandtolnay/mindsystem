@@ -8,60 +8,50 @@ Template for `.planning/PROJECT.md` — the living project context document.
 # [Project Name]
 
 ## What This Is
-
-[Current accurate description — 2-3 sentences. What does this product do and who is it for?
-Use the user's language and framing. Update whenever reality drifts from this description.]
+[2-3 sentences. Product identity in plain language.]
 
 ## Core Value
+[Single sentence: the ONE thing that cannot fail.]
 
-[The ONE thing that matters most. If everything else fails, this must work.
-One sentence that drives prioritization when tradeoffs arise.]
+## Who It's For
+[Target audience — who they are, their context, how they work today. 2-4 sentences.]
 
-## Requirements
+## Core Problem
+[Why this exists — what pain or desire drives it. 1-2 sentences.]
 
-### Validated
+## How It's Different
+[What makes this not another [category]. Include competitive context if relevant.]
+- [Differentiator 1]
+- [Differentiator 2]
+- [Differentiator 3]
 
-<!-- Shipped and confirmed valuable. -->
+## Key User Flows
+[The 2-3 core interactions users perform.]
+- [Flow 1]
+- [Flow 2]
+- [Flow 3]
 
-(None yet — ship to validate)
-
-### Active
-
-<!-- Current scope. Building toward these. -->
-
-- [ ] [Requirement 1]
-- [ ] [Requirement 2]
-- [ ] [Requirement 3]
-
-### Out of Scope
-
-<!-- Explicit boundaries. Includes reasoning to prevent re-adding. -->
-
+## Out of Scope
 - [Exclusion 1] — [why]
 - [Exclusion 2] — [why]
 
-## Context
-
-[Background information that informs implementation:
-- Technical environment or ecosystem
-- Relevant prior work or experience
-- User research or feedback themes
-- Known issues to address]
-
 ## Constraints
-
 - **[Type]**: [What] — [Why]
 - **[Type]**: [What] — [Why]
 
 Common types: Tech stack, Timeline, Budget, Dependencies, Compatibility, Performance, Security
 
-## Key Decisions
+## Technical Context
+[Tech stack, integrations, prior work, known issues/debt.]
 
-<!-- Decisions that constrain future work. Add throughout project lifecycle. -->
+## Validated
+(None yet — ship to validate)
+
+## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| [Choice] | [Why] | [✓ Good / ⚠️ Revisit / — Pending] |
+| [Choice] | [Why] | — Pending |
 
 ---
 *Last updated: [date] after [trigger]*
@@ -83,31 +73,50 @@ Common types: Tech stack, Timeline, Budget, Dependencies, Compatibility, Perform
 - Drives prioritization when tradeoffs arise
 - Rarely changes; if it does, it's a significant pivot
 
-**Requirements — Validated:**
-- Requirements that shipped and proved valuable
-- Format: `- ✓ [Requirement] — [version/phase]`
-- These are locked — changing them requires explicit discussion
+**Who It's For:**
+- Specific enough to find 10 of these people
+- Include their context: what they do today, what tools they use, what frustrates them
+- Avoid broad categories ("developers", "small businesses") — narrow to who needs this MOST
+- Update as real user data replaces assumptions
 
-**Requirements — Active:**
-- Current scope being built toward
-- These are hypotheses until shipped and validated
-- Move to Validated when shipped, Out of Scope if invalidated
+**Core Problem:**
+- The pain or desire that makes this product necessary
+- Should explain why existing alternatives don't suffice
+- One sentence is better than two — forces precision
+- If you can't articulate the problem, the product isn't ready to build
 
-**Requirements — Out of Scope:**
+**How It's Different:**
+- 2-3 concrete differentiators, not marketing language
+- Include what people use today instead (even manual workarounds)
+- "Nothing else does this" is almost always wrong — probe alternatives
+- Competitive context folds in here — no standalone section needed
+
+**Key User Flows:**
+- The 2-3 core interactions that make the product valuable
+- One line each — verb-driven ("Log workout → view history → track progress")
+- Bridges abstract identity and concrete architecture
+- Update as flows are validated or new ones emerge
+
+**Out of Scope:**
 - Explicit boundaries on what we're not building
 - Always include reasoning (prevents re-adding later)
 - Includes: considered and rejected, deferred to future, explicitly excluded
-
-**Context:**
-- Background that informs implementation decisions
-- Technical environment, prior work, user feedback
-- Known issues or technical debt to address
-- Update as new context emerges
 
 **Constraints:**
 - Hard limits on implementation choices
 - Tech stack, timeline, budget, compatibility, dependencies
 - Include the "why" — constraints without rationale get questioned
+
+**Technical Context:**
+- Background that informs implementation decisions
+- Tech stack, integrations, prior work, known issues/debt
+- Update as new technical context emerges
+- Purely technical — business context lives in Layer 1 sections
+
+**Validated:**
+- Requirements that shipped and proved valuable
+- Format: `- ✓ [Requirement] — [version/phase]`
+- These are locked — changing them requires explicit discussion
 
 **Key Decisions:**
 - Significant choices that affect future work
@@ -131,15 +140,17 @@ PROJECT.md evolves throughout the project lifecycle.
 **After each phase transition:**
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
+3. Decisions to log? → Add to Key Decisions
+4. "What This Is" still accurate? → Update if drifted
+5. Has understanding of audience, problem, or differentiation evolved? → Update Who It's For, Core Problem, or How It's Different
+6. New key flows emerged? → Update Key User Flows
 
 **After each milestone:**
-1. Full review of all sections
+1. Full review of all sections including business context (Who It's For, Core Problem, How It's Different)
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state (users, feedback, metrics)
+4. Update Technical Context with current state (users, feedback, metrics)
+5. Key User Flows — validated against what users actually do?
 
 </evolution>
 
@@ -154,15 +165,10 @@ For existing codebases:
    - What patterns are established?
    - What's clearly working and relied upon?
 
-3. **Gather Active requirements** from user:
-   - Present inferred current state
-   - Ask what they want to build next
-
-4. **Initialize:**
+3. **Initialize:**
    - Validated = inferred from existing code
-   - Active = user's goals for this work
    - Out of Scope = boundaries user specifies
-   - Context = includes current codebase state
+   - Technical Context = populated from codebase map
 
 </brownfield>
 

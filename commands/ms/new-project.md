@@ -94,31 +94,32 @@ Exit command.
 
 Ask inline (freeform, NOT AskUserQuestion):
 
-"What do you want to build?"
+- **Greenfield** (no existing code): "What do you want to build?"
+- **Brownfield** (code detected in Step 1): "Tell me about this project — if you were explaining it to someone who's never seen it, what does it do and who uses it?"
+
+For brownfield, explicitly note: "Not the next feature — the product as a whole."
 
 Wait for their response. This gives you the context needed to ask intelligent follow-up questions.
+
+**Derive business context:**
+
+After the initial response, infer business context before asking more questions. Present inferred audience/problem/differentiation for the user to react to:
+
+"It sounds like this is for [audience] dealing with [problem], and your approach is different because [differentiation]. Sound right?"
+
+This leverages what they've already said and gives them something concrete to react to.
 
 **Follow the thread:**
 
 Based on what they said, ask follow-up questions that dig into their response. Use AskUserQuestion with options that probe what they mentioned — interpretations, clarifications, concrete examples.
 
-Keep following threads. Each answer opens new threads to explore. Ask about:
-- What excited them
-- What problem sparked this
-- What they mean by vague terms
-- What it would actually look like
-- What's already decided
+Track coverage against the 6-item context checklist from `questioning.md`. Probe fuzziest areas first — spend questioning budget where clarity is lowest.
 
-Consult `questioning.md` for techniques:
-- Challenge vagueness
-- Make abstract concrete
-- Surface assumptions
-- Find edges
-- Reveal motivation
+Use grounding questions from `questioning.md` instead of template-shaped questions. Don't ask "Who is your target audience?" — ask "Who would be your first 10 users?"
 
-**Check context (background, not out loud):**
+When the conversation pauses and sections are still fuzzy, use success-backward: "Imagine this is wildly successful in a year. What does that look like?"
 
-As you go, mentally check the context checklist from `questioning.md`. If gaps remain, weave questions naturally. Don't suddenly switch to checklist mode.
+Consult `questioning.md` for techniques — challenge vagueness, derive before asking, use grounding questions over template-shaped questions.
 
 **Decision gate:**
 
@@ -142,54 +143,31 @@ Synthesize all context into `.planning/PROJECT.md` using the template from `temp
 
 **For greenfield projects:**
 
-Initialize requirements as hypotheses:
-
-```markdown
-## Requirements
-
-### Validated
-
-(None yet — ship to validate)
-
-### Active
-
-- [ ] [Requirement 1]
-- [ ] [Requirement 2]
-- [ ] [Requirement 3]
-
-### Out of Scope
-
-- [Exclusion 1] — [why]
-- [Exclusion 2] — [why]
-```
-
-All Active requirements are hypotheses until shipped and validated.
+Initialize all sections from questioning:
+- **What This Is** — product identity from questioning
+- **Core Value** — the ONE thing from questioning
+- **Who It's For** — target audience from questioning
+- **Core Problem** — pain or desire from questioning
+- **How It's Different** — differentiators from questioning
+- **Key User Flows** — core interactions from questioning
+- **Out of Scope** — boundaries from questioning
+- **Constraints** — hard limits from questioning
+- **Technical Context** — minimal for greenfield (stack choices if discussed)
+- **Validated** — `(None yet — ship to validate)`
+- **Key Decisions** — any decisions made during questioning
 
 **For brownfield projects (codebase map exists):**
 
-Infer Validated requirements from existing code:
+Same as greenfield, plus:
 
 1. Read `.planning/codebase/ARCHITECTURE.md` and `STACK.md`
-2. Identify what the codebase already does
-3. These become the initial Validated set
+2. Infer Validated requirements from existing code — what the codebase already does
+3. Populate Technical Context from codebase map (stack, integrations, known debt)
 
 ```markdown
-## Requirements
-
-### Validated
-
+## Validated
 - ✓ [Existing capability 1] — existing
 - ✓ [Existing capability 2] — existing
-- ✓ [Existing capability 3] — existing
-
-### Active
-
-- [ ] [New requirement 1]
-- [ ] [New requirement 2]
-
-### Out of Scope
-
-- [Exclusion 1] — [why]
 ```
 
 **Key Decisions:**
@@ -239,7 +217,7 @@ docs: initialize [project-name]
 
 [One-liner from PROJECT.md]
 
-Creates PROJECT.md with requirements and constraints.
+Creates PROJECT.md with business context and constraints.
 EOF
 )"
 ```
@@ -261,19 +239,14 @@ Project initialized:
 
 ## ▶ Next Up
 
-Choose your path:
-
-**Option A: Research first** (recommended)
-Research ecosystem → define requirements → create roadmap. Discovers standard stacks, expected features, architecture patterns.
-
-`/ms:research-project`
-
-**Option B: Define requirements and roadmap directly** (familiar domains)
-Skip research, define requirements and create roadmap from what you know.
-
-`/ms:create-roadmap`
+`/ms:new-milestone` — Discover what to build first, create requirements and roadmap
 
 <sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/ms:create-roadmap` — Skip milestone discovery, define requirements and roadmap directly
 
 ---
 ```
@@ -299,9 +272,10 @@ Update `.planning/STATE.md` Last Command field (if STATE.md exists):
 
 <success_criteria>
 
-- [ ] Deep questioning completed (not rushed, threads followed)
-- [ ] PROJECT.md captures full context with evolutionary structure
-- [ ] Requirements initialized as hypotheses (greenfield) or with inferred Validated (brownfield)
+- [ ] Deep questioning completed with business context extracted
+- [ ] PROJECT.md captures product identity (What/Value/Audience/Problem/Differentiation/Flows)
+- [ ] PROJECT.md captures boundaries (Out of Scope, Constraints, Technical Context)
+- [ ] Validated requirements initialized (empty for greenfield, inferred for brownfield)
 - [ ] Key Decisions table initialized
 - [ ] config.json has subsystems and code_review settings
 - [ ] All committed to git

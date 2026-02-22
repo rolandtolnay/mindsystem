@@ -141,16 +141,17 @@ cat .planning/phases/XX-current/*-SUMMARY.md
 **Assess requirement changes:**
 
 1. **Requirements validated?**
-   - Any Active requirements shipped in this phase?
-   - Move to Validated with phase reference: `- ✓ [Requirement] — Phase X`
+   - Any requirements shipped in this phase?
+   - Add to Validated with phase reference: `- ✓ [Requirement] — Phase X`
 
 2. **Requirements invalidated?**
-   - Any Active requirements discovered to be unnecessary or wrong?
-   - Move to Out of Scope with reason: `- [Requirement] — [why invalidated]`
+   - Any requirements discovered to be unnecessary or wrong?
+   - Add to Out of Scope with reason: `- [Requirement] — [why invalidated]`
 
-3. **Requirements emerged?**
-   - Any new requirements discovered during building?
-   - Add to Active: `- [ ] [New requirement]`
+3. **Business context evolved?**
+   - Has understanding of audience, problem, or differentiation changed?
+   - Update Who It's For, Core Problem, or How It's Different if so
+   - New key flows emerged? → Update Key User Flows
 
 4. **Decisions to log?**
    - Extract decisions from SUMMARY.md files
@@ -174,13 +175,11 @@ Make the edits inline. Update "Last updated" footer:
 Before:
 
 ```markdown
-### Active
+## Validated
 
-- [ ] JWT authentication
-- [ ] Real-time sync < 500ms
-- [ ] Offline mode
+- ✓ Canvas drawing tools — Phase 1
 
-### Out of Scope
+## Out of Scope
 
 - OAuth2 — complexity not needed for v1
 ```
@@ -188,27 +187,23 @@ Before:
 After (Phase 2 shipped JWT auth, discovered rate limiting needed):
 
 ```markdown
-### Validated
+## Validated
 
+- ✓ Canvas drawing tools — Phase 1
 - ✓ JWT authentication — Phase 2
 
-### Active
-
-- [ ] Real-time sync < 500ms
-- [ ] Offline mode
-- [ ] Rate limiting on sync endpoint
-
-### Out of Scope
+## Out of Scope
 
 - OAuth2 — complexity not needed for v1
+- Offline mode — real-time is core value, discovered Phase 2
 ```
 
 **Step complete when:**
 
 - [ ] Phase summaries reviewed for learnings
-- [ ] Validated requirements moved from Active
-- [ ] Invalidated requirements moved to Out of Scope with reason
-- [ ] Emerged requirements added to Active
+- [ ] Shipped requirements added to Validated
+- [ ] Invalidated requirements added to Out of Scope with reason
+- [ ] Business context sections reviewed (Who It's For, Core Problem, How It's Different, Key User Flows)
 - [ ] New decisions logged with rationale
 - [ ] "What This Is" updated if product changed
 - [ ] "Last updated" footer reflects this transition

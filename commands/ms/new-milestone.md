@@ -88,7 +88,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    - Settled decisions and patterns from knowledge files
    - Untested assumptions from previous audit
    - Unaddressed requirements from previous milestones
-   - Strategic features inferred from PROJECT.md's problem/audience/USP
+   - Strategic features inferred from PROJECT.md: Who It's For, Core Problem, How It's Different
    - Pending todos from STATE.md
 
    If no meaningful artifacts exist (first milestone after v1.0), base suggestions purely on PROJECT.md.
@@ -199,8 +199,8 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
     - [Feature 3]
     ```
 
-    Update Active requirements section with new goals.
     Update "Last updated" footer.
+    Note: Milestone-specific goals live in MILESTONE-CONTEXT.md (step 15), not in PROJECT.md.
 
 15. **Write MILESTONE-CONTEXT.md:**
 
@@ -285,7 +285,6 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 <success_criteria>
 - PROJECT.md updated with Current Milestone section
-- Active requirements reflect new milestone goals
 - MILESTONE-CONTEXT.md created with vision, features, scope, priorities
 - STATE.md reset for new milestone
 - Git commit made

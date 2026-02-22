@@ -108,7 +108,10 @@ grep -A30 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
 Extract from PROJECT.md:
 - What This Is (product type)
 - Core Value (design must serve this)
-- Context (target audience)
+- Who It's For (target audience and their context)
+- Core Problem (what the design must address)
+- How It's Different (competitive context, differentiators)
+- Key User Flows (primary interactions that drive hierarchy)
 - Constraints (platform, technical limits)
 
 Extract from ROADMAP.md:
@@ -230,10 +233,19 @@ Platform: [Inferred from codebase or PROJECT.md constraints]
 Phase: [N]: [Phase name from ROADMAP.md]
 
 Target audience:
-[From PROJECT.md - Context section]
+[From PROJECT.md - Who It's For section]
+
+Core problem:
+[From PROJECT.md - Core Problem section]
+
+Competitive differentiators:
+[From PROJECT.md - How It's Different section]
 
 Core value this design must serve:
 [From PROJECT.md - Core Value section]
+
+Primary user flows:
+[From PROJECT.md - Key User Flows section]
 
 Technical constraints:
 [From PROJECT.md - Constraints section]

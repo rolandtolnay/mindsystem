@@ -184,30 +184,31 @@ cat .planning/phases/*-*/*-SUMMARY.md
 3. **Requirements audit:**
 
    **Validated section:**
-   - All Active requirements shipped in this milestone → Move to Validated
+   - All requirements shipped in this milestone → Add to Validated
    - Format: `- ✓ [Requirement] — v[X.Y]`
-
-   **Active section:**
-   - Remove requirements that moved to Validated
-   - Add any new requirements for next milestone
-   - Keep requirements that weren't addressed yet
 
    **Out of Scope audit:**
    - Review each item — is the reasoning still valid?
    - Remove items that are no longer relevant
    - Add any requirements invalidated during this milestone
 
-4. **Context update:**
+4. **Business context review:**
+   - Who It's For — has understanding of audience evolved?
+   - Core Problem — still the right framing?
+   - How It's Different — new competitors or differentiators?
+   - Key User Flows — validated against what users actually do?
+
+5. **Technical Context update:**
    - Current codebase state (LOC, tech stack)
    - User feedback themes (if any)
    - Known issues or technical debt to address
 
-5. **Key Decisions audit:**
+6. **Key Decisions audit:**
    - Extract all decisions from milestone phase summaries
    - Add to Key Decisions table with outcomes where known
    - Mark ✓ Good, ⚠️ Revisit, or — Pending for each
 
-6. **Constraints check:**
+7. **Constraints check:**
    - Any constraints that changed during development?
    - Update as needed
 
@@ -233,20 +234,16 @@ A real-time collaborative whiteboard for remote teams.
 
 Real-time sync that feels instant.
 
-## Requirements
+## Who It's For
 
-### Validated
+Remote teams who need to brainstorm visually during meetings.
+Currently using Miro or physical whiteboards.
+
+## Validated
 
 (None yet — ship to validate)
 
-### Active
-
-- [ ] Canvas drawing tools
-- [ ] Real-time sync < 500ms
-- [ ] User authentication
-- [ ] Export to PNG
-
-### Out of Scope
+## Out of Scope
 
 - Mobile app — web-first approach
 - Video chat — use external tools
@@ -263,27 +260,24 @@ A real-time collaborative whiteboard for remote teams with instant sync and draw
 
 Real-time sync that feels instant.
 
-## Requirements
+## Who It's For
 
-### Validated
+Remote teams (2-8 people) who brainstorm visually during meetings.
+Currently using Miro but frustrated by complexity and latency.
+
+## Validated
 
 - ✓ Canvas drawing tools — v1.0
 - ✓ Real-time sync < 500ms — v1.0 (achieved 200ms avg)
 - ✓ User authentication — v1.0
 
-### Active
-
-- [ ] Export to PNG
-- [ ] Undo/redo history
-- [ ] Shape tools (rectangles, circles)
-
-### Out of Scope
+## Out of Scope
 
 - Mobile app — web-first approach, PWA works well
 - Video chat — use external tools
 - Offline mode — real-time is core value
 
-## Context
+## Technical Context
 
 Shipped v1.0 with 2,400 LOC TypeScript.
 Tech stack: Next.js, Supabase, Canvas API.
@@ -294,10 +288,10 @@ Initial user testing showed demand for shape tools.
 
 - [ ] "What This Is" reviewed and updated if needed
 - [ ] Core Value verified as still correct
-- [ ] All shipped requirements moved to Validated
-- [ ] New requirements added to Active for next milestone
+- [ ] All shipped requirements added to Validated
+- [ ] Business context reviewed (Who It's For, Core Problem, How It's Different, Key User Flows)
 - [ ] Out of Scope reasoning audited
-- [ ] Context updated with current state
+- [ ] Technical Context updated with current state
 - [ ] All milestone decisions added to Key Decisions
 - [ ] "Last updated" footer reflects milestone completion
 
@@ -626,7 +620,7 @@ Tag: v[X.Y]
 
 Milestone completion is successful when (ordered by skip risk):
 
-- [ ] PROJECT.md full evolution review completed (What This Is, Core Value, Requirements, Key Decisions, Context)
+- [ ] PROJECT.md full evolution review completed (What This Is, Core Value, business context, Validated, Key Decisions, Technical Context)
 - [ ] All shipped requirements moved to Validated in PROJECT.md
 - [ ] Key Decisions updated with outcomes
 - [ ] MILESTONES.md entry created with stats and accomplishments
