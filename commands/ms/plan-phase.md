@@ -12,6 +12,7 @@ allowed-tools:
   - WebFetch
   - mcp__context7__*
   - Task
+  - Skill
 ---
 
 <objective>
@@ -91,7 +92,8 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
    - Scan project history via context scanner script (prior decisions, issues, debug resolutions, adhoc learnings, cross-milestone patterns)
    - Break phase into tasks
    - Propose plan grouping (plan boundaries, wave structure, budget estimates) for user review
-   - Hand off tasks + proposed grouping to plan-writer subagent
+   - Discover relevant project skills, confirm with user
+   - Hand off tasks + proposed grouping + confirmed skills to plan-writer subagent
    - Create PLAN.md file(s) with executable structure
 
 **Gap closure mode (--gaps flag):**

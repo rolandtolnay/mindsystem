@@ -389,7 +389,9 @@ Standard tasks (remain in standard plans):
 → Yes: Mark as tdd_candidate=true
 → No: Standard task
 
-Read `~/.claude/mindsystem/references/tdd.md` now for TDD criteria and plan structure.
+**If any tasks were marked tdd_candidate=true:** Read `~/.claude/mindsystem/references/tdd.md` for TDD plan structure guidance.
+
+**If no TDD candidates:** Skip — the heuristic above is sufficient for detection.
 
 **Decisions:** If you identify a task that requires choosing between approaches (which auth provider, which database, etc.), use AskUserQuestion to resolve it now. Don't defer decisions to execution. For purely technical choices where the user hasn't expressed preference, make the decision and document it in the plan's objective.
 
@@ -450,6 +452,25 @@ The user may adjust, merge, or split plans. Once confirmed (or if the user proce
 **TDD plans are always standalone** — propose them as dedicated plans regardless of budget.
 </step>
 
+<step name="discover_skills">
+**Identify relevant project skills for this phase.**
+
+After the user confirms the plan structure, check if project skills could improve plan quality.
+
+**Scan:** Review the skill list in your system-reminder. Match skills against:
+- The phase's technology stack (Flutter, React, Node.js, etc.)
+- The domain of the tasks identified (UI patterns, API design, state management, etc.)
+- Keywords from RESEARCH.md or CONTEXT.md if they exist
+
+**If matches found:** Present via AskUserQuestion:
+- List each matching skill with its description
+- Always include an escape hatch option for the user to name skills manually or skip entirely
+
+**If no matches:** Skip silently — no need to ask the user.
+
+**Store result:** Keep the confirmed skill names (may be empty) for the handoff step.
+</step>
+
 <step name="handoff_to_writer">
 **Spawn ms-plan-writer subagent with task list and context.**
 
@@ -499,6 +520,10 @@ Assemble handoff payload:
 <external_services>
   {list of services detected in task breakdown}
 </external_services>
+
+<confirmed_skills>
+  {comma-separated skill names confirmed by user, or "none"}
+</confirmed_skills>
 
 <learnings>
   <!-- Flat list from read_project_history step 6. Omit if no matches found. -->
@@ -699,7 +724,7 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Prior decisions, issues, concerns synthesized
 - [ ] Tasks identified with needs/creates dependencies
 - [ ] Plan grouping proposed and presented to user
-- [ ] Task list + proposed grouping handed off to ms-plan-writer
+- [ ] Task list + proposed grouping + confirmed skills handed off to ms-plan-writer
 - [ ] PLAN files + EXECUTION-ORDER.md created (pure markdown, Must-Haves, follows proposed grouping)
 - [ ] Plans committed with maximized wave parallelism
 - [ ] Risk assessment presented (score + top factors)

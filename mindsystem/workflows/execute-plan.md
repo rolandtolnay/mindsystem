@@ -28,7 +28,7 @@ cat .planning/STATE.md 2>/dev/null
 <step name="load_plan">
 Read the plan file provided in your prompt context.
 
-Parse inline metadata from header: `**Subsystem:**` and `**Type:**` values.
+Parse inline metadata from header: `**Subsystem:**`, `**Type:**`, and `**Skills:**` values.
 
 Parse plan sections:
 - Context (files to read, @-references)
@@ -44,11 +44,9 @@ Parse plan sections:
 </step>
 
 <step name="load_skills">
-Scan the skill list in your system message for skills matching the plan's technology or domain. Invoke each match via the Skill tool before proceeding — skills contain project-specific conventions and patterns that change what you produce during implementation.
+**If `**Skills:**` is present in plan metadata:** Invoke each listed skill via the Skill tool before proceeding. These were confirmed by the user during planning — load them without further confirmation.
 
-- One clear match → invoke it directly
-- Multiple candidates → use AskUserQuestion to let the user choose
-- No match → proceed without
+**If `**Skills:**` is absent:** Proceed without loading skills. Skill discovery happens during `/ms:plan-phase` — absence means no skills were relevant.
 </step>
 
 <step name="execute">

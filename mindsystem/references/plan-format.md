@@ -43,7 +43,7 @@ Details referencing existing utilities: "Use `comparePassword` in `src/lib/crypt
 | Section | Purpose | Required |
 |---------|---------|----------|
 | `# Plan NN: Title` | H1 with plan number and descriptive title | Yes |
-| `**Subsystem:** X \| **Type:** Y` | Inline metadata (replaces YAML frontmatter) | Yes (type defaults to `execute`) |
+| `**Subsystem:** X \| **Type:** Y \| **Skills:** Z` | Inline metadata (replaces YAML frontmatter) | Yes (type defaults to `execute`, skills optional) |
 | `## Context` | Why this work exists, why this approach | Yes |
 | `## Changes` | Numbered subsections with files and implementation details | Yes |
 | `## Verification` | Bash commands and observable checks | Yes |
@@ -130,6 +130,15 @@ Matches vocabulary from the project's `config.json`. Used by the executor when g
 
 When `**Type:**` is omitted, the plan defaults to `execute`.
 
+### Skills
+
+| Value | Behavior |
+|-------|----------|
+| *(omitted)* | No skills loaded. Skill discovery happens during `/ms:plan-phase` — absence means none were relevant. |
+| `skill-a, skill-b` | Executor invokes listed skills via Skill tool before implementing. |
+
+Skills are confirmed by the user during `/ms:plan-phase` and encoded into plans. Comma-separated list of skill names matching entries in the system-reminder.
+
 ---
 
 ## Must-Haves Specification
@@ -190,6 +199,7 @@ Execution order lives in a single `EXECUTION-ORDER.md` file alongside the plans.
 | What triggers TDD lazy-loading? | `**Type:** tdd` in inline metadata |
 | How does the executor know why an approach was chosen? | Reads `## Context` section |
 | How does the executor find existing utilities? | Reads `**Files:**` lines and inline references in `## Changes` |
+| What triggers skill loading in executor? | `**Skills:**` in inline metadata. No skills loaded if omitted. |
 
 ---
 

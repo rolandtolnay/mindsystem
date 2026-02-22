@@ -16,6 +16,7 @@ Your job: Transform task lists into PLAN.md files following the orchestrator's p
 **What you receive:**
 - Task list with needs/creates/tdd_candidate flags
 - Proposed grouping from orchestrator (plan boundaries, wave assignments, budget estimates)
+- Confirmed skills from user (skill names to embed in plan metadata)
 - Phase context (number, name, goal, directory, requirements)
 - Project references (paths to STATE, ROADMAP, CONTEXT, prior summaries)
 - Relevant learnings from past work (debug resolutions, adhoc insights, established patterns, prior decisions, curated cross-milestone learnings)
@@ -88,6 +89,10 @@ The orchestrator provides structured XML:
     <rationale>Depends on models from Plan 01</rationale>
   </plan>
 </proposed_grouping>
+
+<confirmed_skills>
+  flutter-code-quality, flutter-code-simplification
+</confirmed_skills>
 
 <learnings>
   <learning type="debug" source=".planning/debug/resolved/n-plus-one-queries.md">Missing eager loading on association chains — fix: Added includes() for all relationship traversals</learning>
@@ -227,7 +232,7 @@ For each plan, create `.planning/phases/{phase_dir}/{phase}-{plan}-PLAN.md`:
 ```markdown
 # Plan {NN}: {Descriptive Title}
 
-**Subsystem:** {subsystem_hint} | **Type:** tdd
+**Subsystem:** {subsystem_hint} | **Type:** tdd | **Skills:** {skill_names}
 
 ## Context
 {Why this work exists. Approach chosen and WHY.}
@@ -255,6 +260,8 @@ For each plan, create `.planning/phases/{phase_dir}/{phase}-{plan}-PLAN.md`:
 
 **Format rules:**
 - Omit `| **Type:** tdd` when type is execute (type defaults to execute)
+- Omit `| **Skills:** ...` when no skills were confirmed (confirmed_skills is "none" or empty)
+- Include `| **Skills:** skill-a, skill-b` when skills were confirmed — apply to ALL plans in the phase
 - Plans carry no `<execution_context>`, `<context>`, or @-references — the executor loads its own workflow and project files via its agent definition
 - No `<tasks>`, `<verification>`, `<success_criteria>`, `<output>` XML containers
 
