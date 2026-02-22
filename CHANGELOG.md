@@ -6,6 +6,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.20.0] - 2026-02-22
+
+### Added
+- Smart pre-work routing for `add-phase` and `insert-phase` — both commands now analyze phase descriptions and suggest the right next step (discuss, design, research, or plan) instead of always defaulting to plan-phase
+- Skill discovery in `plan-phase` — automatically finds relevant project skills after task breakdown, confirms with user, and encodes them in plan metadata so the executor loads exact skills without guessing
+
+### Changed
+- `PROJECT.md` template restructured with business context: Product Identity (core value, audience, differentiator, key flows), Product Boundaries (constraints, scope), and Product Memory (validated decisions) — gives Claude grounding for product decisions during milestones and design phases
+- Onboarding questioning flow updated with grounding questions and clarity-adaptive tracking, especially for brownfield projects where users tend to describe features instead of the overall project
+
+### Fixed
+- `doctor-scan` no longer crashes on phases with comma-separated lists or decimal numbering (e.g., `8.3`)
+
 ## [3.19.0] - 2026-02-19
 
 ### Added
@@ -503,7 +516,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.19.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.20.0...HEAD
+[3.20.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.19.0...v3.20.0
 [3.19.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.1...v3.19.0
 [3.18.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.0...v3.18.1
 [3.18.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.17.1...v3.18.0
