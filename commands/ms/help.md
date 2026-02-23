@@ -64,7 +64,7 @@ Initialize → (Optional Research) → Roadmap → Plan → Execute → Verify �
 
 Common deviations:
 - Existing repo: `/ms:map-codebase` after `/ms:new-project` (or before — either works)
-- Plan looks wrong: `/ms:list-phase-assumptions <phase>` or `/ms:check-phase <phase>`
+- Plan looks wrong: `/ms:discuss-phase <phase>` or `/ms:check-phase <phase>`
 - Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
 - Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
 - Execution gaps: `/ms:plan-phase <phase> --gaps` then `/ms:execute-phase <phase>`
@@ -129,11 +129,13 @@ Usage: `/ms:map-codebase`
 ### Phase Planning
 
 **`/ms:discuss-phase <number>`**
-Help articulate your vision for a phase before planning.
+Product-informed collaborative thinking before planning.
 
-- Captures how you imagine this phase working
-- Creates CONTEXT.md with your vision, essentials, and boundaries
-- Use when you have ideas about how something should look/feel
+- Loads milestone artifacts (PROJECT.md, REQUIREMENTS.md) for product context
+- Surfaces Claude's assumptions and validates before deep questioning
+- Offers competitor/UX research for user-facing phases
+- Grounds every question in target audience, industry patterns, and tradeoffs
+- Creates CONTEXT.md with your vision, essentials, and reasoning-backed decisions
 
 Usage: `/ms:discuss-phase 2`
 
@@ -170,15 +172,6 @@ Comprehensive ecosystem research for niche/complex domains.
 - Goes beyond "which library" to ecosystem knowledge
 
 Usage: `/ms:research-phase 3`
-
-**`/ms:list-phase-assumptions <number>`**
-See what Claude is planning to do before it starts.
-
-- Shows Claude's intended approach for a phase
-- Lets you course-correct if Claude misunderstood your vision
-- No files created - conversational output only
-
-Usage: `/ms:list-phase-assumptions 3`
 
 **`/ms:plan-phase [number] [--gaps]`**
 Create detailed execution plan for a specific phase.

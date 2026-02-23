@@ -220,7 +220,7 @@ Check if `{phase}-CONTEXT.md` exists in phase directory.
 - `/ms:discuss-phase {phase}` — gather context first
 - `/ms:design-phase {phase}` — create UI/UX specifications
 - `/ms:research-phase {phase}` — investigate unknowns
-- `/ms:list-phase-assumptions {phase}` — see Claude's assumptions
+- `/ms:discuss-phase {phase}` — gather context and validate assumptions
 
 ---
 ```

@@ -338,11 +338,10 @@ Full docs live in `/ms:help` (same content as `commands/ms/help.md`).
 | `/ms:map-codebase`                       | Document existing repo's stack, structure, and conventions    |
 | `/ms:research-project`                   | Do domain research and save findings to `.planning/research/` |
 | `/ms:create-roadmap`                     | Define requirements and create phases mapped to them          |
-| `/ms:discuss-phase <number>`             | Lock intent and constraints before planning                   |
+| `/ms:discuss-phase <number>`             | Product-informed collaborative thinking before planning       |
 | `/ms:design-phase <number>`              | Generate UI/UX spec for UI-heavy work                         |
 | `/ms:review-design [scope]`              | Audit and improve existing UI quality                         |
 | `/ms:research-phase <number>`            | Do deep research for niche phase domains                      |
-| `/ms:list-phase-assumptions <number>`    | Show what Mindsystem assumes before planning                  |
 | `/ms:plan-phase [number] [--gaps]`       | Create small, verifiable plans with optional risk-based verification |
 | `/ms:check-phase <number>`               | Sanity-check plans before execution                           |
 | `/ms:execute-phase <phase-number>`       | Run all unexecuted plans in fresh subagents                   |

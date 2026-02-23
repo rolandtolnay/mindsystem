@@ -53,10 +53,10 @@ Template for `.planning/phases/XX-name/{phase}-CONTEXT.md` - captures the user's
 <decisions>
 ## Decisions (Locked)
 
-[Concrete implementation decisions made during discussion. These are NOT optional — plans must implement these exactly.]
+[Concrete implementation decisions made during discussion. These are NOT optional — plans must implement these exactly. Each decision includes inline reasoning grounded in vision, audience, or tradeoff analysis.]
 
-- [Decision 1]
-- [Decision 2]
+- [Decision 1] — [Why: grounded in vision, audience, or tradeoff]
+- [Decision 2] — [Reasoning from product analysis or user preference]
 
 ### Claude's Discretion
 
@@ -128,9 +128,9 @@ Priority is clarity over features. Better to show less and make it obvious than 
 <decisions>
 ## Decisions (Locked)
 
-- Card layout for projects (not a list)
-- "Today" section at top showing urgent items
-- Dark mode support (already exists from Phase 2)
+- Card layout for projects (not a list) — Why: user wants personal feel, cards feel more like a notebook than enterprise software; Linear uses cards successfully for similar "what's mine" views
+- "Today" section at top showing urgent items — Why: at-a-glance clarity is the #1 essential; surfacing urgency immediately matches user's "what should I work on today" mental model
+- Dark mode support (already exists from Phase 2) — Why: user considers this essential for the calm aesthetic
 
 ### Claude's Discretion
 
@@ -173,6 +173,7 @@ Vision sections capture the user's own words — how they imagine it, what they 
 - Concrete choices (not vague preferences)
 - Checkable by downstream agents
 - Clear about what's locked vs discretionary
+- Include inline reasoning ("— Why: ...") grounded in vision, audience needs, competitor patterns, or explicit tradeoff analysis
 
 **Content should NOT read like:**
 - A technical specification

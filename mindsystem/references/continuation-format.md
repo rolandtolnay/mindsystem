@@ -59,7 +59,7 @@ When there's meaningful additional context (like a phase identifier), add it as 
 
 **Also available:**
 - Review plans before executing
-- `/ms:list-phase-assumptions 2` — check assumptions
+- `/ms:discuss-phase 2` — gather context and validate assumptions
 
 ---
 ```
