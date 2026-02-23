@@ -71,7 +71,7 @@ Single git commit with all changes (code + code review changes + PLAN.md + SUMMA
 
 <step name="generate_patch">
 Generate patch file from adhoc commit.
-Run generate-adhoc-patch.sh with commit hash and output path.
+Run `ms-tools.py generate-adhoc-patch` with commit hash and output path.
 </step>
 
 <step name="completion">

@@ -466,8 +466,8 @@ function installFile(srcPath, destPath, pathPrefix) {
     fs.copyFileSync(srcPath, destPath);
   }
 
-  // Make shell scripts executable
-  if (srcPath.endsWith('.sh')) {
+  // Make scripts executable
+  if (srcPath.endsWith('.sh') || srcPath.endsWith('.py')) {
     fs.chmodSync(destPath, '755');
   }
 }

@@ -277,7 +277,7 @@ PHASE_NAME=$(grep -A2 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null | head 
 **2. Run context scanner:**
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/scan-planning-context.py \
+uv run ~/.claude/mindsystem/scripts/ms-tools.py scan-planning-context \
   --phase "${PHASE}" \
   --phase-name "${PHASE_NAME}" \
   ${SUBSYSTEM:+--subsystem="${SUBSYSTEM}"}

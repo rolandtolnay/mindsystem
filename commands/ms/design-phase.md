@@ -41,17 +41,12 @@ ls .planning/phases/${PHASE}-*/*DESIGN.md 2>/dev/null
 ## 1. Parse and Validate Phase
 
 ```bash
-# Extract and normalize phase number from arguments
-PHASE_ARG="$ARGUMENTS"
-PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
-
-# Validate phase exists in roadmap
-grep -A5 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
+uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
 ```
 
-**If not found:** Error and exit with message: "Phase ${PHASE} not found in ROADMAP.md"
+**If not found (dir is null):** Error and exit with message: "Phase not found in ROADMAP.md"
 
-**If found:** Extract phase number, name, description. Store for later use.
+**If found:** Extract phase number, name, description from the returned JSON and ROADMAP.md.
 
 ## 2. Check Existing Design
 

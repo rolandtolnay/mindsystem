@@ -580,7 +580,7 @@ Use `mocked_files` list from UAT.md frontmatter. Clear the list after reverting.
 
 **2. Generate UAT fixes patch (if fixes were made):**
 ```bash
-~/.claude/mindsystem/scripts/generate-phase-patch.sh ${PHASE_NUMBER} --suffix=uat-fixes
+uv run ~/.claude/mindsystem/scripts/ms-tools.py generate-phase-patch ${PHASE_NUMBER} --suffix=uat-fixes
 ```
 Output: `.planning/phases/{phase_dir}/{phase}-uat-fixes.patch`
 

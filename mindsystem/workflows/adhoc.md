@@ -381,7 +381,7 @@ Generate patch file from the adhoc commit:
 ```bash
 patch_file=".planning/adhoc/${timestamp}-${slug}.patch"
 
-~/.claude/mindsystem/scripts/generate-adhoc-patch.sh "$commit_hash" "$patch_file"
+uv run ~/.claude/mindsystem/scripts/ms-tools.py generate-adhoc-patch "$commit_hash" "$patch_file"
 ```
 
 If patch generated (file exists and non-empty):

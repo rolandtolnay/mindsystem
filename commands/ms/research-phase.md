@@ -19,15 +19,14 @@ Research how to implement a phase by spawning 3 parallel specialized agents, the
 <context>
 Phase number: $ARGUMENTS (required)
 
-**Normalize phase number first:**
+**Resolve phase:**
 ```bash
-PHASE_ARG="$ARGUMENTS"
-PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
 ```
 
 Check for existing research:
 ```bash
-ls .planning/phases/${PHASE}-*/*RESEARCH.md 2>/dev/null
+uv run ~/.claude/mindsystem/scripts/ms-tools.py check-artifact "$ARGUMENTS" RESEARCH
 ```
 </context>
 
@@ -35,11 +34,7 @@ ls .planning/phases/${PHASE}-*/*RESEARCH.md 2>/dev/null
 
 ## 1. Parse and Validate Phase
 
-```bash
-grep -A5 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null
-```
-
-**If not found:** Error and exit. **If found:** Extract phase number, name, description.
+Use `find-phase` output from context. **If phase not found (dir is null):** Error and exit. **If found:** Extract phase number, name, description from ROADMAP.md.
 
 ## 2. Check Existing Research
 

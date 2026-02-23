@@ -129,9 +129,7 @@ DESIGN: [✓ if DESIGN.md exists | - if not]
 List files in the current phase directory:
 
 ```bash
-ls -1 .planning/phases/[current-phase-dir]/*-PLAN.md 2>/dev/null | wc -l
-ls -1 .planning/phases/[current-phase-dir]/*-SUMMARY.md 2>/dev/null | wc -l
-ls -1 .planning/phases/[current-phase-dir]/*-UAT.md 2>/dev/null | wc -l
+uv run ~/.claude/mindsystem/scripts/ms-tools.py list-artifacts [current-phase-number]
 ```
 
 State: "This phase has {X} plans, {Y} summaries."

@@ -29,9 +29,14 @@ Mindsystem is distributed via `npx mindsystem-cc`. During development, the user 
 | `agents/` | Subagent definitions (copied to `~/.claude/agents/` on install) |
 | `commands/ms/` | Slash commands (copied to `~/.claude/commands/ms/` on install) |
 | `mindsystem/` | Workflows, templates, references (copied to `~/.claude/mindsystem/` on install) |
-| `scripts/` | Shell scripts (copied to `~/.claude/mindsystem/scripts/` on install) |
+| `scripts/` | CLI tools and scripts (copied to `~/.claude/mindsystem/scripts/` on install) |
 
 **Never write to `~/.claude/` directly.** Always modify files in this repository.
+
+**Testing `ms-tools.py`:** Run after any modification to `scripts/ms-tools.py`:
+```bash
+cd scripts && uv run --with pytest --with pyyaml pytest test_ms_tools.py -v
+```
 
 **Linear tickets:** References like `MIN-123` are Linear issue IDs. Load the `linear` skill to read, update, or comment on them.
 
@@ -316,8 +321,7 @@ Include escape hatch: "Something else", "Let me describe"
 1. **XML for commands/workflows, pure Markdown for plans**
 2. **@-references are eagerly loaded** — use read instructions for conditional files
 3. **Imperative, brief, technical** — no filler, sycophancy, or temporal language
-4. **Solo developer + Claude** — no enterprise patterns
-5. **Atomic commits** — Git history as context source
-6. **AskUserQuestion for all exploration** — always options
-7. **Verify after automation** — automate first, verify after
-8. **Separate orchestration from execution** — plans carry execution content only
+4. **Atomic commits** — Git history as context source
+5. **AskUserQuestion for all exploration** — always options
+6. **Verify after automation** — automate first, verify after
+7. **Separate orchestration from execution** — plans carry execution content only

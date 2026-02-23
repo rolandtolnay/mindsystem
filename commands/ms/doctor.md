@@ -68,7 +68,7 @@ Proceed to next step.
 Run the diagnostic scan:
 
 ```bash
-~/.claude/mindsystem/scripts/doctor-scan.sh
+uv run ~/.claude/mindsystem/scripts/ms-tools.py doctor-scan
 ```
 
 Capture the full output. Parse each check's Status (PASS/FAIL/SKIP) and detail lines.
@@ -120,7 +120,7 @@ If subsystems array is empty (State A):
 1. Scan all artifacts for existing values:
 
 ```bash
-~/.claude/mindsystem/scripts/scan-artifact-subsystems.sh --values-only
+uv run ~/.claude/mindsystem/scripts/ms-tools.py scan-artifact-subsystems --values-only
 ```
 
 2. Read `.planning/PROJECT.md` and `.planning/ROADMAP.md`.
@@ -215,7 +215,7 @@ For each completed milestone with orphaned phases in `.planning/phases/`:
 3. Run the archive script:
 
 ```bash
-~/.claude/mindsystem/scripts/archive-milestone-phases.sh <start> <end> <version>
+uv run ~/.claude/mindsystem/scripts/ms-tools.py archive-milestone-phases <start> <end> <version>
 ```
 
 This simultaneously:
@@ -312,7 +312,7 @@ EOF
 Re-run the diagnostic scan:
 
 ```bash
-~/.claude/mindsystem/scripts/doctor-scan.sh
+uv run ~/.claude/mindsystem/scripts/ms-tools.py doctor-scan
 ```
 
 All checks should now PASS. If any still fail, report which checks remain and why.

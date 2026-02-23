@@ -26,10 +26,9 @@ Output: {phase}-CONTEXT.md capturing the user's vision with reasoning-backed dec
 <context>
 Phase number: $ARGUMENTS (required)
 
-**Normalize phase number:**
+**Resolve phase:**
 ```bash
-PHASE_ARG="$ARGUMENTS"
-PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
+uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
 ```
 
 **Load project state first:**

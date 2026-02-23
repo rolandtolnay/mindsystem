@@ -1,0 +1,257 @@
+{
+  "success": true,
+  "target": {
+    "phase": "06",
+    "phase_name": "",
+    "subsystems": [
+      "auth"
+    ],
+    "keywords": [
+      "jwt",
+      "ui"
+    ]
+  },
+  "sources": {
+    "summaries": {
+      "dir": "<FIXTURE>/.planning/phases",
+      "scanned": 3,
+      "skipped": null
+    },
+    "debug_docs": {
+      "dir": "<FIXTURE>/.planning/debug/resolved",
+      "scanned": 1,
+      "skipped": null
+    },
+    "adhoc_summaries": {
+      "dir": "<FIXTURE>/.planning/adhoc",
+      "scanned": 1,
+      "skipped": null
+    },
+    "completed_todos": {
+      "dir": "<FIXTURE>/.planning/todos/done",
+      "scanned": 1,
+      "skipped": null
+    },
+    "pending_todos": {
+      "dir": "<FIXTURE>/.planning/todos/pending",
+      "scanned": 1,
+      "skipped": null
+    },
+    "knowledge_files": {
+      "dir": "<FIXTURE>/.planning/knowledge",
+      "scanned": 1,
+      "skipped": null
+    },
+    "parse_errors": []
+  },
+  "summaries": [
+    {
+      "path": "<FIXTURE>/.planning/phases/02-infra/02-1-SUMMARY.md",
+      "frontmatter": {
+        "phase": "02-infra",
+        "subsystem": "database",
+        "affects": [],
+        "requires": [],
+        "tags": [
+          "postgres",
+          "migrations"
+        ],
+        "tech-stack": {
+          "added": [
+            "postgres"
+          ],
+          "patterns": []
+        },
+        "patterns-established": [],
+        "key-files": {
+          "created": [
+            "db/schema.sql"
+          ],
+          "modified": []
+        },
+        "key-decisions": [
+          "Use PostgreSQL for primary store"
+        ]
+      },
+      "relevance": "LOW",
+      "match_reasons": [],
+      "has_readiness_warnings": false
+    },
+    {
+      "path": "<FIXTURE>/.planning/phases/04-setup/04-1-SUMMARY.md",
+      "frontmatter": {
+        "phase": "04-setup",
+        "subsystem": "api",
+        "affects": [],
+        "requires": [],
+        "tags": [
+          "jwt",
+          "config"
+        ],
+        "tech-stack": {
+          "added": [
+            "dotenv"
+          ],
+          "patterns": [
+            "env-config"
+          ]
+        },
+        "patterns-established": [
+          "Config loading pattern"
+        ],
+        "key-files": {
+          "created": [
+            "src/config.ts"
+          ],
+          "modified": [
+            "package.json"
+          ]
+        },
+        "key-decisions": [
+          "Use dotenv for configuration"
+        ]
+      },
+      "relevance": "HIGH",
+      "match_reasons": [
+        "overlapping tags: ['jwt']",
+        "adjacent phase (N-2)",
+        "in transitive requires chain"
+      ],
+      "has_readiness_warnings": false
+    },
+    {
+      "path": "<FIXTURE>/.planning/phases/05-auth/05-1-SUMMARY.md",
+      "frontmatter": {
+        "phase": "05-auth",
+        "subsystem": "auth",
+        "affects": [
+          "06-ui"
+        ],
+        "requires": [
+          "04-setup"
+        ],
+        "tags": [
+          "jwt",
+          "auth",
+          "tokens"
+        ],
+        "tech-stack": {
+          "added": [
+            "jose",
+            "bcrypt"
+          ],
+          "patterns": [
+            "jwt-auth"
+          ]
+        },
+        "patterns-established": [
+          "JWT token rotation",
+          "Password hashing with bcrypt"
+        ],
+        "key-files": {
+          "created": [
+            "src/auth/login.ts",
+            "src/auth/middleware.ts"
+          ],
+          "modified": [
+            "src/config.ts"
+          ]
+        },
+        "key-decisions": [
+          "JWT with httpOnly cookies",
+          "bcrypt for password hashing"
+        ]
+      },
+      "relevance": "HIGH",
+      "match_reasons": [
+        "affects contains '06'",
+        "same subsystem 'auth'",
+        "overlapping tags: ['jwt']",
+        "adjacent phase (N-1)"
+      ],
+      "has_readiness_warnings": true
+    }
+  ],
+  "debug_learnings": [
+    {
+      "path": "<FIXTURE>/.planning/debug/resolved/token-bug.md",
+      "slug": "token-bug",
+      "subsystem": "auth",
+      "root_cause": "Clock skew between servers caused token validation to fail intermittently",
+      "resolution": "Added 30-second leeway to token expiry check",
+      "tags": [
+        "jwt",
+        "timing"
+      ],
+      "phase": "05-auth"
+    }
+  ],
+  "adhoc_learnings": [
+    {
+      "path": "<FIXTURE>/.planning/adhoc/20260220-fix-token-SUMMARY.md",
+      "subsystem": "auth",
+      "learnings": [
+        "Token expiry must account for clock skew",
+        "Always validate token signature before checking claims"
+      ],
+      "related_phase": "05-auth",
+      "tags": [
+        "jwt",
+        "tokens"
+      ]
+    }
+  ],
+  "completed_todos": [
+    {
+      "path": "<FIXTURE>/.planning/todos/done/setup-db.md",
+      "title": "Set up database migrations",
+      "subsystem": "database",
+      "priority": "high",
+      "phase_origin": "02-infra"
+    }
+  ],
+  "pending_todos": [
+    {
+      "path": "<FIXTURE>/.planning/todos/pending/add-logout.md",
+      "title": "Add logout endpoint",
+      "subsystem": "auth",
+      "priority": "medium",
+      "phase_origin": "05-auth"
+    }
+  ],
+  "knowledge_files": [
+    {
+      "path": "<FIXTURE>/.planning/knowledge/auth.md",
+      "subsystem": "auth",
+      "matched": true
+    }
+  ],
+  "aggregated": {
+    "tech_stack_added": [
+      "bcrypt",
+      "dotenv",
+      "jose"
+    ],
+    "patterns_established": [
+      "Config loading pattern",
+      "JWT token rotation",
+      "Password hashing with bcrypt",
+      "env-config",
+      "jwt-auth"
+    ],
+    "key_files_created": [
+      "src/auth/login.ts",
+      "src/auth/middleware.ts",
+      "src/config.ts"
+    ],
+    "key_files_modified": [
+      "package.json",
+      "src/config.ts"
+    ],
+    "key_decisions": [
+      "Use dotenv for configuration",
+      "JWT with httpOnly cookies",
+      "bcrypt for password hashing"
+    ]
+  }
+}
