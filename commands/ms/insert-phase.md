@@ -136,9 +136,9 @@ Insert the new phase entry into the roadmap:
 
 2. Before writing the phase entry, analyze the description to determine pre-work flags:
 
-   **Discuss**: Likely when description mentions user-facing features, UX decisions,
-   experiential qualities, or novel features. Unlikely for backend/infra, bug fixes,
-   technical debt, or clear-cut work.
+   **Discuss**: Default Likely — enumerate 2-4 assumptions or open questions specific
+   to the phase. Unlikely only for fully mechanical zero-decision work (version bump,
+   rename-only refactor, config-only change, pure deletion/cleanup).
 
    **Design**: Likely when description involves UI work, visual elements, forms,
    dashboards, or multi-screen flows. Unlikely for backend-only, API, infrastructure,

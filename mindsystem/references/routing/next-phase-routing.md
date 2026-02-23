@@ -108,7 +108,7 @@ ELSE:
 
 ### Suggested
 
-`/ms:discuss-phase 3` — ambiguous user flow
+`/ms:discuss-phase 3` — assumes grid layout, unclear what metrics matter
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -130,17 +130,19 @@ ELSE:
 
 | Pre-work | Status | Topics/Focus |
 |----------|--------|--------------|
+| Discuss | Likely | assumes one-time payments only, unclear if subscriptions needed, refund policy unspecified |
 | Research | Likely | Stripe API, webhook handling, idempotency |
 
 ### Suggested
 
-`/ms:research-phase 4` — external API integration
+`/ms:discuss-phase 4` — assumes one-time payments, subscription model unclear
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
+- `/ms:research-phase 4` — external API integration
 - `/ms:plan-phase 4` — plan directly
 ```
 

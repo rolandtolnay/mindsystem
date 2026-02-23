@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
   3. [Observable behavior from user perspective]
-**Discuss**: Unlikely (clear requirements)
+**Discuss**: Unlikely (mechanical setup, zero design decisions)
 **Design**: Unlikely (backend only)
 **Research**: Unlikely (established patterns)
 **Plans**: [Number of plans, e.g., "3 plans" or "TBD"]
@@ -51,7 +51,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
-**Discuss**: Likely (ambiguous user flow)
+**Discuss**: Likely (assumes email/password only, unclear if social login needed, session duration unspecified)
 **Discuss topics**: [What to clarify]
 **Design**: Likely (significant new UI)
 **Design focus**: [What to design]
@@ -81,7 +81,8 @@ Plans:
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
   3. [Observable behavior from user perspective]
-**Discuss**: Unlikely (established patterns)
+**Discuss**: Likely (assumes standard REST patterns, error handling strategy unspecified, rate limiting approach unclear)
+**Discuss topics**: [Integration scope, error UX, retry behavior]
 **Design**: Unlikely (API only)
 **Research**: Likely (external API)
 **Research topics**: [What needs investigating]
@@ -98,7 +99,8 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. [Observable behavior from user perspective]
   2. [Observable behavior from user perspective]
-**Discuss**: Unlikely (clear requirements)
+**Discuss**: Likely (assumes priority ordering of requirements, unclear if batch processing needed, edge case handling unspecified)
+**Discuss topics**: [Priority rules, batch vs individual, error recovery]
 **Design**: Unlikely (backend only)
 **Research**: Unlikely (internal patterns)
 **Plans**: [Number of plans]
@@ -137,7 +139,7 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 - Format: "User can [action]" or "[Thing] works/exists"
 
 **Pre-work indicators** (all use Likely/Unlikely with parenthetical reason):
-- `Discuss` - Vision unknowns: ambiguous requirements, UX decisions, novel features
+- `Discuss` - Default Likely. Surfaces Claude's assumptions before planning. Unlikely only for fully mechanical zero-decision work (version bump, rename-only refactor, config-only change, pure deletion/cleanup). When Likely, rationale enumerates 2-4 phase-specific assumptions or open questions.
 - `Design` - Visual unknowns: significant new UI, novel interactions, multi-screen flows
 - `Research` - Technical unknowns: external APIs, new libraries, architectural decisions
 - Include topic/focus fields only when Likely

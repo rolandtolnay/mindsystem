@@ -222,20 +222,16 @@ All use binary Likely/Unlikely with parenthetical reason. These are hints to use
 
 ### Discussion Indicators
 
-**Problem it solves:** User's mental model isn't documented. Planning happens without understanding what's essential vs nice-to-have.
+**Problem it solves:** Claude plans based on assumptions about user intent. Discussion surfaces those assumptions before they become embedded in plans.
 
-**Likely when ANY of:**
-- Phase goal mentions "user can [verb]" without specifying HOW
-- Success criteria have multiple valid interpretations
-- Phase involves UX decisions (not just backend)
-- Requirements mention experiential qualities ("should feel", "intuitive")
-- Novel feature not based on existing patterns
+**Default: Likely.** Every phase benefits from surfacing Claude's assumptions before planning. Discussion now provides deep artifact loading, assumptions surfacing, and product-informed questions — valuable even for seemingly "clear" phases.
 
-**Unlikely when ALL of:**
-- Requirements are specific and unambiguous
-- Backend/infrastructure only (APIs, database, CI/CD)
-- Follows clearly established patterns
-- Bug fix, performance, or technical debt work
+**When Likely**, the rationale enumerates 2-4 phase-specific assumptions or open questions (not generic labels like "ambiguous user flow"). Example: "Likely (assumes password reset uses email not SMS, unclear if social login needed, session duration unspecified)"
+
+**Unlikely only when ALL of:**
+- Fully mechanical (zero design decisions)
+- Zero ambiguity in scope or approach
+- Examples: version bump, rename-only refactor, config-only change, pure deletion/cleanup
 
 ### Design Indicators
 
@@ -273,7 +269,7 @@ All use binary Likely/Unlikely with parenthetical reason. These are hints to use
 For each phase in ROADMAP.md:
 
 ```markdown
-**Discuss**: Likely (ambiguous user flow) | Unlikely (clear requirements)
+**Discuss**: Likely (assumes X, unclear if Y, Z unspecified) | Unlikely (mechanical change, zero decisions)
 **Discuss topics**: [What to clarify] (only if Likely)
 **Design**: Likely (significant new UI) | Unlikely (backend only)
 **Design focus**: [What to design] (only if Likely)
