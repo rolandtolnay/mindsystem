@@ -298,6 +298,9 @@ completed: YYYY-MM-DD
 ## Issues Encountered
 [Problems during planned work, or "None"]
 
+## User Actions Required
+[Commands the user must run: migrations, package installs, env vars, server restarts. Or "None — no manual steps needed."]
+
 ## Next Step
 [Ready for next plan, or "Phase complete, ready for transition"]
 ```

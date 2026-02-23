@@ -127,7 +127,19 @@ PHASE=$(printf "%02d" "$PHASE_ARG" 2>/dev/null || echo "$PHASE_ARG")
 <offer_next>
 **MANDATORY: Present copy/paste-ready next command.**
 
-After verification completes, route based on status:
+After verification completes:
+
+**First, surface user actions from all SUMMARYs:**
+
+Extract `## User Actions Required` sections from all `*-SUMMARY.md` files in the phase directory. If any contain actions (not "None"), present before route-specific content:
+
+```
+## ⚠ Action Required
+
+{Consolidated list from all SUMMARYs — deduplicate if overlapping}
+```
+
+Then route based on status:
 
 | Status | Route |
 |--------|-------|

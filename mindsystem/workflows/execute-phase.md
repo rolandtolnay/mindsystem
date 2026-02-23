@@ -527,6 +527,10 @@ git commit -m "docs: update codebase map after phase {X}"
 <step name="offer_next">
 Present next steps based on milestone status.
 
+**First, surface user actions:**
+
+Read `## User Actions Required` from all `*-SUMMARY.md` files in the phase directory. If any non-empty actions exist, present as `## ⚠ Action Required` block before route-specific content. Skip if all "None".
+
 **If more phases remain:**
 
 Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase.
