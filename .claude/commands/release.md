@@ -141,7 +141,10 @@ When uncertain, include. The user can remove during confirmation.
 
 **Writing rules:**
 - Group by type (Added, Changed, Fixed, Removed). Skip empty sections.
-- One bullet per logical change. Consolidate iterative commits on the same feature into one entry reflecting the **final state**.
+- **Order entries by user impact** within each section — highest-impact changes first, minor polish last.
+- **Scale description length to impact.** High-impact changes deserve 2-3 sentences explaining the benefit. Low-impact changes can be a single clause. Minor related items (language polish, UX tweaks across multiple commands) consolidate into one line.
+- **Consolidate related commits into one entry.** Multiple commits that tell one story (e.g., a feature + its default behavior change + command it absorbs) become a single entry reflecting the final state. Don't split one feature across Added/Changed/Removed when it reads better as one cohesive entry.
+- **Omit purely internal changes** that users never interact with (structural guards on internal agents, internal architectural refactors with no user-facing effect). When uncertain, include.
 - Write from user perspective: what changed and why it benefits them. Use ticket Problem/Solution context when available.
 - Never include ticket identifiers (e.g., `[MIN-86]`) in changelog lines
 </step>
