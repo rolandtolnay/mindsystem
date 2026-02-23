@@ -411,15 +411,18 @@ function generateWrappers(claudeDir) {
   const binDir = path.join(claudeDir, 'bin');
   fs.mkdirSync(binDir, { recursive: true });
 
-  const msToolsWrapper = '#!/usr/bin/env bash\nexec uv run "$(dirname "$0")/../mindsystem/scripts/ms-tools.py" "$@"\n';
-  const msLookupWrapper = '#!/usr/bin/env bash\nexec "$(dirname "$0")/../mindsystem/scripts/ms-lookup-wrapper.sh" "$@"\n';
+  const wrappers = {
+    'ms-tools': '#!/usr/bin/env bash\nexec uv run "$(dirname "$0")/../mindsystem/scripts/ms-tools.py" "$@"\n',
+    'ms-lookup': '#!/usr/bin/env bash\nexec "$(dirname "$0")/../mindsystem/scripts/ms-lookup-wrapper.sh" "$@"\n',
+    'ms-compare-mockups': '#!/usr/bin/env bash\nexec uv run "$(dirname "$0")/../mindsystem/scripts/compare_mockups.py" "$@"\n',
+  };
 
-  fs.writeFileSync(path.join(binDir, 'ms-tools'), msToolsWrapper);
-  fs.writeFileSync(path.join(binDir, 'ms-lookup'), msLookupWrapper);
-  fs.chmodSync(path.join(binDir, 'ms-tools'), '755');
-  fs.chmodSync(path.join(binDir, 'ms-lookup'), '755');
+  for (const [name, content] of Object.entries(wrappers)) {
+    fs.writeFileSync(path.join(binDir, name), content);
+    fs.chmodSync(path.join(binDir, name), '755');
+  }
 
-  console.log(`  ${green}✓${reset} Generated CLI wrappers (bin/ms-tools, bin/ms-lookup)`);
+  console.log(`  ${green}✓${reset} Generated CLI wrappers (${Object.keys(wrappers).join(', ')})`);
 }
 
 function ensurePathHook(claudeDir, isGlobal, configDir) {

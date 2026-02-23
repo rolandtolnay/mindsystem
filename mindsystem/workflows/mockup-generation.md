@@ -106,7 +106,7 @@ Task(prompt=assembled_context, subagent_type="ms-mockup-designer", description="
 After all 3 agents return, run the comparison script to create the comparison page. Do NOT generate comparison HTML manually — use the script:
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/compare_mockups.py "${PHASE_DIR}/mockups"
+ms-compare-mockups "${PHASE_DIR}/mockups"
 open "${PHASE_DIR}/mockups/comparison.html"
 ```
 

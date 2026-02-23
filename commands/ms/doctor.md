@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run comprehensive health checks on project configuration. Detect and fix structural drift across 6 categories: subsystem vocabulary, milestone directory structure, phase archival, knowledge files, phase summaries, and PLAN cleanup.
+Run comprehensive health checks on project configuration. Detect and fix structural drift across 7 categories: subsystem vocabulary, milestone directory structure, phase archival, knowledge files, phase summaries, PLAN cleanup, and CLI wrappers.
 
 Idempotent — safe to run repeatedly.
 </objective>
@@ -88,6 +88,7 @@ Display results as a markdown table:
 | Knowledge files          | FAIL   | Directory missing                |
 | Phase summaries          | FAIL   | 2 milestones missing summaries   |
 | PLAN cleanup             | FAIL   | 9 leftover PLAN.md files         |
+| CLI wrappers             | FAIL   | ms-tools not on PATH             |
 ```
 
 Populate Result and Details from scan output. Use concise detail summaries.
@@ -332,6 +333,7 @@ Final summary table:
 | Knowledge files          | PASS   | ...                              |
 | Phase summaries          | PASS   | ...                              |
 | PLAN cleanup             | PASS   | ...                              |
+| CLI wrappers             | PASS   | ...                              |
 
 All checks passed.
 ```
@@ -347,6 +349,6 @@ Include counts: checks total, passed, fixed during this run.
 - [ ] User confirms fix strategy before changes (Fix all / Review each / Skip)
 - [ ] Fixes applied in dependency order: subsystems → dirs → archival → cleanup → knowledge
 - [ ] Results displayed as markdown table before any action
-- [ ] All 6 categories reported with PASS/FAIL/SKIP
+- [ ] All 7 categories reported with PASS/FAIL/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>

@@ -607,6 +607,21 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
                 record("PASS", "PLAN Cleanup")
     print()
 
+    # ---- CHECK 7: CLI Wrappers ----
+    print("=== CLI Wrappers ===")
+    wrapper_names = ["ms-tools", "ms-lookup", "ms-compare-mockups"]
+    missing_wrappers = [w for w in wrapper_names if shutil.which(w) is None]
+    if missing_wrappers:
+        print("Status: FAIL")
+        print(f"Not on PATH: {', '.join(missing_wrappers)}")
+        print("Fix: re-run `npx mindsystem-cc` to regenerate wrappers and PATH hook")
+        record("FAIL", "CLI Wrappers")
+    else:
+        print("Status: PASS")
+        print(f"All {len(wrapper_names)} CLI wrappers found on PATH")
+        record("PASS", "CLI Wrappers")
+    print()
+
     # ---- SUMMARY ----
     total = pass_count + fail_count + skip_count
     print("=== Summary ===")
