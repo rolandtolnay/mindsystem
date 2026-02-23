@@ -6,6 +6,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.21.0] - 2026-02-23
+
+### Added
+- **Name-based milestones:** Milestones use slugified names (e.g., "mvp", "push-notifications") instead of version numbers, eliminating conflicts with app semver and git tags. Includes auto-detection from PROJECT.md, doctor check for naming conventions, and migration tooling.
+- **`/ms:config` command:** Configure code reviewers, gitignore patterns, and git remote. Supports updating existing PROJECT.md without starting over.
+- **Unified `ms-tools.py` CLI:** Replaced 10 standalone bash scripts with a single Python CLI using argparse subcommands, plus comprehensive test suite.
+- **CLI wrapper scripts:** Thin `ms-tools` and `ms-lookup` wrappers auto-installed to PATH via SessionStart hook, saving ~1,600 chars of prompt overhead per session.
+- **User actions in execution summaries:** Execute-phase now surfaces manual steps (migrations, installs, env vars) required after plan execution.
+- **Product-aware discuss phase:** Discuss-phase loads milestone artifacts, surfaces Claude's assumptions, and offers optional competitor/UX/industry research before planning.
+
+### Changed
+- Discuss is now the default pre-work phase for all non-mechanical work, with required assumption enumeration to prevent misalignment.
+- Doctor command extracted fix steps into a dedicated workflow, keeping the command as a thin orchestrator.
+- Product researcher agent stripped of local tools to structurally prevent codebase exploration.
+- Simplified language and reordered success criteria across config and new-project commands.
+- Upgraded research-synthesizer agent from Haiku to Sonnet for better synthesis quality.
+- Improved release and design-phase UX (separated changelog display from confirmation, reordered platform detection).
+
+### Removed
+- `/ms:list-phase-assumptions` command (functionality absorbed into discuss-phase).
+
 ## [3.20.0] - 2026-02-22
 
 ### Added
@@ -516,7 +537,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.20.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.21.0...HEAD
+[3.21.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.20.0...v3.21.0
 [3.20.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.19.0...v3.20.0
 [3.19.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.1...v3.19.0
 [3.18.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.0...v3.18.1
