@@ -84,7 +84,7 @@ Add note that this is the last phase and what comes after:
 
 **After this completes:**
 - Milestone complete
-- Next: `/ms:complete-milestone` — archive and tag
+- Next: `/ms:complete-milestone` — archive milestone
 
 ---
 ```
@@ -168,7 +168,7 @@ When there's no clear primary action:
 ```
 ---
 
-## 🎉 Milestone v1.0 Complete
+## 🎉 Milestone Complete
 
 All 4 phases shipped
 

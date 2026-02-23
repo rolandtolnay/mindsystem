@@ -65,8 +65,8 @@ mkdir -p .planning/research
 ```
 
 **Determine milestone context:**
-- If no "Validated" requirements in REQUIREMENTS.md → Greenfield (v1.0)
-- If "Validated" requirements exist → Subsequent milestone (v1.1+)
+- If no "Validated" requirements in REQUIREMENTS.md → Greenfield
+- If "Validated" requirements exist → Subsequent milestone
 
 Spawn all 4 in parallel with rich context:
 
@@ -79,10 +79,10 @@ Project Research — Stack dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-**Greenfield (v1.0):**
+**Greenfield (first milestone):**
 Research the standard stack for building [domain] from scratch. Full ecosystem investigation.
 
-**Subsequent (v1.1+):**
+**Subsequent (later milestones):**
 Research what's needed to add [target features] to an existing [domain] app.
 
 IMPORTANT for subsequent milestones:
@@ -128,10 +128,10 @@ Project Research — Features dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-**Greenfield (v1.0):**
+**Greenfield (first milestone):**
 What features do [domain] products have? What's table stakes vs differentiating?
 
-**Subsequent (v1.1+):**
+**Subsequent (later milestones):**
 How do [target features] typically work? What's expected behavior?
 
 IMPORTANT for subsequent milestones:
@@ -176,10 +176,10 @@ Project Research — Architecture dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-**Greenfield (v1.0):**
+**Greenfield (first milestone):**
 How are [domain] systems typically structured? What are major components?
 
-**Subsequent (v1.1+):**
+**Subsequent (later milestones):**
 How do [target features] integrate with existing [domain] architecture?
 
 IMPORTANT for subsequent milestones:
@@ -224,10 +224,10 @@ Project Research — Pitfalls dimension for [domain].
 <milestone_context>
 {greenfield OR subsequent}
 
-**Greenfield (v1.0):**
+**Greenfield (first milestone):**
 What do [domain] projects commonly get wrong? Critical mistakes?
 
-**Subsequent (v1.1+):**
+**Subsequent (later milestones):**
 What are common mistakes when adding [target features] to [domain]?
 
 IMPORTANT for subsequent milestones:

@@ -66,7 +66,7 @@ Parse the roadmap to find the current milestone section:
 Example structure:
 
 ```
-## Current Milestone: v1.0 Foundation
+## Current Milestone: Foundation
 
 ### Phase 4: Focused Command System
 ### Phase 5: Path Routing & Validation

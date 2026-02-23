@@ -1,8 +1,8 @@
 ---
 type: prompt
 name: ms:complete-milestone
-description: Archive completed milestone and prepare for next version
-argument-hint: <version>
+description: Archive completed milestone and prepare for next milestone
+argument-hint: "[name]"
 allowed-tools:
   - Read
   - Write
@@ -11,10 +11,10 @@ allowed-tools:
 ---
 
 <objective>
-Mark milestone {{version}} complete, archive to milestones/, and update ROADMAP.md and REQUIREMENTS.md.
+Mark milestone complete, archive to milestones/, and update ROADMAP.md and REQUIREMENTS.md.
 
-Purpose: Create historical record of shipped version, archive milestone artifacts (roadmap + requirements), and prepare for next milestone.
-Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tagged.
+Purpose: Create historical record of shipped milestone, archive milestone artifacts (roadmap + requirements), and prepare for next milestone.
+Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
 </objective>
 
 <execution_context>
@@ -33,16 +33,22 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 **User input:**
 
-- Version: {{version}} (e.g., "1.0", "1.1", "2.0")
+- Milestone: $ARGUMENTS (optional — auto-detect from PROJECT.md `## Current Milestone:` header)
   </context>
 
 <process>
 
 **Follow complete-milestone.md workflow:**
 
-0. **Check for audit:**
+0. **Resolve milestone identity:**
 
-   - Look for `.planning/v{{version}}-MILESTONE-AUDIT.md`
+   - If argument provided: use as milestone name, generate slug
+   - If no argument: parse milestone name from PROJECT.md `## Current Milestone:` header, generate slug
+   - If neither found: error — ask user for milestone name
+
+0.5. **Check for audit:**
+
+   - Look for `.planning/MILESTONE-AUDIT.md`
    - If missing or stale: recommend `/ms:audit-milestone` first
    - If audit status is `gaps_found`: recommend `/ms:plan-milestone-gaps` first
    - If audit status is `passed`: proceed to step 1
@@ -50,7 +56,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    ```markdown
    ## Pre-flight Check
 
-   {If no v{{version}}-MILESTONE-AUDIT.md:}
+   {If no MILESTONE-AUDIT.md:}
    ⚠ No milestone audit found. Run `/ms:audit-milestone` first to verify
    requirements coverage, cross-phase integration, and E2E flows.
 
@@ -89,26 +95,26 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 
 5. **Archive milestone:**
 
-   - Create `.planning/milestones/v{{version}}/` directory
-   - Create `.planning/milestones/v{{version}}/ROADMAP.md` from template
+   - Create `.planning/milestones/{{slug}}/` directory
+   - Create `.planning/milestones/{{slug}}/ROADMAP.md` from template
    - Delete ROADMAP.md
 
 6. **Archive requirements:**
 
-   - Create `.planning/milestones/v{{version}}/REQUIREMENTS.md`
+   - Create `.planning/milestones/{{slug}}/REQUIREMENTS.md`
    - Mark all requirements as complete with outcomes
    - Delete `.planning/REQUIREMENTS.md`
 
 7. **Archive milestone files:**
 
    ```bash
-   ms-tools archive-milestone-files v{{version}}
+   ms-tools archive-milestone-files {{slug}}
    ```
 
 8. **Archive and cleanup phases:**
 
    ```bash
-   ms-tools archive-milestone-phases $PHASE_START $PHASE_END v{{version}}
+   ms-tools archive-milestone-phases $PHASE_START $PHASE_END {{slug}}
    ```
 
 9. **Update STATE.md:**
@@ -116,12 +122,10 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
     - Update project reference with current core value and next focus
     - Reset current position for next milestone
 
-10. **Commit and tag:**
+10. **Commit:**
 
     - Stage: MILESTONES.md, PROJECT.md, STATE.md, archive files, deletions
-    - Commit: `chore: archive v{{version}} milestone`
-    - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
-    - Ask about pushing tag
+    - Commit: `chore: archive {{name}} milestone`
 
 11. **Offer next steps:**
     - `/ms:new-milestone` — discover goals and update PROJECT.md
@@ -136,10 +140,9 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 - PROJECT.md full evolution review completed (What This Is, Core Value, Requirements, Key Decisions, Context)
 - All shipped requirements moved to Validated in PROJECT.md
 - Key Decisions updated with outcomes
-- Milestone archived to `.planning/milestones/v{{version}}/ROADMAP.md`
-- Requirements archived to `.planning/milestones/v{{version}}/REQUIREMENTS.md`
+- Milestone archived to `.planning/milestones/{{slug}}/ROADMAP.md`
+- Requirements archived to `.planning/milestones/{{slug}}/REQUIREMENTS.md`
 - `.planning/REQUIREMENTS.md` deleted (fresh for next milestone)
-- Git tag v{{version}} created
   </success_criteria>
 
 <critical_rules>

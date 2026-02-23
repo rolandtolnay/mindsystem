@@ -262,14 +262,14 @@ Replace `<N>` with the phase number you're working on.
 **Run:**
 
 ```
-/ms:audit-milestone 1.0.0
-/ms:complete-milestone 1.0.0
-/ms:new-milestone "v1.1"
+/ms:audit-milestone
+/ms:complete-milestone
+/ms:new-milestone
 ```
 
 **What you'll get:**
 
-- `.planning/milestones/v1.0/` — archived milestone (ROADMAP, REQUIREMENTS, DECISIONS, research)
+- `.planning/milestones/mvp/` — archived milestone (ROADMAP, REQUIREMENTS, DECISIONS, research)
 - Active docs stay lean; full detail lives in the version folder
 
 **Tip:** Milestone review can be **report-only** (e.g., Flutter structural review) so you stay in control. Create a quality phase, or accept tech debt explicitly — your call.

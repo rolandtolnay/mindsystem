@@ -7,14 +7,14 @@ Template for reorganizing `ROADMAP.md` after first milestone ships. Collapse com
 
 ## Milestones
 
-- ✅ **v1.0 MVP** - Phases 1-4 (shipped YYYY-MM-DD)
-- 🚧 **v1.1 [Name]** - Phases 5-6 (in progress)
-- 📋 **v2.0 [Name]** - Phases 7-10 (planned)
+- ✅ **MVP** - Phases 1-4 (shipped YYYY-MM-DD)
+- 🚧 **[Name]** - Phases 5-6 (in progress)
+- 📋 **[Name]** - Phases 7-10 (planned)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 MVP (Phases 1-4) - SHIPPED YYYY-MM-DD</summary>
+<summary>✅ MVP (Phases 1-4) - SHIPPED YYYY-MM-DD</summary>
 
 ### Phase 1: [Name]
 **Goal**: [What this phase delivers]
@@ -25,13 +25,13 @@ Plans:
 - [x] 01-02: [Brief description]
 - [x] 01-03: [Brief description]
 
-[... remaining v1.0 phases ...]
+[... remaining phases ...]
 
 </details>
 
-### 🚧 v1.1 [Name] (In Progress)
+### 🚧 [Name] (In Progress)
 
-**Milestone Goal:** [What v1.1 delivers]
+**Milestone Goal:** [What this milestone delivers]
 
 #### Phase 5: [Name]
 **Goal**: [What this phase delivers]
@@ -42,21 +42,21 @@ Plans:
 - [ ] 05-01: [Brief description]
 - [ ] 05-02: [Brief description]
 
-[... remaining v1.1 phases ...]
+[... remaining phases ...]
 
-### 📋 v2.0 [Name] (Planned)
+### 📋 [Name] (Planned)
 
-**Milestone Goal:** [What v2.0 delivers]
+**Milestone Goal:** [What this milestone delivers]
 
-[... v2.0 phases ...]
+[... phases ...]
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Foundation | v1.0 | 3/3 | Complete | YYYY-MM-DD |
-| 2. Features | v1.0 | 2/2 | Complete | YYYY-MM-DD |
-| 5. Security | v1.1 | 0/2 | Not started | - |
+| 1. Foundation | MVP | 3/3 | Complete | YYYY-MM-DD |
+| 2. Features | MVP | 2/2 | Complete | YYYY-MM-DD |
+| 5. Security | Security & Polish | 0/2 | Not started | - |
 ```
 
 **Notes:**

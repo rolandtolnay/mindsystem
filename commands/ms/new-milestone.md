@@ -1,7 +1,7 @@
 ---
 name: ms:new-milestone
 description: Start a new milestone — discover what to build, update PROJECT.md, create context for downstream
-argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
+argument-hint: "[name, e.g., 'Notifications']"
 allowed-tools:
   - Read
   - Write
@@ -68,7 +68,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    - Read MILESTONES.md (what shipped previously)
    - Read STATE.md (pending todos, blockers)
    - Read config.json (project settings)
-   - Calculate previous milestone version from MILESTONES.md (e.g., if last shipped was v1.0, previous=1.0)
+   - Identify previous milestone name from MILESTONES.md (e.g., last shipped was "MVP")
 
 2. **Check for active milestone:**
 
@@ -76,7 +76,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
    Use AskUserQuestion:
    - header: "Active milestone"
-   - question: "There's a milestone in progress (v[X.Y]). What do you want to do?"
+   - question: "There's a milestone in progress ([Name]). What do you want to do?"
    - options:
      - "Complete it first" — run /ms:complete-milestone
      - "Add phases to it" — run /ms:add-phase
@@ -86,9 +86,9 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    If "Continue anyway": proceed.
 
 3. **Strategic assessment (silent — do not output this step):**
-   - Check for previous milestone artifacts using calculated version:
+   - Check for previous milestone artifacts:
      - `.planning/knowledge/*.md` (subsystem knowledge files — persist across milestones)
-     - `.planning/milestones/v{VERSION}/MILESTONE-AUDIT.md` (if exists)
+     - `.planning/milestones/{slug}/MILESTONE-AUDIT.md` (if exists, for last completed milestone)
      - `.planning/TECH-DEBT.md` (if exists)
    - Identify: outstanding tech debt, untested assumptions, high-impact gaps, unaddressed requirements
    - This is background analysis — synthesize silently, surface through suggestions in step 4
@@ -98,7 +98,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    ```
    ## Last Milestone
 
-   v[X.Y] [Name] — [key accomplishments, 1-2 lines]
+   [Name] — [key accomplishments, 1-2 lines]
 
    ## Suggested Directions
 
@@ -115,7 +115,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    - Strategic features inferred from PROJECT.md: Who It's For, Core Problem, How It's Different
    - Pending todos from STATE.md
 
-   If no meaningful artifacts exist (first milestone after v1.0), base suggestions purely on PROJECT.md.
+   If no meaningful artifacts exist (first milestone), base suggestions purely on PROJECT.md.
 
 5. **Freeform opening:**
 
@@ -181,17 +181,17 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 ## Phase 3: Commit
 
-12. **Determine milestone version:**
-    - Parse last version from MILESTONES.md
-    - Suggest next version (v1.0 → v1.1, or v2.0 for major shifts)
-    - Confirm with user via AskUserQuestion
+12. **Determine milestone name:**
+    - Derive milestone name from the conversation (e.g., "Push Notifications", "Security Hardening")
+    - Generate slug from name (e.g., "push-notifications", "security-hardening")
+    - Confirm name with user via AskUserQuestion
 
 13. **Present milestone summary:**
 
     ```
     ## Milestone Summary
 
-    **Version:** v[X.Y] [Name]
+    **Name:** [Name]
     **Goal:** [One sentence]
     **Target features:**
     - [Feature 1]
@@ -213,7 +213,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
     Add/update these sections:
 
     ```markdown
-    ## Current Milestone: v[X.Y] [Name]
+    ## Current Milestone: [Name]
 
     **Goal:** [One sentence describing milestone focus]
 
@@ -246,7 +246,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
     Phase: Not started (run /ms:create-roadmap)
     Plan: —
     Status: Defining requirements
-    Last activity: [today] — Milestone v[X.Y] started
+    Last activity: [today] — Milestone [Name] started
 
     Progress: ░░░░░░░░░░ 0%
     ```
@@ -258,7 +258,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
     ```bash
     git add .planning/PROJECT.md .planning/STATE.md .planning/MILESTONE-CONTEXT.md
     git commit -m "$(cat <<'EOF'
-    docs: start milestone v[X.Y] [Name]
+    docs: start milestone [Name]
     EOF
     )"
     ```
@@ -280,7 +280,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
     Based on the conversation, recommend ONE path. If unfamiliar domains or open questions surfaced during discovery, recommend `/ms:research-project`. Otherwise recommend `/ms:create-roadmap`.
 
     ```
-    Milestone v[X.Y] [Name] initialized.
+    Milestone [Name] initialized.
 
     PROJECT.md updated with new goals.
     Context saved to MILESTONE-CONTEXT.md

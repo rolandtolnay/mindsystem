@@ -2,7 +2,7 @@
 
 Template for `.planning/ROADMAP.md`.
 
-## Initial Roadmap (v1.0 Greenfield)
+## Initial Roadmap (Greenfield)
 
 ```markdown
 # Roadmap: [Project Name]
@@ -122,7 +122,7 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 ```
 
 <guidelines>
-**Initial planning (v1.0):**
+**Initial planning:**
 - Phase count derived from actual work (not a target number)
 - Each phase delivers something coherent
 - Phases can have 1+ plans (split by orchestrator judgment — multiple subsystems, context budget, vertical slices)

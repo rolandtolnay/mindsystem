@@ -400,12 +400,12 @@ Exit skill and invoke SlashCommand("/ms:plan-phase [X+1]")
 ```
 Phase {X} marked complete.
 
-🎉 Milestone {version} is 100% complete — all {N} phases finished!
+🎉 Milestone is 100% complete — all {N} phases finished!
 
 ⚡ Auto-continuing: Complete milestone and archive
 ```
 
-Exit skill and invoke SlashCommand("/ms:complete-milestone {version}")
+Exit skill and invoke SlashCommand("/ms:complete-milestone")
 
 </step>
 

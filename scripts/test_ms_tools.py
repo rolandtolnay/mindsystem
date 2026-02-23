@@ -16,6 +16,7 @@ _spec = importlib.util.spec_from_file_location(
 _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 
+slugify = _mod.slugify
 normalize_phase = _mod.normalize_phase
 in_range = _mod.in_range
 parse_frontmatter = _mod.parse_frontmatter
@@ -32,6 +33,8 @@ _scan_debug_docs = _mod._scan_debug_docs
 _scan_adhoc_summaries = _mod._scan_adhoc_summaries
 _scan_todos = _mod._scan_todos
 _scan_knowledge_files = _mod._scan_knowledge_files
+_detect_versioned_milestone_dirs = _mod._detect_versioned_milestone_dirs
+_parse_milestone_name_mapping = _mod._parse_milestone_name_mapping
 _SafeEncoder = _mod._SafeEncoder
 
 # ---------------------------------------------------------------------------
@@ -47,6 +50,35 @@ REGENERATE_GOLDEN = False
 # ===================================================================
 # Part 1: Pure Function Unit Tests
 # ===================================================================
+
+
+class TestSlugify:
+    def test_basic_name(self):
+        assert slugify("Push Notifications") == "push-notifications"
+
+    def test_ampersand_stripped(self):
+        assert slugify("Auth & Payments") == "auth-payments"
+
+    def test_uppercase(self):
+        assert slugify("MVP") == "mvp"
+
+    def test_underscores(self):
+        assert slugify("push_notifications") == "push-notifications"
+
+    def test_consecutive_hyphens(self):
+        assert slugify("auth -- payments") == "auth-payments"
+
+    def test_leading_trailing_hyphens(self):
+        assert slugify("-hello-world-") == "hello-world"
+
+    def test_special_characters(self):
+        assert slugify("v2.0 New Features!") == "v20-new-features"
+
+    def test_empty_string(self):
+        assert slugify("") == ""
+
+    def test_already_slug(self):
+        assert slugify("push-notifications") == "push-notifications"
 
 
 class TestNormalizePhase:
@@ -590,3 +622,215 @@ class TestScanIntegrationTargeted:
     def test_no_parse_errors(self):
         output = _build_scan_output(FIXTURE_PLANNING)
         assert output["sources"]["parse_errors"] == []
+
+
+# ===================================================================
+# Part 3: Milestone Naming Detection Tests
+# ===================================================================
+
+
+class TestDetectVersionedMilestoneDirs:
+    """Test _detect_versioned_milestone_dirs detection logic."""
+
+    def test_standard_dirs(self, tmp_path):
+        """v0.1/, v0.2/ with .md files detected as standard."""
+        planning = tmp_path / ".planning"
+        ms = planning / "milestones"
+        (ms / "v0.1").mkdir(parents=True)
+        (ms / "v0.1" / "ROADMAP.md").write_text("# Roadmap")
+        (ms / "v0.2").mkdir(parents=True)
+        (ms / "v0.2" / "ROADMAP.md").write_text("# Roadmap")
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert len(result) == 2
+        assert result[0]["version"] == "v0.1"
+        assert result[0]["type"] == "standard"
+        assert result[0]["sub"] is None
+        assert result[1]["version"] == "v0.2"
+        assert result[1]["type"] == "standard"
+
+    def test_nested_dirs(self, tmp_path):
+        """v2.0.0/ with sub-dirs and no .md files detected as nested."""
+        planning = tmp_path / ".planning"
+        ms = planning / "milestones"
+        v200 = ms / "v2.0.0"
+        (v200 / "quests").mkdir(parents=True)
+        (v200 / "quests" / "ROADMAP.md").write_text("# Roadmap")
+        (v200 / "sanctuary").mkdir(parents=True)
+        (v200 / "sanctuary" / "ROADMAP.md").write_text("# Roadmap")
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert len(result) == 2
+        assert result[0]["version"] == "v2.0.0"
+        assert result[0]["sub"] == "quests"
+        assert result[0]["type"] == "nested"
+        assert result[1]["sub"] == "sanctuary"
+        assert result[1]["type"] == "nested"
+
+    def test_mixed_standard_and_nested(self, tmp_path):
+        """v2.0.0/quests/ (nested) + v2.2.0/ (standard) both detected."""
+        planning = tmp_path / ".planning"
+        ms = planning / "milestones"
+        # Nested
+        v200 = ms / "v2.0.0"
+        (v200 / "quests").mkdir(parents=True)
+        (v200 / "quests" / "ROADMAP.md").write_text("# Roadmap")
+        # Standard
+        (ms / "v2.2.0").mkdir(parents=True)
+        (ms / "v2.2.0" / "ROADMAP.md").write_text("# Roadmap")
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert len(result) == 2
+        nested = [r for r in result if r["type"] == "nested"]
+        standard = [r for r in result if r["type"] == "standard"]
+        assert len(nested) == 1
+        assert nested[0]["sub"] == "quests"
+        assert len(standard) == 1
+        assert standard[0]["version"] == "v2.2.0"
+
+    def test_slug_dirs_ignored(self, tmp_path):
+        """mvp/, blast-pass/ are not flagged."""
+        planning = tmp_path / ".planning"
+        ms = planning / "milestones"
+        (ms / "mvp").mkdir(parents=True)
+        (ms / "mvp" / "ROADMAP.md").write_text("# Roadmap")
+        (ms / "blast-pass").mkdir(parents=True)
+        (ms / "blast-pass" / "ROADMAP.md").write_text("# Roadmap")
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert result == []
+
+    def test_no_milestones_dir(self, tmp_path):
+        """No milestones/ directory returns empty."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert result == []
+
+    def test_empty_milestones_dir(self, tmp_path):
+        """Empty milestones/ directory returns empty."""
+        planning = tmp_path / ".planning"
+        (planning / "milestones").mkdir(parents=True)
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert result == []
+
+    def test_phases_subdir_excluded_from_nested(self, tmp_path):
+        """phases/ sub-directory inside v-dir is excluded from nested detection."""
+        planning = tmp_path / ".planning"
+        ms = planning / "milestones"
+        v01 = ms / "v0.1"
+        (v01 / "phases" / "01-setup").mkdir(parents=True)
+        # Has .md files, so it's standard despite having phases/ sub-dir
+        (v01 / "ROADMAP.md").write_text("# Roadmap")
+
+        result = _detect_versioned_milestone_dirs(planning)
+        assert len(result) == 1
+        assert result[0]["type"] == "standard"
+
+
+class TestParseMilestoneNameMapping:
+    """Test _parse_milestone_name_mapping parsing logic."""
+
+    def test_standard_headers(self, tmp_path):
+        """Parses ## v0.1 MVP (Shipped: ...) correctly."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+        (planning / "MILESTONES.md").write_text(
+            "# Milestones\n\n"
+            "## v0.1 MVP (Shipped: 2026-01-15)\n\n"
+            "Some content.\n"
+        )
+
+        result = _parse_milestone_name_mapping(planning)
+        assert len(result) == 1
+        assert result[0]["version"] == "v0.1"
+        assert result[0]["name"] == "MVP"
+        assert result[0]["slug"] == "mvp"
+
+    def test_multi_word_names(self, tmp_path):
+        """Parses multi-word names with special chars."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+        (planning / "MILESTONES.md").write_text(
+            "# Milestones\n\n"
+            "## v0.1 MVP - POSitive Plus SDK Integration (Shipped: 2026-01-15)\n\n"
+        )
+
+        result = _parse_milestone_name_mapping(planning)
+        assert len(result) == 1
+        assert result[0]["name"] == "MVP - POSitive Plus SDK Integration"
+        assert result[0]["slug"] == "mvp-positive-plus-sdk-integration"
+
+    def test_duplicate_version(self, tmp_path):
+        """Two v2.0.0 entries (like ForgeBlast) both extracted."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+        (planning / "MILESTONES.md").write_text(
+            "# Milestones\n\n"
+            "## v2.0.0 Quests Feature (Shipped: 2026-01-01)\n\n"
+            "Content.\n\n"
+            "## v2.0.0 Sanctuary (Shipped: 2026-02-01)\n\n"
+            "Content.\n"
+        )
+
+        result = _parse_milestone_name_mapping(planning)
+        assert len(result) == 2
+        versions = [r["version"] for r in result]
+        assert versions == ["v2.0.0", "v2.0.0"]
+        names = [r["name"] for r in result]
+        assert "Quests Feature" in names
+        assert "Sanctuary" in names
+
+    def test_no_versioned_headers(self, tmp_path):
+        """New-format headers without version prefix are not matched."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+        (planning / "MILESTONES.md").write_text(
+            "# Milestones\n\n"
+            "## MVP (Shipped: 2026-01-15)\n\n"
+            "Content.\n"
+        )
+
+        result = _parse_milestone_name_mapping(planning)
+        assert result == []
+
+    def test_current_milestone_from_project(self, tmp_path):
+        """Parses ## Current Milestone: v0.3 Demo Release from PROJECT.md."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+        (planning / "PROJECT.md").write_text(
+            "# Project\n\n"
+            "## Current Milestone: v0.3 Demo Release\n\n"
+            "Content.\n"
+        )
+
+        result = _parse_milestone_name_mapping(planning)
+        assert len(result) == 1
+        assert result[0]["version"] == "v0.3"
+        assert result[0]["name"] == "Demo Release"
+        assert result[0]["slug"] == "demo-release"
+        assert result[0].get("current") is True
+
+    def test_no_files(self, tmp_path):
+        """No MILESTONES.md or PROJECT.md returns empty."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+
+        result = _parse_milestone_name_mapping(planning)
+        assert result == []
+
+    def test_started_status(self, tmp_path):
+        """Parses Started: status headers too."""
+        planning = tmp_path / ".planning"
+        planning.mkdir(parents=True)
+        (planning / "MILESTONES.md").write_text(
+            "# Milestones\n\n"
+            "## v0.2 Infrastructure (Started: 2026-02-01)\n\n"
+        )
+
+        result = _parse_milestone_name_mapping(planning)
+        assert len(result) == 1
+        assert result[0]["version"] == "v0.2"
+        assert result[0]["name"] == "Infrastructure"

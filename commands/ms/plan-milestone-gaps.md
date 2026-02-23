@@ -25,7 +25,7 @@ One command creates all fix phases — no manual `/ms:add-phase` per gap.
 
 <context>
 **Audit results:**
-Glob: .planning/v*-MILESTONE-AUDIT.md (use most recent)
+@.planning/MILESTONE-AUDIT.md
 
 **Original intent (for prioritization):**
 @.planning/PROJECT.md
@@ -41,8 +41,7 @@ Glob: .planning/v*-MILESTONE-AUDIT.md (use most recent)
 ## 1. Load Audit Results
 
 ```bash
-# Find the most recent audit file
-ls -t .planning/v*-MILESTONE-AUDIT.md 2>/dev/null | head -1
+cat .planning/MILESTONE-AUDIT.md
 ```
 
 Parse YAML frontmatter to extract structured gaps:
@@ -105,7 +104,7 @@ New phases continue from there:
 ```markdown
 ## Gap Closure Plan
 
-**Milestone:** {version}
+**Milestone:** {name}
 **Gaps to close:** {N} requirements, {M} integration, {K} flows
 
 ### Proposed Phases
@@ -191,7 +190,7 @@ git commit -m "docs(roadmap): add gap closure phases {N}-{M}"
 **After all gap phases complete:**
 
 `/ms:audit-milestone` — re-audit to verify gaps closed
-`/ms:complete-milestone {version}` — archive when audit passes
+`/ms:complete-milestone` — archive when audit passes
 ```
 
 ## 10. Update Last Command

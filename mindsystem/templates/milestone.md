@@ -3,7 +3,7 @@
 Add this entry to `.planning/MILESTONES.md` when completing a milestone:
 
 ```markdown
-## v[X.Y] [Name] (Shipped: YYYY-MM-DD)
+## [Name] (Shipped: YYYY-MM-DD)
 
 **Delivered:** [One sentence describing what shipped]
 
@@ -40,9 +40,9 @@ If MILESTONES.md doesn't exist, create it with header:
 
 <guidelines>
 **When to create milestones:**
-- Initial v1.0 MVP shipped
-- Major version releases (v2.0, v3.0)
-- Significant feature milestones (v1.1, v1.2)
+- Initial MVP shipped
+- Major feature sets complete
+- Significant feature milestones
 - Before archiving planning (capture what was shipped)
 
 **Don't create milestones for:**
@@ -65,7 +65,7 @@ If MILESTONES.md doesn't exist, create it with header:
 ```markdown
 # Project Milestones: WeatherBar
 
-## v1.1 Security & Polish (Shipped: 2025-12-10)
+## Security & Polish (Shipped: 2025-12-10)
 
 **Delivered:** Security hardening with Keychain integration and comprehensive error handling
 
@@ -81,15 +81,15 @@ If MILESTONES.md doesn't exist, create it with header:
 - 23 files modified
 - 650 lines of Swift added
 - 2 phases, 3 plans, 12 tasks
-- 8 days from v1.0 to v1.1
+- 8 days
 
 **Git range:** `feat(05-01)` → `feat(06-02)`
 
-**What's next:** v2.0 SwiftUI redesign with widget support
+**What's next:** SwiftUI redesign with widget support
 
 ---
 
-## v1.0 MVP (Shipped: 2025-11-25)
+## MVP (Shipped: 2025-11-25)
 
 **Delivered:** Menu bar weather app with current conditions and 3-day forecast
 
@@ -110,6 +110,6 @@ If MILESTONES.md doesn't exist, create it with header:
 
 **Git range:** `feat(01-01)` → `feat(04-01)`
 
-**What's next:** Security audit and hardening for v1.1
+**What's next:** Security audit and hardening
 ```
 </example>

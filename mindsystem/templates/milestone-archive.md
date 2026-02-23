@@ -6,7 +6,7 @@ This template is used by the complete-milestone workflow to create archive files
 
 ## File Template
 
-# Milestone v{{VERSION}}: {{MILESTONE_NAME}}
+# Milestone: {{MILESTONE_NAME}}
 
 **Status:** ✅ SHIPPED {{DATE}}
 **Phases:** {{PHASE_START}}-{{PHASE_END}}
@@ -97,13 +97,13 @@ _For current project status, see .planning/PROJECT.md_
 
 <guidelines>
 **When to create milestone archives:**
-- After completing all phases in a milestone (v1.0, v1.1, v2.0, etc.)
+- After completing all phases in a milestone
 - Triggered by complete-milestone workflow
 - Before planning next milestone work
 
 **How to fill template:**
 
-- Replace {{PLACEHOLDERS}} with actual values
+- Replace {{PLACEHOLDERS}} with actual values ({{MILESTONE_NAME}}, {{MILESTONE_SLUG}} for paths)
 - Extract phase details from ROADMAP.md
 - Document decimal phases with (INSERTED) marker
 - Include key decisions from PROJECT-STATE.md or SUMMARY files
@@ -112,8 +112,8 @@ _For current project status, see .planning/PROJECT.md_
 
 **Archive location:**
 
-- Save to `.planning/milestones/v{VERSION}/ROADMAP.md`
-- Example: `.planning/milestones/v1.0/ROADMAP.md`
+- Save to `.planning/milestones/{MILESTONE_SLUG}/ROADMAP.md`
+- Example: `.planning/milestones/mvp/ROADMAP.md`
 
 **After archiving:**
 

@@ -1,6 +1,6 @@
 <purpose>
 
-Mark a shipped version (v1.0, v1.1, v2.0) as complete. This creates a historical record in MILESTONES.md, performs full PROJECT.md evolution review, archives ROADMAP.md and REQUIREMENTS.md, and tags the release in git.
+Mark a shipped milestone as complete. This creates a historical record in MILESTONES.md, performs full PROJECT.md evolution review, and archives ROADMAP.md and REQUIREMENTS.md.
 
 </purpose>
 
@@ -20,9 +20,9 @@ Mark a shipped version (v1.0, v1.1, v2.0) as complete. This creates a historical
 
 When a milestone completes, this workflow:
 
-1. Creates `.planning/milestones/v[X.Y]/` directory for all archive files
-2. Extracts full milestone details to `.planning/milestones/v[X.Y]/ROADMAP.md`
-3. Archives requirements to `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
+1. Creates `.planning/milestones/{slug}/` directory for all archive files
+2. Extracts full milestone details to `.planning/milestones/{slug}/ROADMAP.md`
+3. Archives requirements to `.planning/milestones/{slug}/REQUIREMENTS.md`
 4. Archives milestone files via script (audit, context, research — whichever exist)
 5. Consolidates phase summaries, deletes artifacts, moves phase dirs via script
 6. Deletes REQUIREMENTS.md (fresh one created for next milestone)
@@ -133,7 +133,7 @@ If exists, prepend new entry (reverse chronological order).
 Use template from `templates/milestone.md`:
 
 ```markdown
-## v[Version] [Name] (Shipped: YYYY-MM-DD)
+## [Name] (Shipped: YYYY-MM-DD)
 
 **Delivered:** [One sentence from user]
 
@@ -185,7 +185,7 @@ cat .planning/phases/*-*/*-SUMMARY.md
 
    **Validated section:**
    - All requirements shipped in this milestone → Add to Validated
-   - Format: `- ✓ [Requirement] — v[X.Y]`
+   - Format: `- ✓ [Requirement] — [Name]`
 
    **Out of Scope audit:**
    - Review each item — is the reasoning still valid?
@@ -218,10 +218,10 @@ Make all edits inline. Update "Last updated" footer:
 
 ```markdown
 ---
-*Last updated: [date] after v[X.Y] milestone*
+*Last updated: [date] after [Name] milestone*
 ```
 
-**Example full evolution (v1.0 → v1.1 prep):**
+**Example full evolution (MVP → Security & Polish prep):**
 
 Before:
 
@@ -249,7 +249,7 @@ Currently using Miro or physical whiteboards.
 - Video chat — use external tools
 ```
 
-After v1.0:
+After MVP:
 
 ```markdown
 ## What This Is
@@ -267,9 +267,9 @@ Currently using Miro but frustrated by complexity and latency.
 
 ## Validated
 
-- ✓ Canvas drawing tools — v1.0
-- ✓ Real-time sync < 500ms — v1.0 (achieved 200ms avg)
-- ✓ User authentication — v1.0
+- ✓ Canvas drawing tools — MVP
+- ✓ Real-time sync < 500ms — MVP (achieved 200ms avg)
+- ✓ User authentication — MVP
 
 ## Out of Scope
 
@@ -279,7 +279,7 @@ Currently using Miro but frustrated by complexity and latency.
 
 ## Technical Context
 
-Shipped v1.0 with 2,400 LOC TypeScript.
+Shipped MVP with 2,400 LOC TypeScript.
 Tech stack: Next.js, Supabase, Canvas API.
 Initial user testing showed demand for shape tools.
 ```
@@ -305,9 +305,9 @@ Extract completed milestone details and create archive file.
 
 1. Create milestone directory and archive file:
    ```bash
-   mkdir -p .planning/milestones/v[X.Y]
+   mkdir -p .planning/milestones/{slug}
    ```
-   Archive file path: `.planning/milestones/v[X.Y]/ROADMAP.md`
+   Archive file path: `.planning/milestones/{slug}/ROADMAP.md`
 
 2. Read `~/.claude/mindsystem/templates/milestone-archive.md` template
 
@@ -332,7 +332,7 @@ Extract completed milestone details and create archive file.
    - {{DECISIONS_FROM_PROJECT}} — Key decisions from PROJECT.md
    - {{ISSUES_RESOLVED_DURING_MILESTONE}} — From summaries
 
-6. Write filled template to `.planning/milestones/v[X.Y]/ROADMAP.md`
+6. Write filled template to `.planning/milestones/{slug}/ROADMAP.md`
 
 7. Delete ROADMAP.md (fresh one created for next milestone):
    ```bash
@@ -341,17 +341,17 @@ Extract completed milestone details and create archive file.
 
 8. Verify archive exists:
    ```bash
-   ls .planning/milestones/v[X.Y]/ROADMAP.md
+   ls .planning/milestones/{slug}/ROADMAP.md
    ```
 
 9. Confirm roadmap archive complete:
 
    ```
-   ✅ v[X.Y] roadmap archived to milestones/v[X.Y]/ROADMAP.md
+   ✅ Roadmap archived to milestones/{slug}/ROADMAP.md
    ✅ ROADMAP.md deleted (fresh one for next milestone)
    ```
 
-**Note:** Phase directories are moved to `milestones/v[X.Y]/phases/` by the archive_and_cleanup_phases step. After milestone completion, `.planning/phases/` contains only the next milestone's work. Phase numbering continues (v1.0 phases 1-4, v1.1 phases 5-8, etc.).
+**Note:** Phase directories are moved to `milestones/{slug}/phases/` by the archive_and_cleanup_phases step. After milestone completion, `.planning/phases/` contains only the next milestone's work. Phase numbering continues (MVP phases 1-4, next milestone phases 5-8, etc.).
 
 </step>
 
@@ -366,7 +366,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
    cat .planning/REQUIREMENTS.md
    ```
 
-2. Create archive file: `.planning/milestones/v[X.Y]/REQUIREMENTS.md`
+2. Create archive file: `.planning/milestones/{slug}/REQUIREMENTS.md`
 
 3. Transform requirements for archive:
    - Mark all v1 requirements as `[x]` complete
@@ -379,12 +379,12 @@ Archive requirements and prepare for fresh requirements in next milestone.
 
 4. Write archive file with header:
    ```markdown
-   # Requirements Archive: v[X.Y] [Milestone Name]
+   # Requirements Archive: [Milestone Name]
 
    **Archived:** [DATE]
    **Status:** ✅ SHIPPED
 
-   This is the archived requirements specification for v[X.Y].
+   This is the archived requirements specification for [Milestone Name].
    For current requirements, see `.planning/REQUIREMENTS.md` (created for next milestone).
 
    ---
@@ -400,7 +400,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
    **Dropped:** [list any requirements removed and why]
 
    ---
-   *Archived: [DATE] as part of v[X.Y] milestone completion*
+   *Archived: [DATE] as part of [Milestone Name] milestone completion*
    ```
 
 5. Delete original REQUIREMENTS.md:
@@ -410,7 +410,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
 
 6. Confirm:
    ```
-   ✅ Requirements archived to milestones/v[X.Y]/REQUIREMENTS.md
+   ✅ Requirements archived to milestones/{slug}/REQUIREMENTS.md
    ✅ REQUIREMENTS.md deleted (fresh one needed for next milestone)
    ```
 
@@ -423,7 +423,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
 Archive optional milestone files (audit, context, research) to the milestone directory:
 
 ```bash
-ms-tools archive-milestone-files v[X.Y]
+ms-tools archive-milestone-files {slug}
 ```
 
 The script moves whichever files exist and reports what was archived. Files that don't exist are skipped silently.
@@ -435,22 +435,22 @@ The script moves whichever files exist and reports what was archived. Files that
 Consolidate phase summaries, delete raw artifacts, and move phase directories to the milestone archive. This runs after all steps that read summaries (extract_accomplishments, evolve_project_full_review) and after archive_milestone creates the milestone directory.
 
 ```bash
-ms-tools archive-milestone-phases $PHASE_START $PHASE_END v[X.Y]
+ms-tools archive-milestone-phases $PHASE_START $PHASE_END {slug}
 ```
 
 Verify archive:
 
 ```bash
-ls .planning/milestones/v[X.Y]/PHASE-SUMMARIES.md
-ls .planning/milestones/v[X.Y]/phases/
+ls .planning/milestones/{slug}/PHASE-SUMMARIES.md
+ls .planning/milestones/{slug}/phases/
 ```
 
 Present:
 
 ```
-✅ Phase summaries consolidated to milestones/v[X.Y]/PHASE-SUMMARIES.md
+✅ Phase summaries consolidated to milestones/{slug}/PHASE-SUMMARIES.md
 ✅ Raw artifacts deleted from phase directories
-✅ Phase directories moved to milestones/v[X.Y]/phases/
+✅ Phase directories moved to milestones/{slug}/phases/
 ✅ .planning/phases/ clean for next milestone
 ```
 
@@ -479,7 +479,7 @@ See: .planning/PROJECT.md (updated [today])
 Phase: [Next phase] of [Total] ([Phase name])
 Plan: Not started
 Status: Ready to plan
-Last activity: [today] — v[X.Y] milestone complete
+Last activity: [today] — [Name] milestone complete
 
 Progress: [updated progress bar]
 ```
@@ -492,45 +492,13 @@ Progress: [updated progress bar]
 
 </step>
 
-<step name="git_tag">
-
-Create git tag for milestone:
-
-```bash
-git tag -a v[X.Y] -m "$(cat <<'EOF'
-v[X.Y] [Name]
-
-Delivered: [One sentence]
-
-Key accomplishments:
-- [Item 1]
-- [Item 2]
-- [Item 3]
-
-See .planning/MILESTONES.md for full details.
-EOF
-)"
-```
-
-Confirm: "Tagged: v[X.Y]"
-
-Ask: "Push tag to remote? (y/n)"
-
-If yes:
-
-```bash
-git push origin v[X.Y]
-```
-
-</step>
-
 <step name="git_commit_milestone">
 
 Commit milestone completion including archive files and deletions.
 
 ```bash
 # Stage archive directory (covers ROADMAP, REQUIREMENTS, AUDIT, CONTEXT, research)
-git add .planning/milestones/v[X.Y]/
+git add .planning/milestones/{slug}/
 
 # Stage updated files
 git add .planning/MILESTONES.md
@@ -542,9 +510,9 @@ git add -u .planning/
 
 # Commit with descriptive message
 git commit -m "$(cat <<'EOF'
-chore: complete v[X.Y] milestone
+chore: complete [Name] milestone
 
-Archived to milestones/v[X.Y]/:
+Archived to milestones/{slug}/:
 - ROADMAP.md
 - REQUIREMENTS.md
 - PHASE-SUMMARIES.md (consolidated from phase directories)
@@ -567,32 +535,29 @@ Updated:
 - MILESTONES.md (new entry)
 - PROJECT.md (requirements → Validated)
 - STATE.md (reset for next milestone)
-
-Tagged: v[X.Y]
 EOF
 )"
 ```
 
-Confirm: "Committed: chore: complete v[X.Y] milestone"
+Confirm: "Committed: chore: complete [Name] milestone"
 
 </step>
 
 <step name="offer_next">
 
 ```
-✅ Milestone v[X.Y] [Name] complete
+✅ Milestone [Name] complete
 
 Shipped:
 - [N] phases ([M] plans, [P] tasks)
 - [One sentence of what shipped]
 
-Archived to milestones/v[X.Y]/:
+Archived to milestones/{slug}/:
 - ROADMAP.md
 - REQUIREMENTS.md
 - research/ (if existed)
 
 Summary: .planning/MILESTONES.md
-Tag: v[X.Y]
 
 ---
 
@@ -624,8 +589,8 @@ Milestone completion is successful when (ordered by skip risk):
 - [ ] All shipped requirements moved to Validated in PROJECT.md
 - [ ] Key Decisions updated with outcomes
 - [ ] MILESTONES.md entry created with stats and accomplishments
-- [ ] Roadmap archive created (milestones/v[X.Y]/ROADMAP.md)
-- [ ] Requirements archive created (milestones/v[X.Y]/REQUIREMENTS.md)
+- [ ] Roadmap archive created (milestones/{slug}/ROADMAP.md)
+- [ ] Requirements archive created (milestones/{slug}/REQUIREMENTS.md)
 - [ ] REQUIREMENTS.md deleted (fresh for next milestone)
 - [ ] STATE.md updated with fresh project reference
 

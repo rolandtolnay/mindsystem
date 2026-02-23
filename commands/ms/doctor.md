@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run comprehensive health checks on project configuration. Detect and fix structural drift across 7 categories: subsystem vocabulary, milestone directory structure, phase archival, knowledge files, phase summaries, PLAN cleanup, and CLI wrappers.
+Run comprehensive health checks on project configuration. Detect and fix structural drift across 8 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, and CLI wrappers.
 
 Idempotent — safe to run repeatedly.
 </objective>
@@ -84,6 +84,7 @@ Display results as a markdown table:
 |--------------------------|--------|----------------------------------|
 | Subsystem vocabulary     | PASS   | 9 subsystems, all artifacts OK   |
 | Milestone directories    | FAIL   | 2 flat files need restructuring  |
+| Milestone naming         | FAIL   | 2 version-prefixed dirs need migration |
 | Phase archival           | FAIL   | 8 orphaned phase directories     |
 | Knowledge files          | FAIL   | Directory missing                |
 | Phase summaries          | FAIL   | 2 milestones missing summaries   |
@@ -110,7 +111,7 @@ If "Skip" → go to `report`.
 
 If "Review each" → use AskUserQuestion for each failed check with its details and options: "Fix" / "Skip". Only run fixes for accepted checks.
 
-Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_phase_archival → fix_plan_cleanup → fix_knowledge. Skip any fix whose check passed or was skipped by user.
+Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_milestone_naming → fix_phase_archival → fix_plan_cleanup → fix_knowledge. Skip any fix whose check passed or was skipped by user.
 </step>
 
 <step name="fix_subsystems">
@@ -184,9 +185,11 @@ EOF
 For each flat file like `milestones/v0.1-ROADMAP.md`:
 
 1. Extract version prefix (e.g., `v0.1`).
-2. Create versioned directory if it doesn't exist: `mkdir -p .planning/milestones/v0.1`
+2. Create directory if it doesn't exist: `mkdir -p .planning/milestones/v0.1`
 3. `git mv` the file, stripping the version prefix from the filename:
    `git mv .planning/milestones/v0.1-ROADMAP.md .planning/milestones/v0.1/ROADMAP.md`
+
+**Note:** New milestones use slug-based directories (e.g., `milestones/mvp/`, `milestones/push-notifications/`). Old v-prefixed directories from previous format are valid and handled.
 
 Commit:
 
@@ -204,6 +207,73 @@ EOF
 ```
 </step>
 
+<step name="fix_milestone_naming">
+**Only if Milestone Naming Convention failed.**
+
+1. **Build mapping** — run `ms-tools scan-milestone-naming`, parse JSON output.
+
+2. **Resolve slugs** — For each versioned dir, match to MILESTONES.md name mapping:
+   - Standard dirs: version matches directly (v0.1 → "MVP" → slug "mvp")
+   - Nested dirs: match sub-directory name to the milestone name in MILESTONES.md (v2.0.0/quests → "Quests Feature" → slug "quests-feature")
+   - Derive short slugs from names (Claude proposes, user confirms)
+
+3. **Present mapping** to user with AskUserQuestion:
+
+   ```
+   | Current Directory       | Milestone Name       | Proposed Slug    |
+   |-------------------------|----------------------|------------------|
+   | v0.1/                   | MVP                  | mvp              |
+   | v0.2/                   | Infrastructure       | infrastructure   |
+   | (active)                | Demo Release         | demo-release     |
+   ```
+
+   Options: "Looks good" / "Edit slugs" / "Skip"
+
+4. **Rename directories:**
+   - Standard: `git mv .planning/milestones/v0.1 .planning/milestones/mvp`
+   - Nested: `git mv .planning/milestones/v2.0.0/quests .planning/milestones/quests-feature` for each sub-dir, then `rmdir .planning/milestones/v2.0.0` to remove empty parent
+
+5. **Update archived milestone files** (inside each renamed dir):
+   - `PHASE-SUMMARIES.md`: `# Phase Summaries: v0.1` → `# Phase Summaries: MVP`
+   - `ROADMAP.md`: `# Milestone v0.1: Name` → `# Milestone: Name`
+   - `REQUIREMENTS.md`: `# Requirements Archive: v0.1 Name` → `# Requirements Archive: Name`
+   - `MILESTONE-AUDIT.md`: YAML `milestone: v0.1` → `milestone: mvp` (use slug)
+   - `CONTEXT.md`: `# Milestone Context: v0.1 Name` → `# Milestone Context: Name`
+
+6. **Update MILESTONES.md:**
+   - Strip version prefix from headers: `## v0.1 MVP (Shipped:...)` → `## MVP (Shipped:...)`
+   - Preserve all other content (git ranges, stats, accomplishments)
+
+7. **Update active .planning files:**
+   - `PROJECT.md`: Replace `— v0.1` with `— MVP` in validated requirements, strip version from `## Current Milestone:` header, update `Shipped v0.2 with...` → `Shipped Infrastructure with...`
+   - `STATE.md`: Replace version refs with names (`v0.3 Demo Release` → `Demo Release`)
+   - `ROADMAP.md`: Strip version from `**Milestone:** v0.3 Demo Release` → `**Milestone:** Demo Release`
+   - `MILESTONE-CONTEXT.md`: Strip version from header
+   - `REQUIREMENTS.md`: Strip version from `**Milestone:**` line. For deferred sections (`### v0.4 — On-Device Hardening`), use AskUserQuestion to confirm replacement names or keep description-only format (`### On-Device Hardening (deferred)`)
+
+8. **Rules:**
+   - Do NOT modify git range references (`**Git range:** feat(01-01) → ...`)
+   - Do NOT modify git commit messages quoted in MILESTONES.md
+   - Preserve shipped dates, stats, phase ranges
+   - Use Edit tool for targeted replacements (not bulk find-replace)
+
+9. **Commit:**
+
+```bash
+git add .planning/
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(doctor): migrate milestone naming from versions to slugs
+
+Renamed milestone directories from version-based (v0.1/, v2.0.0/) to
+name-based slugs (mvp/, quests-feature/). Updated all planning file references.
+EOF
+)"
+```
+</step>
+
 <step name="fix_phase_archival">
 **Only if Phase Archival failed.**
 
@@ -212,11 +282,11 @@ Parse MILESTONES.md for completed milestones and their phase ranges (`**Phases c
 For each completed milestone with orphaned phases in `.planning/phases/`:
 
 1. Determine the version and phase range from MILESTONES.md.
-2. Ensure the milestone directory exists: `mkdir -p .planning/milestones/{version}`
+2. Ensure the milestone directory exists: `mkdir -p .planning/milestones/{slug}`
 3. Run the archive script:
 
 ```bash
-ms-tools archive-milestone-phases <start> <end> <version>
+ms-tools archive-milestone-phases <start> <end> <slug>
 ```
 
 This simultaneously:
@@ -329,6 +399,7 @@ Final summary table:
 |--------------------------|--------|----------------------------------|
 | Subsystem vocabulary     | PASS   | ...                              |
 | Milestone directories    | PASS   | ...                              |
+| Milestone naming         | PASS   | ...                              |
 | Phase archival           | PASS   | ...                              |
 | Knowledge files          | PASS   | ...                              |
 | Phase summaries          | PASS   | ...                              |
@@ -347,8 +418,8 @@ Include counts: checks total, passed, fixed during this run.
 - [ ] Each fix group committed atomically
 - [ ] Re-scan verifies all checks pass after fixes
 - [ ] User confirms fix strategy before changes (Fix all / Review each / Skip)
-- [ ] Fixes applied in dependency order: subsystems → dirs → archival → cleanup → knowledge
+- [ ] Fixes applied in dependency order: subsystems → dirs → milestone naming → archival → cleanup → knowledge
 - [ ] Results displayed as markdown table before any action
-- [ ] All 7 categories reported with PASS/FAIL/SKIP
+- [ ] All 8 categories reported with PASS/FAIL/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>

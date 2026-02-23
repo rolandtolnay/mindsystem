@@ -225,7 +225,7 @@ User acceptance testing of phase or plan.
 
 Usage: `/ms:verify-work 5`
 
-**`/ms:audit-milestone [version]`**
+**`/ms:audit-milestone [name]`**
 Audit milestone completion against original intent.
 
 - Use when: you think you’re “done” and want cross-phase integration + requirements coverage checked before archiving.
@@ -234,7 +234,7 @@ Audit milestone completion against original intent.
 - Maintains TECH-DEBT.md as single source of truth for debt items
 - Creates MILESTONE-AUDIT.md with gaps and tech debt
 
-Usage: `/ms:audit-milestone 1.0.0`
+Usage: `/ms:audit-milestone`
 
 ### Roadmap Management
 
@@ -284,18 +284,19 @@ Discover what to build next and start a new milestone.
 - Routes to create-roadmap or research-project
 
 Usage: `/ms:new-milestone`
-Usage: `/ms:new-milestone "v2.0 Features"`
+Usage: `/ms:new-milestone "Push Notifications"`
 
-**`/ms:complete-milestone <version>`**
-Archive completed milestone and prepare for next version.
+**`/ms:complete-milestone [name]`**
+Archive completed milestone and prepare for next.
 
 - Creates MILESTONES.md entry with stats
 - Extracts curated learnings for future milestone planning
 - Archives full details to milestones/ directory
-- Creates git tag for the release
-- Prepares workspace for next version
+- Prepares workspace for next milestone
+- Auto-detects current milestone from PROJECT.md if no argument provided
 
-Usage: `/ms:complete-milestone 1.0.0`
+Usage: `/ms:complete-milestone`
+Usage: `/ms:complete-milestone "MVP"`
 
 **`/ms:plan-milestone-gaps`**
 Create phases to close gaps identified by milestone audit.
@@ -523,19 +524,19 @@ Common options:
 **Completing a milestone:**
 
 ```
-/ms:audit-milestone 1.0.0       # Verify before completing
-/ms:complete-milestone 1.0.0    # Archive and tag
+/ms:audit-milestone             # Verify before completing
+/ms:complete-milestone          # Archive milestone
 /ms:new-milestone               # Discover and start next milestone
 ```
 
 **Closing gaps from audit:**
 
 ```
-/ms:audit-milestone 1.0.0       # Finds gaps
+/ms:audit-milestone             # Finds gaps
 /ms:plan-milestone-gaps         # Creates phases to fix them
 /ms:plan-phase 6                # Plan first gap closure phase
 /ms:execute-phase 6
-/ms:audit-milestone 1.0.0       # Re-audit when done
+/ms:audit-milestone             # Re-audit when done
 ```
 
 **Capturing ideas during work:**

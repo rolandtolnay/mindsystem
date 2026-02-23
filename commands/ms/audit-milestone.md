@@ -1,7 +1,7 @@
 ---
 name: ms:audit-milestone
 description: Audit milestone completion against original intent before archiving
-argument-hint: "[version]"
+argument-hint: "[name]"
 allowed-tools:
   - Read
   - Glob
@@ -22,7 +22,7 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 </execution_context>
 
 <context>
-Version: $ARGUMENTS (optional — defaults to current milestone)
+Milestone: $ARGUMENTS (optional — defaults to current milestone from PROJECT.md)
 
 **Original Intent:**
 @.planning/PROJECT.md
@@ -130,13 +130,13 @@ For each requirement in REQUIREMENTS.md mapped to this milestone:
 - Check phase verification status
 - Determine: satisfied | partial | unsatisfied
 
-## 6. Aggregate into v{version}-MILESTONE-AUDIT.md
+## 6. Aggregate into MILESTONE-AUDIT.md
 
-Create `.planning/v{version}-MILESTONE-AUDIT.md` with:
+Create `.planning/MILESTONE-AUDIT.md` with:
 
 ```yaml
 ---
-milestone: {version}
+milestone: {name}
 audited: {timestamp}
 status: passed | gaps_found | tech_debt
 scores:
@@ -231,7 +231,7 @@ For agents with `mode: analyze-only` (e.g., `ms-flutter-reviewer`):
 Task(
   prompt="
   <objective>
-  Analyze code from milestone {version} for structural issues.
+  Analyze code from milestone {name} for structural issues.
   Report findings only — do NOT make changes.
   </objective>
 
@@ -349,7 +349,7 @@ For agents without `mode: analyze-only` (e.g., `ms-code-simplifier`, `ms-flutter
 Task(
   prompt="
   <objective>
-  Review code from milestone {version}.
+  Review code from milestone {name}.
   Focus on architectural patterns, cross-phase consistency, and structural improvements.
   Preserve all functionality. Make changes that improve clarity and maintainability.
   </objective>
@@ -402,9 +402,9 @@ After code review (all sources now available), generate or update `.planning/TEC
 ## 9. Commit Audit Report
 
 ```bash
-git add .planning/v{version}-MILESTONE-AUDIT.md .planning/TECH-DEBT.md
+git add .planning/MILESTONE-AUDIT.md .planning/TECH-DEBT.md
 git commit -m "$(cat <<'EOF'
-docs(milestone): complete v{version} audit
+docs(milestone): complete {name} audit
 
 Status: {status}
 Scores: Requirements {N}/{M} | Phases {N}/{M} | Integration {N}/{M} | Flows {N}/{M}
@@ -425,11 +425,11 @@ Read `~/.claude/mindsystem/references/routing/audit-result-routing.md` and follo
 - [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
 - [ ] Assumptions aggregated by phase
 - [ ] Integration checker spawned for cross-phase wiring
-- [ ] v{version}-MILESTONE-AUDIT.md created with assumptions section
+- [ ] MILESTONE-AUDIT.md created with assumptions section
 - [ ] Code review completed (or skipped if config says "skip")
 - [ ] If analyze-only reviewer: YAML findings parsed and added to report
 - [ ] If analyze-only reviewer: Binary decision presented (quality phase vs tech debt)
 - [ ] If quality phase chosen: Phase directory created, ROADMAP updated with TECH-DEBT.md scope
-- [ ] MILESTONE-AUDIT.md committed to git
+- [ ] MILESTONE-AUDIT.md and TECH-DEBT.md committed to git
 - [ ] Results presented with actionable next steps
 </success_criteria>

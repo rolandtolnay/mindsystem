@@ -54,7 +54,7 @@ No enterprise process. No approval gates.
 
 Plan → Execute → Ship → Learn → Repeat
 
-Milestones mark shipped versions (v1.0 → v1.1 → v2.0).
+Milestones mark shipped work (MVP → Push Notifications → ...).
 </ship_fast>
 
 <anti_enterprise>

@@ -9,7 +9,8 @@ Route user to appropriate next action based on audit status (passed, gaps_found,
 ## Variables
 
 From calling context:
-- `{version}` — milestone version
+- `{name}` — milestone name
+- `{slug}` — milestone slug (for file paths)
 - `{N}/{M}` — requirements score
 - `{status}` — audit result: passed | gaps_found | tech_debt
 - `{assumptions_count}` — number of untested assumptions (from UAT)
@@ -21,10 +22,10 @@ Read the audit status and present the matching section below.
 ## If Passed
 
 ```markdown
-## ✓ Milestone {version} — Audit Passed
+## ✓ Milestone {name} — Audit Passed
 
 **Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**Report:** .planning/MILESTONE-AUDIT.md
 
 All requirements covered. Cross-phase integration verified. E2E flows complete.
 
@@ -38,7 +39,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ## ▶ Next Up
 
-`/ms:complete-milestone {version}` — archive and tag
+`/ms:complete-milestone` — archive milestone
 
 <sub>`/clear` first → fresh context window</sub>
 ```
@@ -46,10 +47,10 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 ## If Gaps Found
 
 ```markdown
-## ⚠ Milestone {version} — Gaps Found
+## ⚠ Milestone {name} — Gaps Found
 
 **Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**Report:** .planning/MILESTONE-AUDIT.md
 
 ### Unsatisfied Requirements
 
@@ -78,17 +79,17 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 ---
 
 **Also available:**
-- `cat .planning/v{version}-MILESTONE-AUDIT.md` — see full report
-- `/ms:complete-milestone {version}` — proceed anyway (accept tech debt)
+- `cat .planning/MILESTONE-AUDIT.md` — see full report
+- `/ms:complete-milestone` — proceed anyway (accept tech debt)
 ```
 
 ## If Tech Debt (no blockers but accumulated debt)
 
 ```markdown
-## ⚡ Milestone {version} — Tech Debt Review
+## ⚡ Milestone {name} — Tech Debt Review
 
 **Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**Report:** .planning/MILESTONE-AUDIT.md
 
 All requirements met. No critical blockers. Accumulated tech debt needs review.
 
@@ -108,7 +109,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ## ▶ Options
 
-- `/ms:complete-milestone {version}` — accept debt, track in backlog
+- `/ms:complete-milestone` — accept debt, track in backlog
 - `/ms:plan-milestone-gaps` — address debt before completing
 
 <sub>`/clear` first → fresh context window</sub>

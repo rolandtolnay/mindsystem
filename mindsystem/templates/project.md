@@ -115,7 +115,7 @@ Common types: Tech stack, Timeline, Budget, Dependencies, Compatibility, Perform
 
 **Validated:**
 - Requirements that shipped and proved valuable
-- Format: `- ✓ [Requirement] — [version/phase]`
+- Format: `- ✓ [Requirement] — [Milestone Name]`
 - These are locked — changing them requires explicit discussion
 
 **Key Decisions:**
@@ -128,7 +128,7 @@ Common types: Tech stack, Timeline, Budget, Dependencies, Compatibility, Perform
 
 **Last Updated:**
 - Always note when and why the document was updated
-- Format: `after Phase 2` or `after v1.0 milestone`
+- Format: `after Phase 2` or `after [Name] milestone`
 - Triggers review of whether content is still accurate
 
 </guidelines>

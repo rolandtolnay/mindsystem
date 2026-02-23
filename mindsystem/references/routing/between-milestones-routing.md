@@ -15,14 +15,14 @@ cat .planning/MILESTONES.md 2>/dev/null
 ```
 
 Extract:
-- `{X.Y}` — last completed milestone version
+- `{name}` — last completed milestone name from MILESTONES.md
 
 ## Output Format
 
 ```markdown
 ---
 
-## ✓ Milestone v{X.Y} Complete
+## ✓ Milestone {name} Complete
 
 Ready to plan the next milestone.
 

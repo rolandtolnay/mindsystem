@@ -5,7 +5,7 @@ Template for `.planning/MILESTONE-CONTEXT.md` — captures brainstorming context
 <template>
 
 ```markdown
-# Milestone Context: v[X.Y] [Name]
+# Milestone Context: [Name]
 
 **Generated:** [date]
 **Source:** /ms:new-milestone brainstorming session

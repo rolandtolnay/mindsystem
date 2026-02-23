@@ -10,7 +10,7 @@ Celebrate milestone completion and guide user toward audit or archive.
 
 From calling context:
 - `{N}` — total number of phases in milestone
-- `{version}` — milestone version (if known)
+- `{name}` — milestone name (if known)
 
 ## Output Format
 

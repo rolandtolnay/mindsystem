@@ -161,7 +161,7 @@ mindsystem/
 **After all phases:**
 
 9. `/ms:audit-milestone` → Verify milestone completion against original intent
-10. `/ms:complete-milestone` → Archive milestone, prepare for next version
+10. `/ms:complete-milestone` → Archive milestone, prepare for next milestone
 
 ### Artifact Flow
 

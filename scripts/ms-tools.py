@@ -66,6 +66,20 @@ def find_planning_dir() -> Path:
     return planning
 
 
+def slugify(name: str) -> str:
+    """Convert a milestone name to a URL-safe slug.
+
+    Lowercase, replace spaces/underscores with hyphens, strip non-alphanumeric
+    (except hyphens), collapse consecutive hyphens, trim edges.
+    """
+    s = name.lower()
+    s = re.sub(r"[\s_]+", "-", s)
+    s = re.sub(r"[^a-z0-9-]", "", s)
+    s = re.sub(r"-{2,}", "-", s)
+    s = s.strip("-")
+    return s
+
+
 def find_planning_dir_optional() -> Path | None:
     """Find .planning/ from git root. Return None if missing."""
     try:
@@ -447,14 +461,14 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
                     print(f"  {f.name} → directory {ver}/ missing (need to create)")
             record("FAIL", "Milestone Directory Structure")
         else:
-            ver_dirs = [d for d in milestones_dir.iterdir() if d.is_dir() and d.name.startswith("v")]
-            if not ver_dirs:
+            ms_dirs = [d for d in milestones_dir.iterdir() if d.is_dir()]
+            if not ms_dirs:
                 print("Status: SKIP")
                 print("No completed milestones")
                 record("SKIP", "Milestone Directory Structure")
             else:
                 print("Status: PASS")
-                print(f"{len(ver_dirs)} versioned milestone directories")
+                print(f"{len(ms_dirs)} milestone directories")
                 record("PASS", "Milestone Directory Structure")
     print()
 
@@ -536,14 +550,14 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
         print("No milestones directory")
         record("SKIP", "Phase Summaries")
     else:
-        ver_dirs = sorted(d for d in milestones_dir.iterdir() if d.is_dir() and d.name.startswith("v"))
-        if not ver_dirs:
+        ms_dirs = sorted(d for d in milestones_dir.iterdir() if d.is_dir())
+        if not ms_dirs:
             print("Status: SKIP")
-            print("No versioned milestone directories")
+            print("No milestone directories")
             record("SKIP", "Phase Summaries")
         else:
             missing_summaries = [
-                d.name for d in ver_dirs if not (d / "PHASE-SUMMARIES.md").is_file()
+                d.name for d in ms_dirs if not (d / "PHASE-SUMMARIES.md").is_file()
             ]
             if missing_summaries:
                 print("Status: FAIL")
@@ -553,7 +567,7 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
                 record("FAIL", "Phase Summaries")
             else:
                 print("Status: PASS")
-                print(f"All {len(ver_dirs)} milestones have PHASE-SUMMARIES.md")
+                print(f"All {len(ms_dirs)} milestones have PHASE-SUMMARIES.md")
                 record("PASS", "Phase Summaries")
     print()
 
@@ -620,6 +634,33 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
         print("Status: PASS")
         print(f"All {len(wrapper_names)} CLI wrappers found on PATH")
         record("PASS", "CLI Wrappers")
+    print()
+
+    # ---- CHECK 8: Milestone Naming Convention ----
+    print("=== Milestone Naming Convention ===")
+    if not milestones_dir.is_dir():
+        print("Status: SKIP")
+        print("No milestones directory")
+        record("SKIP", "Milestone Naming Convention")
+    else:
+        ms_dirs = [d for d in milestones_dir.iterdir() if d.is_dir()]
+        if not ms_dirs:
+            print("Status: SKIP")
+            print("No milestone directories")
+            record("SKIP", "Milestone Naming Convention")
+        else:
+            versioned = _detect_versioned_milestone_dirs(planning)
+            if versioned:
+                print("Status: FAIL")
+                print(f"Found {len(versioned)} version-prefixed milestone directories:")
+                for v in versioned:
+                    dirname = v["path"].split("/", 1)[1] if "/" in v["path"] else v["path"]
+                    print(f"  {dirname} ({v['type']})")
+                record("FAIL", "Milestone Naming Convention")
+            else:
+                print("Status: PASS")
+                print("All milestone directories use name-based slugs")
+                record("PASS", "Milestone Naming Convention")
     print()
 
     # ---- SUMMARY ----
@@ -957,14 +998,14 @@ def cmd_archive_milestone_phases(args: argparse.Namespace) -> None:
     """Consolidate summaries, delete artifacts, move phase dirs to milestone archive.
 
     Contract:
-        Args: start_phase (int), end_phase (int), version (str)
+        Args: start_phase (int), end_phase (int), milestone (str — slug)
         Output: text — per-stage counts and archive summary
         Exit codes: 0 = success, 1 = start > end or dirs missing
         Side effects: writes PHASE-SUMMARIES.md, deletes artifact files, moves phase dirs
     """
     start = args.start_phase
     end = args.end_phase
-    version = args.version
+    milestone = args.milestone
 
     if start > end:
         print(f"Error: Start phase ({start}) cannot exceed end phase ({end})", file=sys.stderr)
@@ -976,7 +1017,7 @@ def cmd_archive_milestone_phases(args: argparse.Namespace) -> None:
         print(f"Error: Phases directory not found at {phases_dir}", file=sys.stderr)
         sys.exit(1)
 
-    milestone_dir = git_root / ".planning" / "milestones" / version
+    milestone_dir = git_root / ".planning" / "milestones" / milestone
     if not milestone_dir.is_dir():
         print(f"Error: Milestone directory not found at {milestone_dir}", file=sys.stderr)
         print("Run archive_milestone step first to create it")
@@ -985,7 +1026,7 @@ def cmd_archive_milestone_phases(args: argparse.Namespace) -> None:
     # Stage 1: Consolidate summaries
     summaries_file = milestone_dir / "PHASE-SUMMARIES.md"
     summary_count = 0
-    lines = [f"# Phase Summaries: {version}", ""]
+    lines = [f"# Phase Summaries: {milestone}", ""]
 
     for d in sorted(phases_dir.iterdir()):
         if not d.is_dir():
@@ -1042,7 +1083,7 @@ def cmd_archive_milestone_phases(args: argparse.Namespace) -> None:
             shutil.move(str(d), str(archive_phases / d.name))
             moved += 1
 
-    print(f"Stage 3: Moved {moved} phase directories to milestones/{version}/phases/")
+    print(f"Stage 3: Moved {moved} phase directories to milestones/{milestone}/phases/")
     print()
     print(f"Archive complete: {summary_count} summaries, {deleted} artifacts deleted, {moved} dirs moved")
 
@@ -1056,16 +1097,16 @@ def cmd_archive_milestone_files(args: argparse.Namespace) -> None:
     """Move optional milestone files to the milestone archive directory.
 
     Contract:
-        Args: version (str) — milestone version (e.g., v1.0)
+        Args: milestone (str) — milestone slug (e.g., mvp, push-notifications)
         Output: text — per-file archive status
         Exit codes: 0 = success, 1 = milestone directory missing
         Side effects: moves audit, context, and research files to milestone dir
     """
-    version = args.version
+    milestone = args.milestone
 
     git_root = find_git_root()
     planning_dir = git_root / ".planning"
-    milestone_dir = planning_dir / "milestones" / version
+    milestone_dir = planning_dir / "milestones" / milestone
 
     if not milestone_dir.is_dir():
         print(f"Error: Milestone directory not found at {milestone_dir}", file=sys.stderr)
@@ -1075,10 +1116,10 @@ def cmd_archive_milestone_files(args: argparse.Namespace) -> None:
     archived = 0
 
     # Milestone audit
-    audit = planning_dir / f"{version}-MILESTONE-AUDIT.md"
+    audit = planning_dir / "MILESTONE-AUDIT.md"
     if audit.is_file():
         shutil.move(str(audit), str(milestone_dir / "MILESTONE-AUDIT.md"))
-        print(f"Archived: {version}-MILESTONE-AUDIT.md → MILESTONE-AUDIT.md")
+        print("Archived: MILESTONE-AUDIT.md → MILESTONE-AUDIT.md")
         archived += 1
 
     # Milestone context
@@ -1099,7 +1140,7 @@ def cmd_archive_milestone_files(args: argparse.Namespace) -> None:
         print("No optional files to archive (audit, context, research all absent)")
     else:
         print()
-        print(f"Archived {archived} item(s) to milestones/{version}/")
+        print(f"Archived {archived} item(s) to milestones/{milestone}/")
 
 
 # ===================================================================
@@ -1126,6 +1167,98 @@ def _scan_artifact_subsystem_values(planning: Path) -> list[str]:
                 if fm and fm.get("subsystem"):
                     values.append(fm["subsystem"])
     return values
+
+
+def _detect_versioned_milestone_dirs(planning: Path) -> list[dict]:
+    """Detect v-prefixed milestone directories that need migration.
+
+    Returns list of dicts with keys: path, version, sub, type.
+    - "standard": v-dir has .md files directly
+    - "nested": v-dir has sub-directories (excluding phases/) and no direct .md files
+    """
+    milestones_dir = planning / "milestones"
+    if not milestones_dir.is_dir():
+        return []
+
+    v_pattern = re.compile(r"^v\d+")
+    results: list[dict] = []
+
+    for entry in sorted(milestones_dir.iterdir()):
+        if not entry.is_dir() or not v_pattern.match(entry.name):
+            continue
+
+        version = entry.name
+        has_md_files = any(f.suffix == ".md" for f in entry.iterdir() if f.is_file())
+        sub_dirs = [
+            d for d in entry.iterdir()
+            if d.is_dir() and d.name != "phases"
+        ]
+
+        if sub_dirs and not has_md_files:
+            # Nested: each sub-dir is a separate entry
+            for sub in sorted(sub_dirs):
+                results.append({
+                    "path": f"milestones/{version}/{sub.name}",
+                    "version": version,
+                    "sub": sub.name,
+                    "type": "nested",
+                })
+        else:
+            # Standard: v-dir itself is the milestone
+            results.append({
+                "path": f"milestones/{version}",
+                "version": version,
+                "sub": None,
+                "type": "standard",
+            })
+
+    return results
+
+
+def _parse_milestone_name_mapping(planning: Path) -> list[dict]:
+    """Parse MILESTONES.md and PROJECT.md to build version→name→slug mapping.
+
+    Returns list of dicts with keys: version, name, slug, and optionally current.
+    """
+    results: list[dict] = []
+
+    # Parse MILESTONES.md shipped/started headers
+    milestones_file = planning / "MILESTONES.md"
+    if milestones_file.is_file():
+        ms_text = milestones_file.read_text(encoding="utf-8")
+        header_re = re.compile(
+            r"^## (v[\d.]+)\s+(.+?)\s*\((?:Shipped|Started):?\s*[^)]+\)",
+            re.MULTILINE,
+        )
+        for match in header_re.finditer(ms_text):
+            version = match.group(1)
+            name = match.group(2).strip()
+            results.append({
+                "version": version,
+                "name": name,
+                "slug": slugify(name),
+            })
+
+    # Parse PROJECT.md for current milestone
+    project_file = planning / "PROJECT.md"
+    if project_file.is_file():
+        proj_text = project_file.read_text(encoding="utf-8")
+        current_re = re.compile(
+            r"^## Current Milestone:\s*(v[\d.]+)\s+(.+?)$",
+            re.MULTILINE,
+        )
+        m = current_re.search(proj_text)
+        if m:
+            version = m.group(1)
+            name = m.group(2).strip()
+            results.append({
+                "version": version,
+                "name": name,
+                "slug": slugify(name),
+                "current": True,
+            })
+
+    return results
 
 
 def cmd_scan_artifact_subsystems(args: argparse.Namespace) -> None:
@@ -1161,6 +1294,48 @@ def cmd_scan_artifact_subsystems(args: argparse.Namespace) -> None:
                     print(fm["subsystem"])
                 else:
                     print(f"{f}\t{fm['subsystem']}")
+
+
+# ===================================================================
+# Subcommand: scan-milestone-naming
+# ===================================================================
+
+
+def cmd_scan_milestone_naming(args: argparse.Namespace) -> None:
+    """Scan milestone directories for version-based naming needing migration.
+
+    Contract:
+        Args: (none)
+        Output: JSON — versioned_dirs, name_mappings, current_milestone, needs_migration
+        Exit codes: 0 = success, 2 = missing .planning/
+        Side effects: read-only
+    """
+    planning = find_planning_dir()
+
+    versioned_dirs = _detect_versioned_milestone_dirs(planning)
+    name_mappings = _parse_milestone_name_mapping(planning)
+
+    current_milestone = None
+    non_current: list[dict] = []
+    for m in name_mappings:
+        if m.get("current"):
+            current_milestone = {
+                "version": m["version"],
+                "name": m["name"],
+                "slug": m["slug"],
+            }
+        else:
+            non_current.append(m)
+
+    result = {
+        "versioned_dirs": versioned_dirs,
+        "name_mappings": non_current,
+        "current_milestone": current_milestone,
+        "needs_migration": len(versioned_dirs) > 0,
+    }
+
+    json.dump(result, sys.stdout, indent=2)
+    sys.stdout.write("\n")
 
 
 # ===================================================================
@@ -1909,18 +2084,22 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser("archive-milestone-phases", help="Archive phase dirs to milestone directory")
     p.add_argument("start_phase", type=int, help="Start phase number")
     p.add_argument("end_phase", type=int, help="End phase number")
-    p.add_argument("version", help="Milestone version (e.g., v1.0)")
+    p.add_argument("milestone", help="Milestone slug (e.g., mvp, push-notifications)")
     p.set_defaults(func=cmd_archive_milestone_phases)
 
     # --- archive-milestone-files ---
     p = subparsers.add_parser("archive-milestone-files", help="Archive optional milestone files")
-    p.add_argument("version", help="Milestone version (e.g., v1.0)")
+    p.add_argument("milestone", help="Milestone slug (e.g., mvp, push-notifications)")
     p.set_defaults(func=cmd_archive_milestone_files)
 
     # --- scan-artifact-subsystems ---
     p = subparsers.add_parser("scan-artifact-subsystems", help="Scan artifacts for subsystem values")
     p.add_argument("--values-only", action="store_true", help="Print only subsystem values")
     p.set_defaults(func=cmd_scan_artifact_subsystems)
+
+    # --- scan-milestone-naming ---
+    p = subparsers.add_parser("scan-milestone-naming", help="Scan for version-based milestone naming needing migration")
+    p.set_defaults(func=cmd_scan_milestone_naming)
 
     # --- scan-planning-context ---
     p = subparsers.add_parser("scan-planning-context", help="Scan .planning/ and score relevance for plan-phase")
