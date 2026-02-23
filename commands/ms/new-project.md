@@ -12,7 +12,7 @@ allowed-tools:
 
 Initialize a new project through comprehensive context gathering.
 
-This is the most leveraged moment in any project. Deep questioning here means better plans, better execution, better outcomes. The quality of PROJECT.md determines the quality of everything downstream.
+Questioning depth determines PROJECT.md quality, which determines everything downstream. Invest disproportionate effort here — the other steps are mechanical.
 
 Creates `.planning/` with PROJECT.md and config.json.
 
@@ -31,7 +31,7 @@ Creates `.planning/` with PROJECT.md and config.json.
 
 <step name="setup">
 
-**MANDATORY FIRST STEP — Execute these checks before ANY user interaction:**
+**Run before any user interaction:**
 
 1. **Detect update mode:**
    ```bash
@@ -58,7 +58,7 @@ Creates `.planning/` with PROJECT.md and config.json.
    HAS_CODEBASE_MAP=$([ -d .planning/codebase ] && echo "yes")
    ```
 
-   **You MUST run all bash commands above using the Bash tool before proceeding.**
+   **Run all commands above before proceeding.**
 
 </step>
 
@@ -101,7 +101,7 @@ Use grounding questions from `questioning.md` instead of template-shaped questio
 
 When the conversation pauses and sections are still fuzzy, use success-backward: "Imagine this is wildly successful in a year. What does that look like?"
 
-Consult `questioning.md` for techniques — challenge vagueness, derive before asking, use grounding questions over template-shaped questions.
+Consult `questioning.md` for techniques — challenge vagueness, derive before asking.
 
 **Decision gate:**
 
@@ -283,12 +283,12 @@ Update `.planning/STATE.md` Last Command field (if STATE.md exists):
 
 <success_criteria>
 
+- [ ] All committed to git
+- [ ] config.json has subsystems and code_review settings (existing code_review preserved in update mode)
+- [ ] Validated requirements initialized (empty for greenfield, inferred for brownfield)
 - [ ] Deep questioning completed with business context extracted (or update conversation completed)
 - [ ] PROJECT.md captures product identity (What/Value/Audience/Problem/Differentiation/Flows)
 - [ ] PROJECT.md captures boundaries (Out of Scope, Constraints, Technical Context)
-- [ ] Validated requirements initialized (empty for greenfield, inferred for brownfield)
 - [ ] Key Decisions table initialized
-- [ ] config.json has subsystems and code_review settings (existing code_review preserved in update mode)
-- [ ] All committed to git
 
 </success_criteria>

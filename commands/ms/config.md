@@ -20,7 +20,7 @@ Manages code reviewer agents, .gitignore patterns for `.planning/` artifacts, an
 
 <step name="load_context">
 
-**MANDATORY FIRST STEP — Load current state:**
+**Load current state:**
 
 ```bash
 # Check for existing config
@@ -36,7 +36,7 @@ Manages code reviewer agents, .gitignore patterns for `.planning/` artifacts, an
 git remote -v 2>/dev/null || echo "NO_REMOTE"
 ```
 
-**You MUST run the bash command above using the Bash tool before proceeding.**
+**Run this before proceeding.**
 
 </step>
 
@@ -146,7 +146,7 @@ EOF
 
 <step name="done">
 
-Present next steps (see ~/.claude/mindsystem/references/continuation-format.md):
+Present next steps:
 
 **If PROJECT.md exists:**
 
@@ -192,11 +192,11 @@ Present next steps (see ~/.claude/mindsystem/references/continuation-format.md):
 
 <success_criteria>
 
-- [ ] Config.json code_review values set (or preserved if skipped)
+- [ ] Changes committed (if any)
+- [ ] User routed to next step
 - [ ] Gitignore patterns applied (if selected)
 - [ ] Git remote offered (if missing)
 - [ ] Validation summary displayed
-- [ ] Changes committed (if any)
-- [ ] User routed to next step
+- [ ] Config.json code_review values set (or preserved if skipped)
 
 </success_criteria>
