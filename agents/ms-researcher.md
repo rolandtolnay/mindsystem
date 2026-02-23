@@ -195,18 +195,18 @@ When researching "best library for X":
 
 ## ms-lookup CLI
 
-The CLI is at `~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh`.
+The CLI is available as `ms-lookup`.
 
 ### Library Documentation
 
 ```bash
-~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh docs <library> "<query>"
+ms-lookup docs <library> "<query>"
 ```
 
 Example:
 ```bash
-~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh docs nextjs "app router file conventions"
-~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh docs "react-three-fiber" "physics setup"
+ms-lookup docs nextjs "app router file conventions"
+ms-lookup docs "react-three-fiber" "physics setup"
 ```
 
 **When to use:** Library APIs, framework features, configuration options, version-specific behavior. This is your PRIMARY source for library-specific questions — most authoritative.
@@ -216,13 +216,13 @@ Example:
 ### Deep Research
 
 ```bash
-~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh deep "<query>"
+ms-lookup deep "<query>"
 ```
 
 Example:
 ```bash
-~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh deep "authentication patterns for SaaS applications"
-~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh deep "WebGPU browser support and production readiness 2026"
+ms-lookup deep "authentication patterns for SaaS applications"
+ms-lookup deep "WebGPU browser support and production readiness 2026"
 ```
 
 **When to use:** Architecture decisions, technology comparisons, comprehensive ecosystem surveys, best practices synthesis. Use for HIGH-VALUE research questions — this costs money.

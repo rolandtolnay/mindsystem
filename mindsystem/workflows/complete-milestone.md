@@ -68,7 +68,7 @@ cat .planning/config.json 2>/dev/null
 Run the stats script to get readiness status and git statistics:
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py gather-milestone-stats $PHASE_START $PHASE_END
+ms-tools gather-milestone-stats $PHASE_START $PHASE_END
 ```
 
 The script outputs:
@@ -423,7 +423,7 @@ Archive requirements and prepare for fresh requirements in next milestone.
 Archive optional milestone files (audit, context, research) to the milestone directory:
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py archive-milestone-files v[X.Y]
+ms-tools archive-milestone-files v[X.Y]
 ```
 
 The script moves whichever files exist and reports what was archived. Files that don't exist are skipped silently.
@@ -435,7 +435,7 @@ The script moves whichever files exist and reports what was archived. Files that
 Consolidate phase summaries, delete raw artifacts, and move phase directories to the milestone archive. This runs after all steps that read summaries (extract_accomplishments, evolve_project_full_review) and after archive_milestone creates the milestone directory.
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py archive-milestone-phases $PHASE_START $PHASE_END v[X.Y]
+ms-tools archive-milestone-phases $PHASE_START $PHASE_END v[X.Y]
 ```
 
 Verify archive:

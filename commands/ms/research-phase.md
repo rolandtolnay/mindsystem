@@ -21,12 +21,12 @@ Phase number: $ARGUMENTS (required)
 
 **Resolve phase:**
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
+ms-tools find-phase "$ARGUMENTS"
 ```
 
 Check for existing research:
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py check-artifact "$ARGUMENTS" RESEARCH
+ms-tools check-artifact "$ARGUMENTS" RESEARCH
 ```
 </context>
 
@@ -123,8 +123,8 @@ Phase Research — External Documentation focus.
 <focus>
 Library documentation, APIs, version-specific behavior, verified code examples.
 Use the ms-lookup CLI for library docs and deep research:
-  ~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh docs <library> '<query>'
-  ~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh deep '<query>'
+  ms-lookup docs <library> '<query>'
+  ms-lookup deep '<query>'
 Use WebSearch for ecosystem discovery.
 Focus on finding authoritative, current documentation for the libraries and tools
 needed to implement this phase.
@@ -225,7 +225,7 @@ Phase Research — Best Practices & Community Consensus focus.
 <focus>
 Community consensus, common pitfalls, proven approaches, state of the art.
 Use the ms-lookup CLI for deep research on high-value questions:
-  ~/.claude/mindsystem/scripts/ms-lookup-wrapper.sh deep '<query>'
+  ms-lookup deep '<query>'
 Use WebSearch for community articles, blog posts, Stack Overflow patterns.
 Focus on what practitioners recommend and what mistakes to avoid.
 </focus>

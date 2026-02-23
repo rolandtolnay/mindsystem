@@ -65,7 +65,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 1. **Verify readiness and gather stats:**
 
    ```bash
-   uv run ~/.claude/mindsystem/scripts/ms-tools.py gather-milestone-stats $PHASE_START $PHASE_END
+   ms-tools gather-milestone-stats $PHASE_START $PHASE_END
    ```
 
    - If NOT READY: stop and report incomplete plans
@@ -102,13 +102,13 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 7. **Archive milestone files:**
 
    ```bash
-   uv run ~/.claude/mindsystem/scripts/ms-tools.py archive-milestone-files v{{version}}
+   ms-tools archive-milestone-files v{{version}}
    ```
 
 8. **Archive and cleanup phases:**
 
    ```bash
-   uv run ~/.claude/mindsystem/scripts/ms-tools.py archive-milestone-phases $PHASE_START $PHASE_END v{{version}}
+   ms-tools archive-milestone-phases $PHASE_START $PHASE_END v{{version}}
    ```
 
 9. **Update STATE.md:**

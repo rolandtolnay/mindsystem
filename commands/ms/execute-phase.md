@@ -32,7 +32,7 @@ Phase: $ARGUMENTS
 
 **Resolve phase:**
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
+ms-tools find-phase "$ARGUMENTS"
 ```
 
 @.planning/ROADMAP.md
@@ -52,7 +52,7 @@ uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
    - Build list of incomplete plans
 
 3. **Validate and read execution order**
-   - Run `ms-tools.py validate-execution-order` on phase directory
+   - Run `ms-tools validate-execution-order` on phase directory
    - Parse EXECUTION-ORDER.md wave structure
    - Report wave structure to user
 
@@ -61,7 +61,7 @@ uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
    - Spawn `ms-executor` for each plan in wave (parallel Task calls)
    - Wait for completion (Task blocks)
    - Verify SUMMARYs created
-   - Run `ms-tools.py update-state` to update plan progress
+   - Run `ms-tools update-state` to update plan progress
    - Proceed to next wave
 
 5. **Aggregate results**
@@ -84,7 +84,7 @@ uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
    - If changes made: commit as `refactor({phase}): code review improvements`
 
 8. **Generate phase patch**
-   - Run: `uv run ~/.claude/mindsystem/scripts/ms-tools.py generate-phase-patch ${PHASE_NUMBER}`
+   - Run: `ms-tools generate-phase-patch ${PHASE_NUMBER}`
    - Outputs to `.planning/phases/{phase_dir}/{phase}-changes.patch`
    - Verify: patch file exists OR skip message logged
    - Note: Patch captures all changes including simplifications

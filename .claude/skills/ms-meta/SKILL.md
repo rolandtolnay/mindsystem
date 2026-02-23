@@ -53,7 +53,7 @@ The critical judgment when evaluating any Mindsystem feature: **does this step's
 
 Reserve subagents for autonomous execution work, not collaborative thinking.
 
-**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: STATE.md updates via `ms-tools.py update-state`, execution order validation via `ms-tools.py validate-execution-order`, patch generation via `ms-tools.py generate-phase-patch`. Prompts handle reasoning and decisions; scripts handle mechanical operations.
+**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: STATE.md updates via `ms-tools update-state`, execution order validation via `ms-tools validate-execution-order`, patch generation via `ms-tools generate-phase-patch`. Prompts handle reasoning and decisions; scripts handle mechanical operations.
 
 **User as collaborator.** Trust that users can contribute meaningfully. Maintain:
 - **Control** — User decides when to proceed, what to skip
@@ -123,7 +123,7 @@ Command → Workflow → Agent → Artifact
 - **Agent** (`agents/ms-*.md`) — Subagent definition for autonomous work. Spawned via Task tool.
 - **Template** (`mindsystem/templates/*.md`) — Output structure with placeholders. Answers: "What does output look like?"
 - **Reference** (`mindsystem/references/*.md`) — Deep concept explanation. Answers: "Why this design?"
-- **Script** (`scripts/ms-tools.py`) — Unified Python CLI for deterministic automation. No judgment logic.
+- **Script** (`ms-tools`) — Unified Python CLI for deterministic automation. No judgment logic.
 - **Skill** (`skills/*/SKILL.md`) — Domain expertise loaded on demand.
 
 ### Repository Structure
@@ -171,11 +171,11 @@ mindsystem/
 | MILESTONES.md | complete-milestone | progress, new-milestone |
 | REQUIREMENTS.md | ms-roadmapper (create-roadmap) | plan-phase, audit-milestone, ms-verifier |
 | ROADMAP.md | ms-roadmapper (create-roadmap) | progress, plan-phase, execute-phase, audit-milestone |
-| STATE.md | ms-roadmapper (init), ms-tools.py update-state | progress, plan-phase, execute-phase, verify-work |
+| STATE.md | ms-roadmapper (init), ms-tools update-state | progress, plan-phase, execute-phase, verify-work |
 | CONTEXT.md | discuss-phase | plan-phase, ms-plan-writer, ms-designer |
 | DESIGN.md | ms-designer (design-phase) | plan-phase, ms-executor |
 | PLAN.md | ms-plan-writer (plan-phase) | ms-executor, ms-verifier, verify-work |
-| EXECUTION-ORDER.md | ms-plan-writer (plan-phase) | execute-phase, ms-tools.py validate-execution-order |
+| EXECUTION-ORDER.md | ms-plan-writer (plan-phase) | execute-phase, ms-tools validate-execution-order |
 | SUMMARY.md | ms-executor (execute-phase) | progress, verify-work, audit-milestone, dependent plans |
 | VERIFICATION.md | ms-verifier (execute-phase) | progress, plan-phase (gap closure), audit-milestone |
 | UAT.md | verify-work | progress, audit-milestone |
@@ -194,7 +194,7 @@ mindsystem/
 | Plan format or structure | plan-format.md reference + plan-phase workflow + ms-plan-writer agent |
 | EXECUTION-ORDER.md format | execute-phase workflow + ms-plan-writer agent |
 | Plan inline metadata | verifier + executor + plan-checker |
-| STATE.md format | state template + ms-tools.py update-state |
+| STATE.md format | state template + ms-tools update-state |
 | SUMMARY.md format | execute-plan workflow (inline summary instructions) |
 | Command name | help.md command list |
 | New command | help.md + (workflow if non-trivial) |

@@ -33,7 +33,7 @@ Mindsystem is distributed via `npx mindsystem-cc`. During development, the user 
 
 **Never write to `~/.claude/` directly.** Always modify files in this repository.
 
-**Testing `ms-tools.py`:** Run after any modification to `scripts/ms-tools.py`:
+**Testing `ms-tools`:** Run after any modification to `scripts/ms-tools.py`:
 ```bash
 cd scripts && uv run --with pytest --with pyyaml pytest test_ms_tools.py -v
 ```

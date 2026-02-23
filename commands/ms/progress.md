@@ -129,7 +129,7 @@ DESIGN: [✓ if DESIGN.md exists | - if not]
 List files in the current phase directory:
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py list-artifacts [current-phase-number]
+ms-tools list-artifacts [current-phase-number]
 ```
 
 State: "This phase has {X} plans, {Y} summaries."

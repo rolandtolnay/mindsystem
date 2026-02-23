@@ -28,7 +28,7 @@ Phase number: $ARGUMENTS (required)
 
 **Resolve phase:**
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
+ms-tools find-phase "$ARGUMENTS"
 ```
 
 **Load project state first:**

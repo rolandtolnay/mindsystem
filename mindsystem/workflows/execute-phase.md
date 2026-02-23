@@ -81,7 +81,7 @@ Skip completed plans. If all complete, report "Phase already executed" and exit.
 Run validation before launching executors:
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py validate-execution-order "$PHASE_DIR"
+ms-tools validate-execution-order "$PHASE_DIR"
 ```
 
 If validation fails (exit 1), stop execution and report the mismatch to user.
@@ -201,7 +201,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
 
    After reporting wave completion, update STATE.md with progress:
    ```bash
-   uv run ~/.claude/mindsystem/scripts/ms-tools.py update-state {completed_count} {total_count}
+   ms-tools update-state {completed_count} {total_count}
    ```
 
 5. **Handle failures:**
@@ -412,7 +412,7 @@ Generate a patch file with all implementation changes from this phase.
 
 **Run the patch generation script:**
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py generate-phase-patch ${PHASE_NUMBER}
+ms-tools generate-phase-patch ${PHASE_NUMBER}
 ```
 
 The script will:

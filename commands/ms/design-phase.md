@@ -41,7 +41,7 @@ ls .planning/phases/${PHASE}-*/*DESIGN.md 2>/dev/null
 ## 1. Parse and Validate Phase
 
 ```bash
-uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$ARGUMENTS"
+ms-tools find-phase "$ARGUMENTS"
 ```
 
 **If not found (dir is null):** Error and exit with message: "Phase not found in ROADMAP.md"

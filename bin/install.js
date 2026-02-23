@@ -405,6 +405,62 @@ function cleanupOrphanedFiles(claudeDir, filesToRemove) {
 }
 
 /**
+ * Generate CLI wrapper scripts and configure PATH hook
+ */
+function generateWrappers(claudeDir) {
+  const binDir = path.join(claudeDir, 'bin');
+  fs.mkdirSync(binDir, { recursive: true });
+
+  const msToolsWrapper = '#!/usr/bin/env bash\nexec uv run "$(dirname "$0")/../mindsystem/scripts/ms-tools.py" "$@"\n';
+  const msLookupWrapper = '#!/usr/bin/env bash\nexec "$(dirname "$0")/../mindsystem/scripts/ms-lookup-wrapper.sh" "$@"\n';
+
+  fs.writeFileSync(path.join(binDir, 'ms-tools'), msToolsWrapper);
+  fs.writeFileSync(path.join(binDir, 'ms-lookup'), msLookupWrapper);
+  fs.chmodSync(path.join(binDir, 'ms-tools'), '755');
+  fs.chmodSync(path.join(binDir, 'ms-lookup'), '755');
+
+  console.log(`  ${green}✓${reset} Generated CLI wrappers (bin/ms-tools, bin/ms-lookup)`);
+}
+
+function ensurePathHook(claudeDir, isGlobal, configDir) {
+  const settingsPath = path.join(claudeDir, 'settings.json');
+  let settings = {};
+  if (fs.existsSync(settingsPath)) {
+    settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+  }
+
+  if (!settings.hooks) settings.hooks = {};
+  if (!Array.isArray(settings.hooks.SessionStart))
+    settings.hooks.SessionStart = [];
+
+  // Idempotent — skip if already present
+  const marker = 'mindsystem/bin';
+  if (settings.hooks.SessionStart.some(e => JSON.stringify(e).includes(marker)))
+    return;
+
+  // Build PATH expression
+  let binExpr;
+  if (isGlobal) {
+    binExpr = configDir
+      ? `${claudeDir}/bin`
+      : '$HOME/.claude/bin';
+  } else {
+    binExpr = '$CLAUDE_PROJECT_DIR/.claude/bin';
+  }
+
+  settings.hooks.SessionStart.push({
+    matcher: '',
+    hooks: [{
+      type: 'command',
+      command: `echo 'export PATH="${binExpr}:$PATH"' >> "$CLAUDE_ENV_FILE"`
+    }]
+  });
+
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+  console.log(`  ${green}✓${reset} Configured PATH hook`);
+}
+
+/**
  * Recursively copy directory, replacing paths in .md files
  */
 function copyWithPathReplacement(srcDir, destDir, pathPrefix) {
@@ -563,7 +619,11 @@ async function install(isGlobal) {
   fs.writeFileSync(versionDest, pkg.version);
   console.log(`  ${green}✓${reset} Wrote VERSION (${pkg.version})`);
 
-  // Phase 7: Check Python for ms-lookup
+  // Phase 7: Generate CLI wrappers and PATH hook
+  generateWrappers(claudeDir);
+  ensurePathHook(claudeDir, isGlobal, configDir);
+
+  // Phase 8: Check Python for ms-lookup
   const msLookupPath = path.join(claudeDir, 'mindsystem', 'scripts', 'ms-lookup');
   if (fs.existsSync(msLookupPath)) {
     try {
@@ -583,13 +643,13 @@ async function install(isGlobal) {
     }
   }
 
-  // Phase 8: Cleanup orphaned files
+  // Phase 9: Cleanup orphaned files
   if (orphans.length > 0) {
     console.log('');
     cleanupOrphanedFiles(claudeDir, orphans);
   }
 
-  // Phase 9: Write new manifest
+  // Phase 10: Write new manifest
   const newManifest = {
     version: pkg.version,
     installedAt: new Date().toISOString(),

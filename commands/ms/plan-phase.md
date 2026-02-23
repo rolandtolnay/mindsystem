@@ -38,7 +38,7 @@ Gap closure mode: `--gaps` flag triggers gap closure workflow
 ```bash
 PHASE_ARG=$(echo "$ARGUMENTS" | grep -oE '^[0-9]+' | head -1)
 if [ -n "$PHASE_ARG" ]; then
-  uv run ~/.claude/mindsystem/scripts/ms-tools.py find-phase "$PHASE_ARG"
+  ms-tools find-phase "$PHASE_ARG"
 fi
 ```
 
