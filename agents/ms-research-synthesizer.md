@@ -1,7 +1,7 @@
 ---
 name: ms-research-synthesizer
 description: Synthesizes research outputs from parallel researcher agents into SUMMARY.md. Spawned by /ms:research-project after 4 researcher agents complete.
-model: haiku
+model: sonnet
 tools: Read, Write, Bash
 color: purple
 ---

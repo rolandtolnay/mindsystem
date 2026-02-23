@@ -1,7 +1,7 @@
 ---
 name: ms-researcher
 description: Conducts comprehensive research using systematic methodology, source verification, and structured output. Spawned by /ms:research-phase and /ms:research-project orchestrators.
-model: sonnet
+model: opus
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch
 color: cyan
 ---

@@ -1,7 +1,7 @@
 ---
 name: ms-mockup-designer
 description: Generates self-contained HTML/CSS mockups for design direction exploration. Spawned by design-phase command.
-model: sonnet
+model: opus
 tools: Read, Write, Bash
 color: magenta
 ---
