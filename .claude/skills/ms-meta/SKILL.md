@@ -103,11 +103,12 @@ Mindsystem deliberately separates where work happens:
 | Main context (with user) | Fresh subagent contexts (autonomous) |
 |--------------------------|--------------------------------------|
 | `/ms:new-project` | ms-executor |
-| `/ms:create-roadmap` | ms-verifier |
-| `/ms:plan-phase` | ms-researcher |
-| `/ms:discuss-phase` | ms-debugger |
-| `/ms:design-phase` | ms-codebase-mapper |
-| `/ms:verify-work` | ms-code-simplifier |
+| `/ms:config` | ms-verifier |
+| `/ms:create-roadmap` | ms-researcher |
+| `/ms:plan-phase` | ms-debugger |
+| `/ms:discuss-phase` | ms-codebase-mapper |
+| `/ms:design-phase` | ms-code-simplifier |
+| `/ms:verify-work` | |
 
 Collaboration benefits from user visibility and iteration. Execution benefits from fresh context (200k tokens, peak quality). Planning stays editable; execution produces artifacts.
 
@@ -145,6 +146,7 @@ mindsystem/
 ### Core Workflow — Milestone Lifecycle
 
 1. `/ms:new-milestone` → Discover what to build, update PROJECT.md
+1b. `/ms:config` → (optional) Configure code reviewers, gitignore, git remote
 2. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
 
 **Per phase (repeat for each):**
@@ -165,7 +167,7 @@ mindsystem/
 
 | Artifact | Produced by | Consumed by |
 |----------|------------|-------------|
-| PROJECT.md | new-project, new-milestone | create-roadmap, plan-phase, execute-phase, design-phase |
+| PROJECT.md | new-project, new-milestone | create-roadmap, plan-phase, execute-phase, design-phase, config |
 | MILESTONES.md | complete-milestone | progress, new-milestone |
 | REQUIREMENTS.md | ms-roadmapper (create-roadmap) | plan-phase, audit-milestone, ms-verifier |
 | ROADMAP.md | ms-roadmapper (create-roadmap) | progress, plan-phase, execute-phase, audit-milestone |
@@ -188,7 +190,7 @@ mindsystem/
 | Workflow steps | Corresponding command's `<process>` section |
 | Agent expected output | Workflow that spawns it |
 | Template structure | All agents/workflows that reference it |
-| config.json options | execute-phase workflow + help.md |
+| config.json options | execute-phase workflow + help.md + config command |
 | Plan format or structure | plan-format.md reference + plan-phase workflow + ms-plan-writer agent |
 | EXECUTION-ORDER.md format | execute-phase workflow + ms-plan-writer agent |
 | Plan inline metadata | verifier + executor + plan-checker |
@@ -234,6 +236,7 @@ Read source files directly for detailed knowledge:
 | Topic | Read |
 |-------|------|
 | Project initialization | `commands/ms/new-project.md` |
+| Project configuration | `commands/ms/config.md` |
 | Milestone discovery | `commands/ms/new-milestone.md` |
 | Roadmap creation | `commands/ms/create-roadmap.md` |
 | Phase discussion | `mindsystem/workflows/discuss-phase.md` |

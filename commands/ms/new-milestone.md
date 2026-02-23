@@ -39,6 +39,30 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 ## Phase 1: Orient
 
+0. **Validate PROJECT.md exists:**
+
+   ```bash
+   [ -f .planning/PROJECT.md ] || { echo "NO_PROJECT"; exit 0; }
+   ```
+
+   **If `NO_PROJECT`:** Present message and stop:
+
+   ```
+   No PROJECT.md found. Initialize the project first to capture business context, target audience, and project vision.
+
+   ---
+
+   ## ▶ Next Up
+
+   `/ms:new-project` — Initialize project with business context and vision
+
+   <sub>`/clear` first → fresh context window</sub>
+
+   ---
+   ```
+
+   **You MUST run the bash command above using the Bash tool before proceeding.**
+
 1. **Load context:**
    - Read PROJECT.md (existing project, validated requirements, decisions)
    - Read MILESTONES.md (what shipped previously)

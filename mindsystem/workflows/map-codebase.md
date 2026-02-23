@@ -100,8 +100,8 @@ After writing STACK.md, update config.json code_review fields with the appropria
 1. Read STACK.md to detect primary framework
 2. Map framework to code review agent names:
    - Flutter/Dart:
-     - adhoc: "ms-flutter-simplifier"
-     - phase: "ms-flutter-simplifier"
+     - adhoc: "ms-flutter-code-quality"
+     - phase: "ms-flutter-code-quality"
      - milestone: "ms-flutter-reviewer"
    - All others (React, Next.js, Node, Swift, Kotlin, etc.):
      - adhoc: "ms-code-simplifier"

@@ -303,8 +303,8 @@ After creating SUMMARY.md, update config.json code_review fields with agent name
 1. Read recommended stack from STACK.md
 2. Map to code review agent names:
    - Flutter/Dart:
-     - adhoc: \"ms-flutter-simplifier\"
-     - phase: \"ms-flutter-simplifier\"
+     - adhoc: \"ms-flutter-code-quality\"
+     - phase: \"ms-flutter-code-quality\"
      - milestone: \"ms-flutter-reviewer\"
    - All others:
      - adhoc: \"ms-code-simplifier\"

@@ -22,24 +22,25 @@ Output ONLY the reference content below. Do NOT add:
 ## Start Here
 
 - If you already have `.planning/` in this repo: run `/ms:progress`.
-- If you’re starting in an existing codebase (brownfield): run `/ms:map-codebase`, then `/ms:new-project`.
 - Otherwise: run `/ms:new-project`.
 
 ## Quick Start
 
 ### Greenfield (new project)
 
-1. `/ms:new-project` - Initialize project with brief
-2. `/ms:research-project` - (optional) Research domain ecosystem
-3. `/ms:create-roadmap` - Define requirements and create roadmap
-4. `/ms:plan-phase 1` - Create detailed plan for first phase
-5. `/ms:execute-phase 1` - Execute with parallel agents
+1. `/ms:new-project` — Initialize project with brief
+2. `/ms:config` — (optional) Configure code reviewers and gitignore
+3. `/ms:research-project` — (optional) Research domain ecosystem
+4. `/ms:create-roadmap` — Define requirements and create roadmap
+5. `/ms:plan-phase 1` — Create detailed plan for first phase
+6. `/ms:execute-phase 1` — Execute with parallel agents
 
 ### Brownfield (existing codebase)
 
-1. `/ms:map-codebase` - Analyze existing code first
-2. `/ms:new-project` - Questions focus on what you’re adding/changing
-3. Continue with steps 2-5 above (codebase docs load automatically)
+1. `/ms:new-project` — Questions focus on business context and vision
+2. `/ms:map-codebase` — Analyze existing code
+3. `/ms:config` — (optional) Configure code reviewers and gitignore
+4. Continue with research/roadmap/plan/execute
 
 ## Staying Updated
 
@@ -62,7 +63,7 @@ Initialize → (Optional Research) → Roadmap → Plan → Execute → Verify �
 ```
 
 Common deviations:
-- Existing repo: `/ms:map-codebase` before `/ms:new-project`
+- Existing repo: `/ms:map-codebase` after `/ms:new-project` (or before — either works)
 - Plan looks wrong: `/ms:list-phase-assumptions <phase>` or `/ms:check-phase <phase>`
 - Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
 - Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
@@ -81,6 +82,16 @@ Initialize new project with brief and configuration.
 - Commits initialization files to git
 
 Usage: `/ms:new-project`
+
+**`/ms:config`**
+Configure Mindsystem preferences — code reviewers, gitignore patterns, git remote.
+
+- Use when: you want to set up code review agents, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
+- Edits `.planning/config.json` and `.gitignore`
+- Suggests code reviewers based on tech stack (needs PROJECT.md)
+- Idempotent — run anytime to reconfigure
+
+Usage: `/ms:config`
 
 **`/ms:research-project`**
 Research domain ecosystem before creating roadmap.
@@ -111,7 +122,7 @@ Map an existing codebase for brownfield projects.
 - Analyzes codebase with parallel Explore agents
 - Creates `.planning/codebase/` with 7 focused documents
 - Covers stack, architecture, structure, conventions, testing, integrations, concerns
-- Use before `/ms:new-project` on existing codebases
+- Use on existing codebases (before or after `/ms:new-project`)
 
 Usage: `/ms:map-codebase`
 
@@ -443,6 +454,7 @@ Usage: `/ms:release-notes`
 
 ```
 /ms:new-project                 # Extract your idea through questions
+/ms:config                      # (optional) Configure code reviewers and gitignore
 /ms:research-project            # (recommended) Research domain ecosystem
 /ms:create-roadmap              # Define requirements and create phases
 /ms:plan-phase 1                # Create detailed plan
@@ -452,8 +464,9 @@ Usage: `/ms:release-notes`
 **Starting with existing code (brownfield):**
 
 ```
-/ms:map-codebase                # Step 1: Analyze existing code
-/ms:new-project                 # Step 2: Questions focus on what you're adding/changing
+/ms:new-project                 # Step 1: Questions focus on business context and vision
+/ms:map-codebase                # Step 2: Analyze existing code
+/ms:config                      # (optional) Configure code reviewers and gitignore
 /ms:research-project            # (optional) Research new domain areas
 /ms:create-roadmap              # Define requirements and create roadmap
 /ms:plan-phase 1                # Codebase docs load automatically

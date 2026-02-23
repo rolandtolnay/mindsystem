@@ -33,9 +33,9 @@ Creates `.planning/` with PROJECT.md and config.json.
 
 **MANDATORY FIRST STEP — Execute these checks before ANY user interaction:**
 
-1. **Abort if project exists:**
+1. **Detect update mode:**
    ```bash
-   [ -f .planning/PROJECT.md ] && echo "ERROR: Project already initialized. Use /ms:progress" && exit 1
+   [ -f .planning/PROJECT.md ] && echo "IS_UPDATE=true" || echo "IS_UPDATE=false"
    ```
 
 2. **Initialize git repo in THIS directory** (required even if inside a parent repo):
@@ -54,6 +54,7 @@ Creates `.planning/` with PROJECT.md and config.json.
    # Check for existing code files
    CODE_FILES=$(find . -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.swift" -o -name "*.java" 2>/dev/null | grep -v node_modules | grep -v .git | head -20)
    HAS_PACKAGE=$([ -f package.json ] || [ -f requirements.txt ] || [ -f Cargo.toml ] || [ -f go.mod ] || [ -f Package.swift ] && echo "yes")
+   IS_BROWNFIELD=$( ([ -n "$CODE_FILES" ] || [ "$HAS_PACKAGE" = "yes" ]) && echo "yes" || echo "no")
    HAS_CODEBASE_MAP=$([ -d .planning/codebase ] && echo "yes")
    ```
 
@@ -61,36 +62,17 @@ Creates `.planning/` with PROJECT.md and config.json.
 
 </step>
 
-<step name="brownfield_offer">
-
-**If existing code detected and .planning/codebase/ doesn't exist:**
-
-Check the results from setup step:
-- If `CODE_FILES` is non-empty OR `HAS_PACKAGE` is "yes"
-- AND `HAS_CODEBASE_MAP` is NOT "yes"
-
-Use AskUserQuestion:
-- header: "Existing Code"
-- question: "I detected existing code in this directory. Would you like to map the codebase first?"
-- options:
-  - "Map codebase first" — Run /ms:map-codebase to understand existing architecture (Recommended)
-  - "Skip mapping" — Proceed with project initialization
-
-**If "Map codebase first":**
-```
-Run `/ms:map-codebase` first, then return to `/ms:new-project`
-```
-Exit command.
-
-**If "Skip mapping":** Continue to question step.
-
-**If no existing code detected OR codebase already mapped:** Continue to question step.
-
-</step>
-
 <step name="question">
 
 **Open the conversation:**
+
+**If IS_UPDATE=true (update mode):**
+- Read existing `.planning/PROJECT.md`
+- Present a brief summary of the current project context
+- Ask inline (freeform, NOT AskUserQuestion): "What do you want to update?"
+- Follow the same questioning principles below, but focused on what changed
+
+**If IS_UPDATE=false (first run):**
 
 Ask inline (freeform, NOT AskUserQuestion):
 
@@ -126,14 +108,15 @@ Consult `questioning.md` for techniques — challenge vagueness, derive before a
 When you could write a clear PROJECT.md, use AskUserQuestion:
 
 - header: "Ready?"
-- question: "I think I understand what you're after. Ready to create PROJECT.md?"
+- question (first run): "I think I understand what you're after. Ready to create PROJECT.md?"
+- question (update mode): "Ready to update PROJECT.md with these changes?"
 - options:
-  - "Create PROJECT.md" — Let's move forward
+  - "Create PROJECT.md" / "Update PROJECT.md" — Let's move forward
   - "Keep exploring" — I want to share more / ask me more
 
 If "Keep exploring" — ask what they want to add, or identify gaps and probe naturally.
 
-Loop until "Create PROJECT.md" selected.
+Loop until create/update selected.
 
 </step>
 
@@ -195,7 +178,7 @@ Do not compress. Capture everything gathered.
 
 <step name="config">
 
-Create `.planning/config.json` with subsystems and code_review using `templates/config.json` structure.
+Create or update `.planning/config.json` with subsystems and code_review using `templates/config.json` structure.
 
 **Subsystems:** Derive 5-10 initial subsystems from the project context gathered during questioning. These are short, lowercase identifiers for the major functional areas of the project.
 
@@ -206,10 +189,13 @@ Examples by project type:
 
 These values are used throughout the system for consistent categorization of summaries, debug docs, and adhoc work.
 
+**Update mode (config.json already exists):** Re-derive subsystems from updated context. Preserve any existing `code_review` values — do not overwrite configured reviewers with nulls.
+
 </step>
 
 <step name="commit">
 
+**First run:**
 ```bash
 git add .planning/PROJECT.md .planning/config.json
 git commit -m "$(cat <<'EOF'
@@ -222,19 +208,43 @@ EOF
 )"
 ```
 
+**Update mode:**
+```bash
+git add .planning/PROJECT.md .planning/config.json
+git commit -m "$(cat <<'EOF'
+docs: update [project-name] project context
+
+[Brief description of what changed]
+EOF
+)"
+```
+
 </step>
 
 <step name="done">
 
 Present completion with next steps (see ~/.claude/mindsystem/references/continuation-format.md):
 
+**First run:**
 ```
 Project initialized:
 
 - Project: .planning/PROJECT.md
 - Config: .planning/config.json
 [If .planning/codebase/ exists:] - Codebase: .planning/codebase/ (7 documents)
+```
 
+**Update mode:**
+```
+Project updated:
+
+- Project: .planning/PROJECT.md
+- Config: .planning/config.json
+```
+
+**Routing (both modes):**
+
+```
 ---
 
 ## ▶ Next Up
@@ -246,7 +256,8 @@ Project initialized:
 ---
 
 **Also available:**
-- `/ms:create-roadmap` — Skip milestone discovery, define requirements and roadmap directly
+- `/ms:config` — Configure code reviewers, gitignore, and other preferences
+[If brownfield detected and no codebase map:] - `/ms:map-codebase` — Analyze existing codebase for technical context
 
 ---
 ```
@@ -272,12 +283,12 @@ Update `.planning/STATE.md` Last Command field (if STATE.md exists):
 
 <success_criteria>
 
-- [ ] Deep questioning completed with business context extracted
+- [ ] Deep questioning completed with business context extracted (or update conversation completed)
 - [ ] PROJECT.md captures product identity (What/Value/Audience/Problem/Differentiation/Flows)
 - [ ] PROJECT.md captures boundaries (Out of Scope, Constraints, Technical Context)
 - [ ] Validated requirements initialized (empty for greenfield, inferred for brownfield)
 - [ ] Key Decisions table initialized
-- [ ] config.json has subsystems and code_review settings
+- [ ] config.json has subsystems and code_review settings (existing code_review preserved in update mode)
 - [ ] All committed to git
 
 </success_criteria>
