@@ -9,23 +9,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [3.21.0] - 2026-02-23
 
 ### Added
-- **Name-based milestones:** Milestones use slugified names (e.g., "mvp", "push-notifications") instead of version numbers, eliminating conflicts with app semver and git tags. Includes auto-detection from PROJECT.md, doctor check for naming conventions, and migration tooling.
+- **Product-aware discuss phase:** The discuss phase now loads milestone artifacts, surfaces Claude's assumptions, and offers optional competitor/UX/industry research — grounding questions in real project context rather than generic templates. Discuss is now the default pre-work recommendation for all non-mechanical phases, with required assumption enumeration to catch misalignment early.
+- **Unified `ms-tools.py` CLI with PATH wrappers:** Consolidated 10 standalone bash scripts into a single Python CLI with comprehensive test suite. Thin `ms-tools` and `ms-lookup` wrappers auto-installed to PATH replace long-form invocations across commands and workflows, saving ~1,600 chars of prompt overhead per session.
+- **Name-based milestones:** Milestones use slugified names (e.g., "mvp", "push-notifications") instead of version numbers, eliminating conflicts with app semver and git tags. Includes auto-detection from PROJECT.md, doctor check, and migration tooling.
 - **`/ms:config` command:** Configure code reviewers, gitignore patterns, and git remote. Supports updating existing PROJECT.md without starting over.
-- **Unified `ms-tools.py` CLI:** Replaced 10 standalone bash scripts with a single Python CLI using argparse subcommands, plus comprehensive test suite.
-- **CLI wrapper scripts:** Thin `ms-tools` and `ms-lookup` wrappers auto-installed to PATH via SessionStart hook, saving ~1,600 chars of prompt overhead per session.
-- **User actions in execution summaries:** Execute-phase now surfaces manual steps (migrations, installs, env vars) required after plan execution.
-- **Product-aware discuss phase:** Discuss-phase loads milestone artifacts, surfaces Claude's assumptions, and offers optional competitor/UX/industry research before planning.
+- **User actions in execution summaries:** Execute-phase surfaces manual steps (migrations, installs, env vars) after plan execution.
 
 ### Changed
-- Discuss is now the default pre-work phase for all non-mechanical work, with required assumption enumeration to prevent misalignment.
+- Upgraded mockup-designer and researcher agents from Sonnet to Opus; research-synthesizer from Haiku to Sonnet.
 - Doctor command extracted fix steps into a dedicated workflow, keeping the command as a thin orchestrator.
-- Product researcher agent stripped of local tools to structurally prevent codebase exploration.
-- Simplified language and reordered success criteria across config and new-project commands.
-- Upgraded research-synthesizer agent from Haiku to Sonnet for better synthesis quality.
-- Improved release and design-phase UX (separated changelog display from confirmation, reordered platform detection).
+- Simplified language and UX polish across config, new-project, release, and design-phase commands.
 
 ### Removed
-- `/ms:list-phase-assumptions` command (functionality absorbed into discuss-phase).
+- `/ms:list-phase-assumptions` command (absorbed into discuss-phase).
 
 ## [3.20.0] - 2026-02-22
 
