@@ -349,7 +349,7 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
     Contract:
         Args: (none)
         Output: text — per-check PASS/FAIL/SKIP status and summary
-        Exit codes: 0 = all checks passed, 1 = any check failed, 2 = missing .planning/ or config.json
+        Exit codes: 0 = scan completed, 2 = missing .planning/ or config.json
         Side effects: read-only
     """
     git_root = find_git_root()
@@ -669,8 +669,7 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
     print(f"Checks: {total} total, {pass_count} passed, {fail_count} failed, {skip_count} skipped")
 
     if fail_count > 0:
-        print(f"Issues: {' '.join(failed_checks)}")
-        sys.exit(1)
+        print(f"Issues: {', '.join(failed_checks)}")
     else:
         print("All checks passed")
 
