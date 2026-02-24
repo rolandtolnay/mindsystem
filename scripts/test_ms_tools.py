@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import importlib.util
+import io
 import json
 from pathlib import Path
 from unittest import mock
@@ -929,3 +930,693 @@ class TestSetLastCommand:
 
         text = state.read_text()
         assert "Last Command: ms:verify-work 10 | 2026-02-24 14:30" in text
+
+
+# ===================================================================
+# Part 4: UAT File Management Tests
+# ===================================================================
+
+UATFile = _mod.UATFile
+cmd_uat_init = _mod.cmd_uat_init
+cmd_uat_update = _mod.cmd_uat_update
+cmd_uat_status = _mod.cmd_uat_status
+
+# Shared fixture: a complete UAT.md matching the template format
+UAT_FIXTURE = """\
+---
+status: testing
+phase: 05-auth
+source: [05-01-SUMMARY.md]
+started: '2026-02-24 10:00'
+updated: '2026-02-24 10:30'
+current_batch: 2
+mocked_files: [auth_service.dart]
+pre_work_stash: null
+---
+
+## Progress
+
+total: 5
+tested: 3
+passed: 2
+issues: 1
+fixing: 0
+pending: 2
+skipped: 0
+
+## Current Batch
+
+batch: 2 of 3
+name: "Error States"
+mock_type: error_state
+tests: [3, 4]
+status: testing
+
+## Tests
+
+### 1. Login with valid credentials
+expected: User sees dashboard after entering valid email/password
+mock_required: false
+mock_type: null
+result: pass
+
+### 2. View profile page
+expected: Profile shows user name and email
+mock_required: false
+mock_type: null
+result: pass
+
+### 3. Login with invalid password
+expected: Error banner shows "Invalid credentials"
+mock_required: true
+mock_type: error_state
+result: issue
+reported: "Shows generic error instead of specific message"
+severity: major
+fix_status: applied
+fix_commit: abc1234
+retry_count: 0
+
+### 4. Login with expired token
+expected: Redirect to login page with session expired message
+mock_required: true
+mock_type: error_state
+result: [pending]
+
+### 5. Premium feature access
+expected: Shows upgrade prompt for free users
+mock_required: true
+mock_type: premium_user
+result: [pending]
+
+## Fixes Applied
+
+- commit: abc1234
+  test: 3
+  description: "Fixed error message to show specific auth error"
+  files: [auth_service.dart, login_page.dart]
+
+## Batches
+
+### Batch 1: No Mocks Required
+tests: [1, 2]
+status: complete
+mock_type: null
+passed: 2
+issues: 0
+
+### Batch 2: Error States
+tests: [3, 4]
+status: testing
+mock_type: error_state
+
+### Batch 3: Premium Features
+tests: [5]
+status: pending
+mock_type: premium_user
+
+## Assumptions
+"""
+
+# Minimal UAT.md with empty fixes/assumptions
+UAT_MINIMAL = """\
+---
+status: testing
+phase: 03-setup
+source: [03-01-SUMMARY.md]
+started: '2026-02-24 10:00'
+updated: '2026-02-24 10:00'
+current_batch: 1
+mocked_files: []
+pre_work_stash: null
+---
+
+## Progress
+
+total: 2
+tested: 0
+passed: 0
+issues: 0
+fixing: 0
+pending: 2
+skipped: 0
+
+## Current Batch
+
+batch: 1 of 1
+name: "No Mocks"
+mock_type: null
+tests: [1, 2]
+status: pending
+
+## Tests
+
+### 1. Basic setup check
+expected: App starts without errors
+mock_required: false
+mock_type: null
+result: [pending]
+
+### 2. Config loads
+expected: Config values appear in settings
+mock_required: false
+mock_type: null
+result: [pending]
+
+## Fixes Applied
+
+## Batches
+
+### Batch 1: No Mocks
+tests: [1, 2]
+status: pending
+mock_type: null
+
+## Assumptions
+"""
+
+
+class TestUATFileParse:
+    """Test UATFile.parse with complete and minimal fixtures."""
+
+    def test_parse_complete_file(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        assert uat.frontmatter["status"] == "testing"
+        assert uat.frontmatter["phase"] == "05-auth"
+        assert uat.frontmatter["current_batch"] == 2
+        assert uat.frontmatter["mocked_files"] == ["auth_service.dart"]
+        assert len(uat.tests) == 5
+        assert len(uat.batches) == 3
+        assert len(uat.fixes) == 1
+        assert len(uat.assumptions) == 0
+
+    def test_parse_minimal_file(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        assert uat.frontmatter["phase"] == "03-setup"
+        assert len(uat.tests) == 2
+        assert len(uat.batches) == 1
+        assert len(uat.fixes) == 0
+        assert len(uat.assumptions) == 0
+
+    def test_parse_test_with_issue_fields(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        t3 = next(t for t in uat.tests if t["num"] == "3")
+        assert t3["result"] == "issue"
+        assert "Shows generic error" in t3["reported"]
+        assert t3["severity"] == "major"
+        assert t3["fix_status"] == "applied"
+        assert t3["fix_commit"] == "abc1234"
+        assert t3["retry_count"] == "0"
+
+    def test_parse_progress(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        assert uat.progress["total"] == "5"
+        assert uat.progress["passed"] == "2"
+        assert uat.progress["pending"] == "2"
+
+    def test_parse_current_batch(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        assert uat.current_batch["batch"] == "2 of 3"
+        assert uat.current_batch["mock_type"] == "error_state"
+        assert uat.current_batch["status"] == "testing"
+
+    def test_parse_fixes(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        fix = uat.fixes[0]
+        assert fix["commit"] == "abc1234"
+        assert fix["test"] == "3"
+        assert "Fixed error message" in fix["description"]
+
+    def test_parse_batches(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        b1 = uat.batches[0]
+        assert b1["name"] == "No Mocks Required"
+        assert b1["status"] == "complete"
+        assert b1["passed"] == "2"
+
+
+class TestUATFileRoundtrip:
+    """Test parse -> serialize roundtrip."""
+
+    def test_roundtrip_preserves_structure(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        output = uat.serialize()
+        # Re-parse the output
+        uat2 = UATFile.parse(output)
+        assert len(uat2.tests) == len(uat.tests)
+        assert len(uat2.batches) == len(uat.batches)
+        assert len(uat2.fixes) == len(uat.fixes)
+        assert uat2.frontmatter["phase"] == "05-auth"
+        # Test names preserved
+        for t1, t2 in zip(uat.tests, uat2.tests):
+            assert t1["name"] == t2["name"]
+            assert t1["result"] == t2["result"]
+
+    def test_roundtrip_minimal(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        output = uat.serialize()
+        uat2 = UATFile.parse(output)
+        assert len(uat2.tests) == 2
+        assert len(uat2.fixes) == 0
+        assert len(uat2.assumptions) == 0
+
+
+class TestUATFileRecalcProgress:
+    """Test recalc_progress with various result combinations."""
+
+    def test_all_pending(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.recalc_progress()
+        assert uat.progress["total"] == "2"
+        assert uat.progress["pending"] == "2"
+        assert uat.progress["tested"] == "0"
+        assert uat.progress["passed"] == "0"
+
+    def test_mixed_results(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        uat.recalc_progress()
+        assert uat.progress["total"] == "5"
+        assert uat.progress["passed"] == "2"
+        # Test 3 has fix_status=applied → fixing
+        assert uat.progress["fixing"] == "1"
+        assert uat.progress["pending"] == "2"
+
+    def test_verified_fix_counts_as_passed(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        # Change test 3's fix_status to verified
+        t3 = next(t for t in uat.tests if t["num"] == "3")
+        t3["fix_status"] = "verified"
+        uat.recalc_progress()
+        assert uat.progress["passed"] == "3"  # 2 pass + 1 verified
+        assert uat.progress["fixing"] == "0"
+
+    def test_blocked_counts_as_pending(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.tests[0]["result"] = "blocked"
+        uat.recalc_progress()
+        assert uat.progress["pending"] == "2"  # 1 blocked + 1 [pending]
+        assert uat.progress["tested"] == "0"
+
+    def test_skipped(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.tests[0]["result"] = "skipped"
+        uat.recalc_progress()
+        assert uat.progress["skipped"] == "1"
+        assert uat.progress["pending"] == "1"
+        assert uat.progress["tested"] == "1"
+
+
+class TestUATFileMutations:
+    """Test update_test, update_batch, update_session."""
+
+    def test_update_test(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.update_test(1, {"result": "pass"})
+        t1 = next(t for t in uat.tests if t["num"] == "1")
+        assert t1["result"] == "pass"
+
+    def test_update_test_not_found(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        with pytest.raises(ValueError, match="Test 99 not found"):
+            uat.update_test(99, {"result": "pass"})
+
+    def test_update_batch(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        uat.update_batch(1, {"passed": "3", "issues": "0"})
+        b1 = next(b for b in uat.batches if b["num"] == "1")
+        assert b1["passed"] == "3"
+
+    def test_update_session(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        uat.update_session({"status": "fixing"})
+        assert uat.frontmatter["status"] == "fixing"
+
+    def test_update_session_mocked_files(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.update_session({"mocked_files": "a.dart,b.dart"})
+        assert uat.frontmatter["mocked_files"] == ["a.dart", "b.dart"]
+
+    def test_update_session_clear_mocked_files(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        uat.update_session({"mocked_files": ""})
+        assert uat.frontmatter["mocked_files"] == []
+
+    def test_update_session_current_batch_syncs(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        uat.update_session({"current_batch": "3"})
+        assert uat.frontmatter["current_batch"] == 3
+        assert uat.current_batch["batch"] == "3 of 3"
+        assert "Premium" in uat.current_batch["name"]
+
+
+class TestUATFileAppendFix:
+    """Test append_fix new and in-place update."""
+
+    def test_append_new_fix(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.append_fix({
+            "commit": "def567",
+            "test": 1,
+            "description": "Fixed setup",
+            "files": ["setup.dart"],
+        })
+        assert len(uat.fixes) == 1
+        assert uat.fixes[0]["commit"] == "def567"
+        assert uat.fixes[0]["files"] == "[setup.dart]"
+
+    def test_append_fix_same_test_updates_in_place(self):
+        uat = UATFile.parse(UAT_FIXTURE)
+        assert len(uat.fixes) == 1
+        uat.append_fix({
+            "commit": "new999",
+            "test": 3,
+            "description": "Better fix for auth error",
+            "files": ["auth_service.dart"],
+        })
+        # Still 1 fix, updated in place
+        assert len(uat.fixes) == 1
+        assert uat.fixes[0]["commit"] == "new999"
+        assert "Better fix" in uat.fixes[0]["description"]
+
+    def test_append_assumption(self):
+        uat = UATFile.parse(UAT_MINIMAL)
+        uat.append_assumption({
+            "test": 2,
+            "name": "Config loads",
+            "expected": "Config values appear",
+            "reason": "No config file available",
+        })
+        assert len(uat.assumptions) == 1
+        assert uat.assumptions[0]["test"] == "2"
+
+
+class TestCmdUatInit:
+    """Tests for uat-init command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def test_creates_file_from_valid_json(self, tmp_path, capsys):
+        # Create phase dir
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+
+        input_json = json.dumps({
+            "source": ["05-01-SUMMARY.md"],
+            "tests": [
+                {"name": "Login works", "expected": "User sees dashboard", "mock_required": False, "mock_type": None},
+                {"name": "Logout works", "expected": "User sees login page", "mock_required": False, "mock_type": None},
+            ],
+            "batches": [
+                {"name": "No Mocks", "mock_type": None, "tests": [1, 2]},
+            ],
+        })
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.sys, "stdin", io.StringIO(input_json)):
+            cmd_uat_init(args)
+
+        captured = capsys.readouterr()
+        assert "2 tests" in captured.out
+        assert "1 batches" in captured.out
+
+        uat_path = phase_dir / "05-auth-UAT.md"
+        assert uat_path.is_file()
+        content = uat_path.read_text()
+        assert "Login works" in content
+        assert "Logout works" in content
+
+    def test_auto_creates_phase_dir(self, tmp_path, capsys):
+        (tmp_path / ".planning" / "phases").mkdir(parents=True)
+
+        input_json = json.dumps({
+            "source": [],
+            "tests": [{"name": "Test", "expected": "Works"}],
+            "batches": [{"name": "B1", "tests": [1]}],
+        })
+
+        args = argparse.Namespace(phase="99")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.sys, "stdin", io.StringIO(input_json)):
+            cmd_uat_init(args)
+
+        captured = capsys.readouterr()
+        assert "1 tests" in captured.out
+        assert (tmp_path / ".planning" / "phases" / "99").is_dir()
+
+    def test_invalid_json_exits(self, tmp_path):
+        (tmp_path / ".planning" / "phases" / "05-auth").mkdir(parents=True)
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.sys, "stdin", io.StringIO("not json")), \
+             pytest.raises(SystemExit) as exc:
+            cmd_uat_init(args)
+        assert exc.value.code == 1
+
+    def test_stdout_contains_path_and_counts(self, tmp_path, capsys):
+        phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
+        phase_dir.mkdir(parents=True)
+
+        input_json = json.dumps({
+            "source": ["03-01-SUMMARY.md"],
+            "tests": [
+                {"name": "T1", "expected": "E1"},
+                {"name": "T2", "expected": "E2"},
+                {"name": "T3", "expected": "E3"},
+            ],
+            "batches": [
+                {"name": "B1", "tests": [1, 2]},
+                {"name": "B2", "tests": [3]},
+            ],
+        })
+
+        args = argparse.Namespace(phase="3")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.sys, "stdin", io.StringIO(input_json)):
+            cmd_uat_init(args)
+
+        captured = capsys.readouterr()
+        assert "3 tests" in captured.out
+        assert "2 batches" in captured.out
+        assert "03-setup-UAT.md" in captured.out
+
+
+class TestCmdUatUpdate:
+    """Tests for uat-update command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path.write_text(content)
+        return uat_path
+
+    def test_update_test_result_pass(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(
+            phase="5", test=4, batch=None, session=False,
+            append_fix=False, append_assumption=False,
+            fields=["result=pass"],
+        )
+        with self._patch_git_root(tmp_path):
+            cmd_uat_update(args)
+
+        captured = capsys.readouterr()
+        assert "Updated test 4" in captured.out
+        assert "Progress:" in captured.out
+
+        uat = UATFile.parse(uat_path.read_text())
+        t4 = next(t for t in uat.tests if t["num"] == "4")
+        assert t4["result"] == "pass"
+
+    def test_update_test_issue_with_fields(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(
+            phase="5", test=4, batch=None, session=False,
+            append_fix=False, append_assumption=False,
+            fields=["result=issue", "severity=major", "fix_status=investigating", "retry_count=0"],
+        )
+        with self._patch_git_root(tmp_path):
+            cmd_uat_update(args)
+
+        uat = UATFile.parse(uat_path.read_text())
+        t4 = next(t for t in uat.tests if t["num"] == "4")
+        assert t4["result"] == "issue"
+        assert t4["severity"] == "major"
+        assert t4["fix_status"] == "investigating"
+
+    def test_update_batch_complete(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(
+            phase="5", test=None, batch=2, session=False,
+            append_fix=False, append_assumption=False,
+            fields=["status=complete", "passed=1", "issues=1"],
+        )
+        with self._patch_git_root(tmp_path):
+            cmd_uat_update(args)
+
+        uat = UATFile.parse(uat_path.read_text())
+        b2 = next(b for b in uat.batches if b["num"] == "2")
+        assert b2["status"] == "complete"
+        assert b2["passed"] == "1"
+
+    def test_update_session_frontmatter(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(
+            phase="5", test=None, batch=None, session=True,
+            append_fix=False, append_assumption=False,
+            fields=["status=fixing"],
+        )
+        with self._patch_git_root(tmp_path):
+            cmd_uat_update(args)
+
+        uat = UATFile.parse(uat_path.read_text())
+        assert uat.frontmatter["status"] == "fixing"
+
+    def test_append_fix_from_stdin(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        fix_json = json.dumps({
+            "commit": "xyz789",
+            "test": 4,
+            "description": "Fixed token expiry redirect",
+            "files": ["auth_middleware.dart"],
+        })
+
+        args = argparse.Namespace(
+            phase="5", test=None, batch=None, session=False,
+            append_fix=True, append_assumption=False,
+            fields=[],
+        )
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.sys, "stdin", io.StringIO(fix_json)):
+            cmd_uat_update(args)
+
+        uat = UATFile.parse(uat_path.read_text())
+        assert len(uat.fixes) == 2
+        assert uat.fixes[1]["commit"] == "xyz789"
+
+    def test_append_assumption_from_stdin(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        assumption_json = json.dumps({
+            "test": 5,
+            "name": "Premium feature access",
+            "expected": "Shows upgrade prompt",
+            "reason": "No premium account available",
+        })
+
+        args = argparse.Namespace(
+            phase="5", test=None, batch=None, session=False,
+            append_fix=False, append_assumption=True,
+            fields=[],
+        )
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.sys, "stdin", io.StringIO(assumption_json)):
+            cmd_uat_update(args)
+
+        uat = UATFile.parse(uat_path.read_text())
+        assert len(uat.assumptions) == 1
+        assert uat.assumptions[0]["test"] == "5"
+
+    def test_progress_auto_recalculated(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path, UAT_MINIMAL)
+
+        args = argparse.Namespace(
+            phase="3", test=1, batch=None, session=False,
+            append_fix=False, append_assumption=False,
+            fields=["result=pass"],
+        )
+
+        # Adjust path for phase 03-setup
+        phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
+        phase_dir.mkdir(parents=True, exist_ok=True)
+        (phase_dir / "03-setup-UAT.md").write_text(UAT_MINIMAL)
+
+        with self._patch_git_root(tmp_path):
+            cmd_uat_update(args)
+
+        uat = UATFile.parse((phase_dir / "03-setup-UAT.md").read_text())
+        assert uat.progress["passed"] == "1"
+        assert uat.progress["tested"] == "1"
+        assert uat.progress["pending"] == "1"
+
+
+class TestCmdUatStatus:
+    """Tests for uat-status command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path.write_text(content)
+        return uat_path
+
+    def test_outputs_valid_json(self, tmp_path, capsys):
+        self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path):
+            cmd_uat_status(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["status"] == "testing"
+        assert output["current_batch"] == 2
+        assert output["total_batches"] == 3
+        assert output["progress"]["total"] == 5
+        assert output["progress"]["passed"] == 2
+        assert isinstance(output["mocked_files"], list)
+
+    def test_fixing_tests_listed(self, tmp_path, capsys):
+        self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path):
+            cmd_uat_status(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        # Test 3 has fix_status=applied
+        assert len(output["fixing_tests"]) == 1
+        assert output["fixing_tests"][0]["num"] == 3
+        assert output["fixing_tests"][0]["fix_status"] == "applied"
+        assert output["fixing_tests"][0]["fix_commit"] == "abc1234"
+
+    def test_fixing_tests_without_commit(self, tmp_path, capsys):
+        """Tests with fix_status=investigating have empty fix_commit."""
+        uat_path = self._setup_uat(tmp_path)
+        # Change test 3 to investigating (no fix_commit yet)
+        content = uat_path.read_text()
+        content = content.replace("fix_status: applied", "fix_status: investigating")
+        content = content.replace("fix_commit: abc1234\n", "")
+        uat_path.write_text(content)
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path):
+            cmd_uat_status(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["fixing_tests"][0]["fix_commit"] == ""
+
+    def test_missing_file_exits(self, tmp_path):
+        (tmp_path / ".planning" / "phases" / "05-auth").mkdir(parents=True)
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             pytest.raises(SystemExit) as exc:
+            cmd_uat_status(args)
+        assert exc.value.code == 1

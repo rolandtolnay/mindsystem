@@ -47,10 +47,10 @@ Phase: $ARGUMENTS (optional)
 7. **For each batch:**
    - If mock needed: Apply inline mocks (1-4 direct edits, 5+ via ms-mock-generator subagent), tell user to hot reload
    - Present tests via AskUserQuestion (Pass / Can't test / Skip / Other)
-   - Process results, update UAT.md
+   - Process results — UAT.md updates happen via `ms-tools uat-update` (auto-recalculates progress)
    - **For each issue found:**
      - Lightweight investigation (2-3 tool calls)
-     - If simple: Fix inline, commit, ask for re-test
+     - If simple: Fix inline, commit (amend previous fix commit on retry when HEAD matches fix_commit), ask for re-test
      - If complex: Spawn ms-verify-fixer subagent
      - 2 retries on failed re-test, then offer options
 8. **On batch transition:**
@@ -60,12 +60,10 @@ Phase: $ARGUMENTS (optional)
    - Revert all mocks (`git checkout -- <mocked_files>`)
    - Generate UAT fixes patch
    - Restore user's pre-existing work (if stashed)
-   - Commit UAT.md, present summary
+   - Commit UAT.md + STATE.md together in one completion commit, present summary
    - **Update knowledge pitfalls** — if significant UAT issues (blocker/major) were fixed, append pitfall entries to relevant knowledge files
 
-10. **Update last command:** `ms-tools set-last-command "ms:verify-work $ARGUMENTS"`
-
-11. **Present next steps**
+10. **Present next steps**
     - If this was the last phase in milestone: suggest `/ms:audit-milestone`
     - If more phases remain: Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase
 </process>
@@ -78,6 +76,8 @@ Phase: $ARGUMENTS (optional)
 - Don't fix complex issues inline — spawn fixer subagent for multi-file or architectural changes
 - Don't commit mock code — stash mocked files before fixing, restore after
 - Don't re-present skipped tests — assumptions stand
+- Don't Read/Edit UAT.md for field updates — use `ms-tools uat-update`
+- Don't create separate commits for retry fixes — amend previous fix commit when HEAD matches fix_commit
 </anti_patterns>
 
 <success_criteria>

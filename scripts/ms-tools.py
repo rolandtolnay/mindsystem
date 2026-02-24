@@ -2078,6 +2078,650 @@ def cmd_scan_planning_context(args: argparse.Namespace) -> None:
 
 
 # ===================================================================
+# UAT File Management
+# ===================================================================
+
+_TEST_HEADER_RE = re.compile(r"^###\s+(\d+)\.\s+(.+)$")
+_BATCH_HEADER_RE = re.compile(r"^###\s+Batch\s+(\d+):\s+(.+)$")
+_SECTION_HEADER_RE = re.compile(r"^##\s+(.+)$")
+_KV_LINE_RE = re.compile(r"^(\w[\w_]*)\s*:\s*(.*)$")
+_LIST_ITEM_START_RE = re.compile(r"^-\s+(\w[\w_]*)\s*:\s*(.*)$")
+_LIST_ITEM_CONT_RE = re.compile(r"^\s+(\w[\w_]*)\s*:\s*(.*)$")
+
+# Fields that get quoted in serialization per section
+_QUOTED_FIELDS = {
+    "current_batch": {"name"},
+    "fixes": {"description"},
+    "assumptions": {"name", "expected", "reason"},
+    "tests": {"reported"},
+}
+
+
+def _ensure_quoted(value: str) -> str:
+    """Add surrounding quotes if not already quoted."""
+    if value.startswith('"') and value.endswith('"'):
+        return value
+    return f'"{value}"'
+
+
+class UATFile:
+    """Internal representation of UAT.md for programmatic manipulation."""
+
+    def __init__(self) -> None:
+        self.frontmatter: dict[str, Any] = {}
+        self.progress: dict[str, str] = {}
+        self.current_batch: dict[str, str] = {}
+        self.tests: list[dict[str, str]] = []
+        self.fixes: list[dict[str, str]] = []
+        self.batches: list[dict[str, str]] = []
+        self.assumptions: list[dict[str, str]] = []
+
+    # --- Parsing ---
+
+    @classmethod
+    def parse(cls, text: str) -> "UATFile":
+        """Parse UAT.md text into structured representation."""
+        uat = cls()
+
+        # Parse frontmatter
+        fm_match = _FRONTMATTER_RE.match(text)
+        if fm_match:
+            try:
+                uat.frontmatter = yaml.safe_load(fm_match.group(1)) or {}
+            except yaml.YAMLError:
+                uat.frontmatter = {}
+            body = text[fm_match.end():]
+        else:
+            body = text
+
+        # Split into sections by ## headers
+        sections = cls._split_sections(body)
+
+        for name, content in sections.items():
+            if name == "Progress":
+                uat.progress = cls._parse_kv_block(content)
+            elif name == "Current Batch":
+                uat.current_batch = cls._parse_kv_block(content)
+            elif name == "Tests":
+                uat.tests = cls._parse_tests(content)
+            elif name == "Fixes Applied":
+                uat.fixes = cls._parse_list_items(content)
+            elif name == "Batches":
+                uat.batches = cls._parse_batches(content)
+            elif name == "Assumptions":
+                uat.assumptions = cls._parse_list_items(content)
+
+        return uat
+
+    @staticmethod
+    def _split_sections(body: str) -> dict[str, str]:
+        """Split body text into {section_name: content} dict."""
+        sections: dict[str, str] = {}
+        current_name: str | None = None
+        current_lines: list[str] = []
+
+        for line in body.splitlines():
+            m = _SECTION_HEADER_RE.match(line)
+            if m:
+                if current_name is not None:
+                    sections[current_name] = "\n".join(current_lines)
+                current_name = m.group(1).strip()
+                current_lines = []
+            else:
+                current_lines.append(line)
+
+        if current_name is not None:
+            sections[current_name] = "\n".join(current_lines)
+
+        return sections
+
+    @staticmethod
+    def _parse_kv_block(text: str) -> dict[str, str]:
+        """Parse a block of key: value lines."""
+        result: dict[str, str] = {}
+        for line in text.splitlines():
+            m = _KV_LINE_RE.match(line.strip())
+            if m:
+                result[m.group(1)] = m.group(2).strip()
+        return result
+
+    @staticmethod
+    def _parse_tests(text: str) -> list[dict[str, str]]:
+        """Parse ### N. Name sections into test dicts."""
+        tests: list[dict[str, str]] = []
+        current: dict[str, str] | None = None
+
+        for line in text.splitlines():
+            m = _TEST_HEADER_RE.match(line)
+            if m:
+                if current is not None:
+                    tests.append(current)
+                current = {"num": m.group(1), "name": m.group(2).strip()}
+            elif current is not None:
+                kv = _KV_LINE_RE.match(line.strip())
+                if kv:
+                    current[kv.group(1)] = kv.group(2).strip()
+
+        if current is not None:
+            tests.append(current)
+
+        return tests
+
+    @staticmethod
+    def _parse_batches(text: str) -> list[dict[str, str]]:
+        """Parse ### Batch N: Name sections into batch dicts."""
+        batches: list[dict[str, str]] = []
+        current: dict[str, str] | None = None
+
+        for line in text.splitlines():
+            m = _BATCH_HEADER_RE.match(line)
+            if m:
+                if current is not None:
+                    batches.append(current)
+                current = {"num": m.group(1), "name": m.group(2).strip()}
+            elif current is not None:
+                kv = _KV_LINE_RE.match(line.strip())
+                if kv:
+                    current[kv.group(1)] = kv.group(2).strip()
+
+        if current is not None:
+            batches.append(current)
+
+        return batches
+
+    @staticmethod
+    def _parse_list_items(text: str) -> list[dict[str, str]]:
+        """Parse - key: value list items (fixes, assumptions)."""
+        items: list[dict[str, str]] = []
+        current: dict[str, str] | None = None
+
+        for line in text.splitlines():
+            m = _LIST_ITEM_START_RE.match(line)
+            if m:
+                if current is not None:
+                    items.append(current)
+                current = {m.group(1): m.group(2).strip()}
+            elif current is not None:
+                m2 = _LIST_ITEM_CONT_RE.match(line)
+                if m2:
+                    current[m2.group(1)] = m2.group(2).strip()
+
+        if current is not None:
+            items.append(current)
+
+        return items
+
+    # --- Construction ---
+
+    @classmethod
+    def from_init_json(cls, data: dict, phase_name: str) -> "UATFile":
+        """Construct from structured JSON input."""
+        uat = cls()
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        tests = data.get("tests", [])
+        batches = data.get("batches", [])
+        source = data.get("source", [])
+
+        uat.frontmatter = {
+            "status": "testing",
+            "phase": phase_name,
+            "source": source,
+            "started": now,
+            "updated": now,
+            "current_batch": 1,
+            "mocked_files": [],
+            "pre_work_stash": None,
+        }
+
+        # Build tests
+        for i, t in enumerate(tests, 1):
+            uat.tests.append({
+                "num": str(i),
+                "name": t["name"],
+                "expected": t["expected"],
+                "mock_required": str(t.get("mock_required", False)).lower(),
+                "mock_type": t.get("mock_type") or "null",
+                "result": "[pending]",
+            })
+
+        # Build batches
+        for i, b in enumerate(batches, 1):
+            test_nums = "[" + ", ".join(str(n) for n in b["tests"]) + "]"
+            uat.batches.append({
+                "num": str(i),
+                "name": b["name"],
+                "tests": test_nums,
+                "status": "pending",
+                "mock_type": b.get("mock_type") or "null",
+            })
+
+        # Set first batch as current
+        if batches:
+            first = batches[0]
+            test_nums = "[" + ", ".join(str(n) for n in first["tests"]) + "]"
+            uat.current_batch = {
+                "batch": f"1 of {len(batches)}",
+                "name": _ensure_quoted(first["name"]),
+                "mock_type": first.get("mock_type") or "null",
+                "tests": test_nums,
+                "status": "pending",
+            }
+
+        uat.recalc_progress()
+        return uat
+
+    # --- Mutations ---
+
+    def update_test(self, num: int, fields: dict[str, str]) -> None:
+        """Update fields on test N."""
+        for t in self.tests:
+            if t["num"] == str(num):
+                t.update(fields)
+                return
+        raise ValueError(f"Test {num} not found")
+
+    def update_batch(self, num: int, fields: dict[str, str]) -> None:
+        """Update fields on batch N."""
+        for b in self.batches:
+            if b["num"] == str(num):
+                b.update(fields)
+                return
+        raise ValueError(f"Batch {num} not found")
+
+    def update_session(self, fields: dict[str, str]) -> None:
+        """Update frontmatter fields."""
+        for k, v in fields.items():
+            if v == "":
+                # Empty string means clear/null
+                if k == "mocked_files":
+                    self.frontmatter[k] = []
+                else:
+                    self.frontmatter[k] = None
+            elif k == "mocked_files":
+                self.frontmatter[k] = [f.strip() for f in v.split(",") if f.strip()]
+            elif k == "current_batch":
+                try:
+                    batch_num = int(v)
+                    self.frontmatter[k] = batch_num
+                    self._sync_current_batch(batch_num)
+                except ValueError:
+                    self.frontmatter[k] = v
+            else:
+                self.frontmatter[k] = v
+
+    def _sync_current_batch(self, batch_num: int) -> None:
+        """Sync Current Batch section when frontmatter current_batch changes."""
+        total = len(self.batches)
+        for b in self.batches:
+            if b["num"] == str(batch_num):
+                name = b["name"]
+                if not name.startswith('"'):
+                    name = _ensure_quoted(name)
+                self.current_batch = {
+                    "batch": f"{batch_num} of {total}",
+                    "name": name,
+                    "mock_type": b.get("mock_type", "null"),
+                    "tests": b.get("tests", "[]"),
+                    "status": b.get("status", "pending"),
+                }
+                return
+
+    def append_fix(self, fix_dict: dict) -> None:
+        """Append to fixes. Update in-place if same test already has a fix."""
+        test_num = str(fix_dict.get("test", ""))
+        converted: dict[str, str] = {}
+        for k, v in fix_dict.items():
+            if isinstance(v, list):
+                converted[k] = "[" + ", ".join(str(x) for x in v) + "]"
+            elif k == "description":
+                converted[k] = _ensure_quoted(str(v))
+            else:
+                converted[k] = str(v)
+
+        for i, f in enumerate(self.fixes):
+            if f.get("test") == test_num:
+                self.fixes[i] = converted
+                return
+        self.fixes.append(converted)
+
+    def append_assumption(self, assumption_dict: dict) -> None:
+        """Append to assumptions."""
+        converted: dict[str, str] = {}
+        for k, v in assumption_dict.items():
+            s = str(v)
+            if k in ("name", "expected", "reason"):
+                s = _ensure_quoted(s)
+            converted[k] = s
+        self.assumptions.append(converted)
+
+    # --- Progress ---
+
+    def recalc_progress(self) -> None:
+        """Derive all progress counters from test results."""
+        total = len(self.tests)
+        pending = 0
+        passed = 0
+        issues = 0
+        fixing = 0
+        skipped = 0
+
+        for t in self.tests:
+            result = t.get("result", "[pending]")
+            fix_status = t.get("fix_status", "")
+
+            if result in ("[pending]", "blocked"):
+                pending += 1
+            elif result == "pass":
+                passed += 1
+            elif result == "issue":
+                if fix_status == "verified":
+                    passed += 1
+                elif fix_status in ("investigating", "applied"):
+                    fixing += 1
+                else:
+                    issues += 1
+            elif result == "skipped":
+                skipped += 1
+
+        tested = total - pending
+        self.progress = {
+            "total": str(total),
+            "tested": str(tested),
+            "passed": str(passed),
+            "issues": str(issues),
+            "fixing": str(fixing),
+            "pending": str(pending),
+            "skipped": str(skipped),
+        }
+
+    def progress_summary(self) -> str:
+        """One-line summary for stdout."""
+        p = self.progress
+        return (
+            f"{p.get('tested', '0')}/{p.get('total', '0')} "
+            f"({p.get('passed', '0')} pass, {p.get('issues', '0')} issue, "
+            f"{p.get('fixing', '0')} fixing, {p.get('skipped', '0')} skip)"
+        )
+
+    # --- Serialization ---
+
+    def serialize(self) -> str:
+        """Rebuild full file from internal state."""
+        self.recalc_progress()
+        self.frontmatter["updated"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        lines: list[str] = []
+
+        # Frontmatter
+        lines.append("---")
+        fm_text = yaml.dump(
+            self.frontmatter, default_flow_style=False, sort_keys=False,
+        ).rstrip()
+        lines.append(fm_text)
+        lines.append("---")
+        lines.append("")
+
+        # Progress
+        lines.append("## Progress")
+        lines.append("")
+        for k in ("total", "tested", "passed", "issues", "fixing", "pending", "skipped"):
+            if k in self.progress:
+                lines.append(f"{k}: {self.progress[k]}")
+        lines.append("")
+
+        # Current Batch
+        lines.append("## Current Batch")
+        lines.append("")
+        for k in ("batch", "name", "mock_type", "tests", "status"):
+            if k in self.current_batch:
+                lines.append(f"{k}: {self.current_batch[k]}")
+        lines.append("")
+
+        # Tests
+        lines.append("## Tests")
+        lines.append("")
+        test_field_order = (
+            "expected", "mock_required", "mock_type", "result",
+            "reported", "severity", "fix_status", "fix_commit",
+            "retry_count", "reason",
+        )
+        for t in self.tests:
+            lines.append(f"### {t['num']}. {t['name']}")
+            for k in test_field_order:
+                if k in t:
+                    val = t[k]
+                    if k in _QUOTED_FIELDS.get("tests", set()):
+                        val = _ensure_quoted(val)
+                    lines.append(f"{k}: {val}")
+            lines.append("")
+
+        # Fixes Applied
+        lines.append("## Fixes Applied")
+        lines.append("")
+        fix_field_order = ("commit", "test", "description", "files")
+        for fix in self.fixes:
+            first = True
+            for k in fix_field_order:
+                if k in fix:
+                    val = fix[k]
+                    if k in _QUOTED_FIELDS.get("fixes", set()):
+                        val = _ensure_quoted(val)
+                    prefix = "- " if first else "  "
+                    lines.append(f"{prefix}{k}: {val}")
+                    first = False
+            lines.append("")
+
+        # Batches
+        lines.append("## Batches")
+        lines.append("")
+        batch_field_order = ("tests", "status", "mock_type", "passed", "issues")
+        for b in self.batches:
+            lines.append(f"### Batch {b['num']}: {b['name']}")
+            for k in batch_field_order:
+                if k in b:
+                    lines.append(f"{k}: {b[k]}")
+            lines.append("")
+
+        # Assumptions
+        lines.append("## Assumptions")
+        lines.append("")
+        assumption_field_order = ("test", "name", "expected", "reason")
+        for a in self.assumptions:
+            first = True
+            for k in assumption_field_order:
+                if k in a:
+                    val = a[k]
+                    if k in _QUOTED_FIELDS.get("assumptions", set()):
+                        val = _ensure_quoted(val)
+                    prefix = "- " if first else "  "
+                    lines.append(f"{prefix}{k}: {val}")
+                    first = False
+            lines.append("")
+
+        return "\n".join(lines)
+
+
+# ===================================================================
+# Subcommand: uat-init
+# ===================================================================
+
+
+def cmd_uat_init(args: argparse.Namespace) -> None:
+    """Create UAT.md from JSON stdin.
+
+    Contract:
+        Args: phase (str) — phase number
+        Input: JSON on stdin with source, tests, batches
+        Output: text — confirmation with path and counts
+        Exit codes: 0 = success, 1 = invalid JSON
+        Side effects: creates UAT.md file
+    """
+    phase = normalize_phase(args.phase)
+    planning = find_planning_dir()
+
+    try:
+        data = json.loads(sys.stdin.read())
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    phase_dir = find_phase_dir(planning, phase)
+    if phase_dir is None:
+        phases_dir = planning / "phases"
+        phases_dir.mkdir(parents=True, exist_ok=True)
+        phase_dir = phases_dir / phase
+        phase_dir.mkdir(parents=True, exist_ok=True)
+
+    phase_name = phase_dir.name
+    uat = UATFile.from_init_json(data, phase_name)
+
+    out_path = phase_dir / f"{phase_name}-UAT.md"
+    out_path.write_text(uat.serialize(), encoding="utf-8")
+
+    n_tests = len(uat.tests)
+    n_batches = len(uat.batches)
+    print(f"Created {out_path} with {n_tests} tests in {n_batches} batches")
+
+
+# ===================================================================
+# Subcommand: uat-update
+# ===================================================================
+
+
+def cmd_uat_update(args: argparse.Namespace) -> None:
+    """Update UAT.md fields.
+
+    Contract:
+        Args: phase (str), mutually exclusive target flag, key=value pairs or JSON stdin
+        Output: text — update label + progress summary
+        Exit codes: 0 = success, 1 = file not found or invalid input
+        Side effects: writes UAT.md
+    """
+    phase = normalize_phase(args.phase)
+    planning = find_planning_dir()
+
+    phase_dir = find_phase_dir(planning, phase)
+    if phase_dir is None:
+        print(f"Error: Phase directory not found for {phase}", file=sys.stderr)
+        sys.exit(1)
+
+    uat_path = phase_dir / f"{phase_dir.name}-UAT.md"
+    if not uat_path.is_file():
+        print(f"Error: UAT file not found: {uat_path}", file=sys.stderr)
+        sys.exit(1)
+
+    uat = UATFile.parse(uat_path.read_text(encoding="utf-8"))
+
+    # Parse key=value pairs from remaining args
+    fields: dict[str, str] = {}
+    for kv in (args.fields or []):
+        if "=" in kv:
+            k, v = kv.split("=", 1)
+            fields[k] = v
+
+    label = ""
+
+    if args.test is not None:
+        uat.update_test(args.test, fields)
+        label = f"Updated test {args.test}: " + ", ".join(f"{k}={v}" for k, v in fields.items())
+    elif args.batch is not None:
+        uat.update_batch(args.batch, fields)
+        label = f"Updated batch {args.batch}: " + ", ".join(f"{k}={v}" for k, v in fields.items())
+    elif args.session:
+        uat.update_session(fields)
+        label = f"Updated session: " + ", ".join(f"{k}={v}" for k, v in fields.items())
+    elif args.append_fix:
+        try:
+            fix_data = json.loads(sys.stdin.read())
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+            sys.exit(1)
+        uat.append_fix(fix_data)
+        label = f"Appended fix for test {fix_data.get('test', '?')}"
+    elif args.append_assumption:
+        try:
+            assumption_data = json.loads(sys.stdin.read())
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+            sys.exit(1)
+        uat.append_assumption(assumption_data)
+        label = f"Appended assumption for test {assumption_data.get('test', '?')}"
+
+    uat_path.write_text(uat.serialize(), encoding="utf-8")
+    print(f"{label} | Progress: {uat.progress_summary()}")
+
+
+# ===================================================================
+# Subcommand: uat-status
+# ===================================================================
+
+
+def cmd_uat_status(args: argparse.Namespace) -> None:
+    """Output UAT status as JSON.
+
+    Contract:
+        Args: phase (str) — phase number
+        Output: JSON — compact status for LLM resume
+        Exit codes: 0 = success, 1 = file not found
+        Side effects: read-only
+    """
+    phase = normalize_phase(args.phase)
+    planning = find_planning_dir()
+
+    phase_dir = find_phase_dir(planning, phase)
+    if phase_dir is None:
+        print(f"Error: Phase directory not found for {phase}", file=sys.stderr)
+        sys.exit(1)
+
+    uat_path = phase_dir / f"{phase_dir.name}-UAT.md"
+    if not uat_path.is_file():
+        print(f"Error: UAT file not found: {uat_path}", file=sys.stderr)
+        sys.exit(1)
+
+    uat = UATFile.parse(uat_path.read_text(encoding="utf-8"))
+    uat.recalc_progress()
+
+    fixing_tests = []
+    pending_tests = []
+    blocked_tests = []
+
+    for t in uat.tests:
+        num = int(t["num"])
+        result = t.get("result", "[pending]")
+        fix_status = t.get("fix_status", "")
+
+        if fix_status in ("investigating", "applied"):
+            fixing_tests.append({
+                "num": num,
+                "name": t["name"],
+                "fix_status": fix_status,
+                "fix_commit": t.get("fix_commit", ""),
+                "retry_count": int(t.get("retry_count", "0")),
+            })
+        if result == "[pending]":
+            pending_tests.append(num)
+        elif result == "blocked":
+            blocked_tests.append(num)
+
+    output = {
+        "status": uat.frontmatter.get("status", ""),
+        "current_batch": uat.frontmatter.get("current_batch"),
+        "total_batches": len(uat.batches),
+        "progress": {k: int(v) for k, v in uat.progress.items()},
+        "mocked_files": uat.frontmatter.get("mocked_files", []),
+        "fixing_tests": fixing_tests,
+        "pending_tests": pending_tests,
+        "blocked_tests": blocked_tests,
+        "pre_work_stash": uat.frontmatter.get("pre_work_stash"),
+        "path": str(uat_path),
+    }
+
+    json.dump(output, sys.stdout, cls=_SafeEncoder)
+    sys.stdout.write("\n")
+
+
+# ===================================================================
 # Argument parser setup
 # ===================================================================
 
@@ -2172,6 +2816,28 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("phase", help="Phase number")
     p.add_argument("type", help="Artifact type (CONTEXT, DESIGN, RESEARCH, UAT, VERIFICATION, PLAN, SUMMARY, EXECUTION-ORDER)")
     p.set_defaults(func=cmd_check_artifact)
+
+    # --- uat-init ---
+    p = subparsers.add_parser("uat-init", help="Create UAT.md from JSON stdin")
+    p.add_argument("phase", help="Phase number (e.g., 5, 05, 2.1)")
+    p.set_defaults(func=cmd_uat_init)
+
+    # --- uat-update ---
+    p = subparsers.add_parser("uat-update", help="Update UAT.md fields")
+    p.add_argument("phase", help="Phase number")
+    group = p.add_mutually_exclusive_group(required=True)
+    group.add_argument("--test", type=int, help="Test number to update")
+    group.add_argument("--batch", type=int, help="Batch number to update")
+    group.add_argument("--session", action="store_true", help="Update session/frontmatter fields")
+    group.add_argument("--append-fix", action="store_true", help="Append fix (JSON from stdin)")
+    group.add_argument("--append-assumption", action="store_true", help="Append assumption (JSON from stdin)")
+    p.add_argument("fields", nargs="*", help="key=value pairs")
+    p.set_defaults(func=cmd_uat_update)
+
+    # --- uat-status ---
+    p = subparsers.add_parser("uat-status", help="Output UAT status as JSON")
+    p.add_argument("phase", help="Phase number")
+    p.set_defaults(func=cmd_uat_status)
 
     return parser
 

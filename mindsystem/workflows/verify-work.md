@@ -175,21 +175,27 @@ Each batch has: batch number, name, mock_type, and test list.
 </step>
 
 <step name="create_uat_file">
-**Create UAT file:**
+**Create UAT file via ms-tools:**
+
+Construct JSON from classified tests and batch data, pipe to `uat-init`:
 
 ```bash
-mkdir -p "$PHASE_DIR"
+ms-tools uat-init $PHASE_NUMBER <<'EOF'
+{"source":["XX-01-SUMMARY.md"],"tests":[{"name":"...","expected":"...","mock_required":false,"mock_type":null}],"batches":[{"name":"No Mocks","mock_type":null,"tests":[1,2]}]}
+EOF
 ```
 
-Create file at `.planning/phases/XX-name/{phase}-UAT.md` following the template structure in context. Populate with classified tests and batch data from previous steps.
+- `source`: list of SUMMARY.md filenames tested
+- `tests`: array of `{name, expected, mock_required, mock_type}` from classification
+- `batches`: array of `{name, mock_type, tests: [nums]}` from batch grouping
 
-Proceed to `execute_batch`.
+stdout confirms path and counts. Proceed to `execute_batch`.
 </step>
 
 <step name="execute_batch">
 **Execute current batch:**
 
-Read current batch from UAT.md.
+Read current batch from UAT.md (test descriptions needed for presenting to user).
 
 **1. Handle mock generation (if needed):**
 
@@ -198,7 +204,7 @@ If `mock_type` is not null AND different from previous batch:
   ```bash
   git checkout -- <mocked_files>
   ```
-- Clear `mocked_files` in frontmatter
+- Clear mocked_files: `ms-tools uat-update $PHASE_NUMBER --session mocked_files=`
 - Go to `generate_mocks`
 
 If `mock_type` is null or same as previous:
@@ -314,11 +320,24 @@ For each question:
 | color, font, spacing, alignment, visual | cosmetic |
 | Default | major |
 
-**Update UAT.md after processing all responses in batch:**
-- Update each test's result
-- Update Progress counts
-- Update Batches section
-- Update timestamp
+**Update UAT.md via ms-tools after processing each response:**
+
+```bash
+# Pass:
+ms-tools uat-update $PHASE_NUMBER --test N result=pass
+
+# Blocked:
+ms-tools uat-update $PHASE_NUMBER --test N result=blocked
+
+# Skipped:
+ms-tools uat-update $PHASE_NUMBER --test N result=skipped
+echo '{"test":N,"name":"...","expected":"...","reason":"..."}' | ms-tools uat-update $PHASE_NUMBER --append-assumption
+
+# Issue:
+ms-tools uat-update $PHASE_NUMBER --test N result=issue reported="user description" severity=major fix_status=investigating retry_count=0
+```
+
+Progress auto-recalculates on every `uat-update` call. No manual progress recalculation needed.
 
 **For each issue found:** Go to `investigate_issue` before processing next test.
 </step>
@@ -372,21 +391,31 @@ Use `mocked_files` list from UAT.md frontmatter.
 - Edit the file(s)
 - Test that fix compiles/runs
 
-**3. Commit with proper message:**
+**3. Commit (amend on retry when safe):**
 ```bash
 git add [specific files]
-git commit -m "fix({phase}-uat): {description}"
+
+# Check if this is a retry AND HEAD matches the test's previous fix_commit:
+PREV_FIX=$(ms-tools uat-status $PHASE_NUMBER | python3 -c "import sys,json; d=json.load(sys.stdin); t=[x for x in d['fixing_tests'] if x['num']==N]; print(t[0].get('fix_commit','') if t else '')" 2>/dev/null)
+HEAD_SHORT=$(git rev-parse --short HEAD)
+
+if [ "$PREV_FIX" = "$HEAD_SHORT" ] && [ -n "$PREV_FIX" ]; then
+  git commit --amend --no-edit
+else
+  git commit -m "fix({phase}-uat): {description}"
+fi
 ```
 
-**4. Record in UAT.md:**
-- Update test: `fix_status: applied`, `fix_commit: {hash}`
-- Append to Fixes Applied section:
-  ```yaml
-  - commit: {hash}
-    test: {N}
-    description: "{what was fixed}"
-    files: [{changed files}]
-  ```
+Safety: only amend if HEAD matches recorded fix_commit. If HEAD has moved (other fixes in between), create new commit.
+
+**4. Record in UAT.md via ms-tools:**
+```bash
+FIX_HASH=$(git rev-parse --short HEAD)
+ms-tools uat-update $PHASE_NUMBER --test N fix_status=applied fix_commit=$FIX_HASH
+echo '{"commit":"'$FIX_HASH'","test":N,"description":"what was fixed","files":["changed.ts"]}' | ms-tools uat-update $PHASE_NUMBER --append-fix
+```
+
+`append-fix` updates in-place if a fix for the same test already exists (amend support).
 
 **5. Restore mocks:**
 ```bash
@@ -459,7 +488,7 @@ Mocks are stashed — working tree is clean.
 **3. Handle fixer return:**
 
 **If FIX COMPLETE:**
-- Update UAT.md with fix details
+- Record fix via ms-tools (same as `apply_fix` step 4: `uat-update --test N` + `--append-fix`)
 - Restore mocks: `git stash pop`
 - Handle conflicts as in `apply_fix`
 - Request re-test
@@ -484,11 +513,15 @@ Mocks are stashed — working tree is clean.
 AskUserQuestion: Pass / Still broken / New issue.
 
 **If Pass:**
-- Update test: `result: pass`, `fix_status: verified`
+```bash
+ms-tools uat-update $PHASE_NUMBER --test N result=pass fix_status=verified
+```
 - Continue to next issue or next batch
 
 **If Still broken (retry_count < 2):**
-- Increment `retry_count` in UAT.md test entry
+```bash
+ms-tools uat-update $PHASE_NUMBER --test N retry_count=1
+```
 - Go back to `investigate_issue` with new context
 
 **If Still broken (retry_count >= 2):**
@@ -513,7 +546,12 @@ AskUserQuestion: Pass / Still broken / New issue.
 <step name="resume_from_file">
 **Resume testing from UAT file:**
 
-Read full UAT file.
+Use `uat-status` for compact status determination:
+```bash
+ms-tools uat-status $PHASE_NUMBER
+```
+
+Returns JSON with: `status`, `current_batch`, `total_batches`, `progress`, `mocked_files`, `fixing_tests`, `pending_tests`, `blocked_tests`, `pre_work_stash`, `path`.
 
 Check `mocked_files` — if non-empty, verify mocks are still present:
 ```bash
@@ -522,19 +560,17 @@ git diff --name-only
 If mocked files have uncommitted changes, mocks are still active — continue.
 If mocked files are clean, mocks were lost — regenerate for current batch.
 
-Find current position:
-- current_batch
-- Tests with `[pending]` or `blocked` or `fixing` status
+Read full UAT.md only if test descriptions needed (for re-presenting tests to user).
 
 Announce:
 ```
 Resuming: Phase {phase} UAT
-Batch: {current} of {total}
+Batch: {current_batch} of {total_batches}
 Progress: {tested}/{total}
 Issues being fixed: {fixing count}
 ```
 
-If `fix_status: fixing` exists, go to `handle_retest` for that issue.
+If `fixing_tests` is non-empty, go to `handle_retest` for that issue.
 Otherwise, go to `execute_batch`.
 </step>
 
@@ -548,16 +584,14 @@ If blocked tests exist AND no issues remain in `fixing` status:
 - Re-present the blocked tests via `present_tests`
 - Blocked tests were waiting on other issues to be fixed first
 
-**2. Update Batches section (when no blocked tests remain):**
+**2. Update batch and session via ms-tools (when no blocked tests remain):**
 
-```yaml
-### Batch {N}: [Name]
-tests: [...]
-status: complete
-mock_type: [...]
-passed: {count}
-issues: {count}
+```bash
+ms-tools uat-update $PHASE_NUMBER --batch N status=complete passed=X issues=Y
+ms-tools uat-update $PHASE_NUMBER --session current_batch=N+1
 ```
+
+The `--session current_batch=N` call auto-syncs the Current Batch section with the new batch's info.
 
 **If more batches remain:**
 - Increment current_batch
@@ -591,15 +625,12 @@ PRE_WORK_STASH=$(git stash list | grep "pre-verify-work" | head -1 | cut -d: -f1
 [ -n "$PRE_WORK_STASH" ] && git stash pop "$PRE_WORK_STASH"
 ```
 
-**4. Update UAT.md:**
-- status: complete
-- Clear current_batch, mocked_files
-- Final Progress counts
-
-**5. Commit UAT.md:**
+**4. Update UAT.md and commit together with STATE.md:**
 ```bash
-git add ".planning/phases/XX-name/{phase}-UAT.md"
-git commit -m "test({phase}): complete UAT - {passed} passed, {fixed} fixed, {skipped} assumptions"
+ms-tools uat-update $PHASE_NUMBER --session status=complete current_batch= mocked_files=
+ms-tools set-last-command "ms:verify-work $ARGUMENTS"
+git add "$PHASE_DIR/${PHASE}-UAT.md" .planning/STATE.md
+git commit -m "test(${PHASE}): complete UAT - {passed} passed, {fixed} fixed, {skipped} assumptions"
 ```
 
 **5.5. Update knowledge pitfalls (lightweight):**
@@ -653,28 +684,24 @@ Check if more phases remain in ROADMAP.md:
 **Issue adds:** reported, severity, fix_status (investigating | applied | verified), fix_commit, retry_count
 **Skipped adds:** reason
 
-**Write UAT.md after:**
-- Each batch of responses processed
-- Each fix applied
-- Each re-test completed
-- Session complete
+**All UAT.md updates use ms-tools commands.** Never Read/Edit UAT.md manually for field updates.
 
-| Section | Rule | When |
-|---------|------|------|
-| Frontmatter.status | OVERWRITE | Phase transitions |
-| Frontmatter.current_batch | OVERWRITE | Batch transitions |
-| Frontmatter.mocked_files | OVERWRITE | Mock generation/cleanup |
-| Frontmatter.pre_work_stash | OVERWRITE | Dirty tree handling |
-| Frontmatter.updated | OVERWRITE | Every write |
-| Progress | OVERWRITE | After each test result |
-| Current Batch | OVERWRITE | Batch transitions |
-| Tests.{N}.result | OVERWRITE | When user responds |
-| Tests.{N}.fix_status | OVERWRITE | During fix flow |
-| Tests.{N}.fix_commit | OVERWRITE | After fix committed |
-| Tests.{N}.retry_count | OVERWRITE | On re-test failure |
-| Fixes Applied | APPEND | After each fix committed |
-| Batches.{N}.status | OVERWRITE | Batch transitions |
-| Assumptions | APPEND | When test skipped |
+| Trigger | Command |
+|---------|---------|
+| User responds to test | `ms-tools uat-update $PHASE --test N result=pass` |
+| Issue found | `ms-tools uat-update $PHASE --test N result=issue severity=major fix_status=investigating retry_count=0` |
+| Fix applied | `ms-tools uat-update $PHASE --test N fix_status=applied fix_commit=HASH` |
+| Fix verified | `ms-tools uat-update $PHASE --test N result=pass fix_status=verified` |
+| Re-test failed | `ms-tools uat-update $PHASE --test N retry_count=N` |
+| Record fix | `echo '{"commit":"...","test":N,...}' \| ms-tools uat-update $PHASE --append-fix` |
+| Test skipped | `ms-tools uat-update $PHASE --test N result=skipped` + `--append-assumption` |
+| Batch complete | `ms-tools uat-update $PHASE --batch N status=complete passed=X issues=Y` |
+| Batch transition | `ms-tools uat-update $PHASE --session current_batch=N` |
+| Mock files changed | `ms-tools uat-update $PHASE --session mocked_files=a.dart,b.dart` |
+| Session complete | `ms-tools uat-update $PHASE --session status=complete current_batch= mocked_files=` |
+| Resume session | `ms-tools uat-status $PHASE` (read-only JSON) |
+
+Progress auto-recalculates on every `uat-update` call. Timestamp auto-updates on every write.
 </update_rules>
 
 <severity_inference>
