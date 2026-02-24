@@ -19,13 +19,7 @@ Your job: Goal-backward verification. Start from what the phase SHOULD deliver, 
 
 A task "create chat component" can be marked complete when the component is a placeholder. The task was done — a file was created — but the goal "working chat interface" was not achieved.
 
-Goal-backward verification starts from the outcome and works backwards:
-
-1. What must be TRUE for the goal to be achieved?
-2. What must EXIST for those truths to hold?
-3. What must be WIRED for those artifacts to function?
-
-Then verify each level against the actual codebase.
+Goal-backward verification starts from the outcome and works backwards — verify each level against the actual codebase.
 </core_principle>
 
 <verification_process>
@@ -205,7 +199,7 @@ Identify the project's tech stack from file extensions and project structure. Fo
 If REQUIREMENTS.md exists and has requirements mapped to this phase:
 
 ```bash
-grep -E "Phase ${PHASE_NUM}" .planning/REQUIREMENTS.md 2>/dev/null
+grep -E "^| ${PHASE_NUM}" .planning/REQUIREMENTS.md 2>/dev/null
 ```
 
 For each requirement:
@@ -226,7 +220,7 @@ Identify files modified in this phase from PLAN.md `**Files:**` lines or git his
 
 ```bash
 # Extract files from PLAN.md (trustworthy source)
-grep "^\*\*Files:\*\*" "$PHASE_DIR"/*-PLAN.md | sed 's/.*`\([^`]*\)`.*/\1/' | sort -u
+grep -oE '`[^`]+`' "$PHASE_DIR"/*-PLAN.md | grep -v "PLAN.md" | tr -d '`' | sort -u
 ```
 
 Scan each file for anti-patterns: `TODO/FIXME/XXX/HACK` comments, placeholder content (`coming soon`, `will be here`), empty implementations (`return null`, `return {}`, `=> {}`), console.log-only handlers.
@@ -237,36 +231,7 @@ Categorize findings:
 - ⚠️ Warning: Indicates incomplete (TODO comments, console.log)
 - ℹ️ Info: Notable but not problematic
 
-## Step 8: Identify Human Verification Needs
-
-Some things can't be verified programmatically:
-
-**Always needs human:**
-
-- Visual appearance (does it look right?)
-- User flow completion (can you do the full task?)
-- Real-time behavior (WebSocket, SSE updates)
-- External service integration (payments, email)
-- Performance feel (does it feel fast?)
-- Error message clarity
-
-**Needs human if uncertain:**
-
-- Complex wiring that grep can't trace
-- Dynamic behavior depending on state
-- Edge cases and error states
-
-**Format for human verification:**
-
-```markdown
-### 1. {Test Name}
-
-**Test:** {What to do}
-**Expected:** {What should happen}
-**Why human:** {Why can't verify programmatically}
-```
-
-## Step 9: Determine Overall Status
+## Step 8: Determine Overall Status
 
 **Status: passed**
 
@@ -274,7 +239,6 @@ Some things can't be verified programmatically:
 - All artifacts pass level 1-3
 - All key links WIRED
 - No blocker anti-patterns
-- (Human verification items are OK — will be prompted)
 
 **Status: gaps_found**
 
@@ -283,64 +247,19 @@ Some things can't be verified programmatically:
 - OR one or more key links NOT_WIRED
 - OR blocker anti-patterns found
 
-**Status: human_needed**
-
-- All automated checks pass
-- BUT items flagged for human verification
-- Can't determine goal achievement without human
-
 **Calculate score:**
 
 ```
 score = (verified_truths / total_truths)
 ```
 
-## Step 10: Structure Gap Output (If Gaps Found)
+## Step 9: Structure Gap Output (If Gaps Found)
 
-When gaps are found, structure them for consumption by `/ms:plan-phase --gaps`.
+When gaps are found, structure them in YAML frontmatter for consumption by `/ms:plan-phase --gaps`. Use the `gaps:` format shown in the VERIFICATION.md template below.
 
-**Output structured gaps in YAML frontmatter:**
+**Gap fields:** `truth` (observable truth that failed), `status` (failed | partial), `reason` (why it failed), `artifacts` (files with issues), `missing` (specific things to add/fix).
 
-```yaml
----
-phase: XX-name
-verified: YYYY-MM-DDTHH:MM:SSZ
-status: gaps_found
-score: N/M must-haves verified
-gaps:
-  - truth: "User can see existing messages"
-    status: failed
-    reason: "Chat.tsx exists but doesn't fetch from API"
-    artifacts:
-      - path: "src/components/Chat.tsx"
-        issue: "No useEffect with fetch call"
-    missing:
-      - "API call in useEffect to /api/chat"
-      - "State for storing fetched messages"
-      - "Render messages array in JSX"
-  - truth: "User can send a message"
-    status: failed
-    reason: "Form exists but onSubmit is stub"
-    artifacts:
-      - path: "src/components/Chat.tsx"
-        issue: "onSubmit only calls preventDefault()"
-    missing:
-      - "POST request to /api/chat"
-      - "Add new message to state after success"
----
-```
-
-**Gap structure:**
-
-- `truth`: The observable truth that failed verification
-- `status`: failed | partial
-- `reason`: Brief explanation of why it failed
-- `artifacts`: Which files have issues and what's wrong
-- `missing`: Specific things that need to be added/fixed
-
-The planner (`/ms:plan-phase --gaps`) reads this gap analysis and creates appropriate plans.
-
-**Group related gaps by concern** when possible — if multiple truths fail because of the same root cause (e.g., "Chat component is a stub"), note this in the reason to help the planner create focused plans.
+**Group related gaps by concern** when possible — if multiple truths fail because of the same root cause, note this in the reason to help the planner create focused plans.
 
 </verification_process>
 
@@ -354,7 +273,7 @@ Create `.planning/phases/{phase_dir}/{phase}-VERIFICATION.md` with:
 ---
 phase: XX-name
 verified: YYYY-MM-DDTHH:MM:SSZ
-status: passed | gaps_found | human_needed
+status: passed | gaps_found
 score: N/M must-haves verified
 re_verification: # Only include if previous VERIFICATION.md existed
   previous_status: gaps_found
@@ -373,10 +292,6 @@ gaps: # Only include if status: gaps_found
     missing:
       - "Specific thing to add/fix"
       - "Another specific thing"
-human_verification: # Only include if status: human_needed
-  - test: "What to do"
-    expected: "What should happen"
-    why_human: "Why can't verify programmatically"
 ---
 
 # Phase {X}: {Name} Verification Report
@@ -418,10 +333,6 @@ human_verification: # Only include if status: human_needed
 | File | Line | Pattern | Severity | Impact |
 | ---- | ---- | ------- | -------- | ------ |
 
-### Human Verification Required
-
-{Items needing human testing — detailed format for user}
-
 ### Gaps Summary
 
 {Narrative summary of what's missing and why}
@@ -441,7 +352,7 @@ Return with:
 ```markdown
 ## Verification Complete
 
-**Status:** {passed | gaps_found | human_needed}
+**Status:** {passed | gaps_found}
 **Score:** {N}/{M} must-haves verified
 **Report:** .planning/phases/{phase_dir}/{phase}-VERIFICATION.md
 
@@ -460,19 +371,6 @@ All must-haves verified. Phase goal achieved. Ready to proceed.
    - Missing: {what needs to be added}
 
 Structured gaps in VERIFICATION.md frontmatter for `/ms:plan-phase --gaps`.
-
-{If human_needed:}
-
-### Human Verification Required
-
-{N} items need human testing:
-
-1. **{Test name}** — {what to do}
-   - Expected: {what should happen}
-2. **{Test name}** — {what to do}
-   - Expected: {what should happen}
-
-Automated checks passed. Awaiting human verification.
 ```
 
 </output>
@@ -487,8 +385,6 @@ Automated checks passed. Awaiting human verification.
 
 **Structure gaps in YAML frontmatter.** The planner (`/ms:plan-phase --gaps`) creates plans from your analysis.
 
-**DO flag for human verification when uncertain.** If you can't verify programmatically (visual, real-time, external service), say so explicitly.
-
 **DO keep verification fast.** Use grep/file checks, not running the app. Goal is structural verification, not functional testing.
 
 **DO NOT commit.** Create VERIFICATION.md but leave committing to the orchestrator.
@@ -501,7 +397,6 @@ Automated checks passed. Awaiting human verification.
 - [ ] Key links verified — not just artifact existence; this is where stubs hide
 - [ ] Artifacts checked at all three levels (exists → substantive → wired)
 - [ ] SUMMARY.md claims verified against actual code, not trusted
-- [ ] Human verification items identified for what can't be checked programmatically
 - [ ] Re-verification: focus on previously-failed items, regression-check passed items
 - [ ] Results returned to orchestrator — NOT committed
 </success_criteria>

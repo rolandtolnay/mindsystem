@@ -274,33 +274,11 @@ grep "^status:" "$PHASE_DIR"/*-VERIFICATION.md | cut -d: -f2 | tr -d ' '
 | Status | Action |
 |--------|--------|
 | `passed` | Continue to code_review |
-| `human_needed` | Present items to user, get approval or feedback |
 | `gaps_found` | Present gap summary, offer `/ms:plan-phase {phase} --gaps` |
 
 **If passed:**
 
 Phase goal verified. Proceed to code_review.
-
-**If human_needed:**
-
-```markdown
-## ✓ Phase {X}: {Name} — Human Verification Required
-
-All automated checks passed. {N} items need human testing:
-
-### Human Verification Checklist
-
-{Extract from VERIFICATION.md human_verification section}
-
----
-
-**After testing:**
-- "approved" → continue to code_review
-- Report issues → will route to gap closure planning
-```
-
-If user approves → continue to code_review.
-If user reports issues → treat as gaps_found.
 
 **If gaps_found:**
 

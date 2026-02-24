@@ -75,7 +75,6 @@ ms-tools find-phase "$ARGUMENTS"
    - Creates VERIFICATION.md with detailed report
    - Route by status:
      - `passed` → continue to step 7
-     - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/ms:plan-phase {X} --gaps`
 
 7. **Code review (optional)**
@@ -142,7 +141,6 @@ Then route based on status:
 | Status | Route |
 |--------|-------|
 | `gaps_found` | Route C (gap closure) |
-| `human_needed` | Present checklist, then re-route based on approval |
 | `passed` + more phases | Route A (next phase) |
 | `passed` + last phase | Route B (milestone complete) |
 

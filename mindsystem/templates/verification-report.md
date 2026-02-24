@@ -10,7 +10,7 @@ Template for `.planning/phases/XX-name/{phase}-VERIFICATION.md` — phase goal v
 ---
 phase: XX-name
 verified: YYYY-MM-DDTHH:MM:SSZ
-status: passed | gaps_found | human_needed
+status: passed | gaps_found
 score: N/M must-haves verified
 ---
 
@@ -18,7 +18,7 @@ score: N/M must-haves verified
 
 **Phase Goal:** {goal from ROADMAP.md}
 **Verified:** {timestamp}
-**Status:** {passed | gaps_found | human_needed}
+**Status:** {passed | gaps_found}
 
 ## Goal Achievement
 
@@ -71,23 +71,6 @@ score: N/M must-haves verified
 | src/hooks/useChat.ts | - | File missing | 🛑 Blocker | Expected hook doesn't exist |
 
 **Anti-patterns:** {N} found ({blockers} blockers, {warnings} warnings)
-
-## Human Verification Required
-
-{If no human verification needed:}
-None — all verifiable items checked programmatically.
-
-{If human verification needed:}
-
-### 1. {Test Name}
-**Test:** {What to do}
-**Expected:** {What should happen}
-**Why human:** {Why can't verify programmatically}
-
-### 2. {Test Name}
-**Test:** {What to do}
-**Expected:** {What should happen}
-**Why human:** {Why can't verify programmatically}
 
 ## Gaps Summary
 
@@ -149,7 +132,6 @@ None — all verifiable items checked programmatically.
 **Verification approach:** Goal-backward (derived from phase goal)
 **Must-haves source:** {PLAN.md ## Must-Haves section | derived from ROADMAP.md goal}
 **Automated checks:** {N} passed, {M} failed
-**Human checks required:** {N}
 **Total verification time:** {duration}
 
 ---
@@ -164,7 +146,6 @@ None — all verifiable items checked programmatically.
 **Status values:**
 - `passed` — All must-haves verified, no blockers
 - `gaps_found` — One or more critical gaps found
-- `human_needed` — Automated checks pass but human verification required
 
 **Evidence types:**
 - For EXISTS: "File at path, exports X"
@@ -257,10 +238,6 @@ score: 2/5 must-haves verified
 
 **Anti-patterns:** 3 found (2 blockers, 1 warning)
 
-## Human Verification Required
-
-None needed until automated gaps are fixed.
-
 ## Gaps Summary
 
 ### Critical Gaps (Block Progress)
@@ -313,7 +290,6 @@ None needed until automated gaps are fixed.
 **Verification approach:** Goal-backward (derived from phase goal)
 **Must-haves source:** 03-01-PLAN.md ## Must-Haves section
 **Automated checks:** 2 passed, 8 failed
-**Human checks required:** 0 (blocked by automated failures)
 **Total verification time:** 2 min
 
 ---

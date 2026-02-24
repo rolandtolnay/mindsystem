@@ -247,7 +247,7 @@ Read source files directly for detailed knowledge:
 | Plan conventions | `.claude/skills/ms-meta/references/conventions.md` |
 | Execution orchestration | `mindsystem/workflows/execute-phase.md` |
 | Plan execution (in subagent) | `mindsystem/workflows/execute-plan.md` |
-| Verification protocol | `mindsystem/workflows/verify-phase.md` |
+| Verification protocol | `agents/ms-verifier.md` |
 | Milestone audit | `commands/ms/audit-milestone.md` |
 | Milestone completion | `mindsystem/workflows/complete-milestone.md` |
 | Code review (generic) | `agents/ms-code-simplifier.md` |
