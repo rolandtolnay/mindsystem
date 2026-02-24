@@ -129,6 +129,7 @@ DESIGN: [✓ if DESIGN.md exists | - if not]
 List files in the current phase directory:
 
 ```bash
+# ms-tools is on PATH — invoke directly, not as a script path
 ms-tools list-artifacts [current-phase-number]
 ```
 

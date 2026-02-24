@@ -71,6 +71,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
 1. **Verify readiness and gather stats:**
 
    ```bash
+   # ms-tools is on PATH — invoke directly, not as a script path
    ms-tools gather-milestone-stats $PHASE_START $PHASE_END
    ```
 

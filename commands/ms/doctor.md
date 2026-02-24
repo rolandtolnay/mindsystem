@@ -72,6 +72,7 @@ Proceed to next step.
 Run the diagnostic scan:
 
 ```bash
+# ms-tools is on PATH — invoke directly, not as a script path
 ms-tools doctor-scan
 ```
 

@@ -21,6 +21,7 @@ Phase number: $ARGUMENTS (required)
 
 **Resolve phase:**
 ```bash
+# ms-tools is on PATH — invoke directly, not as a script path
 ms-tools find-phase "$ARGUMENTS"
 ```
 

@@ -447,9 +447,15 @@ Tasks: {task_ids} — {brief rationale}
 **Waves:** {wave structure}
 ```
 
-The user may adjust, merge, or split plans. Once confirmed (or if the user proceeds without objection), pass the proposed grouping to the plan-writer.
-
 **TDD plans are always standalone** — propose them as dedicated plans regardless of budget.
+
+**Confirm via AskUserQuestion:**
+- header: "Plan Structure"
+- question: "Does this plan structure look good?"
+- Options: "Looks good, proceed", "Adjust grouping"
+
+**"Looks good, proceed":** Continue to discover_skills.
+**"Adjust grouping":** User describes changes in free-text. Apply adjustments, re-present, and confirm again.
 </step>
 
 <step name="discover_skills">
@@ -462,9 +468,10 @@ After the user confirms the plan structure, check if project skills could improv
 - The domain of the tasks identified (UI patterns, API design, state management, etc.)
 - Keywords from RESEARCH.md or CONTEXT.md if they exist
 
-**If matches found:** Present via AskUserQuestion:
-- List each matching skill with its description
-- Always include an escape hatch option for the user to name skills manually or skip entirely
+**If matches found:** Present via AskUserQuestion with `multiSelect: true`:
+- Each matching skill is one option (label: skill name, description: what it provides)
+- Always include a "None — skip skill loading" option
+- User selects which to load, skips, or types a skill name in the free-text field
 
 **If no matches:** Skip silently — no need to ask the user.
 

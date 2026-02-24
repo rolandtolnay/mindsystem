@@ -41,6 +41,7 @@ ls .planning/phases/${PHASE}-*/*DESIGN.md 2>/dev/null
 ## 1. Parse and Validate Phase
 
 ```bash
+# ms-tools is on PATH — invoke directly, not as a script path
 ms-tools find-phase "$ARGUMENTS"
 ```
 
@@ -78,7 +79,10 @@ Scan skills in your system-reminder for matches. Look for skills related to:
 
 **3b. Confirm with user:**
 
-Use AskUserQuestion to present findings. Always include an escape hatch for the user to name a skill manually.
+Present via AskUserQuestion with `multiSelect: true`:
+- Each matching skill is one option (label: skill name, description: what it provides)
+- Always include a "None — skip skill loading" option
+- User selects which to load, skips, or types a skill name in the free-text field
 
 **3c. Load selected skills:**
 

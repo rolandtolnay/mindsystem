@@ -76,7 +76,7 @@ Before analyzing, establish what this screen is trying to accomplish.
 - Read `.planning/PROJECT.md` for product type, core value, target audience
 - If phase-based, grep `.planning/ROADMAP.md` for phase requirements
 - Glob for existing DESIGN.md in `.planning/phases/` for design intent
-- Check available skills for one matching `*-ui` or `*-design` in name or description — if found, invoke via Skill tool for existing patterns
+- Scan available skills in system-reminder for matches related to UI, design, or the screen's platform/framework. If matches found, present via AskUserQuestion with `multiSelect: true`: each matching skill is one option (label: skill name, description: what it provides), always include a "None — skip skill loading" option. User selects which to load, skips, or types a skill name in the free-text field. Load selected skills via Skill tool for existing patterns.
 
 **State the screen's job in one sentence:**
 > "This screen helps the user [accomplish X]."

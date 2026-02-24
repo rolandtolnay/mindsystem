@@ -36,6 +36,7 @@ Gap closure mode: `--gaps` flag triggers gap closure workflow
 
 **Resolve phase if provided:**
 ```bash
+# ms-tools is on PATH — invoke directly, not as a script path
 PHASE_ARG=$(echo "$ARGUMENTS" | grep -oE '^[0-9]+' | head -1)
 if [ -n "$PHASE_ARG" ]; then
   ms-tools find-phase "$PHASE_ARG"
