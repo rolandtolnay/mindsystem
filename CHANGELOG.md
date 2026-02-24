@@ -6,6 +6,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.22.0] - 2026-02-24
+
+### Added
+- **Configurable mockup open behavior** in design-phase. New `open_mockups` config setting (`auto`/`ask`/`off`) controls whether comparison pages auto-open in browser during design work.
+- **Research API key health check** in doctor. New CHECK 9 detects missing Context7 and Perplexity API keys with actionable setup guidance. Uses WARN status since missing keys degrade research quality but don't break functionality.
+- **UNCERTAIN verification signal** in verify-work pipeline. Verification items that can't be confirmed programmatically now surface as UNCERTAIN instead of being silently passed, with automatic verify-work recommendation when functional confirmation is needed.
+
+### Changed
+- **UAT management moved to ms-tools.** Deterministic `uat-init`, `uat-update`, and `uat-status` commands replace LLM-driven Read/Edit cycles for UAT.md bookkeeping, improving reliability. Fix commits now amend-on-retry and UAT.md + STATE.md fold into a single completion commit.
+- **Last Command tracking uses ms-tools.** `set-last-command` replaces manual text-manipulation across 22 commands/workflows, with real timestamps instead of hallucinated placeholders.
+- **Flutter-specific components removed.** Flutter agents, skills, and references now live in the standalone `flutter-llm-toolkit` package. Agent mappings replaced with generic defaults.
+
+### Fixed
+- **Plan checker** uses budget-aware scope estimation matching scope-estimation.md instead of rigid change-count thresholds. Fixed ROADMAP phase extraction.
+- **Product researcher** receives actual current date, applying year strings selectively — for trend queries but not product-specific searches where it narrows results.
+- **Prompt ergonomics** improved across commands: skill selection uses multiSelect, ms-tools code blocks include PATH hints, plan-phase uses explicit AskUserQuestion gate.
+- **Doctor scan** exits 0 on successful scan regardless of check results (exit 2 retained for infrastructure failures).
+
 ## [3.21.0] - 2026-02-23
 
 ### Added
@@ -533,7 +551,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.21.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.0...HEAD
+[3.22.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.21.0...v3.22.0
 [3.21.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.20.0...v3.21.0
 [3.20.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.19.0...v3.20.0
 [3.19.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.18.1...v3.19.0
