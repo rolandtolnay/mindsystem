@@ -91,7 +91,7 @@ The orchestrator provides structured XML:
 </proposed_grouping>
 
 <confirmed_skills>
-  flutter-code-quality, flutter-code-simplification
+  project-skill-a, project-skill-b
 </confirmed_skills>
 
 <learnings>

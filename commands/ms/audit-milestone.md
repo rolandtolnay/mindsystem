@@ -342,7 +342,7 @@ Findings are already tracked in `.planning/TECH-DEBT.md` via Step 8.5. Continue 
 
 ### Path B: Simplifier Agents (default)
 
-For agents without `mode: analyze-only` (e.g., `ms-code-simplifier`, `ms-flutter-code-quality`):
+For agents without `mode: analyze-only` (e.g., `ms-code-simplifier`):
 
 **B1. Spawn code review agent:**
 

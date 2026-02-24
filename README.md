@@ -272,7 +272,7 @@ Replace `<N>` with the phase number you're working on.
 - `.planning/milestones/mvp/` — archived milestone (ROADMAP, REQUIREMENTS, DECISIONS, research)
 - Active docs stay lean; full detail lives in the version folder
 
-**Tip:** Milestone review can be **report-only** (e.g., Flutter structural review) so you stay in control. Create a quality phase, or accept tech debt explicitly — your call.
+**Tip:** Milestone review can be **report-only** so you stay in control. Create a quality phase, or accept tech debt explicitly — your call.
 
 ---
 
@@ -312,17 +312,9 @@ After `/ms:execute-phase` (and optionally `/ms:audit-milestone`), Mindsystem run
 
 | Value                     | What it does                                                   |
 | ------------------------- | -------------------------------------------------------------- |
-| `null`                    | Use the default (stack-aware when available)                   |
-| `"ms-code-simplifier"`    | Generic reviewer — improves clarity and maintainability        |
-| `"ms-flutter-simplifier"` | Flutter/Dart-specific — strong widget and Riverpod conventions |
-| `"ms-flutter-reviewer"`   | Flutter structural analysis (report-only, no code changes)     |
-| `"skip"`                  | Disable review for that level                                  |
-
-**Flutter-specific tools (built-in):**
-
-- **`ms-flutter-simplifier`** — pragmatic refactors that preserve behavior
-- **`ms-flutter-reviewer`** — milestone-level structural audit with actionable report (you control the fixes)
-- **`flutter-senior-review` skill** — domain principles that raise review quality beyond generic lint advice
+| `null`                 | No reviewer (default)                                       |
+| `"ms-code-simplifier"` | Generic reviewer — improves clarity and maintainability      |
+| `"skip"`               | Disable review for that level                                |
 
 ---
 
