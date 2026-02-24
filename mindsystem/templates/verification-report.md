@@ -12,6 +12,7 @@ phase: XX-name
 verified: YYYY-MM-DDTHH:MM:SSZ
 status: passed | gaps_found
 score: N/M must-haves verified
+uncertain: N  # UNCERTAIN truths + NEEDS HUMAN requirements
 ---
 
 # Phase {X}: {Name} Verification Report

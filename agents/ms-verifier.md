@@ -235,10 +235,12 @@ Categorize findings:
 
 **Status: passed**
 
-- All truths VERIFIED
+- All truths VERIFIED or UNCERTAIN
 - All artifacts pass level 1-3
 - All key links WIRED
 - No blocker anti-patterns
+
+UNCERTAIN truths count toward passed — they are structurally present but need functional confirmation through UAT.
 
 **Status: gaps_found**
 
@@ -275,6 +277,7 @@ phase: XX-name
 verified: YYYY-MM-DDTHH:MM:SSZ
 status: passed | gaps_found
 score: N/M must-haves verified
+uncertain: N # Count of UNCERTAIN truths + NEEDS HUMAN requirements (0 if none)
 re_verification: # Only include if previous VERIFICATION.md existed
   previous_status: gaps_found
   previous_score: 2/5
@@ -356,8 +359,18 @@ Return with:
 **Score:** {N}/{M} must-haves verified
 **Report:** .planning/phases/{phase_dir}/{phase}-VERIFICATION.md
 
-{If passed:}
+{If passed AND uncertain == 0:}
 All must-haves verified. Phase goal achieved. Ready to proceed.
+
+{If passed AND uncertain > 0:}
+All must-haves verified. Phase goal achieved.
+
+### Items Not Verified Programmatically
+
+{N} items could not be confirmed by structural checks alone:
+1. **{Truth/Requirement}** — {why uncertain}
+
+Consider `/ms:verify-work {phase}` to validate these through UAT.
 
 {If gaps_found:}
 

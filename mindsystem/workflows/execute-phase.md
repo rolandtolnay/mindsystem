@@ -280,6 +280,12 @@ grep "^status:" "$PHASE_DIR"/*-VERIFICATION.md | cut -d: -f2 | tr -d ' '
 
 Phase goal verified. Proceed to code_review.
 
+If the verifier's return includes "Items Not Verified Programmatically" (uncertain > 0), surface that section to the user before proceeding:
+
+```markdown
+**Note:** {N} items could not be verified by structural checks alone. Consider `/ms:verify-work {phase}` to validate these through UAT.
+```
+
 **If gaps_found:**
 
 Present gaps and offer next command:
