@@ -186,34 +186,38 @@ issue:
 **Question:** Will plans complete within context budget?
 
 **Process:**
-1. Count `### ` subsections (changes) per plan
-2. Count files from `**Files:**` lines per plan
-3. Check against thresholds
+1. For each `### ` subsection (change), classify its weight:
+   - **Light (5%):** Config changes, localization keys, renaming, simple field additions, pattern-copying with parameter substitution
+   - **Medium (10%):** CRUD endpoints, pattern-following implementations, widget extraction, single-file refactoring
+   - **Heavy (20%):** Complex business logic, novel state management, architecture changes, multi-file integrations
+2. Sum estimated budget per plan (target: 25-45%)
+3. Check structural signals
 
-**Thresholds:**
-| Metric | Target | Warning | Blocker |
-|--------|--------|---------|---------|
-| Changes/plan | 2-3 | 4 | 5+ |
-| Files/plan | 5-8 | 10 | 15+ |
-| Total context | ~50% | ~70% | 80%+ |
+**Thresholds (warning-level only — scope never produces blockers):**
+| Metric | Target | Warning |
+|--------|--------|---------|
+| Estimated budget/plan | 25-45% | >50% |
+| Files per single change | 1-3 | 8+ |
+
+**Raw change count is NOT a threshold.** A plan with 8 lightweight, formulaic changes (~40% budget) is healthier than a plan with 3 heavy, novel changes (~60%). Assess complexity and budget, not count.
 
 **Red flags:**
-- Plan with 5+ changes (quality degrades)
-- Plan with 15+ file modifications
-- Single change with 10+ files
-- Complex work (auth, payments) crammed into one plan
+- Estimated plan budget >50% (quality will degrade)
+- Single change with 10+ file modifications
+- Multiple unrelated subsystems crammed into one plan
+- Novel/complex work appearing late in a long change sequence (context fatigue risks lower attention)
 
 **Example issue:**
 ```yaml
 issue:
   dimension: scope_sanity
   severity: warning
-  description: "Plan 01 has 5 changes - split recommended"
+  description: "Plan 01 estimated at ~55% budget - 3 heavy changes with novel state management"
   plan: "01"
   metrics:
-    changes: 5
-    files: 12
-  fix_hint: "Split into 2 plans: foundation (01) and integration (02)"
+    estimated_budget: "55%"
+    heavy_changes: 3
+  fix_hint: "Move change 3 (complex state machine) to a separate plan"
 ```
 
 ## Dimension 6: Verification Derivation
@@ -301,7 +305,7 @@ PHASE_DIR=$(ls -d .planning/phases/${PADDED_PHASE}-* .planning/phases/${PHASE_AR
 ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 
 # Get phase goal from ROADMAP
-grep -A 10 "Phase ${PHASE_NUM}" .planning/ROADMAP.md | head -15
+grep -A 10 "Phase ${PADDED_PHASE}" .planning/ROADMAP.md | head -15
 
 # Get phase brief if exists
 ls "$PHASE_DIR"/*-BRIEF.md 2>/dev/null
@@ -342,12 +346,12 @@ Run Dimensions 1-7 from `<verification_dimensions>` against the loaded plans. Bu
 - Missing requirement coverage
 - Missing required change fields
 - Circular dependencies or file conflicts in same wave
-- Scope > 5 changes per plan
 
 **warning** - Should fix, execution may work
-- Scope 4 tasks (borderline)
+- Estimated plan budget >50%
 - Implementation-focused truths
 - Minor wiring missing
+- Novel/complex changes appearing late in change sequence
 
 **info** - Suggestions for improvement
 - Could split for better parallelization
@@ -369,8 +373,8 @@ issues:
   - plan: "01"
     dimension: "scope_sanity"
     severity: "warning"
-    description: "Plan has 4 changes - consider splitting"
-    fix_hint: "Split into foundation + integration plans"
+    description: "Plan estimated at ~50% budget - heavy changes may cause degradation"
+    fix_hint: "Consider splitting complex changes into separate plan"
 
   - plan: null
     dimension: "requirement_coverage"
@@ -462,13 +466,9 @@ issues:
 
 <anti_patterns>
 
-**DO NOT check code existence.** That's ms-verifier's job after execution. You verify plans, not codebase.
-
-**DO NOT run the application.** This is static plan analysis. No `npm start`, no `curl` to running server.
+**DO NOT check the codebase.** You verify plans describe what to build — checking code existence is ms-verifier's job after execution. No `npm start`, no `curl`, no runtime verification.
 
 **DO NOT accept vague changes.** "Implement auth" is not specific enough. Changes need concrete files, implementation details, verification.
-
-**DO NOT verify implementation details.** Check that plans describe what to build, not that code exists.
 
 **DO NOT trust change titles alone.** Read the implementation details, Files lines, verification entries. A well-named change can be empty.
 
@@ -478,11 +478,11 @@ issues:
 
 Plan verification complete when:
 
-- [ ] Key links checked (wiring planned between artifacts, not just creation)
-- [ ] Scope assessed per plan (changes, files within thresholds)
-- [ ] Must-Haves are user-observable truths, not implementation details
-- [ ] EXECUTION-ORDER.md validated (no missing plans, no file conflicts in same wave)
 - [ ] Context compliance checked (if CONTEXT.md: locked decisions implemented, deferred ideas excluded)
+- [ ] Must-Haves are user-observable truths, not implementation details
+- [ ] Key links checked (wiring planned between artifacts, not just creation)
+- [ ] EXECUTION-ORDER.md validated (no missing plans, no file conflicts in same wave)
+- [ ] Scope assessed per plan (estimated budget within thresholds)
 - [ ] Structured issues returned to orchestrator
 
 </success_criteria>
