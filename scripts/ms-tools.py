@@ -13,6 +13,7 @@ patch generation, archival, and planning context scanning.
 import argparse
 import datetime
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -419,14 +420,17 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
     knowledge_dir = planning / "knowledge"
 
     pass_count = 0
+    warn_count = 0
     fail_count = 0
     skip_count = 0
     failed_checks: list[str] = []
 
     def record(status: str, name: str) -> None:
-        nonlocal pass_count, fail_count, skip_count
+        nonlocal pass_count, warn_count, fail_count, skip_count
         if status == "PASS":
             pass_count += 1
+        elif status == "WARN":
+            warn_count += 1
         elif status == "FAIL":
             fail_count += 1
             failed_checks.append(name)
@@ -706,13 +710,41 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
                 record("PASS", "Milestone Naming Convention")
     print()
 
+    # ---- CHECK 9: Research API Keys ----
+    print("=== Research API Keys ===")
+    c7_key = os.environ.get("CONTEXT7_API_KEY", "")
+    pplx_key = os.environ.get("PERPLEXITY_API_KEY", "")
+    if c7_key and pplx_key:
+        print("Status: PASS")
+        print("All research API keys configured")
+        record("PASS", "Research API Keys")
+    else:
+        print("Status: WARN")
+        missing_keys: list[str] = []
+        if not c7_key:
+            missing_keys.append("CONTEXT7_API_KEY")
+            print("CONTEXT7_API_KEY: not set")
+            print("  Enables: library documentation lookup via Context7")
+            print("  Without: falls back to WebSearch/WebFetch (less authoritative)")
+            print("  Set up:  https://context7.com → copy API key → export CONTEXT7_API_KEY=<key>")
+        if not pplx_key:
+            missing_keys.append("PERPLEXITY_API_KEY")
+            print("PERPLEXITY_API_KEY: not set")
+            print("  Enables: deep research via Perplexity AI")
+            print("  Without: falls back to WebSearch/WebFetch (less comprehensive)")
+            print("  Set up:  https://perplexity.ai/settings/api → copy API key → export PERPLEXITY_API_KEY=<key>")
+        record("WARN", "Research API Keys")
+    print()
+
     # ---- SUMMARY ----
-    total = pass_count + fail_count + skip_count
+    total = pass_count + warn_count + fail_count + skip_count
     print("=== Summary ===")
-    print(f"Checks: {total} total, {pass_count} passed, {fail_count} failed, {skip_count} skipped")
+    print(f"Checks: {total} total, {pass_count} passed, {warn_count} warned, {fail_count} failed, {skip_count} skipped")
 
     if fail_count > 0:
         print(f"Issues: {', '.join(failed_checks)}")
+    elif warn_count > 0:
+        print("No failures — warnings are informational")
     else:
         print("All checks passed")
 

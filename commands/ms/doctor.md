@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run health checks on project configuration. Detect and fix structural drift across 8 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, and CLI wrappers.
+Run health checks on project configuration. Detect and fix structural drift across 9 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers, and research API keys.
 
 Idempotent.
 </objective>
@@ -76,7 +76,7 @@ Run the diagnostic scan:
 ms-tools doctor-scan
 ```
 
-Capture the full output. Parse each check's Status (PASS/FAIL/SKIP) and detail lines.
+Capture the full output. Parse each check's Status (PASS/FAIL/SKIP/WARN) and detail lines.
 </step>
 
 <step name="present_results">
@@ -95,11 +95,12 @@ Display results as a markdown table:
 | Phase summaries          | FAIL   | 2 milestones missing summaries   |
 | PLAN cleanup             | FAIL   | 9 leftover PLAN.md files         |
 | CLI wrappers             | FAIL   | ms-tools not on PATH             |
+| Research API Keys        | WARN   | PERPLEXITY_API_KEY not set        |
 ```
 
 Populate Result and Details from scan output. Use concise detail summaries.
 
-If all PASS → go to `report`.
+If all PASS (or WARN only) → go to `report`.
 If any FAIL → go to `confirm_action`.
 </step>
 
@@ -118,7 +119,7 @@ If "Review each" → use AskUserQuestion for each failed check with its details 
 
 Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_milestone_naming → fix_phase_archival → fix_plan_cleanup → fix_knowledge. Skip any fix whose check passed or was skipped by user.
 
-Phase summaries are resolved by fix_phase_archival. CLI wrappers require manual PATH configuration (no automated fix).
+Phase summaries are resolved by fix_phase_archival. CLI wrappers require manual PATH configuration (no automated fix). WARN checks (Research API Keys) are informational — no fix offered, only displayed in the report.
 </step>
 
 <step name="apply_fixes">
@@ -153,11 +154,12 @@ Final summary table:
 | Phase summaries          | PASS   | ...                              |
 | PLAN cleanup             | PASS   | ...                              |
 | CLI wrappers             | PASS   | ...                              |
+| Research API Keys        | PASS   | ...                              |
 
 All checks passed.
 ```
 
-Include counts: checks total, passed, fixed during this run.
+Include counts: checks total, passed, warned, fixed during this run.
 </step>
 
 </process>
@@ -168,6 +170,6 @@ Include counts: checks total, passed, fixed during this run.
 - [ ] Re-scan verifies all checks pass after fixes
 - [ ] Each fix group committed atomically
 - [ ] Fixes applied in dependency order: subsystems → dirs → milestone naming → archival → cleanup → knowledge
-- [ ] All 8 categories reported with PASS/FAIL/SKIP
+- [ ] All 9 categories reported with PASS/FAIL/WARN/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>
