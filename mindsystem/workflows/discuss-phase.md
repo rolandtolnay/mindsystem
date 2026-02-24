@@ -130,6 +130,10 @@ Use AskUserQuestion:
 Spawn ms-product-researcher subagent via Task tool:
 
 ```
+<current_date>
+[Output of: date +%Y-%m]
+</current_date>
+
 <product_context>
 [Who It's For, Core Value, How It's Different from PROJECT.md]
 </product_context>
