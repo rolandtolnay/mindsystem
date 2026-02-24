@@ -199,7 +199,8 @@ Report: "Milestone code review skipped (config: skip)"
 Proceed to next steps.
 
 **If CODE_REVIEW = empty/null:**
-Use default: `CODE_REVIEW="ms-flutter-reviewer"`
+Report: "No milestone reviewer configured. Run `/ms:config` to set one."
+Skip code review step (proceed to next steps).
 
 ### Step 8.1: Get Changed Files
 
@@ -223,7 +224,7 @@ AGENT_MODE=$(grep -A10 '^---' ~/.claude/agents/${CODE_REVIEW}.md | grep 'mode:' 
 
 ### Path A: Analysis-Only Reviewers (mode: analyze-only)
 
-For agents with `mode: analyze-only` (e.g., `ms-flutter-reviewer`):
+For agents with `mode: analyze-only` (e.g., a report-only reviewer):
 
 **A1. Spawn reviewer with read-only tools:**
 

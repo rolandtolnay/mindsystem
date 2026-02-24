@@ -67,18 +67,13 @@ If "Create with gh CLI":
 
 Show current code_review values from config.json (if loaded).
 
-**If PROJECT.md or STACK.md exists:** Detect tech stack and suggest appropriate reviewers:
-
-- **Flutter/Dart:** adhoc=`ms-flutter-code-quality`, phase=`ms-flutter-code-quality`, milestone=`ms-flutter-reviewer`
-- **All others:** adhoc=`ms-code-simplifier`, phase=`ms-code-simplifier`, milestone=null
-
-**If no PROJECT.md or STACK.md:** Warn: "No PROJECT.md found — can't suggest reviewers based on tech stack. Run `/ms:new-project` first, or pick manually."
+**Default reviewers:** adhoc=`ms-code-simplifier`, phase=`ms-code-simplifier`, milestone=null
 
 Use AskUserQuestion:
 - header: "Code review"
 - question: "Which code reviewer configuration do you want?"
 - options:
-  - "[Suggested based on stack]" — e.g., "Flutter reviewers (ms-flutter-code-quality)" (Recommended)
+  - "Default (ms-code-simplifier)" — Generic reviewer for adhoc and phase tiers (Recommended)
   - "Skip code review" — Disable review for all tiers
   - "Custom" — I'll specify reviewers manually
 
