@@ -53,8 +53,7 @@ ms-tools find-phase "$ARGUMENTS"
 8. **Informed discussion** — follow discuss-phase.md workflow. ALL questions use AskUserQuestion.
 9. Create CONTEXT.md capturing their vision with reasoning-backed decisions
 10. Present pre-work status: Read `~/.claude/mindsystem/references/prework-status.md` and show what's done vs still needed for this phase
-11. Update `.planning/STATE.md` Last Command field:
-    - Format: `Last Command: ms:discuss-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
+11. **Update last command:** `ms-tools set-last-command "ms:discuss-phase $ARGUMENTS"`
 
 **CRITICAL: ALL questions use AskUserQuestion. Never ask inline text questions.**
 </process>

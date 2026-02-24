@@ -1,8 +1,11 @@
 """Tests for ms-tools.py pure logic layer and scan-planning-context integration."""
 
+import argparse
+import datetime
 import importlib.util
 import json
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -36,6 +39,7 @@ _scan_knowledge_files = _mod._scan_knowledge_files
 _detect_versioned_milestone_dirs = _mod._detect_versioned_milestone_dirs
 _parse_milestone_name_mapping = _mod._parse_milestone_name_mapping
 _SafeEncoder = _mod._SafeEncoder
+cmd_set_last_command = _mod.cmd_set_last_command
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -834,3 +838,94 @@ class TestParseMilestoneNameMapping:
         assert len(result) == 1
         assert result[0]["version"] == "v0.2"
         assert result[0]["name"] == "Infrastructure"
+
+
+# ---------------------------------------------------------------------------
+# Tests: cmd_set_last_command
+# ---------------------------------------------------------------------------
+
+
+def _make_args(command_string: str) -> argparse.Namespace:
+    return argparse.Namespace(command_string=command_string)
+
+
+class TestSetLastCommand:
+    """Tests for the set-last-command subcommand."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def test_replaces_existing_last_command(self, tmp_path):
+        state = tmp_path / ".planning" / "STATE.md"
+        state.parent.mkdir(parents=True)
+        state.write_text(
+            "# State\n"
+            "Status: In progress\n"
+            "Last Command: ms:old-cmd | 2025-01-01 00:00\n"
+            "Phase: 10\n"
+        )
+
+        with self._patch_git_root(tmp_path):
+            cmd_set_last_command(_make_args("ms:plan-phase 10"))
+
+        text = state.read_text()
+        assert "ms:plan-phase 10 |" in text
+        assert "ms:old-cmd" not in text
+        # Verify only one Last Command line
+        assert text.count("Last Command:") == 1
+
+    def test_inserts_after_status_when_missing(self, tmp_path):
+        state = tmp_path / ".planning" / "STATE.md"
+        state.parent.mkdir(parents=True)
+        state.write_text(
+            "# State\n"
+            "Status: In progress\n"
+            "Phase: 10\n"
+        )
+
+        with self._patch_git_root(tmp_path):
+            cmd_set_last_command(_make_args("ms:execute-phase 10"))
+
+        text = state.read_text()
+        assert "Last Command: ms:execute-phase 10 |" in text
+        # Should appear after Status line
+        lines = text.splitlines()
+        status_idx = next(i for i, l in enumerate(lines) if l.startswith("Status:"))
+        last_cmd_idx = next(i for i, l in enumerate(lines) if l.startswith("Last Command:"))
+        assert last_cmd_idx == status_idx + 1
+
+    def test_missing_state_file_warns(self, tmp_path, capsys):
+        with self._patch_git_root(tmp_path):
+            cmd_set_last_command(_make_args("ms:plan-phase 10"))
+
+        captured = capsys.readouterr()
+        assert "Warning: STATE.md not found" in captured.err
+        assert captured.out == ""
+
+    def test_missing_both_lines_warns(self, tmp_path, capsys):
+        state = tmp_path / ".planning" / "STATE.md"
+        state.parent.mkdir(parents=True)
+        original = "# State\nPhase: 10\n"
+        state.write_text(original)
+
+        with self._patch_git_root(tmp_path):
+            cmd_set_last_command(_make_args("ms:adhoc"))
+
+        captured = capsys.readouterr()
+        assert "Warning:" in captured.err
+        # File should be unchanged
+        assert state.read_text() == original
+
+    def test_timestamp_format(self, tmp_path):
+        state = tmp_path / ".planning" / "STATE.md"
+        state.parent.mkdir(parents=True)
+        state.write_text("# State\nStatus: Idle\nLast Command: old\n")
+
+        fake_dt = mock.MagicMock()
+        fake_dt.datetime.now.return_value.strftime.return_value = "2026-02-24 14:30"
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "datetime", fake_dt):
+            cmd_set_last_command(_make_args("ms:verify-work 10"))
+
+        text = state.read_text()
+        assert "Last Command: ms:verify-work 10 | 2026-02-24 14:30" in text

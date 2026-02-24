@@ -119,9 +119,7 @@ ms-tools find-phase "$ARGUMENTS"
 13. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 
-14. **Update last command**
-    - Update `.planning/STATE.md` Last Command field
-    - Format: `Last Command: ms:execute-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
+14. **Update last command:** `ms-tools set-last-command "ms:execute-phase $ARGUMENTS"`
 </process>
 
 <offer_next>

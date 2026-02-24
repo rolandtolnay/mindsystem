@@ -115,8 +115,8 @@ STATE.md is the project's short-term memory spanning all phases and sessions.
 - adhoc: After adhoc work completed
   - Add entry to "Recent Adhoc Work" section
   - Keep last 5 entries (older entries remain in .planning/adhoc/)
-- Any state-changing command: Update Last Command field
-  - Format: `ms:{command} {args} | YYYY-MM-DD HH:MM`
+- Any state-changing command: `ms-tools set-last-command "ms:{command} {args}"`
+  - Appends real local timestamp via `datetime.now()`
   - Enables status line to show context without running /ms:progress
 
 </lifecycle>

@@ -301,9 +301,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
     ---
     ```
 
-20. **Update last command:**
-    - Update `.planning/STATE.md` Last Command field
-    - Format: `Last Command: ms:new-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
+20. **Update last command:** `ms-tools set-last-command "ms:new-milestone $ARGUMENTS"`
 
 </process>
 

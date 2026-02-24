@@ -324,9 +324,9 @@ Read `~/.claude/mindsystem/references/prework-status.md` and present what's done
 </step>
 
 <step name="update_state">
-Update `.planning/STATE.md` Last Command field:
-
-Format: `Last Command: ms:discuss-phase ${PHASE} | YYYY-MM-DD HH:MM`
+```bash
+ms-tools set-last-command "ms:discuss-phase ${PHASE}"
+```
 </step>
 
 </process>

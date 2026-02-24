@@ -131,8 +131,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
 11. **Offer next steps:**
     - `/ms:new-milestone` — discover goals and update PROJECT.md
 
-12. **Update last command:**
-    - Format: `Last Command: ms:complete-milestone $ARGUMENTS | YYYY-MM-DD HH:MM`
+12. **Update last command:** `ms-tools set-last-command "ms:complete-milestone $ARGUMENTS"`
 
 </process>
 

@@ -186,7 +186,9 @@ Run the app and check this screen — [describe the expected visual difference i
 
 ## Step 8: Update Last Command
 
-Run: `sed -i '' "s/^Last Command:.*/Last Command: ms:review-design $ARGUMENTS | $(date '+%Y-%m-%d %H:%M')/" .planning/STATE.md`
+```bash
+ms-tools set-last-command "ms:review-design $ARGUMENTS"
+```
 
 </process>
 

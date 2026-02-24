@@ -216,10 +216,9 @@ After the "Next Up" section, add:
 </step>
 
 <step name="update_last_command">
-Update `.planning/STATE.md` Last Command field:
-- Find line starting with `Last Command:` in Current Position section
-- Replace with: `Last Command: ms:insert-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
-- If line doesn't exist, add it after `Status:` line
+```bash
+ms-tools set-last-command "ms:insert-phase $ARGUMENTS"
+```
 </step>
 
 </process>

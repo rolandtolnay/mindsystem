@@ -251,6 +251,49 @@ def cmd_update_state(args: argparse.Namespace) -> None:
 
 
 # ===================================================================
+# Subcommand: set-last-command
+# ===================================================================
+
+
+def cmd_set_last_command(args: argparse.Namespace) -> None:
+    """Update .planning/STATE.md Last Command field with timestamp.
+
+    Contract:
+        Args: command_string (str) — e.g. "ms:plan-phase 10"
+        Output: text — confirmation or warning
+        Exit codes: 0 always (bookkeeping, not critical path)
+        Side effects: writes STATE.md (if it exists)
+    """
+    command_string = args.command_string
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    new_line = f"Last Command: {command_string} | {now}"
+
+    state_file = find_git_root() / ".planning" / "STATE.md"
+    if not state_file.is_file():
+        print("Warning: STATE.md not found, skipping Last Command update", file=sys.stderr)
+        return
+
+    text = state_file.read_text(encoding="utf-8")
+
+    # Try replacing existing Last Command line
+    updated, count = re.subn(
+        r"^Last Command:.*$", new_line, text, count=1, flags=re.MULTILINE,
+    )
+
+    if count == 0:
+        # Insert after Status: line
+        updated, count = re.subn(
+            r"^(Status:.*)$", rf"\1\n{new_line}", text, count=1, flags=re.MULTILINE,
+        )
+        if count == 0:
+            print("Warning: No 'Last Command:' or 'Status:' line found in STATE.md", file=sys.stderr)
+            return
+
+    state_file.write_text(updated, encoding="utf-8")
+    print(f"STATE.md Last Command: {command_string} | {now}")
+
+
+# ===================================================================
 # Subcommand: validate-execution-order
 # ===================================================================
 
@@ -2051,6 +2094,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("completed", type=int, help="Number of completed plans")
     p.add_argument("total", type=int, help="Total number of plans")
     p.set_defaults(func=cmd_update_state)
+
+    # --- set-last-command ---
+    p = subparsers.add_parser("set-last-command", help="Update STATE.md Last Command with timestamp")
+    p.add_argument("command_string", help='Command that was run (e.g. "ms:plan-phase 10")')
+    p.set_defaults(func=cmd_set_last_command)
 
     # --- validate-execution-order ---
     p = subparsers.add_parser("validate-execution-order", help="Validate EXECUTION-ORDER.md against plan files")

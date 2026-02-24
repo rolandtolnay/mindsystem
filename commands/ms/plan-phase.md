@@ -105,9 +105,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
    - Number plans sequentially after existing (if 01-03 exist, create 04, 05...)
    - Create PLAN.md file(s) focused on closing specific gaps
 
-6. **Update last command**
-   - Update `.planning/STATE.md` Last Command field
-   - Format: `Last Command: ms:plan-phase $ARGUMENTS | YYYY-MM-DD HH:MM`
+6. **Update last command:** `ms-tools set-last-command "ms:plan-phase $ARGUMENTS"`
 
 7. **Risk assessment** (skip if `--gaps` flag present)
    - Calculate risk score from context already loaded (task count, plan count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains)

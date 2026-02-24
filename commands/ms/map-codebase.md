@@ -60,8 +60,7 @@ Check for .planning/STATE.md - loads context if project already initialized
 5. Verify all 7 documents exist with line counts
 6. Commit codebase map
 7. Offer next steps (typically: /ms:new-project or /ms:plan-phase)
-8. Update `.planning/STATE.md` Last Command field (if STATE.md exists):
-   - Format: `Last Command: ms:map-codebase $ARGUMENTS | YYYY-MM-DD HH:MM`
+8. **Update last command:** `ms-tools set-last-command "ms:map-codebase $ARGUMENTS"`
 </process>
 
 <success_criteria>

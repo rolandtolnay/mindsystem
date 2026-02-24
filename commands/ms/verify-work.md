@@ -63,9 +63,7 @@ Phase: $ARGUMENTS (optional)
    - Commit UAT.md, present summary
    - **Update knowledge pitfalls** — if significant UAT issues (blocker/major) were fixed, append pitfall entries to relevant knowledge files
 
-10. **Update last command**
-    - Update `.planning/STATE.md` Last Command field
-    - Format: `Last Command: ms:verify-work $ARGUMENTS | YYYY-MM-DD HH:MM`
+10. **Update last command:** `ms-tools set-last-command "ms:verify-work $ARGUMENTS"`
 
 11. **Present next steps**
     - If this was the last phase in milestone: suggest `/ms:audit-milestone`
