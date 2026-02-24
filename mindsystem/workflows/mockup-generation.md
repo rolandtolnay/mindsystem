@@ -6,8 +6,6 @@ Called by design-phase command (step 4b) when user opts into mockup generation.
 
 <required_reading>
 @~/.claude/mindsystem/references/design-directions.md
-@~/.claude/mindsystem/templates/mockup-mobile.md (if mobile)
-@~/.claude/mindsystem/templates/mockup-web.md (if web)
 </required_reading>
 
 <process>
@@ -82,17 +80,18 @@ Extract the HTML scaffold from the `<template>` block.
 <step name="spawn_agents">
 ```bash
 PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
+# Assumes single match. If empty, phase directory is missing — stop and report.
 mkdir -p "${PHASE_DIR}/mockups"
 ```
 
 Spawn 3 ms-mockup-designer agents IN PARALLEL, each receiving:
-- `<product_context>` — From PROJECT.md
-- `<phase_context>` — From ROADMAP.md phase entry
-- `<design_direction>` — One of the 3 derived directions (name, philosophy, concrete choices)
-- `<platform>` — `mobile` or `web`
-- `<feature_grounding>` — The screen/feature being mocked
-- `<existing_aesthetic>` — Colors/fonts from project UI skill or codebase (if exists)
-- `<mockup_template>` — The HTML scaffold from the template file
+- `<product_context>` — from PROJECT.md "What This Is" section
+- `<phase_context>` — from ROADMAP.md phase entry
+- `<design_direction>` — one of the 3 directions from `derive_directions` (name, philosophy, concrete choices)
+- `<platform>` — `mobile` or `web` from `determine_platform`
+- `<feature_grounding>` — screen/feature identified in `identify_primary_screen`
+- `<existing_aesthetic>` — from project UI skill (`SKILL.md` with design tokens) if exists, else scan codebase theme/style files for colors and fonts. If greenfield, state "No existing aesthetic."
+- `<mockup_template>` — HTML scaffold from `read_template`
 - Output path: `.planning/phases/{phase}-{slug}/mockups/variant-a.html` (b, c for others)
 
 ```
@@ -107,13 +106,24 @@ After all 3 agents return, run the comparison script to create the comparison pa
 
 ```bash
 ms-compare-mockups "${PHASE_DIR}/mockups"
-open "${PHASE_DIR}/mockups/comparison.html"
 ```
 
-Display summary:
+Read the `open_mockups` config setting:
+
+```bash
+OPEN_MOCKUPS=$(cat .planning/config.json 2>/dev/null | jq -r '.open_mockups // "auto"')
+```
+
+Branch on the value:
+
+- **`"auto"` (default):** Run `open "${PHASE_DIR}/mockups/comparison.html"`. Display summary with "comparison page opened in browser."
+- **`"ask"`:** Display summary with "comparison page ready." Ask "Open mockup comparison in browser?" (Yes/No). If Yes, run `open`.
+- **`"off"`:** Display summary with explicit comparison page path. No open.
+
+**Summary template** (adapt first line per branch above):
 
 ```markdown
-3 mockup variants generated — comparison page opened in browser.
+3 mockup variants generated — {status line from branch}.
 
 Individual variants for reference:
 - **A: {Direction A name}** — `.planning/phases/{phase}-{slug}/mockups/variant-a.html`
@@ -121,7 +131,7 @@ Individual variants for reference:
 - **C: {Direction C name}** — `.planning/phases/{phase}-{slug}/mockups/variant-c.html`
 ```
 
-Use AskUserQuestion:
+**After displaying summary**, use AskUserQuestion:
 > "Which direction works best?"
 > 1. **A: {name}** — Use this direction
 > 2. **B: {name}** — Use this direction
@@ -145,15 +155,29 @@ Handle user response:
 </step>
 
 <step name="extract_specs">
-Read the chosen HTML file. Extract from the inline CSS:
-- Direction name and description (from the derived direction that was selected)
-- Color palette — `background`, `color`, CSS custom properties, repeated accent values
-- Layout structure — container arrangement (sidebar/topnav/stacked, grid/list)
-- Typography — `font-size`, `font-weight`, `line-height` from headings and body
-- Spacing — `padding`, `gap`, `margin` values used consistently
-- User preferences (any specific feedback from selection)
+Read the chosen HTML file. Extract from the inline CSS and assemble into a `<mockup_direction>` block with this exact structure:
 
-Assemble into a `<mockup_direction>` block for ms-designer. See the `<mockup_direction>` template in `design-phase.md` step 5 for the expected format.
+```xml
+<mockup_direction>
+Direction: [chosen direction name]
+Philosophy: [direction one-sentence philosophy]
+
+Color palette:
+[Extracted hex values — background, text, accent, secondary from `background`, `color`, CSS custom properties, repeated accent values]
+
+Layout structure:
+[Container arrangement from CSS — sidebar/topnav/stacked, grid/list]
+
+Typography:
+[`font-size`, `font-weight`, `line-height` from headings and body]
+
+Spacing:
+[`padding`, `gap`, `margin` values used consistently]
+
+User preferences:
+[Any specific feedback from mockup selection — "I liked X but want Y changed"]
+</mockup_direction>
+```
 
 Return this block to the design-phase orchestrator.
 </step>

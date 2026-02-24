@@ -1,6 +1,6 @@
 ---
 name: ms:config
-description: Configure Mindsystem preferences — code reviewers, gitignore, git remote
+description: Configure Mindsystem preferences — code reviewers, mockups, gitignore, git remote
 allowed-tools:
   - Read
   - Write
@@ -12,7 +12,7 @@ allowed-tools:
 
 Configure Mindsystem preferences for the current project.
 
-Manages code reviewer agents, .gitignore patterns for `.planning/` artifacts, and git remote setup. Run anytime to reconfigure — idempotent.
+Manages code reviewer agents, mockup preferences, .gitignore patterns for `.planning/` artifacts, and git remote setup. Run anytime to reconfigure — idempotent.
 
 </objective>
 
@@ -113,6 +113,36 @@ If no selections: skip gitignore changes.
 
 </step>
 
+<step name="mockup_preferences">
+
+Read current value:
+
+```bash
+CURRENT=$(cat .planning/config.json 2>/dev/null | jq -r '.open_mockups // "auto"')
+echo "Current open_mockups: $CURRENT"
+```
+
+Use AskUserQuestion:
+- header: "Mockups"
+- question: "How should mockup comparisons open after generation?"
+- options:
+  - "Auto-open (Recommended)" — Open comparison.html in browser automatically
+  - "Ask first" — Prompt before opening
+  - "Don't open" — Display path only, never auto-open
+
+Map selection to config value:
+- "Auto-open" → `"auto"`
+- "Ask first" → `"ask"`
+- "Don't open" → `"off"`
+
+Update config.json with selected value via jq:
+
+```bash
+jq --arg v "$VALUE" '.open_mockups = $v' .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+```
+
+</step>
+
 <step name="validation_summary">
 
 Show final config state:
@@ -121,6 +151,7 @@ Show final config state:
 Configuration updated:
 
 - Code reviewers: [adhoc / phase / milestone values]
+- Mockup open: [auto / ask / off]
 - Gitignore: [patterns added, or "no changes"]
 - Git remote: [remote URL, or "none configured"]
 ```
@@ -198,5 +229,6 @@ Present next steps:
 - [ ] Git remote offered (if missing)
 - [ ] Validation summary displayed
 - [ ] Config.json code_review values set (or preserved if skipped)
+- [ ] Config.json open_mockups value set (or preserved if skipped)
 
 </success_criteria>

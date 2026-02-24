@@ -84,9 +84,9 @@ Initialize new project with brief and configuration.
 Usage: `/ms:new-project`
 
 **`/ms:config`**
-Configure Mindsystem preferences — code reviewers, gitignore patterns, git remote.
+Configure Mindsystem preferences — code reviewers, mockup preferences, gitignore patterns, git remote.
 
-- Use when: you want to set up code review agents, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
+- Use when: you want to set up code review agents, mockup open behavior, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
 - Edits `.planning/config.json` and `.gitignore`
 - Suggests code reviewers based on tech stack (needs PROJECT.md)
 - Idempotent — run anytime to reconfigure
