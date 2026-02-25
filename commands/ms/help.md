@@ -47,14 +47,11 @@ Output ONLY the reference content below. Do NOT add:
 Mindsystem evolves fast. Check for updates periodically:
 
 ```
-/ms:release-notes
+/ms:update
 ```
 
-Shows full release notes with update status. Update with:
-
-```bash
-npx mindsystem-cc@latest
-```
+Shows current vs latest version. Updates non-interactively if behind.
+Release notes: `/ms:release-notes`
 
 ## Core Workflow
 
@@ -391,6 +388,16 @@ Health check and fix project configuration — subsystems, milestone structure, 
 - Idempotent — safe to run repeatedly
 
 Usage: `/ms:doctor`
+
+**`/ms:update`**
+Check for updates and install latest Mindsystem version.
+
+- Detects local vs global install mode automatically
+- Compares installed version against npm registry
+- Runs non-interactive install with --force flag
+- After update: restart Claude Code, then run `/ms:doctor`
+
+Usage: `/ms:update`
 
 **`/ms:help`**
 Show this command reference.

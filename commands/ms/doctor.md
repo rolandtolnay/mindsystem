@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run health checks on project configuration. Detect and fix structural drift across 9 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers, and research API keys.
+Run health checks on project configuration. Detect and fix structural drift across 10 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers, research API keys, and Mindsystem version.
 
 Idempotent.
 </objective>
@@ -79,6 +79,28 @@ ms-tools doctor-scan
 Capture the full output. Parse each check's Status (PASS/FAIL/SKIP/WARN) and detail lines.
 </step>
 
+<step name="check_version">
+Check for Mindsystem updates:
+
+```bash
+# Installed version
+cat "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/mindsystem/VERSION" 2>/dev/null || cat ./.claude/mindsystem/VERSION 2>/dev/null
+```
+
+```bash
+# Latest from npm
+npm view mindsystem-cc version 2>/dev/null
+```
+
+Compare versions:
+- installed == latest → PASS, "v{installed} (latest)"
+- installed > latest → PASS, "v{installed} (development)"
+- installed < latest → WARN, "v{installed} → v{latest} available — run `/ms:update`"
+- npm fetch failed → SKIP, "Could not reach npm registry"
+
+Include as an extra row ("Mindsystem version") in the results table.
+</step>
+
 <step name="present_results">
 Display results as a markdown table:
 
@@ -96,9 +118,10 @@ Display results as a markdown table:
 | PLAN cleanup             | FAIL   | 9 leftover PLAN.md files         |
 | CLI wrappers             | FAIL   | ms-tools not on PATH             |
 | Research API Keys        | WARN   | PERPLEXITY_API_KEY not set        |
+| Mindsystem version       | WARN   | v3.21.0 → v3.22.1 available       |
 ```
 
-Populate Result and Details from scan output. Use concise detail summaries.
+Populate Result and Details from scan output and version check. Use concise detail summaries.
 
 If all PASS (or WARN only) → go to `report`.
 If any FAIL → go to `confirm_action`.
@@ -155,6 +178,7 @@ Final summary table:
 | PLAN cleanup             | PASS   | ...                              |
 | CLI wrappers             | PASS   | ...                              |
 | Research API Keys        | PASS   | ...                              |
+| Mindsystem version       | PASS   | ...                              |
 
 All checks passed.
 ```
@@ -170,6 +194,6 @@ Include counts: checks total, passed, warned, fixed during this run.
 - [ ] Re-scan verifies all checks pass after fixes
 - [ ] Each fix group committed atomically
 - [ ] Fixes applied in dependency order: subsystems → dirs → milestone naming → archival → cleanup → knowledge
-- [ ] All 9 categories reported with PASS/FAIL/WARN/SKIP
+- [ ] All 10 categories reported with PASS/FAIL/WARN/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>

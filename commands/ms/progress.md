@@ -55,6 +55,22 @@ This means a milestone was completed and archived. Go to **Route F** (between mi
 If missing both ROADMAP.md and PROJECT.md: suggest `/ms:new-project`.
 </step>
 
+<step name="check_version">
+**Check for Mindsystem updates (non-blocking):**
+
+```bash
+# Installed version
+cat "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/mindsystem/VERSION" 2>/dev/null || cat ./.claude/mindsystem/VERSION 2>/dev/null
+```
+
+```bash
+# Latest from npm
+npm view mindsystem-cc version 2>/dev/null
+```
+
+Compare versions. Store result for the report step. If npm fails or versions match, skip — do not block progress.
+</step>
+
 <step name="load">
 **Load full project context:**
 
@@ -114,6 +130,10 @@ DESIGN: [✓ if DESIGN.md exists | - if not]
 ## Active Debug Sessions
 - [count] active — /ms:debug to continue
 (Only show this section if count > 0)
+
+## Update Available
+⬆ v{installed} → v{latest} — run `/ms:update`
+(Only show this section if installed < latest)
 
 ## What's Next
 [Next phase/plan objective from ROADMAP]
