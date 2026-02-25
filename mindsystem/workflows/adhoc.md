@@ -1,7 +1,5 @@
 <purpose>
 Execute discovered work with knowledge-aware planning, subagent execution, and knowledge consolidation.
-
-Provides "describe → load knowledge → explore → plan → execute → consolidate" flow that integrates with the Mindsystem knowledge system. The key differentiator vs vanilla Claude plan mode: prior learnings inform the plan, and execution learnings feed back into knowledge files.
 </purpose>
 
 <process>
@@ -69,7 +67,7 @@ Synthesize exploration findings with knowledge context into a concise approach s
 - Relevant patterns from knowledge files
 - Any pitfalls or constraints discovered
 
-Present to user via AskUserQuestion with concrete options if there are decisions to make. If approach is clear, present summary and ask for confirmation or adjustments.
+Present to user via AskUserQuestion with concrete options if there are decisions to make. If approach is clear, use AskUserQuestion with options: Approve / Request adjustments / Abort.
 </step>
 
 <step name="spawn_plan_writer">
@@ -167,9 +165,11 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 <step name="cleanup_and_report">
 **Commit knowledge updates:**
 ```bash
-git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" "${exec_dir}/adhoc-01-changes.patch" .planning/STATE.md
-git commit -m "$(cat <<'EOF'
-docs(adhoc): consolidate knowledge from {description}
+git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" .planning/STATE.md
+# Only include patch if it was generated
+[ -f "${exec_dir}/adhoc-01-changes.patch" ] && git add "${exec_dir}/adhoc-01-changes.patch"
+git commit -m "$(cat <<EOF
+docs(adhoc): consolidate knowledge from $description
 
 Knowledge files updated, SUMMARY preserved.
 EOF

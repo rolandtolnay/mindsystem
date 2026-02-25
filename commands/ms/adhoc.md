@@ -14,11 +14,7 @@ allowed-tools:
 ---
 
 <objective>
-Execute work discovered mid-session with knowledge-aware planning and execution — the key differentiator vs vanilla Claude plan mode.
-
-Knowledge flows in both directions:
-- **Input:** Prior decisions, established patterns, and pitfalls inform the plan
-- **Output:** Learnings from execution feed back into knowledge files
+Execute work discovered mid-session with knowledge-aware planning and execution.
 
 Use when:
 - Work is discovered mid-session (not pre-planned)
@@ -84,17 +80,11 @@ Commit artifacts, update STATE.md, report completion.
 </process>
 
 <success_criteria>
-Adhoc work is complete when:
-
-- [ ] Knowledge files loaded before exploration
-- [ ] Codebase explored with relevant findings
-- [ ] PLAN.md created in per-execution subdirectory
-- [ ] All tasks executed by ms-executor
-- [ ] Phase-style SUMMARY.md created for consolidator compatibility
-- [ ] Code review completed (or skipped per config)
-- [ ] Patch file generated at `{exec_dir}/adhoc-01-changes.patch`
 - [ ] Knowledge files updated via ms-consolidator
-- [ ] STATE.md updated with adhoc entry
-- [ ] Git commit with all changes
-- [ ] User informed of completion
+- [ ] STATE.md "Recent Adhoc Work" section updated with new entry
+- [ ] Code review executed (or explicitly skipped per config)
+- [ ] Patch file generated if adhoc commits exist
+- [ ] `ms-tools set-last-command` called with adhoc command
+- [ ] Phase-style SUMMARY.md created for consolidator compatibility
+- [ ] All artifacts committed
 </success_criteria>

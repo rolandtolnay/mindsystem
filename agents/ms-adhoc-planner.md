@@ -46,14 +46,7 @@ cat ~/.claude/mindsystem/references/goal-backward.md
 </step>
 
 <step name="analyze_context">
-Parse the orchestrator's context payload:
-
-1. Work description — what needs to be done
-2. Exploration findings — codebase state, relevant files, patterns
-3. Knowledge contents — prior decisions, established patterns, pitfalls
-4. User decisions — clarifications from the orchestrator's Q&A
-5. STATE.md context — current phase, accumulated context
-6. Subsystems — vocabulary from config.json
+Parse the orchestrator's context payload. Mine knowledge files for pitfalls and established patterns to encode in plan changes.
 
 Optionally read additional files if exploration findings reference them but didn't include full content.
 </step>
@@ -114,7 +107,6 @@ Title format: `# Adhoc: {Descriptive Title}`
 Format rules:
 - Pure markdown, no XML containers, no YAML frontmatter
 - `**Subsystem:**` inline metadata on one line (no `**Type:**` needed — adhoc defaults to execute)
-- Specific file paths, specific changes, specific verification commands
 </step>
 
 </process>
@@ -133,10 +125,8 @@ Return structured markdown to orchestrator:
 </output_format>
 
 <success_criteria>
-- [ ] References loaded (plan-format, goal-backward)
-- [ ] Plan written to specified output path
-- [ ] Standard format: Context, Changes, Verification, Must-Haves
 - [ ] All Changes have specific file paths and implementation details
-- [ ] Must-Haves are user-observable truths
-- [ ] Structured completion report returned
+- [ ] Structured completion report returned to orchestrator
+- [ ] Standard format: Context, Changes, Verification, Must-Haves
+- [ ] Must-Haves are user-observable truths, not implementation details
 </success_criteria>
