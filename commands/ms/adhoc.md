@@ -35,6 +35,7 @@ For larger work requiring wave-based parallelization or multi-plan coordination,
 Parse work description from $ARGUMENTS.
 Validate STATE.md exists (active Mindsystem project required).
 If task_tracker configured and input matches ticket ID, lazy-load tracker reference and follow its detection process.
+If input is a todo file path (`.planning/todos/*.md`), lazy-load todo reference and follow its detection process.
 </step>
 
 <step name="load_knowledge">
@@ -76,7 +77,7 @@ Spawn ms-consolidator on execution directory to update knowledge files.
 </step>
 
 <step name="cleanup_and_report">
-Commit artifacts, update STATE.md, report completion. When ticket detected, finalize per loaded tracker reference.
+Commit artifacts, update STATE.md, report completion. When ticket detected, finalize per loaded tracker reference. When todo detected, finalize per loaded todo reference.
 </step>
 
 </process>
@@ -90,4 +91,5 @@ Commit artifacts, update STATE.md, report completion. When ticket detected, fina
 - [ ] Phase-style SUMMARY.md created for consolidator compatibility
 - [ ] All artifacts committed
 - [ ] Ticket finalized when tracker configured (comment posted, commit attached, state → Done)
+- [ ] Todo finalized when detected (moved to done/, outcome appended)
 </success_criteria>

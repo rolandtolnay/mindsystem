@@ -41,6 +41,8 @@ Read STATE.md for project context (current phase, accumulated decisions, blocker
 TRACKER_TYPE=$(jq -r '.task_tracker.type // empty' .planning/config.json 2>/dev/null)
 TRACKER_CLI=$(jq -r '.task_tracker.cli // empty' .planning/config.json 2>/dev/null)
 ```
+
+**Todo detection:** If `$ARGUMENTS` matches a `.planning/todos/*.md` file path and the file exists, lazy-load `~/.claude/mindsystem/references/todo-file.md` and follow its **Todo Detection** process. Todo detection is independent of ticket detection — both can be inactive.
 </step>
 
 <step name="load_knowledge">
@@ -117,6 +119,7 @@ Assemble context payload for ms-adhoc-planner:
 - Subsystem list from config.json
 - Output path: `${exec_dir}/adhoc-01-PLAN.md`
 - Ticket context when detected (per loaded ticket reference)
+- Todo context when detected (per loaded todo reference)
 
 Spawn ms-adhoc-planner via Task tool. Receive completion report with plan path.
 </step>
@@ -140,6 +143,7 @@ Provide in the prompt:
 - SUMMARY output path: `${exec_dir}/adhoc-01-SUMMARY.md`
 - Instruction to use phase-style SUMMARY format (with key-decisions, patterns-established, key-files, mock_hints frontmatter fields) for consolidator compatibility
 - Ticket commit instructions when detected (per loaded ticket reference)
+- Todo commit instructions when detected (per loaded todo reference)
 
 The executor reads the plan, executes tasks with atomic commits, creates SUMMARY.md, and returns completion report.
 </step>
@@ -194,6 +198,8 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 
 <step name="cleanup_and_report">
 **Finalize ticket (when detected):** Follow the **Finalization**, **Commit Message Suffix**, and **Report Additions** sections from the loaded ticket reference.
+
+**Finalize todo (when detected):** Follow the **Finalization**, **Commit Message Suffix**, and **Report Additions** sections from the loaded todo reference.
 
 **Commit knowledge updates:**
 ```bash
