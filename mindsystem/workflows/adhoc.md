@@ -68,13 +68,34 @@ Each agent receives:
 </step>
 
 <step name="present_and_clarify">
-Synthesize exploration findings with knowledge context into a concise approach summary:
+Present exploration findings as a briefing with externalized assumptions, then cross the information asymmetry boundary with targeted questions.
 
-- What files need to change and why
-- Relevant patterns from knowledge files
-- Any pitfalls or constraints discovered
+**Part 1 — Briefing (always):**
 
-Present to user via AskUserQuestion with concrete options if there are decisions to make. If approach is clear, use AskUserQuestion with options: Approve / Request adjustments / Abort.
+Present a dense, specific summary:
+- What changes and why (files, purpose)
+- Claude's assumptions about expected behavior, scope boundaries, and approach — each marked with confidence: **high** / **medium** / **low** to focus user attention on uncertain areas
+- Patterns and constraints from knowledge files and exploration
+
+**Part 2 — AskUserQuestion:**
+
+Governing principle: each question must save more context than it costs. A question that prevents a wrong assumption from reaching the executor saves an entire subagent context window.
+
+- Q1 (always): Assumption validation — "Are these assumptions correct?" with options:
+  - Looks right
+  - Some corrections (let me clarify)
+  - Let me reframe the task
+- Additional questions (conditional): Only when exploration surfaced genuine behavioral ambiguity the user must resolve. Frame with implementation context discovered during exploration. Typically 1-2 for focused work, 3-4 for multi-area work.
+
+**What NOT to ask** (Claude determines these from exploration):
+- Technical approach or patterns
+- Error handling strategy
+- Implementation details the user can't meaningfully influence
+- Only ask about: user intent, expected behavior, scope boundaries
+
+**Fast path:** All assumptions high-confidence + no ambiguity → collapse to single validation question.
+
+**On corrections:** Absorb user feedback and proceed to planning. Do not re-present the full briefing.
 </step>
 
 <step name="spawn_plan_writer">

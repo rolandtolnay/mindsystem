@@ -46,8 +46,9 @@ Spawn 1-3 parallel Explore agents based on work scope and loaded knowledge.
 </step>
 
 <step name="present_and_clarify">
-Synthesize exploration findings with knowledge context.
-Present approach to user, AskUserQuestion for gaps or decisions.
+Present briefing with assumptions marked by confidence (high/medium/low).
+AskUserQuestion: always validate assumptions; add questions only for genuine behavioral ambiguity the user must resolve.
+Guardrail: never ask about technical approach, error handling, or implementation details — only user intent, expected behavior, scope boundaries.
 </step>
 
 <step name="spawn_plan_writer">
