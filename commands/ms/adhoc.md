@@ -69,6 +69,10 @@ Spawn ms-executor with plan path and SUMMARY output path.
 Per config.json `code_review.adhoc` setting — spawn code review agent or skip.
 </step>
 
+<step name="generate_patch">
+Generate patch file from adhoc commits via `ms-tools generate-adhoc-patch`.
+</step>
+
 <step name="consolidate_knowledge">
 Spawn ms-consolidator on execution directory to update knowledge files.
 </step>
@@ -88,6 +92,7 @@ Adhoc work is complete when:
 - [ ] All tasks executed by ms-executor
 - [ ] Phase-style SUMMARY.md created for consolidator compatibility
 - [ ] Code review completed (or skipped per config)
+- [ ] Patch file generated at `{exec_dir}/adhoc-01-changes.patch`
 - [ ] Knowledge files updated via ms-consolidator
 - [ ] STATE.md updated with adhoc entry
 - [ ] Git commit with all changes

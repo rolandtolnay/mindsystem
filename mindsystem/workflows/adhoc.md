@@ -123,7 +123,7 @@ Read code review agent from config:
 CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.adhoc // .code_review.phase // empty')
 ```
 
-**If CODE_REVIEW = "skip":** Skip to consolidate_knowledge.
+**If CODE_REVIEW = "skip":** Skip to generate_patch.
 
 **If CODE_REVIEW = empty/null:** Use default: `CODE_REVIEW="ms-code-simplifier"`
 
@@ -131,12 +131,27 @@ CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.adhoc 
 
 1. Get modified files from executor's commits:
    ```bash
-   git diff --name-only HEAD~$(git log --oneline "${exec_dir}/adhoc-01-PLAN.md".. 2>/dev/null | wc -l | tr -d ' ') HEAD 2>/dev/null | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$'
+   ADHOC_COMMITS=$(git log --oneline --grep="(adhoc-" --format="%H")
+   CHANGED_FILES=$(git diff --name-only $(echo "$ADHOC_COMMITS" | tail -1)^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
    ```
 
 2. Spawn code review agent with adhoc scope.
 
 3. If changes made: commit with message `refactor(adhoc): code review pass`.
+</step>
+
+<step name="generate_patch">
+Generate a patch file capturing all adhoc changes:
+
+```bash
+ADHOC_COMMITS=$(git log --oneline --grep="(adhoc-" --format="%H")
+FIRST_COMMIT=$(echo "$ADHOC_COMMITS" | tail -1)
+LAST_COMMIT=$(echo "$ADHOC_COMMITS" | head -1)
+patch_file="${exec_dir}/adhoc-01-changes.patch"
+ms-tools generate-adhoc-patch "$FIRST_COMMIT" "$patch_file" --end "$LAST_COMMIT"
+```
+
+If no adhoc commits found or patch generation reports no changes, skip silently.
 </step>
 
 <step name="consolidate_knowledge">
@@ -152,7 +167,7 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 <step name="cleanup_and_report">
 **Commit knowledge updates:**
 ```bash
-git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" .planning/STATE.md
+git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" "${exec_dir}/adhoc-01-changes.patch" .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs(adhoc): consolidate knowledge from {description}
 
@@ -181,6 +196,7 @@ Adhoc work complete: [description]
 
 Artifacts:
 - Summary: {exec_dir}/adhoc-01-SUMMARY.md
+- Patch: {exec_dir}/adhoc-01-changes.patch
 - Knowledge: .planning/knowledge/[subsystem].md
 
 ---
