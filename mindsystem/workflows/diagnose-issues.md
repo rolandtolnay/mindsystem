@@ -205,7 +205,6 @@ Debug sessions: ${DEBUG_DIR}/
 
 **Each debug agent:** Fresh 200k context
 - Loads full debug workflow
-- Loads debugging references
 - Investigates with full capacity
 - Returns root cause
 

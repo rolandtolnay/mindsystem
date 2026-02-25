@@ -10,11 +10,7 @@ allowed-tools:
 ---
 
 <objective>
-Debug issues using scientific method with subagent isolation.
-
-**Orchestrator role:** Gather symptoms, spawn ms-debugger agent, handle checkpoints, spawn continuations.
-
-**Why subagent:** Investigation burns context fast (reading files, forming hypotheses, testing). Fresh 200k context per investigation. Main context stays lean for user interaction.
+Gather symptoms from user, spawn ms-debugger agent, handle returns and checkpoints.
 </objective>
 
 <context>
@@ -31,27 +27,28 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved | head -5
 ## 1. Check Active Sessions
 
 If active sessions exist AND no $ARGUMENTS:
-- List sessions with status, hypothesis, next action
+- Read each debug file's frontmatter (status, hypothesis from Current Focus, next_action)
+- Display as numbered list: `{N}. {slug} — status: {status}, focus: {hypothesis}`
 - User picks number to resume OR describes new issue
 
 If $ARGUMENTS provided OR user describes new issue:
 - Continue to symptom gathering
 
-## 2. Gather Symptoms (if new issue)
+## 2. Gather Symptoms
 
-Use AskUserQuestion for each:
+Extract what you can from $ARGUMENTS first. Only use AskUserQuestion for missing categories:
 
 1. **Expected behavior** - What should happen?
 2. **Actual behavior** - What happens instead?
-3. **Error messages** - Any errors? (paste or describe)
+3. **Error messages** - Any errors?
 4. **Timeline** - When did this start? Ever worked?
-5. **Reproduction** - How do you trigger it?
+5. **Reproduction** - How to trigger it?
 
-After all gathered, confirm ready to investigate.
+If the user's description covers most categories, proceed directly.
 
 ## 3. Spawn ms-debugger Agent
 
-Fill prompt and spawn:
+Fill prompt template and spawn:
 
 ```markdown
 <objective>
@@ -88,12 +85,16 @@ Task(
 
 ## 4. Handle Agent Return
 
-**If `## ROOT CAUSE FOUND`:**
+**If `## DEBUG COMPLETE`:**
+- Display root cause, fix applied, and verification summary
+- Done — the agent already committed the fix
+
+**If `## ROOT CAUSE FOUND`** (from `find_root_cause_only` mode):
 - Display root cause and evidence summary
 - Offer options:
-  - "Fix now" - spawn fix subagent
-  - "Plan fix" - suggest /ms:plan-phase --gaps
-  - "Manual fix" - done
+  - "Fix now" — spawn ms-debugger with `goal: find_and_fix` and the debug file
+  - "Plan fix" — suggest /ms:plan-phase --gaps
+  - "Done" — leave the diagnosis
 
 **If `## CHECKPOINT REACHED`:**
 - Present checkpoint details to user
@@ -103,9 +104,9 @@ Task(
 **If `## INVESTIGATION INCONCLUSIVE`:**
 - Show what was checked and eliminated
 - Offer options:
-  - "Continue investigating" - spawn new agent with additional context
-  - "Manual investigation" - done
-  - "Add more context" - gather more symptoms, spawn again
+  - "Continue investigating" — spawn new agent with additional context
+  - "Add more context" — gather more symptoms, spawn again
+  - "Done" — stop investigation
 
 ## 5. Spawn Continuation Agent (After Checkpoint)
 
@@ -147,9 +148,8 @@ ms-tools set-last-command "ms:debug $ARGUMENTS"
 </process>
 
 <success_criteria>
-- [ ] Active sessions checked
-- [ ] Symptoms gathered (if new)
-- [ ] ms-debugger spawned with context
-- [ ] Checkpoints handled correctly
-- [ ] Root cause confirmed before fixing
+- [ ] All 4 return types handled (DEBUG COMPLETE, ROOT CAUSE FOUND, CHECKPOINT, INCONCLUSIVE)
+- [ ] Symptoms extracted from $ARGUMENTS first — only ask for gaps
+- [ ] Continuation agent spawned after checkpoint response
+- [ ] Last command updated after completion
 </success_criteria>
