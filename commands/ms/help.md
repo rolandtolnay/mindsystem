@@ -365,16 +365,17 @@ Usage: `/ms:check-todos api`
 ### Adhoc Work
 
 **`/ms:adhoc <description>`**
-Execute small discovered work without phase overhead (max 2 tasks).
+Execute discovered work with knowledge-aware planning and execution.
 
-- Use when: you discover small work mid-session that needs to be done now but doesn't warrant a full phase.
-- Bridges the gap between `/ms:add-todo` (capture for later) and `/ms:insert-phase` (full planning)
-- Maximum 2 tasks — refuses and suggests `/ms:insert-phase` for larger work
-- Creates lightweight artifacts in `.planning/adhoc/` for audit trail
-- Updates STATE.md with adhoc work entry
-- Single git commit with all changes
+- Use when: you discover work mid-session that can be completed in a single context window without multi-phase orchestration.
+- Bridges the gap between `/ms:add-todo` (capture for later) and `/ms:insert-phase` (multi-plan coordination)
+- Knowledge-aware: loads relevant knowledge files before planning, consolidates learnings after execution
+- Spawns Explore agents for codebase understanding, ms-adhoc-planner for plan creation, ms-executor for execution
+- Creates per-execution artifacts in `.planning/adhoc/{timestamp}-{slug}/`
+- Updates knowledge files via ms-consolidator after execution
 
 Usage: `/ms:adhoc Fix auth token not refreshing on 401`
+Usage: `/ms:adhoc Refactor API error handling to use consistent format`
 
 ### Utility Commands
 
@@ -424,9 +425,10 @@ Usage: `/ms:release-notes`
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on
 │   └── done/             # Completed todos
-├── adhoc/                # Small work executed via /ms:adhoc
-│   ├── *-PLAN.md         # Lightweight plans
-│   └── *-SUMMARY.md      # Completion summaries
+├── adhoc/                # Work executed via /ms:adhoc
+│   └── {date}-{slug}/    # Per-execution subdirectory
+│       ├── adhoc-01-PLAN.md    # Execution plan (deleted after consolidation)
+│       └── adhoc-01-SUMMARY.md # Completion summary
 ├── debug/                # Active debug sessions
 │   └── resolved/         # Archived resolved issues
 ├── codebase/             # Codebase map (brownfield projects)
@@ -496,8 +498,8 @@ Usage: `/ms:release-notes`
 ```
 /ms:debug "form submission fails silently"    # Systematic investigation (persists across /clear)
 # Then decide where the fix belongs:
-# - If it's small (1-2 tasks) and needed now:
-/ms:adhoc "Fix auth token refresh on 401"   # Quick fix with audit trail
+# - If it fits in a single context window:
+/ms:adhoc "Fix auth token refresh on 401"   # Knowledge-aware fix with consolidation
 # - If it's required to satisfy the current phase goal: add more plans to the current phase
 /ms:plan-phase 5                              # (or: /ms:plan-phase 5 --gaps after verification)
 /ms:execute-phase 5

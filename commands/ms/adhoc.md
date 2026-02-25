@@ -1,6 +1,6 @@
 ---
 name: ms:adhoc
-description: Execute small discovered work without phase overhead (max 2 tasks)
+description: Execute discovered work with knowledge-aware planning and execution
 argument-hint: <description>
 allowed-tools:
   - Read
@@ -14,15 +14,18 @@ allowed-tools:
 ---
 
 <objective>
-Execute small work items discovered during verification or debugging without the overhead of phase insertion or todos.
+Execute work discovered mid-session with knowledge-aware planning and execution — the key differentiator vs vanilla Claude plan mode.
 
-Bridges the gap between "capture for later" (/ms:add-todo) and "full phase workflow" (/ms:insert-phase).
+Knowledge flows in both directions:
+- **Input:** Prior decisions, established patterns, and pitfalls inform the plan
+- **Output:** Learnings from execution feed back into knowledge files
 
 Use when:
-- Work is small (1-2 tasks maximum)
 - Work is discovered mid-session (not pre-planned)
-- Work can be completed quickly
-- Work doesn't require architectural changes
+- Work can be completed in a single context window
+- Work doesn't require multi-phase orchestration
+
+For larger work requiring wave-based parallelization or multi-plan coordination, use `/ms:insert-phase`.
 </objective>
 
 <execution_context>
@@ -33,78 +36,60 @@ Use when:
 <process>
 
 <step name="parse_and_validate">
-Parse the work description from $ARGUMENTS.
-Validate project has .planning/STATE.md (active Mindsystem project required).
+Parse work description from $ARGUMENTS.
+Validate STATE.md exists (active Mindsystem project required).
 </step>
 
-<step name="analyze_scope">
-Quick analysis of what tasks are needed.
-If >2 tasks or architectural changes required: REFUSE with suggestion to use /ms:insert-phase.
+<step name="load_knowledge">
+Read config.json subsystems, match relevant knowledge files to work description.
 </step>
 
-<step name="create_lightweight_plan">
-Create .planning/adhoc/{timestamp}-{slug}-PLAN.md with minimal structure.
+<step name="explore_codebase">
+Spawn 1-3 parallel Explore agents based on work scope and loaded knowledge.
 </step>
 
-<step name="execute_tasks">
-Execute tasks inline (no subagent for small work).
-Apply deviation rules 1-3 (auto-fix bugs, critical, blocking).
-If Rule 4 triggered (architectural): STOP, suggest /ms:insert-phase.
+<step name="present_and_clarify">
+Synthesize exploration findings with knowledge context.
+Present approach to user, AskUserQuestion for gaps or decisions.
 </step>
 
-<step name="verify_and_summarize">
-Run verify commands from tasks.
-Create .planning/adhoc/{timestamp}-{slug}-SUMMARY.md.
+<step name="spawn_plan_writer">
+Create execution directory, assemble context, spawn ms-adhoc-planner.
+</step>
+
+<step name="review_plan">
+Read generated plan, show summary to user, allow edits.
+</step>
+
+<step name="spawn_executor">
+Spawn ms-executor with plan path and SUMMARY output path.
 </step>
 
 <step name="code_review">
-Read `code_review.adhoc` from config.json (fallback: `code_review.phase`, default: `ms-code-simplifier`).
-If `"skip"`: proceed to update_state_and_commit.
-Spawn code review agent with modified files.
-Track if code review changes were applied for commit message.
+Per config.json `code_review.adhoc` setting — spawn code review agent or skip.
 </step>
 
-<step name="update_state_and_commit">
-Add entry to STATE.md "Recent Adhoc Work" section.
-Single git commit with all changes (code + code review changes + PLAN.md + SUMMARY.md + STATE.md).
+<step name="consolidate_knowledge">
+Spawn ms-consolidator on execution directory to update knowledge files.
 </step>
 
-<step name="generate_patch">
-Generate patch file from adhoc commit.
-Run `ms-tools generate-adhoc-patch` with commit hash and output path.
-</step>
-
-<step name="completion">
-Report what was done, show commit hash, file paths, and patch file path.
-</step>
-
-<step name="update_last_command">
-```bash
-ms-tools set-last-command "ms:adhoc $ARGUMENTS"
-```
+<step name="cleanup_and_report">
+Commit artifacts, update STATE.md, report completion.
 </step>
 
 </process>
 
-<anti_patterns>
-- Don't use for work requiring >2 tasks (use /ms:insert-phase)
-- Don't use for work requiring architectural changes
-- Don't use outside active Mindsystem projects (needs STATE.md)
-- Don't create elaborate plans — this is for quick fixes
-- Don't run full goal-backward verification — lightweight checks only
-</anti_patterns>
-
 <success_criteria>
 Adhoc work is complete when:
 
-- [ ] Work analyzed and confirmed ≤2 tasks
-- [ ] .planning/adhoc/ directory exists
-- [ ] PLAN.md created with tasks
-- [ ] All tasks executed and verified
-- [ ] Code review completed (or skipped if config says "skip")
-- [ ] SUMMARY.md created with outcomes
+- [ ] Knowledge files loaded before exploration
+- [ ] Codebase explored with relevant findings
+- [ ] PLAN.md created in per-execution subdirectory
+- [ ] All tasks executed by ms-executor
+- [ ] Phase-style SUMMARY.md created for consolidator compatibility
+- [ ] Code review completed (or skipped per config)
+- [ ] Knowledge files updated via ms-consolidator
 - [ ] STATE.md updated with adhoc entry
-- [ ] Single git commit with all changes (including code review changes)
-- [ ] Patch file generated OR explicitly skipped with message
-- [ ] User informed of completion and commit hash
+- [ ] Git commit with all changes
+- [ ] User informed of completion
 </success_criteria>

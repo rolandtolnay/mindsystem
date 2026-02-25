@@ -594,10 +594,14 @@ class TestScanIntegrationTargeted:
 
     def test_adhoc_learnings_collected(self):
         output = _build_scan_output(FIXTURE_PLANNING)
-        assert len(output["adhoc_learnings"]) == 1
-        adhoc = output["adhoc_learnings"][0]
-        assert adhoc["subsystem"] == "auth"
-        assert len(adhoc["learnings"]) == 2
+        assert len(output["adhoc_learnings"]) == 2
+        # Flat file (old format with learnings field)
+        auth_adhoc = next(a for a in output["adhoc_learnings"] if a["subsystem"] == "auth")
+        assert len(auth_adhoc["learnings"]) == 2
+        # Subdirectory file (phase-style with key-decisions fallback)
+        api_adhoc = next(a for a in output["adhoc_learnings"] if a["subsystem"] == "api")
+        assert len(api_adhoc["learnings"]) == 2
+        assert "duplicate route handlers" in api_adhoc["learnings"][0].lower()
 
     def test_pending_todos_collected(self):
         output = _build_scan_output(FIXTURE_PLANNING)

@@ -1769,7 +1769,7 @@ def _scan_adhoc_summaries(
         source_info["skipped"] = "directory not found"
         return [], source_info
 
-    summary_files = sorted(adhoc_dir.glob("*-SUMMARY.md"))
+    summary_files = sorted(adhoc_dir.glob("**/*-SUMMARY.md"))
     if not summary_files:
         source_info["skipped"] = "no adhoc SUMMARY.md files found"
         return [], source_info
@@ -1785,6 +1785,12 @@ def _scan_adhoc_summaries(
         learnings = fm.get("learnings", []) or []
         if isinstance(learnings, str):
             learnings = [learnings]
+        # Fallback: extract from key-decisions if learnings absent (phase-style SUMMARY)
+        if not learnings:
+            key_decisions = fm.get("key-decisions", []) or []
+            if isinstance(key_decisions, str):
+                key_decisions = [key_decisions]
+            learnings = key_decisions
 
         results.append({
             "path": str(path),

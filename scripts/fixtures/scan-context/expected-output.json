@@ -24,7 +24,7 @@
     },
     "adhoc_summaries": {
       "dir": "<FIXTURE>/.planning/adhoc",
-      "scanned": 1,
+      "scanned": 2,
       "skipped": null
     },
     "completed_todos": {
@@ -198,6 +198,20 @@
       "tags": [
         "jwt",
         "tokens"
+      ]
+    },
+    {
+      "path": "<FIXTURE>/.planning/adhoc/20260225-refactor-api/adhoc-01-SUMMARY.md",
+      "subsystem": "api",
+      "learnings": [
+        "Consolidated duplicate route handlers into shared utility",
+        "Adopted consistent error response format across endpoints"
+      ],
+      "related_phase": "",
+      "tags": [
+        "rest",
+        "endpoints",
+        "refactor"
       ]
     }
   ],
