@@ -192,6 +192,24 @@ cat .planning/phases/*-*/*-SUMMARY.md
    - Remove items that are no longer relevant
    - Add any requirements invalidated during this milestone
 
+   **Deferred triage** (runs while REQUIREMENTS.md and CONTEXT.md files are still available):
+
+   a. Read REQUIREMENTS.md `## v2 Requirements` section
+   b. Scan phase CONTEXT.md files for `<deferred>` sections:
+      ```bash
+      grep -l "<deferred>" .planning/phases/*/*-CONTEXT.md 2>/dev/null
+      ```
+      Read each matching file's `<deferred>` section.
+   c. Collect all deferred items into a combined list (deduplicate by description similarity)
+   d. If no deferred items found: skip silently
+   e. If deferred items exist, present as batch decision gate via AskUserQuestion:
+      - Show all items grouped by source (v2 requirements vs phase deferred ideas)
+      - Options: "Defer all", "Triage individually", "Discard all"
+      - If "Triage individually": for each item, options are Keep (→ Deferred), Exclude (→ Out of Scope), Discard
+      - If "Defer all": add all to PROJECT.md `## Deferred` section
+   f. Update PROJECT.md `## Deferred` and/or `## Out of Scope` sections accordingly
+   g. If a Deferred section already exists (from previous milestones), merge — don't replace
+
 4. **Business context review:**
    - Who It's For — has understanding of audience evolved?
    - Core Problem — still the right framing?
@@ -289,6 +307,7 @@ Initial user testing showed demand for shape tools.
 - [ ] "What This Is" reviewed and updated if needed
 - [ ] Core Value verified as still correct
 - [ ] All shipped requirements added to Validated
+- [ ] Deferred items triaged (v2 requirements + CONTEXT.md deferred ideas)
 - [ ] Business context reviewed (Who It's For, Core Problem, How It's Different, Key User Flows)
 - [ ] Out of Scope reasoning audited
 - [ ] Technical Context updated with current state
@@ -587,6 +606,7 @@ Milestone completion is successful when (ordered by skip risk):
 
 - [ ] PROJECT.md full evolution review completed (What This Is, Core Value, business context, Validated, Key Decisions, Technical Context)
 - [ ] All shipped requirements moved to Validated in PROJECT.md
+- [ ] Deferred items triaged (v2 requirements + CONTEXT.md deferred ideas)
 - [ ] Key Decisions updated with outcomes
 - [ ] MILESTONES.md entry created with stats and accomplishments
 - [ ] Roadmap archive created (milestones/{slug}/ROADMAP.md)

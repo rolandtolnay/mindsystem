@@ -90,8 +90,9 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
 
 4. **Update PROJECT.md:**
 
-   - Full evolution review (What This Is, Core Value, Requirements audit, Key Decisions, Context)
+   - Full evolution review (What This Is, Core Value, Requirements audit, **Deferred triage**, Key Decisions, Context)
    - Move all shipped requirements to Validated
+   - Triage v2 requirements and CONTEXT.md deferred ideas (defer, exclude, or discard)
    - Update "Last updated" footer
 
 5. **Archive milestone:**
@@ -139,6 +140,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
 
 - PROJECT.md full evolution review completed (What This Is, Core Value, Requirements, Key Decisions, Context)
 - All shipped requirements moved to Validated in PROJECT.md
+- Deferred items triaged (v2 requirements + CONTEXT.md deferred ideas)
 - Key Decisions updated with outcomes
 - Milestone archived to `.planning/milestones/{{slug}}/ROADMAP.md`
 - Requirements archived to `.planning/milestones/{{slug}}/REQUIREMENTS.md`

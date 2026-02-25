@@ -35,6 +35,9 @@ Template for `.planning/PROJECT.md` — the living project context document.
 - [Exclusion 1] — [why]
 - [Exclusion 2] — [why]
 
+## Deferred
+- [Requirement] — deferred from [Milestone], [brief reason]
+
 ## Constraints
 - **[Type]**: [What] — [Why]
 - **[Type]**: [What] — [Why]
@@ -100,7 +103,14 @@ Common types: Tech stack, Timeline, Budget, Dependencies, Compatibility, Perform
 **Out of Scope:**
 - Explicit boundaries on what we're not building
 - Always include reasoning (prevents re-adding later)
-- Includes: considered and rejected, deferred to future, explicitly excluded
+- Explicitly excluded items only — use Deferred for "wanted but not yet"
+
+**Deferred:**
+- Items the user wants to build but haven't shipped yet
+- Each entry includes origin milestone and reason for deferral
+- Audited at each milestone completion: promote to current milestone, keep deferred, move to Out of Scope, or discard
+- Consumed by create-roadmap as v1 candidates for new milestones
+- Format: `- [Requirement] — deferred from [Milestone], [brief reason]`
 
 **Constraints:**
 - Hard limits on implementation choices
@@ -148,9 +158,10 @@ PROJECT.md evolves throughout the project lifecycle.
 **After each milestone:**
 1. Full review of all sections including business context (Who It's For, Core Problem, How It's Different)
 2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Technical Context with current state (users, feedback, metrics)
-5. Key User Flows — validated against what users actually do?
+3. Audit Deferred — still desired? Promote to current milestone, keep deferred, reclassify to Out of Scope, or discard
+4. Audit Out of Scope — reasons still valid?
+5. Update Technical Context with current state (users, feedback, metrics)
+6. Key User Flows — validated against what users actually do?
 
 </evolution>
 

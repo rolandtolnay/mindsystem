@@ -112,7 +112,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    - Tech debt from TECH-DEBT.md, MILESTONE-AUDIT.md, or knowledge file Pitfalls sections
    - Settled decisions and patterns from knowledge files
    - Untested assumptions from previous audit
-   - Unaddressed requirements from previous milestones
+   - Deferred items from PROJECT.md `## Deferred` section (carried forward from previous milestones)
    - Strategic features inferred from PROJECT.md: Who It's For, Core Problem, How It's Different
    - Pending todos from `.planning/todos/`
 

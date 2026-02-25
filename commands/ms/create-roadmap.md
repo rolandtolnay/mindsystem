@@ -132,13 +132,14 @@ Task(
 
 <instructions>
 1. Derive REQUIREMENTS.md from milestone context (apply requirements_derivation process)
-2. Derive phases from those requirements (don't impose structure)
-3. **Start phase numbering at $START_PHASE** (not 1, unless this is the first milestone)
-4. Map every v1 requirement to exactly one phase
-5. Derive 2-5 success criteria per phase (observable user behaviors)
-6. Validate 100% coverage
-7. Write files immediately (REQUIREMENTS.md, ROADMAP.md, STATE.md)
-8. Return ROADMAP CREATED with combined requirements + roadmap summary
+2. If PROJECT.md has a Deferred section, consider those items as v1 candidates for this milestone
+3. Derive phases from those requirements (don't impose structure)
+4. **Start phase numbering at $START_PHASE** (not 1, unless this is the first milestone)
+5. Map every v1 requirement to exactly one phase
+6. Derive 2-5 success criteria per phase (observable user behaviors)
+7. Validate 100% coverage
+8. Write files immediately (REQUIREMENTS.md, ROADMAP.md, STATE.md)
+9. Return ROADMAP CREATED with combined requirements + roadmap summary
 
 Write files first, then return. This ensures artifacts persist even if context is lost.
 </instructions>

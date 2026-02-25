@@ -50,6 +50,8 @@ Parse the milestone context for:
 - Scope boundaries (what's in, what's out)
 - Priorities and ordering signals
 
+If PROJECT.md has a `## Deferred` section, treat those items as v1 candidates for this milestone. Cross-reference deferred items with milestone context — if the milestone naturally covers a deferred item, promote to v1; if not relevant to this milestone, keep deferred.
+
 If research/FEATURES.md exists, cross-reference:
 - Table stakes → strong v1 candidates
 - Differentiators → contextual (include if aligned with milestone priorities)
@@ -497,6 +499,8 @@ Orchestrator provides:
 Parse and confirm understanding before proceeding.
 
 ## Step 2: Derive Requirements
+
+Check PROJECT.md for `## Deferred` section. Include relevant deferred items as v1 candidates (user will confirm during approval gate). Mark promoted items clearly in the requirements summary return.
 
 Apply `<requirements_derivation>` process. Write REQUIREMENTS.md immediately using template.
 
