@@ -29,14 +29,9 @@ Manages code reviewer agents, mockup preferences, .gitignore patterns for `.plan
 # Check for PROJECT.md (tech stack detection)
 [ -f .planning/PROJECT.md ] && echo "HAS_PROJECT" || echo "NO_PROJECT"
 
-# Check for STACK.md (precise tech detection)
-[ -f .planning/codebase/STACK.md ] && echo "HAS_STACK" || echo "NO_STACK"
-
 # Check git remote
 git remote -v 2>/dev/null || echo "NO_REMOTE"
 ```
-
-**Run this before proceeding.**
 
 </step>
 
@@ -77,11 +72,17 @@ Use AskUserQuestion:
   - "Skip code review" — Disable review for all tiers
   - "Custom" — I'll specify reviewers manually
 
-If "Custom": ask for each tier (adhoc, phase, milestone) individually.
+If "Custom": use AskUserQuestion for each tier (adhoc, phase, milestone) individually, offering available reviewer agents as options.
 
 If "Skip code review": set all three values to `"skip"`.
 
-Update config.json with selected values.
+Update config.json with selected values via jq:
+
+```bash
+jq '.code_review = {"adhoc": $a, "phase": $p, "milestone": $m}' \
+  --arg a "$ADHOC" --arg p "$PHASE" --arg m "$MILESTONE" \
+  .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+```
 
 </step>
 
@@ -102,7 +103,12 @@ Use AskUserQuestion (multiSelect):
   - "Phase patch files (`.planning/phases/**/*.patch`)" — Large binary diffs, regeneratable
   - "Design mockups (`.planning/phases/**/*.html`)" — Generated HTML mockups from design-phase
 
-Apply selected patterns to `.gitignore`. Create the file if needed.
+Apply selected patterns to `.gitignore`. Create the file if needed:
+
+```bash
+echo '.planning/phases/**/*.patch' >> .gitignore  # if selected
+echo '.planning/phases/**/*.html' >> .gitignore   # if selected
+```
 
 If no selections: skip gitignore changes.
 
@@ -215,45 +221,12 @@ EOF
 
 <step name="done">
 
-Present next steps:
+Present next steps using the "Next Up" format:
 
-**If PROJECT.md exists:**
+- **If PROJECT.md exists:** recommend `/ms:new-milestone` — Discover what to build next, create requirements and roadmap
+- **If no PROJECT.md:** recommend `/ms:new-project` — Initialize project with business context and vision
 
-```
----
-
-## ▶ Next Up
-
-`/ms:new-milestone` — Discover what to build next, create requirements and roadmap
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:doctor` — Verify subsystems and artifact health
-
----
-```
-
-**If no PROJECT.md:**
-
-```
----
-
-## ▶ Next Up
-
-`/ms:new-project` — Initialize project with business context and vision
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:doctor` — Verify subsystems and artifact health
-
----
-```
+Also list: `/ms:doctor` — Verify subsystems and artifact health
 
 </step>
 
