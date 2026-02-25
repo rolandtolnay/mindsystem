@@ -59,7 +59,8 @@ If MISSING, create from template structure:
     "adhoc": null,
     "phase": null,
     "milestone": null
-  }
+  },
+  "task_tracker": null
 }
 ```
 

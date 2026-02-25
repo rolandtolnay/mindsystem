@@ -1,6 +1,6 @@
 ---
 name: ms:config
-description: Configure Mindsystem preferences — code reviewers, mockups, gitignore, git remote
+description: Configure Mindsystem preferences — code reviewers, mockups, gitignore, git remote, task tracker
 allowed-tools:
   - Read
   - Write
@@ -12,7 +12,7 @@ allowed-tools:
 
 Configure Mindsystem preferences for the current project.
 
-Manages code reviewer agents, mockup preferences, .gitignore patterns for `.planning/` artifacts, and git remote setup. Run anytime to reconfigure — idempotent.
+Manages code reviewer agents, mockup preferences, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
 
 </objective>
 
@@ -138,6 +138,48 @@ jq --arg v "$VALUE" '.open_mockups = $v' .planning/config.json > .planning/confi
 
 </step>
 
+<step name="task_tracker">
+
+Read current value:
+
+```bash
+CURRENT=$(cat .planning/config.json 2>/dev/null | jq -r '.task_tracker.type // "not configured"')
+echo "Current task_tracker: $CURRENT"
+```
+
+Use AskUserQuestion:
+- header: "Task tracker"
+- question: "Do you use a task tracker for this project?"
+- options:
+  - "Linear" — Integrate with Linear for ticket-driven adhoc work
+  - "None / not yet" — Skip task tracker integration
+
+If "Linear":
+
+Use AskUserQuestion:
+- header: "Linear CLI"
+- question: "Path to Linear CLI script?"
+- options:
+  - "Default (`uv run ~/.claude/skills/linear/scripts/linear.py`) (Recommended)" — Standard Mindsystem Linear skill location
+  - "Custom path" — I'll provide the CLI path
+
+If "Default": set `cli` to `uv run ~/.claude/skills/linear/scripts/linear.py`
+If "Custom path": ask user for path via AskUserQuestion.
+
+Write to config.json:
+
+```bash
+jq '.task_tracker = {"type": "linear", "cli": $cli}' --arg cli "$CLI_PATH" .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+```
+
+If "None / not yet":
+
+```bash
+jq '.task_tracker = null' .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+```
+
+</step>
+
 <step name="validation_summary">
 
 Show final config state:
@@ -149,6 +191,7 @@ Configuration updated:
 - Mockup open: [auto / ask / off]
 - Gitignore: [patterns added, or "no changes"]
 - Git remote: [remote URL, or "none configured"]
+- Task tracker: [type + cli path, or "none"]
 ```
 
 Check subsystems in config.json. If empty or missing, note:
@@ -225,5 +268,6 @@ Present next steps:
 - [ ] Validation summary displayed
 - [ ] Config.json code_review values set (or preserved if skipped)
 - [ ] Config.json open_mockups value set (or preserved if skipped)
+- [ ] Config.json task_tracker value set (or preserved if skipped)
 
 </success_criteria>

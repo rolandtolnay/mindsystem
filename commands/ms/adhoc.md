@@ -34,6 +34,7 @@ For larger work requiring wave-based parallelization or multi-plan coordination,
 <step name="parse_and_validate">
 Parse work description from $ARGUMENTS.
 Validate STATE.md exists (active Mindsystem project required).
+If task_tracker configured and input matches ticket ID, lazy-load tracker reference and follow its detection process.
 </step>
 
 <step name="load_knowledge">
@@ -74,7 +75,7 @@ Spawn ms-consolidator on execution directory to update knowledge files.
 </step>
 
 <step name="cleanup_and_report">
-Commit artifacts, update STATE.md, report completion.
+Commit artifacts, update STATE.md, report completion. When ticket detected, finalize per loaded tracker reference.
 </step>
 
 </process>
@@ -87,4 +88,5 @@ Commit artifacts, update STATE.md, report completion.
 - [ ] `ms-tools set-last-command` called with adhoc command
 - [ ] Phase-style SUMMARY.md created for consolidator compatibility
 - [ ] All artifacts committed
+- [ ] Ticket finalized when tracker configured (comment posted, commit attached, state → Done)
 </success_criteria>

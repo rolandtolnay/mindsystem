@@ -19,6 +19,7 @@ Your job: Produce a single executable PLAN.md for adhoc work — same standard f
 - STATE.md context (current phase, accumulated decisions)
 - Subsystem list from config.json
 - Output path for the plan file
+- Ticket context (ID, title, description) — when work originates from a task tracker ticket
 
 **What you produce:**
 - Single PLAN.md at the specified output path

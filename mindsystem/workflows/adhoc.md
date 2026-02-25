@@ -34,6 +34,13 @@ fi
 ```
 
 Read STATE.md for project context (current phase, accumulated decisions, blockers).
+
+**Ticket detection:** Check `task_tracker` in config.json. If configured and `$ARGUMENTS` matches the ticket ID pattern, lazy-load `~/.claude/mindsystem/references/{type}-cli.md` and follow its **Ticket Detection** process. If no tracker configured or no match, proceed with `$ARGUMENTS` as free-text.
+
+```bash
+TRACKER_TYPE=$(jq -r '.task_tracker.type // empty' .planning/config.json 2>/dev/null)
+TRACKER_CLI=$(jq -r '.task_tracker.cli // empty' .planning/config.json 2>/dev/null)
+```
 </step>
 
 <step name="load_knowledge">
@@ -88,6 +95,7 @@ Assemble context payload for ms-adhoc-planner:
 - STATE.md context (current phase, accumulated decisions)
 - Subsystem list from config.json
 - Output path: `${exec_dir}/adhoc-01-PLAN.md`
+- Ticket context when detected (per loaded ticket reference)
 
 Spawn ms-adhoc-planner via Task tool. Receive completion report with plan path.
 </step>
@@ -110,6 +118,7 @@ Provide in the prompt:
 - Plan path: `${exec_dir}/adhoc-01-PLAN.md`
 - SUMMARY output path: `${exec_dir}/adhoc-01-SUMMARY.md`
 - Instruction to use phase-style SUMMARY format (with key-decisions, patterns-established, key-files, mock_hints frontmatter fields) for consolidator compatibility
+- Ticket commit instructions when detected (per loaded ticket reference)
 
 The executor reads the plan, executes tasks with atomic commits, creates SUMMARY.md, and returns completion report.
 </step>
@@ -163,6 +172,8 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 </step>
 
 <step name="cleanup_and_report">
+**Finalize ticket (when detected):** Follow the **Finalization**, **Commit Message Suffix**, and **Report Additions** sections from the loaded ticket reference.
+
 **Commit knowledge updates:**
 ```bash
 git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" .planning/STATE.md
@@ -198,7 +209,9 @@ Artifacts:
 - Summary: {exec_dir}/adhoc-01-SUMMARY.md
 - Patch: {exec_dir}/adhoc-01-changes.patch
 - Knowledge: .planning/knowledge/[subsystem].md
+```
 
+```
 ---
 
 Continue with current work or check project status:
