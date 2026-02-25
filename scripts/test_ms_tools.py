@@ -41,6 +41,7 @@ _detect_versioned_milestone_dirs = _mod._detect_versioned_milestone_dirs
 _parse_milestone_name_mapping = _mod._parse_milestone_name_mapping
 _SafeEncoder = _mod._SafeEncoder
 cmd_set_last_command = _mod.cmd_set_last_command
+cmd_gather_milestone_stats = _mod.cmd_gather_milestone_stats
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -934,6 +935,80 @@ class TestSetLastCommand:
 
         text = state.read_text()
         assert "Last Command: ms:verify-work 10 | 2026-02-24 14:30" in text
+
+
+class TestCmdGatherMilestoneStats:
+    """Tests for gather-milestone-stats command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _patch_run_git(self):
+        return mock.patch.object(_mod, "run_git", return_value="")
+
+    def _make_phase(self, tmp_path, name, plans=None, summaries=None):
+        """Create a phase dir with optional PLAN.md and SUMMARY.md files."""
+        phase_dir = tmp_path / ".planning" / "phases" / name
+        phase_dir.mkdir(parents=True, exist_ok=True)
+        for p in (plans or []):
+            (phase_dir / p).write_text("# Plan")
+        for s in (summaries or []):
+            (phase_dir / s).write_text("# Summary")
+        return phase_dir
+
+    def test_both_plan_and_summary(self, tmp_path, capsys):
+        self._make_phase(tmp_path, "01-auth",
+                         plans=["01-01-PLAN.md"], summaries=["01-01-SUMMARY.md"])
+        args = argparse.Namespace(start_phase=1, end_phase=1)
+        with self._patch_git_root(tmp_path), self._patch_run_git():
+            cmd_gather_milestone_stats(args)
+        out = capsys.readouterr().out
+        assert "Plans: 1 total, 1 complete" in out
+        assert "Status: READY" in out
+
+    def test_summary_only_no_plan(self, tmp_path, capsys):
+        """PLAN.md cleaned up after execution — SUMMARY.md alone counts."""
+        self._make_phase(tmp_path, "09-persistence",
+                         summaries=["09-01-SUMMARY.md", "09-02-SUMMARY.md"])
+        args = argparse.Namespace(start_phase=9, end_phase=9)
+        with self._patch_git_root(tmp_path), self._patch_run_git():
+            cmd_gather_milestone_stats(args)
+        out = capsys.readouterr().out
+        assert "Plans: 2 total, 2 complete" in out
+        assert "Status: READY" in out
+
+    def test_plan_only_no_summary_is_incomplete(self, tmp_path, capsys):
+        self._make_phase(tmp_path, "03-setup",
+                         plans=["03-01-PLAN.md"])
+        args = argparse.Namespace(start_phase=3, end_phase=3)
+        with self._patch_git_root(tmp_path), self._patch_run_git():
+            cmd_gather_milestone_stats(args)
+        out = capsys.readouterr().out
+        assert "Plans: 1 total, 0 complete" in out
+        assert "Status: NOT READY" in out
+
+    def test_multi_phase_mixed(self, tmp_path, capsys):
+        """Multiple phases: some with PLANs, some with only SUMMARYs."""
+        self._make_phase(tmp_path, "09-persistence",
+                         summaries=["09-01-SUMMARY.md", "09-02-SUMMARY.md"])
+        self._make_phase(tmp_path, "10-transactions",
+                         plans=["10-01-PLAN.md"],
+                         summaries=["10-01-SUMMARY.md"])
+        args = argparse.Namespace(start_phase=9, end_phase=10)
+        with self._patch_git_root(tmp_path), self._patch_run_git():
+            cmd_gather_milestone_stats(args)
+        out = capsys.readouterr().out
+        assert "Plans: 3 total, 3 complete" in out
+        assert "Status: READY" in out
+
+    def test_no_plans_or_summaries(self, tmp_path, capsys):
+        self._make_phase(tmp_path, "01-auth")
+        args = argparse.Namespace(start_phase=1, end_phase=1)
+        with self._patch_git_root(tmp_path), self._patch_run_git():
+            cmd_gather_milestone_stats(args)
+        out = capsys.readouterr().out
+        assert "Plans: 0 total, 0 complete" in out
+        assert "Status: NOT READY" in out
 
 
 # ===================================================================

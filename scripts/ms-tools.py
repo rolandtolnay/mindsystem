@@ -798,16 +798,23 @@ def cmd_gather_milestone_stats(args: argparse.Namespace) -> None:
             phase_plans = 0
             phase_complete = 0
 
-            for plan in sorted(d.glob("*-PLAN.md")):
+            # Discover plans from both PLAN.md and SUMMARY.md files
+            # (PLAN.md may be cleaned up after execution)
+            plan_bases: set[str] = set()
+            for plan in d.glob("*-PLAN.md"):
+                plan_bases.add(plan.name.replace("-PLAN.md", ""))
+            for summary in d.glob("*-SUMMARY.md"):
+                plan_bases.add(summary.name.replace("-SUMMARY.md", ""))
+
+            for plan_base in sorted(plan_bases):
                 plan_count += 1
                 phase_plans += 1
-                plan_base = plan.name.replace("-PLAN.md", "")
                 summary = d / f"{plan_base}-SUMMARY.md"
                 if summary.is_file():
                     complete += 1
                     phase_complete += 1
                 else:
-                    incomplete_list.append(f"  {dirname}/{plan.name}")
+                    incomplete_list.append(f"  {dirname}/{plan_base}-PLAN.md")
 
             phase_details.append(f"- Phase {phase_num}: {phase_name} ({phase_complete}/{phase_plans} plans)")
 
