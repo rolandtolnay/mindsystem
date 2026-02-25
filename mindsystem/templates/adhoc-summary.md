@@ -1,6 +1,6 @@
 # Adhoc Summary Template
 
-Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for small work items executed via `/ms:adhoc`.
+Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for work items executed via `/ms:adhoc`.
 
 ---
 
@@ -45,7 +45,7 @@ learnings:
 
 <purpose>
 
-Adhoc summaries document small work items executed outside the normal phase workflow.
+Adhoc summaries document work items executed outside the normal phase workflow.
 
 **Differences from phase SUMMARY.md:**
 - Simplified frontmatter (no waves, depends_on, requires, provides, affects)
@@ -146,9 +146,8 @@ learnings:
 - Required output from adhoc workflow
 
 **Size:**
-- Keep brief — adhoc work is small by definition
-- 1-2 accomplishments typical
-- 1-3 files typical
+- Keep brief — proportional to work scope
+- Summarize key accomplishments, not every file touched
 
 **Commit reference:**
 - Always include commit hash in frontmatter

@@ -520,7 +520,7 @@ Common options:
 
 ```
 /ms:audit-milestone             # Finds gaps → review MILESTONE-AUDIT.md
-/ms:adhoc "fix dashboard auth"  # Small gaps (1-2 tasks)
+/ms:adhoc "fix dashboard auth"  # Discovered gaps (single context)
 /ms:add-phase "Wire API auth"   # Larger coherent gaps
 /ms:audit-milestone             # Re-audit when done
 ```

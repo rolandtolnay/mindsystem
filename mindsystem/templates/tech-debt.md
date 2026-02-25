@@ -6,7 +6,7 @@ Template for `.planning/TECH-DEBT.md` — single source of truth for all tech de
 
 ## Usage
 
-Created and updated by `/ms:audit-milestone`. Items persist across milestones. Users reference items manually via `/ms:adhoc` (small fixes) or `/ms:insert-phase` (larger remediation). Loaded automatically by `/ms:plan-phase` for quality/cleanup phases.
+Created and updated by `/ms:audit-milestone`. Items persist across milestones. Users reference items manually via `/ms:adhoc` (single context work) or `/ms:insert-phase` (multi-phase remediation). Loaded automatically by `/ms:plan-phase` for quality/cleanup phases.
 
 **Item IDs** use `TD-{N}` format — monotonically increasing, never reused. New items continue from highest existing ID.
 
@@ -21,7 +21,7 @@ Created and updated by `/ms:audit-milestone`. Items persist across milestones. U
 # Tech Debt
 
 > Single source of truth for tech debt. Updated by `/ms:audit-milestone`.
-> Address items via `/ms:adhoc` (1-2 tasks) or `/ms:insert-phase` (larger work).
+> Address items via `/ms:adhoc` (single context) or `/ms:insert-phase` (multi-phase work).
 
 ## {Severity}
 <!-- Sections in order: Critical, High, Medium, Low. Omit empty sections. -->

@@ -61,8 +61,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
    requirements coverage, cross-phase integration, and E2E flows.
 
    {If audit has gaps:}
-   ⚠ Milestone audit found gaps. Address via `/ms:adhoc` (1-2 small fixes)
-   or `/ms:add-phase` (larger remediation), or proceed anyway to accept as tech debt.
+   ⚠ Milestone audit found gaps. Address via `/ms:adhoc` (single context fixes)
+   or `/ms:add-phase` (multi-phase remediation), or proceed anyway to accept as tech debt.
 
    {If audit passed:}
    ✓ Milestone audit passed. Proceeding with completion.

@@ -240,7 +240,7 @@ Replace `<N>` with the phase number you're working on.
 
 **Then route the fix:**
 
-- **Small and urgent (1–2 tasks):** `/ms:adhoc "Fix <bug>"`
+- **Discovered work for this context:** `/ms:adhoc "Fix <bug>"`
 - **Must happen before next phase:** `/ms:insert-phase <after> "Hotfix: <bug>"` → `/ms:plan-phase <N>` → `/ms:execute-phase <N>`
 - **Belongs in current phase after verification gaps:** `/ms:plan-phase <N> --gaps` → `/ms:execute-phase <N>`
 
@@ -253,7 +253,7 @@ Replace `<N>` with the phase number you're working on.
 | Non-urgent work for later     | `/ms:add-phase "..."`            |
 | Urgent work before next phase | `/ms:insert-phase <after> "..."` |
 | Task to capture for later     | `/ms:add-todo "..."`             |
-| Small fix to do right now     | `/ms:adhoc "..."`              |
+| Discovered work to do now     | `/ms:adhoc "..."`              |
 
 ### Milestone ship (finishing a version)
 
@@ -339,7 +339,7 @@ Full docs live in `/ms:help` (same content as `commands/ms/help.md`).
 | `/ms:execute-phase <phase-number>`       | Run all unexecuted plans in fresh subagents                   |
 | `/ms:verify-work [number]`               | Batched manual UAT with inline fixes                          |
 | `/ms:debug [issue description]`          | Structured debugging that survives `/clear`                   |
-| `/ms:adhoc <description>`              | Execute a small fix now with review                           |
+| `/ms:adhoc <description>`              | Execute discovered work with knowledge-aware planning         |
 | `/ms:add-phase <description>`            | Append a new phase to the roadmap                             |
 | `/ms:insert-phase <after> <description>` | Insert urgent work between phases                             |
 | `/ms:remove-phase <number>`              | Delete a future phase and renumber                            |

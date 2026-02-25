@@ -57,7 +57,7 @@ Recent decisions affecting current work:
 
 ### Recent Adhoc Work
 
-[Small work items executed via /ms:adhoc]
+[Work items executed via /ms:adhoc]
 
 None yet.
 
@@ -149,7 +149,7 @@ Updated after each plan completion.
 
 **Decisions:** Reference to PROJECT.md Key Decisions table, plus recent decisions summary for quick access. Full decision log lives in PROJECT.md.
 
-**Recent Adhoc Work:** Small fixes executed via /ms:adhoc
+**Recent Adhoc Work:** Discovered work executed via /ms:adhoc
 - Last 5 adhoc work entries
 - Format: `- [date]: [description] (.planning/adhoc/[file]-SUMMARY.md)`
 - Full history remains in .planning/adhoc/ directory

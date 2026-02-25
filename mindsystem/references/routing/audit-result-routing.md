@@ -74,7 +74,7 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 Review the gaps above, then choose the right tool:
 
-- `/ms:adhoc` — for 1-2 small fixes (missing wiring, edge cases)
+- `/ms:adhoc` — for discovered fixes (missing wiring, edge cases)
 - `/ms:add-phase "<description>"` — for a coherent set of related gaps
 - `/ms:insert-phase <after> "<description>"` — if gaps must be fixed before a specific phase
 
@@ -100,8 +100,8 @@ All requirements met. No critical blockers. Accumulated tech debt needs review.
 **Tech debt tracked:** .planning/TECH-DEBT.md ({tech_debt_count} active items)
 
 Address items using:
-- `/ms:adhoc` — for small fixes (1-2 tasks)
-- `/ms:insert-phase` — for larger remediation
+- `/ms:adhoc` — for single-context fixes
+- `/ms:insert-phase` — for multi-phase remediation
 
 {If assumptions_count > 0:}
 ### Untested Assumptions: {assumptions_count} items
@@ -114,8 +114,8 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 ## ▶ Options
 
 - `/ms:complete-milestone` — accept debt, track in backlog
-- `/ms:adhoc` — for small fixes (1-2 tasks)
-- `/ms:add-phase` — for larger remediation
+- `/ms:adhoc` — for single-context fixes
+- `/ms:add-phase` — for multi-phase remediation
 
 <sub>`/clear` first → fresh context window</sub>
 ```
