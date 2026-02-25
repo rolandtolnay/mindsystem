@@ -480,7 +480,7 @@ def _build_scan_output(planning: Path) -> dict:
     debug_learnings, debug_src = _scan_debug_docs(planning, parse_errors)
     adhoc_learnings, adhoc_src = _scan_adhoc_summaries(planning, parse_errors)
     completed_todos, completed_src = _scan_todos(planning, "done", parse_errors)
-    pending_todos, pending_src = _scan_todos(planning, "pending", parse_errors)
+    pending_todos, pending_src = _scan_todos(planning, "", parse_errors)
     knowledge_files, knowledge_src = _scan_knowledge_files(planning, subsystems)
 
     aggregated = _aggregate_from_summaries(summaries)

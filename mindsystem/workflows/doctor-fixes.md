@@ -56,7 +56,7 @@ git add .planning/phases/*/*-SUMMARY.md 2>/dev/null
 git add .planning/adhoc/*-SUMMARY.md 2>/dev/null
 git add .planning/debug/*.md 2>/dev/null
 git add .planning/debug/resolved/*.md 2>/dev/null
-git add .planning/todos/pending/*.md 2>/dev/null
+git add .planning/todos/*.md 2>/dev/null
 git add .planning/todos/done/*.md 2>/dev/null
 ```
 

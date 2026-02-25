@@ -66,7 +66,8 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 1. **Load context:**
    - Read PROJECT.md (existing project, validated requirements, decisions)
    - Read MILESTONES.md (what shipped previously)
-   - Read STATE.md (pending todos, blockers)
+   - Read STATE.md (blockers)
+   - Scan `.planning/todos/` for pending todos
    - Read config.json (project settings)
    - Identify previous milestone name from MILESTONES.md (e.g., last shipped was "MVP")
 
@@ -113,7 +114,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
    - Untested assumptions from previous audit
    - Unaddressed requirements from previous milestones
    - Strategic features inferred from PROJECT.md: Who It's For, Core Problem, How It's Different
-   - Pending todos from STATE.md
+   - Pending todos from `.planning/todos/`
 
    If no meaningful artifacts exist (first milestone), base suggestions purely on PROJECT.md.
 

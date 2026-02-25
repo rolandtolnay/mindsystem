@@ -55,12 +55,6 @@ Recent decisions affecting current work:
 - [Phase X]: [Decision summary]
 - [Phase Y]: [Decision summary]
 
-### Pending Todos
-
-[From .planning/todos/pending/ — ideas captured during sessions]
-
-None yet.
-
 ### Recent Adhoc Work
 
 [Small work items executed via /ms:adhoc]
@@ -155,11 +149,6 @@ Updated after each plan completion.
 
 **Decisions:** Reference to PROJECT.md Key Decisions table, plus recent decisions summary for quick access. Full decision log lives in PROJECT.md.
 
-**Pending Todos:** Ideas captured via /ms:add-todo
-- Count of pending todos
-- Reference to .planning/todos/pending/
-- Brief list if few, count if many (e.g., "5 pending todos — see /ms:check-todos")
-
 **Recent Adhoc Work:** Small fixes executed via /ms:adhoc
 - Last 5 adhoc work entries
 - Format: `- [date]: [description] (.planning/adhoc/[file]-SUMMARY.md)`
@@ -212,6 +201,6 @@ The goal is "read once, know where we are" — if it's too long, that fails.
 - Project Reference: Pointer to PROJECT.md with core value
 - Current Position: Where we are now (phase, plan, status)
 - Performance Metrics: Velocity tracking
-- Accumulated Context: Recent decisions, pending todos, adhoc work, blockers
+- Accumulated Context: Recent decisions, adhoc work, blockers
 
 </guidelines>

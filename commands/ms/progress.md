@@ -38,7 +38,7 @@ Reconstruct STATE.md from artifacts:
 1. Read PROJECT.md → Extract "What This Is" and Core Value
 2. Read ROADMAP.md → Determine phases, find current position
 3. Scan *-SUMMARY.md files → Extract recent decisions, concerns
-4. Count pending todos in .planning/todos/pending/
+4. Count pending todos in .planning/todos/
 
 Write reconstructed STATE.md, then proceed to "load" step.
 
@@ -95,7 +95,7 @@ Compare versions. Store result for the report step. If npm fails or versions mat
 - Note any blockers or concerns
 - Check for CONTEXT.md: For phases without PLAN.md files, check if `{phase}-CONTEXT.md` exists in phase directory
 - Check for DESIGN.md: For UI-heavy phases, check if `{phase}-DESIGN.md` exists in phase directory
-- Count pending todos: `ls .planning/todos/pending/*.md 2>/dev/null | wc -l`
+- Count pending todos: `ls .planning/todos/*.md 2>/dev/null | wc -l`
 - Check for active debug sessions: `ls .planning/debug/*.md 2>/dev/null | grep -v resolved | wc -l`
   </step>
 
@@ -125,7 +125,7 @@ DESIGN: [✓ if DESIGN.md exists | - if not]
 - [any blockers or concerns from STATE.md]
 
 ## Pending Todos
-- [count] pending — /ms:check-todos to review
+- [count] pending — /ms:add-todo to capture, /ms:adhoc to work on
 
 ## Active Debug Sessions
 - [count] active — /ms:debug to continue

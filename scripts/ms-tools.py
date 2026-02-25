@@ -1021,30 +1021,33 @@ def cmd_generate_phase_patch(args: argparse.Namespace) -> None:
 
 
 def cmd_generate_adhoc_patch(args: argparse.Namespace) -> None:
-    """Generate a patch file from an adhoc commit.
+    """Generate a patch file from an adhoc commit or commit range.
 
     Contract:
-        Args: commit (str) — commit hash, output (str) — output file path
+        Args: commit (str) — start commit hash, output (str) — output file path,
+              end (str, optional) — end commit hash for range diffs
         Output: text — patch generation status and file path
         Exit codes: 0 = success (or no changes), 1 = commit not found
         Side effects: writes .patch file to output path
     """
     commit_hash = args.commit
+    end_commit = getattr(args, "end", None) or commit_hash
     output_path = args.output
 
     git_root = find_git_root()
     import os
     os.chdir(git_root)
 
-    # Verify commit exists
-    try:
-        run_git("rev-parse", commit_hash)
-    except subprocess.CalledProcessError:
-        print(f"Error: Commit {commit_hash} not found", file=sys.stderr)
-        sys.exit(1)
+    # Verify commits exist
+    for ref in {commit_hash, end_commit}:
+        try:
+            run_git("rev-parse", ref)
+        except subprocess.CalledProcessError:
+            print(f"Error: Commit {ref} not found", file=sys.stderr)
+            sys.exit(1)
 
     exclude_args = build_exclude_pathspecs()
-    diff_args = ["diff", f"{commit_hash}^", commit_hash, "--", "."] + exclude_args
+    diff_args = ["diff", f"{commit_hash}^", end_commit, "--", "."] + exclude_args
 
     result = subprocess.run(
         ["git"] + diff_args,
@@ -1230,7 +1233,7 @@ def _scan_artifact_subsystem_values(planning: Path) -> list[str]:
         ("adhoc", "*-SUMMARY.md"),
         ("debug", "*.md"),
         ("debug/resolved", "*.md"),
-        ("todos/pending", "*.md"),
+        ("todos", "*.md"),
         ("todos/done", "*.md"),
     ]
     for subdir, pattern in scan_globs:
@@ -1352,7 +1355,7 @@ def cmd_scan_artifact_subsystems(args: argparse.Namespace) -> None:
         ("Adhoc SUMMARYs", "adhoc", "*-SUMMARY.md"),
         ("Debug docs", "debug", "*.md"),
         ("Debug resolved", "debug/resolved", "*.md"),
-        ("Pending Todos", "todos/pending", "*.md"),
+        ("Pending Todos", "todos", "*.md"),
         ("Done Todos", "todos/done", "*.md"),
     ]
 
@@ -1808,8 +1811,8 @@ def _scan_todos(
     subdir: str,
     parse_errors: list[dict[str, str]],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Scan todo files (done/ or pending/) for metadata."""
-    todo_dir = planning / "todos" / subdir
+    """Scan todo files (done/ or root todos/) for metadata."""
+    todo_dir = planning / "todos" / subdir if subdir else planning / "todos"
     source_info: dict[str, Any] = {"dir": str(todo_dir), "scanned": 0, "skipped": None}
 
     if not todo_dir.is_dir():
@@ -1818,7 +1821,8 @@ def _scan_todos(
 
     md_files = sorted(todo_dir.glob("*.md"))
     if not md_files:
-        source_info["skipped"] = f"no .md files in {subdir}/"
+        label = f"{subdir}/" if subdir else "todos/"
+        source_info["skipped"] = f"no .md files in {label}"
         return [], source_info
 
     results: list[dict[str, Any]] = []
@@ -1834,7 +1838,7 @@ def _scan_todos(
             "title": fm.get("title", path.stem),
             "subsystem": fm.get("subsystem", ""),
             "priority": fm.get("priority", ""),
-            "phase_origin": fm.get("phase_origin", ""),
+            "estimate": fm.get("estimate", ""),
         })
 
     return results, source_info
@@ -2009,9 +2013,10 @@ def _format_markdown(output: dict[str, Any]) -> str:
         for t in todos:
             title = t.get("title", "untitled")
             priority = t.get("priority", "")
+            estimate = t.get("estimate", "")
             sub = t.get("subsystem", "")
             path = t.get("path", "")
-            lines.append(f"- **{title}** [{priority}] ({sub}) — `{path}`")
+            lines.append(f"- **{title}** [P{priority}|{estimate}] ({sub}) — `{path}`")
         sections.append("\n".join(lines))
 
     sources = output.get("sources", {})
@@ -2086,7 +2091,7 @@ def cmd_scan_planning_context(args: argparse.Namespace) -> None:
     debug_learnings, debug_src = _scan_debug_docs(planning, parse_errors)
     adhoc_learnings, adhoc_src = _scan_adhoc_summaries(planning, parse_errors)
     completed_todos, completed_src = _scan_todos(planning, "done", parse_errors)
-    pending_todos, pending_src = _scan_todos(planning, "pending", parse_errors)
+    pending_todos, pending_src = _scan_todos(planning, "", parse_errors)
     knowledge_files, knowledge_src = _scan_knowledge_files(planning, subsystems)
 
     aggregated = _aggregate_from_summaries(summaries)
@@ -2804,9 +2809,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_generate_phase_patch)
 
     # --- generate-adhoc-patch ---
-    p = subparsers.add_parser("generate-adhoc-patch", help="Generate patch from an adhoc commit")
-    p.add_argument("commit", help="Commit hash")
+    p = subparsers.add_parser("generate-adhoc-patch", help="Generate patch from an adhoc commit or range")
+    p.add_argument("commit", help="Start commit hash")
     p.add_argument("output", help="Output path for the patch file")
+    p.add_argument("--end", default=None, help="End commit hash for range diffs (default: same as commit)")
     p.set_defaults(func=cmd_generate_adhoc_patch)
 
     # --- archive-milestone-phases ---

@@ -51,7 +51,7 @@ PLAN.md IS the prompt that Claude executes. Plans are grouped into execution wav
 Read `.planning/STATE.md` and parse:
 - Current position (which phase we're planning)
 - Accumulated decisions (constraints on this phase)
-- Pending todos (candidates for inclusion)
+- Pending todos from `.planning/todos/` (candidates for inclusion)
 - Blockers/concerns (things this phase may address)
 - Brief alignment status
 

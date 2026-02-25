@@ -33,7 +33,7 @@
       "skipped": null
     },
     "pending_todos": {
-      "dir": "<FIXTURE>/.planning/todos/pending",
+      "dir": "<FIXTURE>/.planning/todos",
       "scanned": 1,
       "skipped": null
     },
@@ -220,17 +220,17 @@
       "path": "<FIXTURE>/.planning/todos/done/setup-db.md",
       "title": "Set up database migrations",
       "subsystem": "database",
-      "priority": "high",
-      "phase_origin": "02-infra"
+      "priority": 2,
+      "estimate": "M"
     }
   ],
   "pending_todos": [
     {
-      "path": "<FIXTURE>/.planning/todos/pending/add-logout.md",
+      "path": "<FIXTURE>/.planning/todos/add-logout.md",
       "title": "Add logout endpoint",
       "subsystem": "auth",
-      "priority": "medium",
-      "phase_origin": "05-auth"
+      "priority": 3,
+      "estimate": "S"
     }
   ],
   "knowledge_files": [

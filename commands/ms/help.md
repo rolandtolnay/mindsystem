@@ -337,30 +337,17 @@ Usage: `/ms:debug` (resume active session)
 ### Todo Management
 
 **`/ms:add-todo [description]`**
-Capture idea or task as todo from current conversation.
+Capture idea or task as todo with priority, estimate, and subsystem (Linear-inspired).
 
 - Use when: you discover work that’s real but not the right thing to do right now.
 - Extracts context from conversation (or uses provided description)
-- Creates structured todo file in `.planning/todos/pending/`
-- Infers area from file paths for grouping
-- Checks for duplicates before creating
-- Updates STATE.md todo count
+- Infers priority (1-4), estimate (XS-XL), and subsystem from context
+- Confirms inferred metadata before creating (adjust if needed)
+- Creates structured todo file in `.planning/todos/`
+- Use `/ms:adhoc` to address todos anytime
 
 Usage: `/ms:add-todo` (infers from conversation)
 Usage: `/ms:add-todo Add auth token refresh`
-
-**`/ms:check-todos [area]`**
-List pending todos and select one to work on.
-
-- Use when: you want to pick up deferred work and route it into the right place (do now vs schedule vs plan into a phase).
-- Lists all pending todos with title, area, age
-- Optional area filter (e.g., `/ms:check-todos api`)
-- Loads full context for selected todo
-- Routes to appropriate action (work now, add to phase, brainstorm)
-- Moves todo to done/ when work begins
-
-Usage: `/ms:check-todos`
-Usage: `/ms:check-todos api`
 
 ### Adhoc Work
 
@@ -423,7 +410,7 @@ Usage: `/ms:release-notes`
 ├── config.json           # Workflow settings
 ├── research/             # Domain ecosystem research
 ├── todos/                # Captured ideas and tasks
-│   ├── pending/          # Todos waiting to be worked on
+│   ├── *.md              # Pending todos (flat files)
 │   └── done/             # Completed todos
 ├── adhoc/                # Work executed via /ms:adhoc
 │   └── {date}-{slug}/    # Per-execution subdirectory
@@ -553,8 +540,7 @@ Common options:
 ```
 /ms:add-todo                    # Capture from conversation context
 /ms:add-todo Fix modal z-index  # Capture with explicit description
-/ms:check-todos                 # Review and work on todos
-/ms:check-todos api             # Filter by area
+/ms:adhoc Fix modal z-index     # Work on a todo right now
 ```
 
 ## Getting Help
