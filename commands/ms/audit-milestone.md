@@ -37,7 +37,7 @@ Glob: .planning/phases/*/*-SUMMARY.md
 Glob: .planning/phases/*/*-VERIFICATION.md
 
 **Tech Debt:**
-@.planning/TECH-DEBT.md (if exists)
+Read `.planning/TECH-DEBT.md` at Step 8.5 (lazy — only needed for de-duplication)
 </context>
 
 <process>
@@ -213,47 +213,63 @@ FIRST_COMMIT=$(git log --oneline --grep="(${FIRST_PHASE}-" --format="%H" | tail 
 CHANGED_FILES=$(git diff --name-only ${FIRST_COMMIT}^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
 ```
 
-### Step 8.2: Determine Agent Mode
-
-```bash
-# Read agent mode from frontmatter
-AGENT_MODE=$(grep -A10 '^---' ~/.claude/agents/${CODE_REVIEW}.md | grep 'mode:' | awk '{print $2}')
-```
-
----
-
-### Path A: Analysis-Only Reviewers (mode: analyze-only)
-
-For agents with `mode: analyze-only` (e.g., a report-only reviewer):
-
-**A1. Spawn reviewer with read-only tools:**
+### Step 8.2: Spawn Code Review Agent
 
 ```
 Task(
   prompt="
   <objective>
-  Analyze code from milestone {name} for structural issues.
-  Report findings only — do NOT make changes.
+  Review code from milestone {name}.
+  Focus on architectural patterns, cross-phase consistency, and structural improvements.
+  Preserve all functionality.
   </objective>
 
   <scope>
-  Files to analyze:
+  Files to review:
   {CHANGED_FILES}
   </scope>
 
   <output>
-  Provide findings report with YAML summary block for parsing.
+  Report findings with YAML summary block:
+  ```yaml
+  code_review:
+    files_analyzed: {N}
+    findings_by_impact:
+      high: {X}
+      medium: {Y}
+      low: {Z}
+    findings: [...]
+  ```
   </output>
   ",
   subagent_type="{CODE_REVIEW}"
 )
 ```
 
-**A2. Parse YAML findings from output:**
+### Step 8.3: Handle Results
 
-Extract the `code_review:` YAML block from the reviewer's response.
+The agent controls its own behavior — it may modify files, report findings, or both. React to what actually happened.
 
-**A3. Add findings to MILESTONE-AUDIT.md:**
+**Check for file changes:**
+
+```bash
+git diff --stat
+```
+
+**If files were modified:** commit them.
+
+```bash
+git add [modified files]
+git commit -m "$(cat <<'EOF'
+refactor(milestone): code review improvements
+
+Reviewer: {CODE_REVIEW}
+Files reviewed: {count}
+EOF
+)"
+```
+
+**If findings were reported:** parse the `code_review:` YAML block from the agent's response and add to MILESTONE-AUDIT.md:
 
 Append to the YAML frontmatter:
 
@@ -281,27 +297,15 @@ Add markdown section to report body:
 
 Code review findings flow into `.planning/TECH-DEBT.md` via Step 8.5 — do NOT add them to `tech_debt` YAML.
 
-**A4. Present binary decision:**
+**If any findings were reported**, present a decision gate. Recommend based on findings profile:
 
-```markdown
-## Code Review Complete
+- **Any high findings OR multiple medium findings** → recommend quality phase
+- **Few low-impact findings only** → recommend adhoc fixes
 
-**Findings:** {total} ({high} high, {medium} medium, {low} low)
-
-### Options
-
-**A. Create quality phase** — Add phase to address findings before completing milestone
-
-**B. Accept as tech debt** — Document findings, proceed to complete milestone
-
----
-
-Which would you like to do?
-```
-
-Use AskUserQuestion with options A and B.
-
-**A5. Handle decision:**
+Use AskUserQuestion with options:
+- **Create quality phase** — Add phase to address findings before completing milestone (Recommended if high/medium findings)
+- **Fix in adhoc** — Address findings in a fresh context via `/ms:adhoc` (Recommended if only a few low findings)
+- **Accept as tech debt** — Document findings, proceed to complete milestone
 
 **If user chooses "Create quality phase":**
 
@@ -334,55 +338,29 @@ Plans:
 <sub>`/clear` first → fresh context window</sub>
 ```
 
-**If user chooses "Accept as tech debt":**
+**If user chooses "Fix in adhoc":**
 
-Findings are already tracked in `.planning/TECH-DEBT.md` via Step 8.5. Continue to offer_next section.
+Report:
+```markdown
+## Adhoc Fix Recommended
+
+**Findings:** {total} ({summary by impact})
+**Source:** `.planning/TECH-DEBT.md`
 
 ---
 
-### Path B: Simplifier Agents (default)
+## ▶ Next Up
 
-For agents without `mode: analyze-only` (e.g., `ms-code-simplifier`):
+`/ms:adhoc address code review findings from TECH-DEBT.md` — fix in a fresh context
 
-**B1. Spawn code review agent:**
-
-```
-Task(
-  prompt="
-  <objective>
-  Review code from milestone {name}.
-  Focus on architectural patterns, cross-phase consistency, and structural improvements.
-  Preserve all functionality. Make changes that improve clarity and maintainability.
-  </objective>
-
-  <scope>
-  Files to analyze:
-  {CHANGED_FILES}
-  </scope>
-
-  <output>
-  After review, run static analysis and tests.
-  Report what was improved and verification results.
-  </output>
-  ",
-  subagent_type="{CODE_REVIEW}"
-)
+<sub>`/clear` first → fresh context window</sub>
 ```
 
-**B2. Commit if changes made:**
+Continue to offer_next section.
 
-```bash
-git add [modified files]
-git commit -m "$(cat <<'EOF'
-refactor(milestone): code review improvements
+**If user chooses "Accept as tech debt":**
 
-Reviewer: {agent_type}
-Files reviewed: {count}
-EOF
-)"
-```
-
-Report: "Milestone code review complete."
+Findings are already tracked in `.planning/TECH-DEBT.md` via Step 8.5. Continue to offer_next section.
 
 ## 8.5. Generate/Update TECH-DEBT.md
 
@@ -420,17 +398,16 @@ Read `~/.claude/mindsystem/references/routing/audit-result-routing.md` and follo
 </offer_next>
 
 <success_criteria>
-- [ ] Milestone scope identified
-- [ ] All phase VERIFICATION.md files read
-- [ ] All phase UAT.md files read for assumptions
-- [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
-- [ ] Assumptions aggregated by phase
-- [ ] Integration checker spawned for cross-phase wiring
-- [ ] MILESTONE-AUDIT.md created with assumptions section
-- [ ] Code review completed (or skipped if config says "skip")
-- [ ] If analyze-only reviewer: YAML findings parsed and added to report
-- [ ] If analyze-only reviewer: Binary decision presented (quality phase vs tech debt)
+- [ ] If findings reported: decision gate presented (quality phase / adhoc fix / tech debt)
 - [ ] If quality phase chosen: Phase directory created, ROADMAP updated with TECH-DEBT.md scope
+- [ ] If files modified by reviewer: changes committed
+- [ ] If findings reported: parsed and added to MILESTONE-AUDIT.md
 - [ ] MILESTONE-AUDIT.md and TECH-DEBT.md committed to git
+- [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
+- [ ] UAT assumptions collected and aggregated by phase
+- [ ] Integration checker spawned for cross-phase wiring
+- [ ] Code review completed (or skipped if config says "skip")
+- [ ] All phase VERIFICATION.md files read
+- [ ] MILESTONE-AUDIT.md created with assumptions section
 - [ ] Results presented with actionable next steps
 </success_criteria>

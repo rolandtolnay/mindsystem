@@ -40,13 +40,16 @@ Format: Name | What it does | When to use it
 Fastest path to a working result. Copy-paste ready.
 
 ## Usage Examples (if not covered above)
-2-3 concrete examples progressing from simple to complex.
+2-3 concrete examples showing different interaction patterns (not exhaustive coverage).
 
 ## Configuration / Setup (if needed)
 Only what's required. Link to full docs for advanced config.
 
 ## Updating
-How to get new versions.
+How to get new versions. Cover each install mode separately if they differ.
+
+## Uninstalling
+How to remove. State what it does and does not touch (e.g. "removes only toolkit files").
 
 ## Contributing (if applicable)
 Brief guidance or link to CONTRIBUTING.md.
@@ -65,7 +68,10 @@ One line with link.
 **Collapsible sections** (`<details>`) for:
 - Platform-specific installation variants
 - Advanced configuration
+- Edge case behaviors (conflict resolution, force overwrite flags)
 - Anything useful to 20% of readers but noise for the other 80%
+
+**Inline vs standalone:** If a caveat or limitation is 1-2 sentences, merge it into the relevant section (e.g. scope caveats into "What This Is"). Don't create a standalone section for a single sentence.
 
 **Badges:** 3-5 max. Build status, version, license. More than that signals insecurity, not quality.
 
@@ -119,7 +125,7 @@ Senior engineer explaining their tool to a peer. Confident without being boastfu
 
 - **No `$` prefix** in code blocks — prevents clean copy-paste.
 - **One logical action per code block** so each block is independently copy-pasteable.
-- **State prerequisites before the install command**, not after.
+- **State prerequisites before the install command**, not after. Only list prerequisites that aren't obvious or that the user might not have. Don't specify version numbers unless enforced in code.
 - Use `bash` syntax highlighting on fenced code blocks.
 
 ### Multiple Installation Paths
@@ -197,9 +203,9 @@ The "When to use it" column is what makes a collection useful. Without it, the r
 
 Don't alphabetize — group by workflow or problem domain. A developer looking for "something to help with code review" will scan category headers, not an alphabetical list.
 
-### Add a Workflow Section
+### Workflow Sections — Use Sparingly
 
-After listing the tools, show how they connect:
+If the collection section already has "when to use" triggers for each item, a workflow section often restates it. Only add one when it reveals non-obvious connections between tools that aren't apparent from the individual descriptions:
 
 ```markdown
 ## How These Fit Together
@@ -208,7 +214,7 @@ After listing the tools, show how they connect:
 **Reviewing code:** Run Z to catch issues A does not cover.
 ```
 
-This turns a list of independent tools into a coherent system.
+If you find yourself just listing the tools in sequential order, the workflow section is redundant — cut it.
 
 ---
 
@@ -229,6 +235,12 @@ This turns a list of independent tools into a coherent system.
 7. **Marketing language.** Developers have finely tuned BS detectors. State what the tool does concretely.
 
 8. **Not saying when NOT to use it.** Honest scoping builds trust. "If you need X, check out Y" makes people trust your recommendations for when your tool *is* appropriate.
+
+9. **Documenting the self-evident.** Don't tell users `--help` exists or that they can read the source code. Every line should earn its place.
+
+10. **Usage examples that repeat patterns.** Three examples showing different interaction styles (natural language prompt, targeted command, slash command) are better than four where the last one demonstrates the same pattern as the third. Each example should reveal something new.
+
+11. **No subtraction pass.** After writing, re-read and ask "does removing this lose information?" for every section. Workflow sections, closing summaries, and scope sections often restate what's already covered. If a section's content already lives elsewhere in the README, cut the section.
 
 ---
 

@@ -3,7 +3,6 @@ name: ms-code-reviewer
 description: Analyzes code for structural issues during milestone audits. Reports findings only — does NOT fix anything.
 model: opus
 tools: Read, Bash, Glob, Grep
-mode: analyze-only
 color: yellow
 ---
 

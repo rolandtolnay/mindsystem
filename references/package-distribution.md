@@ -1,341 +1,349 @@
-# Prompt Package Distribution: Analysis & Improvement Plan
+# Prompt Package Distribution
 
-## Executive Summary
+How to distribute prompt packages (skills, agents, commands, references) to users via GitHub. This is the authoritative implementation guide — give it to an agent building a new toolkit installer and it should have everything needed to implement autonomously.
 
-After deep analysis of [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) and comparing it with flutter-llm-toolkit's current installer, a surprising finding: **flutter-llm-toolkit already has the more sophisticated distribution model**. The ui-ux-pro-max uses a copy-only approach with no symlinks, no manifest tracking, and no conflict detection. However, it excels in **multi-tool support** (15 AI coding assistants) and **template-based generation** for platform-specific files.
+## Core Principle
 
-The ideal model combines the best of both: flutter-llm-toolkit's symlink + manifest architecture with ui-ux-pro-max's multi-tool platform awareness. **Symlink-first is the default** — clone once, link everywhere, `git pull` auto-updates. Copy mode exists as a fallback for npx users. This pattern applies across prompt package projects (Mindsystem, LLM Toolkit, flutter-llm-toolkit).
+Clone once, symlink everywhere, `git pull` auto-updates all installations.
+
+```bash
+git clone <repo> ~/toolkits/my-toolkit
+cd my-flutter-project && ~/toolkits/my-toolkit/install.js          # project scope
+~/toolkits/my-toolkit/install.js --global                          # global scope
+cd ~/toolkits/my-toolkit && git pull                                # updates everywhere
+```
+
+Symlink mode is the default. Copy mode (`--copy`) exists as a fallback for users who want to commit toolkit files into their project's git for team sharing.
 
 ---
 
-## Part 1: How Each System Works
-
-### ui-ux-pro-max (uipro-cli)
-
-| Aspect | Detail |
-|--------|--------|
-| **Distribution** | npm package (`uipro-cli`), invoked via `npx uipro-cli@latest init` |
-| **Installation** | Copies files into current project directory |
-| **Symlinks** | None — every project gets independent copies |
-| **Scope** | Project-only (installs into `./<tool-dir>/`) |
-| **Multi-tool** | 15 AI tools via `--ai <type>` flag and platform JSON configs |
-| **Updates** | `uipro update` re-copies latest files (overwrites) |
-| **Manifest** | None — no tracking of installed files |
-| **Conflict detection** | None — `--force` overwrites everything |
-| **Uninstall** | Manual `rm -rf` |
-
-**Architecture**: Template generation system. Each AI tool has a JSON config specifying folder structure, frontmatter, and content sections. A base `skill-content.md` template is rendered with platform-specific variables.
+## Repository Structure
 
 ```
-src/ui-ux-pro-max/templates/platforms/
-├── claude.json    → .claude/skills/ui-ux-pro-max/SKILL.md
-├── cursor.json    → .cursor/skills/ui-ux-pro-max/SKILL.md
-├── codex.json     → .codex/skills/ui-ux-pro-max/SKILL.md
-├── windsurf.json  → .windsurf/skills/ui-ux-pro-max/SKILL.md
-└── ... (15 total)
+my-toolkit/
+├── install.js              # Standalone installer (Node.js, zero dependencies)
+├── package.json            # npm metadata + test scripts
+├── scripts/
+│   └── test-install-regressions.sh
+├── agents/                 # Subagent definitions (individual .md files)
+│   └── my-agent.md
+├── commands/               # Slash commands (individual .md files)
+│   └── my-command.md
+├── skills/                 # Skills (each is a directory)
+│   ├── skill-a/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── skill-b/
+│       └── SKILL.md
+└── references/             # Reference docs (files and subdirectories)
+    ├── guide.md
+    └── patterns/
+        └── common.md
 ```
 
-### flutter-llm-toolkit (current)
-
-| Aspect | Detail |
-|--------|--------|
-| **Distribution** | npm package (`flutter-llm-toolkit`), invoked via `npx flutter-llm-toolkit` |
-| **Installation** | Copy (default) or symlink (`--link`) |
-| **Symlinks** | File-level for agents/commands/references, directory-level for skills |
-| **Scope** | Global (`--global` → `~/.claude/`) or local (`--local` → `./.claude/`) |
-| **Multi-tool** | Claude Code only |
-| **Updates** | Copy: re-run npx. Symlink: `git pull` auto-updates |
-| **Manifest** | SHA256 checksums in `.manifest.json` |
-| **Conflict detection** | Detects local modifications, prompts user |
-| **Uninstall** | Orphan detection removes stale files |
-
-**Architecture**: Direct file installation with manifest tracking. 9-phase pipeline: detect target → read manifest → migrate legacy → collect files → compare → resolve conflicts → install → remove orphans → write manifest.
+Content directories (`agents/`, `commands/`, `skills/`, `references/`) map 1:1 to the target's `.claude/` structure. The installer recursively collects all files from these four directories.
 
 ---
 
-## Part 2: Validating the Core Insight
+## Installation Modes
 
-> "Users clone the repo anywhere, use a CLI to create symlinks, git pull auto-updates everywhere."
+### Link Mode (default)
 
-### Does ui-ux-pro-max do this?
+Creates symlinks from the target `.claude/` back to the cloned repo.
 
-**No.** It copies files. Every project is independent. Updates require re-running `uipro update` in each project. There is no single-source-of-truth symlink model. The repo isn't even intended to be cloned by end users — it's distributed purely via npm.
+- **Agents, commands, references**: Individual file-level symlinks (absolute paths).
+- **Skills**: Directory-level symlinks per skill folder. This is critical because skills are multi-file directories (SKILL.md + supporting files) and directory symlinks keep them atomic.
 
-### Does flutter-llm-toolkit do this?
+```
+~/.claude/
+├── agents/my-agent.md → ~/toolkits/my-toolkit/agents/my-agent.md
+├── commands/my-command.md → ~/toolkits/my-toolkit/commands/my-command.md
+├── skills/skill-a → ~/toolkits/my-toolkit/skills/skill-a           # directory symlink
+└── .my-toolkit.manifest.json
+```
 
-**Yes, with `--link` mode.** When installed with `npx flutter-llm-toolkit --global --link`:
-- Skills get directory-level symlinks: `~/.claude/skills/flutter-senior-review` → `/path/to/repo/skills/flutter-senior-review`
-- Commands/agents/references get file-level symlinks
-- Running `git pull` in the repo automatically updates all symlinked files
-- The manifest tracks what was installed for clean upgrades
+### Copy Mode (`--copy`)
 
-**However, the current flow has friction points** (detailed in Part 3).
+Copies files into the target directory. Useful when:
+- Users want to commit toolkit files into their project's git
+- Windows without admin privileges (symlinks require elevated permissions)
+
+Copy mode must handle a critical edge case: if the target already has directory symlinks for skills (from a previous link-mode install), writing files "into" that symlink would write into the source repo. The installer must detect and remove toolkit-owned skill symlinks before copying.
 
 ---
 
-## Part 3: Current Limitations & Improvement Opportunities
+## Manifest System
 
-### 3.1 The npx Indirection Problem
-
-**Current flow:**
-```bash
-# User must first clone the repo (undocumented for symlink use)
-git clone https://github.com/rolandtolnay/flutter-llm-toolkit.git ~/my-toolkits/flutter-llm-toolkit
-
-# Then run npx, which downloads a SEPARATE copy from npm
-npx flutter-llm-toolkit --global --link
-```
-
-**Problem:** `npx` downloads the package from npm into a temp cache. The symlinks created point to the **npm cache copy**, not the user's cloned repo. The user would need to run `node install.js --global --link` from within their cloned repo for symlinks to point to the right place.
-
-**Fix:** The installer should detect when it's running from a git clone vs npm cache and adjust behavior accordingly. Or better: provide a clone-and-install workflow.
-
-### 3.2 No "Clone Once, Install Everywhere" Workflow
-
-There's no documented flow for the symlink-based multi-project workflow:
-
-```bash
-# Ideal flow (doesn't exist yet):
-git clone <repo> ~/toolkits/flutter-llm-toolkit
-cd ~/toolkits/flutter-llm-toolkit
-./install --scope global          # symlinks into ~/.claude/
-./install --scope project ~/my-app  # symlinks into ~/my-app/.claude/
-./install --scope project ~/other   # symlinks into ~/other/.claude/
-
-# Later:
-cd ~/toolkits/flutter-llm-toolkit && git pull  # updates everywhere
-```
-
-### 3.3 No Multi-Tool Support
-
-Currently only installs into `.claude/` directories. With Codex, Cursor, Windsurf, and other AI tools becoming prevalent, the installer should support multiple targets.
-
-### 3.4 npx vs Local CLI Confusion
-
-The `npx` flow works well for copy-mode distribution (fire and forget). But for symlink mode, users need to clone the repo first, making `npx` the wrong entry point. These are two fundamentally different workflows that should be separated.
-
-### 3.5 No Self-Contained CLI Script
-
-The current `install.js` requires Node.js but has no dependencies beyond built-in modules. It could be made even more accessible as a standalone script with a shebang, runnable directly after cloning.
-
-### 3.6 Symlink Fragility with AI Editing Tools
-
-**Observed:** Claude Code's Edit tool reads through symlinks but writes a new regular file at the symlink path, silently replacing the symlink with an independent copy. The source file in the repo may or may not retain the changes.
-
-**Impact:** After an AI tool edits a symlinked skill, command, or agent file, the installation silently diverges from the repo. Future `git pull` updates no longer reach the replaced file. The user has no indication this happened.
-
-**Detection pattern:** `ls -la <path>` — a regular file (`-rw-r--r--`) where a symlink (`lrwxr-xr-x`) was expected.
-
-**Recovery pattern:** Verify the source file in the repo has the intended content, then `rm <path> && ln -s <source> <path>` to restore the symlink.
-
-**Mitigation:** The `doctor` command should detect broken symlinks on every run. This is the strongest argument for promoting doctor/diagnostics to Phase 2 (see Part 6).
-
----
-
-## Part 4: Recommended Architecture
-
-### Two Distribution Modes, Two Entry Points
-
-#### Default: Symlink Install (from cloned repo)
-The recommended workflow. Clone once, symlink everywhere, `git pull` updates all installations:
-```bash
-# One-time setup
-git clone <repo> ~/toolkits/flutter-llm-toolkit
-cd ~/toolkits/flutter-llm-toolkit
-
-# Install globally (symlinks into ~/.claude/)
-./install.js link --tool claude --scope global
-
-# Install into specific project (symlinks into project/.claude/)
-./install.js link --tool claude --scope project ~/path/to/my-app
-
-# Install for Codex too
-./install.js link --tool codex --scope global
-
-# Update everything at once
-git pull  # All symlinks auto-update
-```
-
-#### Fallback: Copy Install (via npx)
-For users who want to try the toolkit without cloning:
-```bash
-npx flutter-llm-toolkit install --tool claude --scope global
-npx flutter-llm-toolkit install --tool codex --scope project
-```
-- Copies files into target directory
-- No repo clone needed
-- Updates via re-running `npx flutter-llm-toolkit install`
-- Manifest tracks installed files for clean upgrades
-
-### Unified CLI Interface
-
-```
-flutter-llm-toolkit <command> [options]
-
-Commands:
-  install     Copy files into target (npx-friendly)
-  link        Create symlinks to this repo (requires clone)
-  unlink      Remove symlinks created by this repo
-  status      Show what's installed, where, and freshness
-  doctor      Diagnose installation issues (broken symlinks, diverged copies)
-
-Options:
-  --tool <name>     Target tool: claude, codex, cursor, windsurf, all (default: claude)
-  --scope <scope>   global (~/) or project (./) (default: global)
-  --project <path>  Explicit project path (alternative to --scope project + cd)
-  --force           Overwrite without prompting
-```
-
-### Multi-Tool Platform Config
-
-Borrowing from ui-ux-pro-max's platform config approach:
-
-```
-platforms/
-├── claude.json      # { root: ".claude", skills: "skills/", commands: "commands/" }
-├── codex.json       # { root: ".codex", instructions: "instructions/" }
-├── cursor.json      # { root: ".cursor", rules: "rules/" }
-└── windsurf.json    # { root: ".windsurf", rules: "rules/" }
-```
-
-Each config maps the toolkit's content types to the tool's expected directory structure:
+The manifest is the single source of truth for what was installed and where. Stored as a dotfile directly in the target directory: `<target>/.<toolkit-name>.manifest.json`.
 
 ```json
 {
-  "platform": "codex",
-  "displayName": "Codex CLI",
-  "structure": {
-    "root": ".codex",
-    "contentMap": {
-      "skills": { "target": "instructions", "format": "single-file" },
-      "references": { "target": "instructions", "format": "concatenated" },
-      "commands": null
-    }
+  "version": "1.0.0",
+  "installedAt": "2026-02-25T10:00:00.000Z",
+  "mode": "link",
+  "files": {
+    "agents/my-agent.md": "a1b2c3d4e5f67890",
+    "commands/my-command.md": "f0e1d2c3b4a59876",
+    "skills/skill-a/SKILL.md": "1234567890abcdef",
+    "skills/skill-a/references/guide.md": "fedcba0987654321"
   }
 }
 ```
 
-The `contentMap` tells the installer how to transform flutter-llm-toolkit content for each tool. Some tools want individual files (Claude Code skills/), others want a single concatenated instruction file (Codex AGENTS.md).
+- **`version`**: Manifest schema version for future migrations.
+- **`mode`**: The mode used for this installation (`link` or `copy`). Critical for detecting mode switches.
+- **`files`**: Map of relative path → SHA-256 checksum (first 16 hex chars). In link mode, checksums come from the source file. In copy mode, checksums come from the installed copy.
 
-### Symlink Architecture for Multi-Project
+### What the Manifest Enables
 
+| Capability | How |
+|---|---|
+| **Orphan detection** | Files in old manifest but not in new file list → removed on next install |
+| **Conflict detection** | Compare on-disk checksum vs manifest checksum to detect local edits |
+| **Mode switch safety** | Detect copy→link transitions that would silently overwrite local edits |
+| **Clean uninstall** | Delete every file listed in manifest, then the manifest itself |
+| **Idempotent installs** | Skip files where on-disk matches source (no unnecessary writes) |
+
+---
+
+## Installation Pipeline
+
+The installer runs a 9-phase pipeline. Each phase is a pure function operating on the results of prior phases.
+
+### Phase 1: Determine Target
+
+Resolve the target directory from CLI flags:
+- Default: `<cwd>/.claude/`
+- `--global`: `~/.claude/`
+
+Derive the manifest path: `<target>/.<toolkit-name>.manifest.json`
+
+Safety check: refuse to install into the toolkit repo itself (when cwd === script dir and not `--global`).
+
+### Phase 2: Read Old Manifest
+
+Load the existing manifest if present. If corrupted JSON, warn and treat as fresh install.
+
+### Phase 3: Migrate from Legacy Installs
+
+If no manifest exists, scan the target for symlinks pointing into this toolkit repo. Build a synthetic manifest from discovered symlinks so that orphan/conflict logic works correctly on the first manifest-aware install.
+
+This is essential for upgrading from any pre-manifest installer (e.g., a shell script). The migration scans `agents/`, `commands/`, `skills/`, `references/` in the target directory. For each symlink whose resolved target falls within the toolkit repo's real path, record it in the synthetic manifest.
+
+Important: Symlinks can be relative or absolute. Resolution must handle both by resolving relative to the link's parent directory, then calling `realpathSync` for comparison against the repo's real path.
+
+### Phase 4: Build New File List
+
+Recursively collect all files from the four content directories in the repo. Each entry is `{ rel, abs }` where `rel` is the forward-slash-normalized relative path (e.g., `skills/skill-a/SKILL.md`) and `abs` is the absolute filesystem path.
+
+Skip patterns: `.DS_Store`, `__pycache__`, `.git`.
+
+### Phase 5: Compare Manifests
+
+Produce two lists by diffing old manifest against new file list:
+
+**Orphans**: Files in old manifest but not in new file list, and still present on disk. These will be removed.
+
+**Conflicts**: Files where the on-disk content differs from both the manifest checksum (user edited it) AND the source checksum (source also changed). If on-disk matches source, there's no conflict — the user's edit happens to match the update.
+
+Conflict detection applies in two scenarios:
+1. **Copy mode reinstall**: Standard three-way comparison (manifest vs disk vs source).
+2. **Copy → link mode switch**: This is the dangerous transition. The user may have edited copied files. Switching to link mode would silently replace those edits with symlinks to the repo. Detect conflicts for individual files AND for entire skill directories (since skills switch from copied file trees to directory symlinks).
+
+### Phase 6: Resolve Conflicts
+
+If conflicts exist, prompt the user per-file: `[O]verwrite / [K]eep / [A]ll overwrite / [N]one keep`.
+
+Behavior modifiers:
+- `--force`: Overwrite all conflicts without prompting.
+- Non-interactive terminal: Overwrite all (with warning), EXCEPT during copy→link transitions where non-interactive mode throws an error. This prevents CI scripts from silently destroying local edits during the most dangerous mode switch.
+
+### Phase 7: Install Files
+
+For each file in the new list (skipping kept files):
+
+**Link mode:**
+- Skills: Create one directory symlink per skill folder. If the symlink already points to the correct target, skip. If a real directory exists (from copy mode), remove it first (only allowed during copy→link switch or with `--force`).
+- Other files: Create individual file symlinks. Remove existing symlink or file first if present.
+
+**Copy mode:**
+- Remove existing toolkit skill symlinks first (prevents writing into the repo).
+- Copy each file. Skip if content is identical to existing file.
+- Set executable permissions on `.sh` and `.py` files.
+
+### Phase 8: Remove Orphans
+
+Delete orphaned files. Additionally scan for stale skill directory symlinks (pointing into the toolkit repo but whose target no longer exists on disk — meaning the skill was removed from the repo).
+
+Clean up empty parent directories (deepest first). Never remove top-level category directories (`agents/`, `commands/`, `skills/`, `references/`) since other tools or manual files may live there.
+
+### Phase 9: Write New Manifest
+
+Record every installed file with its current checksum. For kept files, record the on-disk checksum (not the source). This ensures the next install correctly detects whether the user's kept version has been further modified.
+
+---
+
+## Uninstall
+
+The `--uninstall` flag removes all toolkit files from the target scope.
+
+Implementation: Read the manifest, treat every entry as an orphan, delete them all, remove skill directory symlinks pointing into the toolkit repo, clean up empty directories, delete the manifest file.
+
+```bash
+cd my-project && ~/toolkits/my-toolkit/install.js --uninstall          # project scope
+~/toolkits/my-toolkit/install.js --uninstall --global                  # global scope
 ```
-~/toolkits/flutter-llm-toolkit/          # Cloned repo (single source of truth)
-├── skills/flutter-senior-review/
-├── commands/capture-lesson.md
-├── agents/ms-flutter-reviewer.md
-└── references/code_quality.md
 
-~/.claude/                                # Global Claude Code (symlinked)
-├── skills/flutter-senior-review → ~/toolkits/flutter-llm-toolkit/skills/flutter-senior-review
-├── commands/capture-lesson.md → ~/toolkits/flutter-llm-toolkit/commands/capture-lesson.md
-└── flutter-llm-toolkit/.manifest.json
+If no manifest exists, print "Nothing to uninstall" and exit cleanly.
 
-~/projects/app-a/.claude/                 # Project A (symlinked)
-├── skills/flutter-senior-review → ~/toolkits/flutter-llm-toolkit/skills/flutter-senior-review
-└── flutter-llm-toolkit/.manifest.json
+---
 
-~/projects/app-b/.codex/                  # Project B, different tool (symlinked)
-├── instructions/flutter-toolkit.md       # Generated/concatenated from skills + references
-└── flutter-llm-toolkit/.manifest.json
+## Symlink Ownership Detection
 
-~/.codex/                                 # Global Codex (symlinked)
-└── instructions/flutter-toolkit.md → ~/toolkits/flutter-llm-toolkit/.generated/codex/instructions.md
-```
+A recurring problem: determining whether a symlink "belongs to" this toolkit. A naive check (`target.startsWith(SCRIPT_DIR)`) fails for relative symlinks and for symlinks created when the repo was at a different path.
 
-### Installation Registry
+The robust approach:
 
-Track all installations from a single manifest in the repo:
+1. Read the symlink target with `readlinkSync`.
+2. If relative, resolve to absolute using `path.resolve(path.dirname(linkPath), target)`.
+3. Resolve to real path with `realpathSync` (follows further symlinks, canonicalizes).
+4. Check if the resolved real path falls within `realpathSync(SCRIPT_DIR)` using `path.relative`.
 
-```json
-// ~/toolkits/flutter-llm-toolkit/.installations.json
-{
-  "installations": [
-    {
-      "id": "global-claude",
-      "tool": "claude",
-      "scope": "global",
-      "target": "/Users/roland/.claude",
-      "mode": "link",
-      "installedAt": "2026-02-25T10:00:00Z"
-    },
-    {
-      "id": "app-a-claude",
-      "tool": "claude",
-      "scope": "project",
-      "target": "/Users/roland/projects/app-a/.claude",
-      "mode": "link",
-      "installedAt": "2026-02-25T10:05:00Z"
-    }
-  ]
+```javascript
+function symlinkPointsIntoScriptDir(linkPath) {
+  const linkTarget = fs.readlinkSync(linkPath);
+  const absolute = path.resolve(path.dirname(linkPath), linkTarget);
+  const real = fs.realpathSync(absolute);  // may throw if dangling
+  const relative = path.relative(SCRIPT_DIR_REAL, real);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 ```
 
-This enables:
-- `status` command showing all installations
-- `unlink --all` to clean up everything
-- Detecting broken symlinks after repo moves
+---
+
+## Edge Cases (Regression-Tested)
+
+These are hard-won lessons. Each has a corresponding regression test.
+
+### 1. Copy → Link: Modified Files Must Not Be Silently Overwritten
+
+**Scenario**: User installs with `--copy`, edits a file, then re-runs the installer (which defaults to link mode). The modified copy would be silently replaced by a symlink.
+
+**Solution**: Detect copy→link transitions via `oldManifest.mode === 'copy'` and `currentMode === 'link'`. Run conflict detection for all files. In non-interactive mode, throw an error instead of silently overwriting. The user must either run interactively (to choose overwrite/keep per file), or use `--force`.
+
+### 2. Copy → Link: Skill Directories Need Whole-Directory Conflict Check
+
+**Scenario**: In copy→link transitions, skills switch from individual copied files to a single directory symlink. If any file within the skill directory was modified, the entire directory replacement must be flagged as a conflict.
+
+**Solution**: Compare every file in the installed skill directory against the source. Also check for extra files the user may have added. If any difference exists, flag `skills/<name>` as a conflict (not individual files).
+
+### 3. Relative Symlinks from Previous Installers
+
+**Scenario**: A previous version of the installer (or a shell script) created relative symlinks. The ownership check using `startsWith(SCRIPT_DIR)` fails on relative paths.
+
+**Solution**: Always resolve symlinks to absolute+real paths before checking ownership (see Symlink Ownership Detection above).
+
+### 4. Copy Mode Must Remove Pre-Existing Skill Symlinks
+
+**Scenario**: User previously installed with link mode (skill directory symlinks), then re-runs with `--copy`. Writing files into a directory symlink writes into the source repo, not the target.
+
+**Solution**: Before the copy loop, scan `<target>/skills/` for symlinks pointing into the toolkit repo and remove them. The copy loop then creates real directories via `mkdirSync`.
+
+### 5. AI Tools Replace Symlinks with Regular Files
+
+**Scenario**: Claude Code's Edit tool reads through symlinks but writes a new regular file at the symlink path. The symlink silently becomes an independent copy. Future `git pull` updates no longer reach it.
+
+**Detection**: `ls -la <path>` shows a regular file where a symlink was expected.
+
+**Recovery**: Re-running the installer fixes it (the existing file is removed and replaced with a fresh symlink).
 
 ---
 
-## Part 5: What to Borrow from ui-ux-pro-max
+## CLI Interface
 
-### Worth Adopting
+```
+Usage: install.js [options]
 
-1. **Platform JSON configs** — Clean separation of "what to install" from "where to install it." Each AI tool gets a JSON file describing its directory conventions.
+Options:
+  -g, --global     Install to ~/.claude/ (default: current project ./.claude/)
+      --copy       Copy files instead of symlinking
+  -f, --force      Overwrite modified files without prompting
+      --uninstall  Remove all toolkit files from the target scope
+  -h, --help       Show this help message
+```
 
-2. **Template rendering for cross-tool content** — Some tools need different file formats. A template system can render the same skill content into Claude's SKILL.md format, Codex's AGENTS.md format, or Cursor's .cursorrules format.
+The installer is a standalone Node.js script with zero dependencies (only `fs`, `path`, `os`, `readline`, `crypto`). It uses a shebang (`#!/usr/bin/env node`) so it's directly executable after cloning.
 
-3. **`--ai` / `--tool` flag with auto-detection** — Detect which AI tools are configured in a project by checking for `.claude/`, `.cursor/`, `.codex/` directories.
-
-4. **Offline-first with network fallback** — Bundled assets work without network; GitHub releases provide the latest version if available.
-
-5. **`--ai all` flag** — Install for every detected AI tool in one command.
-
-### Not Worth Adopting
-
-1. **Copy-only distribution** — Their approach means every project has independent copies that must be updated individually. The symlink model is strictly better for power users.
-
-2. **No manifest/tracking** — They have no way to detect conflicts, orphans, or local modifications. The manifest system in flutter-llm-toolkit is a clear advantage.
-
-3. **No uninstall** — Manual `rm -rf` is not a great UX.
-
-4. **Template duplication** — They maintain copies of assets in both `src/` and `cli/assets/`, requiring manual sync. A symlink-from-source approach eliminates this.
+`package.json` should declare the installer as a `bin` entry so `npx` works as a fallback distribution method, though the primary flow is clone-and-run.
 
 ---
 
-## Part 6: Implementation Priority
+## Regression Tests
 
-### Phase 1: Multi-Tool Platform Configs (High Impact, Low Effort)
-- Add `platforms/` directory with JSON configs for claude, codex, cursor, windsurf
-- Modify `install.js` to accept `--tool` flag
-- Map content types to each tool's expected structure
+Ship a bash test script (`scripts/test-install-regressions.sh`) that exercises the critical edge cases. Each test creates a temporary directory, runs installs with specific flag combinations, and asserts the expected filesystem state.
 
-### Phase 2: Doctor & Symlink Integrity (High Impact, Low Effort)
-- `doctor` command to detect symlinks replaced by regular files (see 3.6)
-- Verify every symlinked path is still a symlink, offer `--fix` to restore broken ones
-- Detect repo moves and suggest re-linking
-- Version freshness checks (compare local HEAD with remote)
+Tests to include:
 
-### Phase 3: Explicit Clone-and-Link Workflow (High Impact, Medium Effort)
-- Document the "clone repo → run install.js link" workflow
-- Add `link` and `unlink` subcommands
-- Add `.installations.json` registry in repo root
-- Add `status` command
+1. **Copy → link blocks non-interactive modified files**: Install `--copy`, modify a file, re-run without flags. Assert exit code is non-zero, error message mentions "Local modifications", file is NOT replaced with symlink, content is preserved.
 
-### Phase 4: Cross-Tool Content Rendering (Medium Impact, Medium Effort)
-- Template system to render skills/references into tool-specific formats
-- Concatenation for tools that want single instruction files (Codex)
-- Frontmatter adaptation per tool
+2. **Copy → link force overwrites modified files**: Same setup, but re-run with `--force`. Assert file IS now a symlink, local edit content is gone.
+
+3. **Copy mode converts relative skill symlinks**: Pre-create a relative symlink for a skill directory, run `--copy`. Assert the symlink is replaced with a real directory containing copied files.
+
+Add the test script to `package.json`:
+```json
+{
+  "scripts": {
+    "test:install-regressions": "scripts/test-install-regressions.sh"
+  }
+}
+```
 
 ---
 
-## Appendix: Key Files Reference
+## Multi-CLI Tool Support (Future)
 
-| File | Repository | Purpose |
-|------|-----------|---------|
-| `cli/src/commands/init.ts` | ui-ux-pro-max | Main installation logic with template rendering |
-| `cli/src/utils/template.ts` | ui-ux-pro-max | Template engine for multi-platform file generation |
-| `cli/assets/templates/platforms/*.json` | ui-ux-pro-max | Platform-specific configs (15 AI tools) |
-| `install.js` | flutter-llm-toolkit | 9-phase installer with manifest tracking |
-| `package.json` | flutter-llm-toolkit | npm package config with bin entry |
+Currently installs into `.claude/` only. This section documents the architecture for supporting Codex, Cursor, Windsurf, and other AI coding tools.
+
+### Platform Configuration
+
+Each AI tool has different directory conventions. Define platform configs that map toolkit content types to the tool's expected structure:
+
+```json
+{
+  "platform": "codex",
+  "root": ".codex",
+  "contentMap": {
+    "skills": { "target": "instructions", "format": "single-file" },
+    "references": { "target": "instructions", "format": "concatenated" },
+    "commands": null,
+    "agents": null
+  }
+}
+```
+
+- `root`: The tool's configuration directory (`.claude/`, `.codex/`, `.cursor/`).
+- `contentMap`: How each content type maps to the tool's structure. `null` means the content type isn't supported by this tool.
+- `format`: `"individual"` (one file per source file, like Claude Code), `"single-file"` (one file per content type), or `"concatenated"` (all content types merged into one file).
+
+### CLI Extension
+
+Add a `--tool` flag:
+```
+--tool <name>    Target tool: claude (default), codex, cursor, windsurf, all
+```
+
+`--tool all` installs for every detected tool (check for existence of `.claude/`, `.codex/`, etc. in the target).
+
+### Content Transformation
+
+Some tools need different file formats:
+- **Claude Code**: Individual files in subdirectories (skills/, commands/, etc.)
+- **Codex CLI**: Single AGENTS.md instruction file
+- **Cursor**: .cursorrules or .cursor/rules/ files
+
+The installer should support a content transformation step that renders the same source content into tool-specific formats. For tools that want concatenated files, the installer generates them into a `.generated/<tool>/` directory in the repo and symlinks to those generated files.
+
+### Manifest Per Tool
+
+Each tool installation gets its own manifest dotfile: `<target>/.<toolkit-name>.manifest.json`. This allows independent install/uninstall per tool.
