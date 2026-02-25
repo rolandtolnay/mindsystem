@@ -50,7 +50,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
 
    - Look for `.planning/MILESTONE-AUDIT.md`
    - If missing or stale: recommend `/ms:audit-milestone` first
-   - If audit status is `gaps_found`: recommend `/ms:plan-milestone-gaps` first
+   - If audit status is `gaps_found`: recommend addressing gaps via `/ms:adhoc` or `/ms:add-phase`
    - If audit status is `passed`: proceed to step 1
 
    ```markdown
@@ -61,8 +61,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
    requirements coverage, cross-phase integration, and E2E flows.
 
    {If audit has gaps:}
-   ⚠ Milestone audit found gaps. Run `/ms:plan-milestone-gaps` to create
-   phases that close the gaps, or proceed anyway to accept as tech debt.
+   ⚠ Milestone audit found gaps. Address via `/ms:adhoc` (1-2 small fixes)
+   or `/ms:add-phase` (larger remediation), or proceed anyway to accept as tech debt.
 
    {If audit passed:}
    ✓ Milestone audit passed. Proceeding with completion.

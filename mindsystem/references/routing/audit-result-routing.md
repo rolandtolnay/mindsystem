@@ -72,7 +72,11 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 
 ## ▶ Next Up
 
-`/ms:plan-milestone-gaps` — create phases to complete milestone
+Review the gaps above, then choose the right tool:
+
+- `/ms:adhoc` — for 1-2 small fixes (missing wiring, edge cases)
+- `/ms:add-phase "<description>"` — for a coherent set of related gaps
+- `/ms:insert-phase <after> "<description>"` — if gaps must be fixed before a specific phase
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -110,7 +114,8 @@ See full list in MILESTONE-AUDIT.md. Consider addressing in next milestone.
 ## ▶ Options
 
 - `/ms:complete-milestone` — accept debt, track in backlog
-- `/ms:plan-milestone-gaps` — address debt before completing
+- `/ms:adhoc` — for small fixes (1-2 tasks)
+- `/ms:add-phase` — for larger remediation
 
 <sub>`/clear` first → fresh context window</sub>
 ```

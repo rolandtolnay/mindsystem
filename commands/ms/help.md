@@ -295,15 +295,6 @@ Archive completed milestone and prepare for next.
 Usage: `/ms:complete-milestone`
 Usage: `/ms:complete-milestone "MVP"`
 
-**`/ms:plan-milestone-gaps`**
-Create phases to close gaps identified by milestone audit.
-
-- Reads MILESTONE-AUDIT.md and groups gaps into logical phases
-- Prioritizes by requirement importance (must/should/nice)
-- Creates phase entries in ROADMAP.md automatically
-
-Usage: `/ms:plan-milestone-gaps`
-
 ### Progress Tracking
 
 **`/ms:progress`**
@@ -528,10 +519,9 @@ Common options:
 **Closing gaps from audit:**
 
 ```
-/ms:audit-milestone             # Finds gaps
-/ms:plan-milestone-gaps         # Creates phases to fix them
-/ms:plan-phase 6                # Plan first gap closure phase
-/ms:execute-phase 6
+/ms:audit-milestone             # Finds gaps → review MILESTONE-AUDIT.md
+/ms:adhoc "fix dashboard auth"  # Small gaps (1-2 tasks)
+/ms:add-phase "Wire API auth"   # Larger coherent gaps
 /ms:audit-milestone             # Re-audit when done
 ```
 
