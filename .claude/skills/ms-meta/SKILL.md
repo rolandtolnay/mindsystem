@@ -180,7 +180,7 @@ mindsystem/
 | VERIFICATION.md | ms-verifier (execute-phase) | progress, plan-phase (gap closure), audit-milestone |
 | UAT.md | verify-work | progress, audit-milestone |
 | MILESTONE-AUDIT.md | audit-milestone | complete-milestone |
-| knowledge/*.md | ms-consolidator (execute-phase) | future phase planning |
+| knowledge/*.md | ms-consolidator (execute-phase), ms-compounder (compound) | future phase planning |
 </architecture>
 
 <change_propagation>

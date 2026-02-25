@@ -368,6 +368,21 @@ Health check and fix project configuration — subsystems, milestone structure, 
 
 Usage: `/ms:doctor`
 
+**`/ms:compound [input]`**
+Compound code changes into knowledge files.
+
+- Use when: work was done outside the Mindsystem pipeline and knowledge files need updating
+- Accepts: git reference (SHA, range), file path, description, or no args (infers from conversation)
+- Updates existing knowledge files for affected subsystems
+- Creates new subsystem knowledge files if warranted
+- Extends config.json subsystem list if new subsystem detected
+
+Usage: `/ms:compound abc123` (commit)
+Usage: `/ms:compound HEAD~3..HEAD` (range)
+Usage: `/ms:compound src/auth/login.ts` (file)
+Usage: `/ms:compound "Added JWT auth with refresh tokens"` (description)
+Usage: `/ms:compound` (infer from conversation context)
+
 **`/ms:update`**
 Check for updates and install latest Mindsystem version.
 

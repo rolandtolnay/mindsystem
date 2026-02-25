@@ -4,7 +4,7 @@ Template for `.planning/knowledge/{subsystem}.md` — per-subsystem knowledge fi
 
 **Purpose:** Curated reference per domain area. Bridges phase-scoped execution artifacts to topic-scoped knowledge. Each file contains decisions, architecture, design, pitfalls, and key files for one subsystem.
 
-**Created by:** `ms-consolidator` agent during `execute-phase`
+**Created by:** `ms-consolidator` agent during `execute-phase`, or `ms-compounder` agent during `ms:compound`
 
 **Referenced by:** All pre-planning phases (discuss-phase, design-phase, research-phase, plan-phase)
 
