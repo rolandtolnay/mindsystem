@@ -250,7 +250,8 @@ Read source files directly for detailed knowledge:
 | Verification protocol | `agents/ms-verifier.md` |
 | Milestone audit | `commands/ms/audit-milestone.md` |
 | Milestone completion | `mindsystem/workflows/complete-milestone.md` |
-| Code review (generic) | `agents/ms-code-simplifier.md` |
+| Code review (simplifier) | `agents/ms-code-simplifier.md` |
+| Code review (structural) | `agents/ms-code-reviewer.md` |
 | Health checks & config healing | `commands/ms/doctor.md` |
 | All agents | `ls agents/` |
 | All commands | `ls commands/ms/` |

@@ -67,13 +67,13 @@ If "Create with gh CLI":
 
 Show current code_review values from config.json (if loaded).
 
-**Default reviewers:** adhoc=`ms-code-simplifier`, phase=`ms-code-simplifier`, milestone=null
+**Default reviewers:** adhoc=`ms-code-simplifier`, phase=`ms-code-simplifier`, milestone=`ms-code-reviewer`
 
 Use AskUserQuestion:
 - header: "Code review"
 - question: "Which code reviewer configuration do you want?"
 - options:
-  - "Default (ms-code-simplifier)" — Generic reviewer for adhoc and phase tiers (Recommended)
+  - "Default" — ms-code-simplifier for adhoc/phase, ms-code-reviewer for milestone (Recommended)
   - "Skip code review" — Disable review for all tiers
   - "Custom" — I'll specify reviewers manually
 

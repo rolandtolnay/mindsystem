@@ -211,6 +211,3 @@ verdict: "clean | minor_issues | needs_refactoring | structural_concerns"
 - User has opportunity to provide context before changes
 - YAML summary block included for orchestrator parsing
 
-## Full Compiled Document
-
-For the complete guide with all principles expanded: `AGENTS.md`
