@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.22.1] - 2026-02-25
+
+### Changed
+- Rewrote the debugger agent from the ground up — consolidated the debug workflow, debugging discipline, and agent prompt into a single streamlined `ms-debugger` definition. Removes redundant reference files and simplifies the debug command to a thin wrapper, making debugging sessions more effective and reliable.
+
 ## [3.22.0] - 2026-02-24
 
 ### Added
@@ -551,7 +556,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.1...HEAD
+[3.22.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.0...v3.22.1
 [3.22.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.21.0...v3.22.0
 [3.21.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.20.0...v3.21.0
 [3.20.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.19.0...v3.20.0
