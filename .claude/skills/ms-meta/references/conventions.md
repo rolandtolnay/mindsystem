@@ -130,4 +130,23 @@ Each task gets its own commit immediately after completion.
 - Metadata commit after SUMMARY.md created
 </atomic_commits>
 
+<knowledge_lifecycle>
+## Knowledge Lifecycle
+
+Knowledge files (`knowledge/*.md`) persist per-subsystem patterns and decisions across phases.
+
+**Created by:**
+- ms-consolidator (automatic, after execute-phase) — extracts patterns, decisions, and conventions from SUMMARY.md files
+- ms-compounder (manual, via `/ms:compound`) — updates knowledge from work done outside the pipeline
+
+**Consumed by:**
+- plan-phase — loads relevant knowledge when breaking phase into tasks
+- ms-executor — loads knowledge for implementation context in subagent
+- ms-adhoc-planner — loads knowledge before planning adhoc work
+
+**Content:** Established patterns, technology choices, naming conventions, architectural decisions, integration details. Current state only — not a changelog.
+
+**Lifecycle:** Knowledge files grow across phases within a milestone. At milestone completion, they carry forward — they're project knowledge, not milestone-scoped.
+</knowledge_lifecycle>
+
 </conventions>

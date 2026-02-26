@@ -46,6 +46,10 @@ The critical judgment when evaluating any Mindsystem feature: **does this step's
 
 **Modularity over bundling.** Commands stay small, explicit, and composable. Avoid mega-flows. Users pick the depth they need (quick fix vs. new feature vs. UI-heavy system). Each command has a clear purpose — no consulting documentation to understand which to use. When in doubt, keep commands separate rather than unifying into one large command.
 
+**Composability over flags.** Commands handle their primary purpose — no optional flags or modes for edge cases. When a flag is proposed, ask: which existing command already handles this? Edge-case handling inside core commands degrades prompt quality for the happy path — the majority of invocations. Keep commands focused; let users compose them. Example: `--gaps` was removed from plan-phase because adhoc, insert-phase, add-phase, and add-todo already compose to cover every gap scenario.
+
+**Phase linearity.** Phase execution order is immutable: discuss → design → research → plan → execute → verify. Once a phase is executed, it is complete — never re-plan or re-execute the same phase. If gaps emerge after execution, route through the appropriate primitive based on scope (see Deferred Work Routing in architecture). Protecting the linear flow prevents edge-case handling from degrading core command prompts.
+
 **Main context for collaboration.** Planning, discussion, and back-and-forth happen with the user in the main conversation. Subagents are for autonomous execution, not for hiding key decisions or reasoning. This preserves:
 - Conversational iteration during planning
 - User ability to question, redirect, and contribute
@@ -59,6 +63,8 @@ Reserve subagents for autonomous execution work, not collaborative thinking.
 - **Control** — User decides when to proceed, what to skip
 - **Granularity** — Separate commands for research, requirements, planning, execution
 - **Transparency** — No hidden delegation or background orchestration
+
+**Collaboration topology:** Most commands are ~80% autonomous with ~20% user input. Two commands invert this — discuss-phase (~80% human, drives all downstream decisions) and verify-work (~80% human, validates delivered output). These are critical collaboration points, not optional steps. Investment in discuss pays forward through every subsequent phase; investment in verify compounds into knowledge that reduces future errors.
 
 **Minimal ceremony.** No process overhead that doesn't improve output — sprint ceremonies, RACI matrices, stakeholder management, time estimates. This applies regardless of team size. User is the visionary. Claude is the builder.
 
@@ -181,6 +187,29 @@ mindsystem/
 | UAT.md | verify-work | progress, audit-milestone |
 | MILESTONE-AUDIT.md | audit-milestone | complete-milestone |
 | knowledge/*.md | ms-consolidator (execute-phase), ms-compounder (compound) | future phase planning |
+
+### Knowledge Compounding
+
+Knowledge files (`knowledge/*.md`) are the system's learning mechanism — per-subsystem patterns, decisions, and conventions that accumulate across phases and milestones.
+
+**Creation:** ms-consolidator (automatic, after execute-phase) and ms-compounder (manual, via `/ms:compound`).
+**Consumption:** plan-phase and ms-adhoc-planner load relevant knowledge before planning. ms-executor loads knowledge for implementation context.
+**Compounding loop:** discuss → execute → verify → consolidate/compound → future planning uses accumulated knowledge → fewer errors, faster execution.
+
+`/ms:compound` closes the gap for work done outside the pipeline (direct Claude sessions, manual edits, merged branches). Without it, knowledge goes stale when work bypasses the standard lifecycle.
+
+### Deferred Work Routing
+
+When work is discovered after phase execution, route by scope:
+
+| Scope | Command | When |
+|-------|---------|------|
+| Single context window | `/ms:adhoc` | Straightforward fix or feature, condensed full pipeline |
+| Must happen before next phase | `/ms:insert-phase` | Urgent, blocking — creates decimal phase (e.g., 5.1) |
+| Can happen after current phases | `/ms:add-phase` | Non-blocking, appends to roadmap end |
+| Not worth doing now | `/ms:add-todo` | Capture for later triage |
+
+**Input sources for adhoc:** user description, VERIFICATION.md, TECH-DEBT.md, todo file, Linear ticket ID — anything that provides problem context in a fresh window.
 </architecture>
 
 <change_propagation>
@@ -228,6 +257,8 @@ mindsystem/
 - **Manual gates for automatable work** — if Claude can verify it, don't ask the user
 - **Orchestration in plans** — wave numbers, dependencies, and file ownership metadata belong in EXECUTION-ORDER.md, not in individual plan files
 - **XML/YAML in plans** — plans use pure markdown; XML containers and YAML frontmatter are overhead that doesn't improve code output
+- **Flag-based modes** — commands handle one job; edge cases route through composable commands, not flags
+- **Backward phase flow** — never re-plan or re-execute a completed phase; route discovered work through deferred work routing
 </anti_patterns>
 
 <deep_dive_paths>
@@ -252,6 +283,9 @@ Read source files directly for detailed knowledge:
 | Milestone completion | `mindsystem/workflows/complete-milestone.md` |
 | Code review (simplifier) | `agents/ms-code-simplifier.md` |
 | Code review (structural) | `agents/ms-code-reviewer.md` |
+| Knowledge compounding | `commands/ms/compound.md`, `mindsystem/workflows/compound.md` |
+| Adhoc execution | `commands/ms/adhoc.md`, `mindsystem/workflows/adhoc.md` |
+| Todo management | `commands/ms/add-todo.md` |
 | Health checks & config healing | `commands/ms/doctor.md` |
 | All agents | `ls agents/` |
 | All commands | `ls commands/ms/` |

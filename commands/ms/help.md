@@ -67,6 +67,26 @@ Common deviations:
 - New urgent work: `/ms:insert-phase <after> "<desc>"`
 - New non-urgent work: `/ms:add-todo "<desc>"`
 
+### Choosing the Right Command
+
+**"I found something that needs fixing"**
+
+| What you know | Best command | Why |
+|--------------|-------------|-----|
+| Quick fix, single context window | `/ms:adhoc` | Full pipeline (plan, execute, consolidate) in one session |
+| Blocking — must happen before next phase | `/ms:insert-phase` | Creates decimal phase (e.g., 5.1) with full plan-execute cycle |
+| Important but not urgent | `/ms:add-phase` | Appends to roadmap end, planned and executed in sequence |
+| Just capture it for later | `/ms:add-todo` | Flat-file capture with priority and estimate |
+
+**"I want to prepare before planning"**
+
+| What you need | Best command |
+|--------------|-------------|
+| Align on vision, validate assumptions | `/ms:discuss-phase` |
+| UI layouts, component specs, mockups | `/ms:design-phase` |
+| Stack research, ecosystem knowledge | `/ms:research-phase` |
+| All three (UI-heavy feature) | discuss, then design, then research, then plan |
+
 ### Project Initialization
 
 **`/ms:new-project`**
