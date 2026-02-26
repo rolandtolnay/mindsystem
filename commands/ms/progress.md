@@ -246,9 +246,9 @@ Check if `{phase}-CONTEXT.md` exists in phase directory.
 
 ---
 
-**Route E: UAT gaps need fix plans**
+**Route E: Verification or UAT gaps need resolution**
 
-UAT.md exists with gaps (diagnosed issues). Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow its instructions to present the gap closure section.
+VERIFICATION.md or UAT.md exists with gaps. Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow its triage instructions to present gap summary and route to the appropriate primitive.
 
 ---
 

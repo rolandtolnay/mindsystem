@@ -64,7 +64,6 @@ Common deviations:
 - Plan looks wrong: `/ms:discuss-phase <phase>`
 - Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
 - Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
-- Execution gaps: `/ms:plan-phase <phase> --gaps` then `/ms:execute-phase <phase>`
 - New urgent work: `/ms:insert-phase <after> "<desc>"`
 - New non-urgent work: `/ms:add-todo "<desc>"`
 
@@ -170,10 +169,10 @@ Comprehensive ecosystem research for niche/complex domains.
 
 Usage: `/ms:research-phase 3`
 
-**`/ms:plan-phase [number] [--gaps]`**
+**`/ms:plan-phase [number]`**
 Create detailed execution plan for a specific phase.
 
-- Use when: you're about to start a phase, or you need additional plans (including verifier-driven gap closure via `--gaps`).
+- Use when: you're about to start a phase.
 - Generates `.planning/phases/XX-phase-name/XX-YY-PLAN.md`
 - Breaks phase into concrete, actionable tasks
 - Includes verification criteria and success measures
@@ -470,9 +469,10 @@ Usage: `/ms:release-notes`
 ```
 /ms:plan-phase 5                 # Create one or more PLAN.md files
 /ms:execute-phase 5              # Execute; produces SUMMARY + VERIFICATION
-# If gaps found during verification:
-/ms:plan-phase 5 --gaps          # Create additional plans to close verifier gaps
-/ms:execute-phase 5              # Re-run until phase verifies cleanly
+# If gaps found during verification, follow triage recommendation:
+# Small gaps:    /ms:adhoc "Close phase 5 gaps: ..."
+# Larger gaps:   /ms:insert-phase 5 "Close verification gaps"
+# Minor polish:  /ms:add-todo "Phase 5 polish: ..."
 ```
 
 **Found a bug:**
@@ -482,9 +482,9 @@ Usage: `/ms:release-notes`
 # Then decide where the fix belongs:
 # - If it fits in a single context window:
 /ms:adhoc "Fix auth token refresh on 401"   # Knowledge-aware fix with consolidation
-# - If it's required to satisfy the current phase goal: add more plans to the current phase
-/ms:plan-phase 5                              # (or: /ms:plan-phase 5 --gaps after verification)
-/ms:execute-phase 5
+# - If it's required to satisfy the current phase goal:
+/ms:adhoc "Fix auth token refresh on 401"     # Small scope — single context
+/ms:insert-phase 5 "Close verification gaps"  # Larger scope — full plan-execute cycle
 # - If it's urgent but should happen before the next phase (and not worth renumbering):
 /ms:insert-phase 5 "Fix critical auth bug"     # Creates 05.1
 /ms:plan-phase 5.1
@@ -496,7 +496,7 @@ Usage: `/ms:release-notes`
 **Need to adjust scope (new info, new requirements, or a cut):**
 
 Common options:
-- If the current phase goal can’t be met: add more plans to the current phase (`/ms:plan-phase <current>` or `/ms:plan-phase <current> --gaps`) then `/ms:execute-phase <current>`
+- If the current phase goal can’t be met: `/ms:adhoc` for small gaps, `/ms:insert-phase` for larger gaps, `/ms:add-todo` for minor polish
 - Add work later: `/ms:add-phase "…"`
 - Insert urgent work before the next phase: `/ms:insert-phase <after> "…"`
 - Cut future work: `/ms:remove-phase <phase>`

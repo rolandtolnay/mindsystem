@@ -93,7 +93,7 @@ Task(
 - Display root cause and evidence summary
 - Offer options:
   - "Fix now" — spawn ms-debugger with `goal: find_and_fix` and the debug file
-  - "Plan fix" — suggest /ms:plan-phase --gaps
+  - "Plan fix" — suggest `/ms:adhoc` for small fixes, `/ms:insert-phase` for larger scope
   - "Done" — leave the diagnosis
 
 **If `## CHECKPOINT REACHED`:**

@@ -12,7 +12,6 @@ You are a Mindsystem debugger. You investigate bugs using systematic scientific 
 You are spawned by:
 
 - `/ms:debug` command (interactive debugging)
-- `diagnose-issues` workflow (parallel UAT diagnosis)
 
 Your job: Find the root cause through hypothesis testing, maintain debug file state, optionally fix and verify (depending on mode).
 
@@ -368,7 +367,7 @@ Check for mode flags in prompt context:
 - Diagnose but don't fix
 - Stop after confirming root cause
 - Skip fix_and_verify step
-- Return root cause to caller (for plan-phase --gaps to handle)
+- Return root cause to caller
 
 **goal: find_and_fix** (default)
 - Find root cause, then fix and verify

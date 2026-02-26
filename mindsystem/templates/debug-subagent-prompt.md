@@ -60,11 +60,6 @@ Task(
 )
 ```
 
-**From diagnose-issues (UAT):**
-```python
-Task(prompt=template, subagent_type="ms-debugger", description="Debug UAT-001")
-```
-
 ---
 
 ## Continuation

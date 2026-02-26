@@ -75,7 +75,7 @@ ms-tools find-phase "$ARGUMENTS"
    - Creates VERIFICATION.md with detailed report
    - Route by status:
      - `passed` → continue to step 7
-     - `gaps_found` → present gaps, offer `/ms:plan-phase {X} --gaps`
+     - `gaps_found` → present gaps, route via gap-closure-routing.md triage
 
 7. **Code review (optional)**
    - Read `code_review.phase` from config.json (default: `ms-code-simplifier`)

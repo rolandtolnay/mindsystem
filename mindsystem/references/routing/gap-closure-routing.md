@@ -1,10 +1,10 @@
 # Gap Closure Routing
 
-Reference for presenting "Next Up" guidance when phase verification found gaps. Used by execute-phase and progress commands.
+Reference for triaging verification gaps by scope and routing to the appropriate primitive. Used by execute-phase and progress commands.
 
 ## Purpose
 
-Guide user toward planning gap closure when VERIFICATION.md reports gaps.
+Analyze VERIFICATION.md gaps and recommend the best primitive based on scope and urgency.
 
 ## Variables
 
@@ -14,7 +14,6 @@ From calling context:
 - `{N}/{M}` — must-haves score from VERIFICATION.md
 - `{phase_dir}` — phase directory path
 - `{phase}` — phase identifier (e.g., "04")
-- `{gap_summaries}` — extracted gap summaries from VERIFICATION.md
 
 ## Information to Extract
 
@@ -26,9 +25,26 @@ cat .planning/phases/${phase_dir}/${phase}-VERIFICATION.md
 
 Extract:
 - Score (must-haves verified count)
+- Gap count and severity (critical vs non-critical)
 - Gap summaries from gaps section
 
+## Triage Table
+
+| Scope | Criteria | Route | Rationale |
+|-------|----------|-------|-----------|
+| Small | 1-2 gaps, localized files, quick fixes | `/ms:adhoc` | Single context window, no multi-plan overhead |
+| Larger (blocking) | 3+ gaps OR cross-cutting, blocks next phase | `/ms:insert-phase` | Needs full plan-execute cycle, preserves phase numbering |
+| Larger (non-blocking) | 3+ gaps OR cross-cutting, next phase can proceed | `/ms:add-phase` | Defers to end of milestone, no urgency |
+| Minor | Cosmetic, non-functional, polish items | `/ms:add-todo` | Capture for later, not worth planning now |
+
+**Judgment calls:**
+- If all gaps share the same root cause, treat as small regardless of count
+- If gaps span multiple subsystems, prefer insert-phase even if count is low
+- Mix routes when gaps vary: adhoc for quick wins + insert-phase for larger items
+
 ## Output Format
+
+Present gap summary, then route recommendation using standard "Next Up" format:
 
 ```markdown
 ---
@@ -46,7 +62,21 @@ Extract:
 
 ## ▶ Next Up
 
-`/ms:plan-phase {Z} --gaps` — create additional plans to complete the phase
+{Primary recommendation based on triage:}
+
+{If adhoc:}
+`/ms:adhoc "Close phase {Z} gaps: {brief description}"` — fix {N} localized gaps in a single context
+
+<sub>Reference: `.planning/phases/{phase_dir}/{phase}-VERIFICATION.md`</sub>
+
+{If insert-phase:}
+`/ms:insert-phase {Z} "Close verification gaps"` — plan and execute gap closure as phase {Z}.1
+
+{If add-phase:}
+`/ms:add-phase "Close phase {Z} verification gaps"` — defer gap closure to end of milestone
+
+{If add-todo:}
+`/ms:add-todo "Phase {Z} polish: {brief description}"` — capture for later
 
 <sub>`/clear` first → fresh context window</sub>
 
@@ -54,16 +84,8 @@ Extract:
 
 **Also available:**
 - `cat .planning/phases/{phase_dir}/{phase}-VERIFICATION.md` — see full report
-- `/ms:verify-work {Z}` — manual testing before planning
+- `/ms:verify-work {Z}` — manual testing before fixing
+{Include other routes not chosen as alternatives}
 
 ---
 ```
-
-## Gap Closure Flow
-
-After user runs `/ms:plan-phase {Z} --gaps`:
-1. Planner reads VERIFICATION.md gaps
-2. Creates plans 04, 05, etc. to close gaps
-3. User runs `/ms:execute-phase {Z}` again
-4. Execute-phase runs incomplete plans (04, 05...)
-5. Verifier runs again — loop until passed

@@ -274,7 +274,7 @@ grep "^status:" "$PHASE_DIR"/*-VERIFICATION.md | cut -d: -f2 | tr -d ' '
 | Status | Action |
 |--------|--------|
 | `passed` | Continue to code_review |
-| `gaps_found` | Present gap summary, offer `/ms:plan-phase {phase} --gaps` |
+| `gaps_found` | Present gap summary, route via gap-closure-routing.md triage |
 
 **If passed:**
 
@@ -288,41 +288,7 @@ If the verifier's return includes "Items Not Verified Programmatically" (uncerta
 
 **If gaps_found:**
 
-Present gaps and offer next command:
-
-```markdown
-## ⚠ Phase {X}: {Name} — Gaps Found
-
-**Score:** {N}/{M} must-haves verified
-**Report:** {phase_dir}/{phase}-VERIFICATION.md
-
-### What's Missing
-
-{Extract gap summaries from VERIFICATION.md gaps section}
-
----
-
-## ▶ Next Up
-
-`/ms:plan-phase {X} --gaps` — create additional plans to complete the phase
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `cat {phase_dir}/{phase}-VERIFICATION.md` — see full report
-- `/ms:verify-work {X}` — manual testing before planning
-```
-
-User runs `/ms:plan-phase {X} --gaps` which:
-1. Reads VERIFICATION.md gaps
-2. Creates additional plans (04, 05, etc.) to close gaps
-3. User then runs `/ms:execute-phase {X}` again
-4. Execute-phase runs incomplete plans (04-05)
-5. Verifier runs again after new plans complete
-
-User stays in control at each decision point.
+Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow its triage instructions to present gap summary and route to the appropriate primitive based on scope analysis.
 </step>
 
 <step name="code_review">

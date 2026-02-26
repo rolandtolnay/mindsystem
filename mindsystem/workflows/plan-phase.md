@@ -97,130 +97,6 @@ If multiple phases available, ask which one to plan. If obvious (first incomplet
 
 Read any existing PLAN.md or DISCOVERY.md in the phase directory.
 
-**Check for --gaps flag:**
-If `--gaps` present in arguments, switch to gap_closure_mode (see `<step name="gap_closure_mode">`).
-</step>
-
-<step name="gap_closure_mode">
-**Triggered by `--gaps` flag.** Plans address verification gaps OR UAT gaps.
-
-**1. Find gap sources:**
-
-```bash
-PHASE_DIR=$(ls -d .planning/phases/${PHASE_ARG}* 2>/dev/null | head -1)
-
-# Check for VERIFICATION.md (code verification gaps)
-ls "$PHASE_DIR"/*-VERIFICATION.md 2>/dev/null
-
-# Check for UAT.md with diagnosed status (user testing gaps)
-grep -l "status: diagnosed" "$PHASE_DIR"/*-UAT.md 2>/dev/null
-```
-
-**Priority:** If both exist, load both and combine gaps. UAT gaps (user-discovered) may overlap with verification gaps (code-discovered).
-
-**2. Parse gaps:**
-
-**From VERIFICATION.md** (if exists): Parse gaps from `## Gaps Summary` section (markdown format with `### Critical Gaps` and `### Non-Critical Gaps` subsections).
-
-**From UAT.md** (if exists with status: diagnosed): Parse gaps from `## Gaps` section (YAML format).
-
-Each gap has:
-- `truth`: The observable behavior that failed
-- `reason`: Why it failed
-- `artifacts`: Files with issues
-- `missing`: Specific things to add/fix
-
-**3. Load existing SUMMARYs:**
-
-```bash
-ls "$PHASE_DIR"/*-SUMMARY.md
-```
-
-Understand what's already built. Gap closure plans reference existing work.
-
-**4. Find next plan number:**
-
-```bash
-# Get highest existing plan number
-ls "$PHASE_DIR"/*-PLAN.md | sort -V | tail -1
-```
-
-If plans 01, 02, 03 exist, next is 04.
-
-**5. Group gaps into plans:**
-
-Cluster related gaps by:
-- Same artifact (multiple issues in Chat.tsx → one plan)
-- Same concern (fetch + render → one "wire frontend" plan)
-- Dependency order (can't wire if artifact is stub → fix stub first)
-
-**6. Create gap closure changes:**
-
-For each gap, create a markdown change subsection:
-
-```markdown
-### N. {Fix description}
-**Files:** `{artifact.path}`
-
-{For each item in gap.missing:}
-- {missing item}
-
-Reference existing code: {from SUMMARYs}
-Gap reason: {gap.reason}
-```
-
-**7. Write PLAN.md files:**
-
-Use pure markdown plan format with gap closure context:
-
-```markdown
-# Plan NN: {Gap closure description}
-
-**Subsystem:** {subsystem} | **Type:** execute
-
-## Context
-Gap closure for phase XX. Addresses gaps identified by verification.
-
-## Changes
-
-### 1. {Fix description}
-**Files:** `{artifact.path}`
-
-{Implementation details from gap.missing items}
-
-## Verification
-- {How to confirm gap is closed}
-
-## Must-Haves
-- [ ] {Observable truth now achievable}
-```
-
-Also create or update EXECUTION-ORDER.md to include gap closure plans (typically single wave, independent of each other).
-
-**9. Present gap closure summary:**
-
-```markdown
-## Gap Closure Plans Created
-
-**Phase {X}: {Name}** — closing {N} gaps
-
-| Plan | Gaps Addressed | Files |
-|------|----------------|-------|
-| {phase}-04 | {gap truths} | {files} |
-| {phase}-05 | {gap truths} | {files} |
-
----
-
-## ▶ Next Up
-
-`/ms:execute-phase {X}` — execute gap closure plans
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-```
-
-**Skip directly to git_commit step after creating plans.**
 </step>
 
 <step name="mandatory_discovery">
@@ -608,8 +484,6 @@ Extract:
 <step name="risk_decision">
 **Present risk score and handle user choice.**
 
-**Skip this step if:** `--gaps` flag present (gap closure plans don't need risk assessment)
-
 **Present via AskUserQuestion based on tier from subagent:**
 
 **Skip tier (0-39):**
@@ -725,7 +599,7 @@ Tasks are instructions for Claude, not Jira tickets.
 </anti_patterns>
 
 <success_criteria>
-**Standard mode** — Phase planning complete when:
+Phase planning complete when:
 - [ ] STATE.md read, project history absorbed
 - [ ] Mandatory discovery completed (Level 0-3)
 - [ ] Prior decisions, issues, concerns synthesized
@@ -737,14 +611,4 @@ Tasks are instructions for Claude, not Jira tickets.
 - [ ] Risk assessment presented (score + top factors)
 - [ ] User chose verify/skip (or verified if chosen)
 - [ ] User knows next steps and wave structure
-
-**Gap closure mode (`--gaps`)** — Planning complete when:
-- [ ] VERIFICATION.md loaded and gaps parsed
-- [ ] Existing SUMMARYs read for context
-- [ ] Gaps clustered into focused plans
-- [ ] Plan numbers sequential after existing (04, 05...)
-- [ ] PLAN file(s) created with pure markdown format
-- [ ] EXECUTION-ORDER.md updated with gap closure plans
-- [ ] PLAN file(s) committed to git
-- [ ] User knows to run `/ms:execute-phase {X}` next
 </success_criteria>

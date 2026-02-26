@@ -33,7 +33,7 @@ When there's meaningful additional context (like a phase identifier), add it as 
 ## Format Rules
 
 1. **Command is the anchor** — backtick command + description on one line, no separate bold label restating the command name
-2. **Phase identifiers are additive context** — `**Phase 2: Auth**` carries info the command doesn't; bold labels like `**Plan gap closure**` just restate `/ms:plan-phase --gaps` and should be omitted
+2. **Phase identifiers are additive context** — `**Phase 2: Auth**` carries info the command doesn't; bold labels that just restate the command name should be omitted
 3. **Pull context from source** — ROADMAP.md for phases, PLAN.md `<objective>` for plans
 4. **Command in inline code** — backticks, easy to copy-paste, renders as clickable link
 5. **`/clear` explanation** — always include, keeps it concise but explains why

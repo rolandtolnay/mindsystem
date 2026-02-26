@@ -257,7 +257,7 @@ score = (verified_truths / total_truths)
 
 ## Step 9: Structure Gap Output (If Gaps Found)
 
-When gaps are found, structure them in YAML frontmatter for consumption by `/ms:plan-phase --gaps`. Use the `gaps:` format shown in the VERIFICATION.md template below.
+When gaps are found, structure them in YAML frontmatter for gap triage. Use the `gaps:` format shown in the VERIFICATION.md template below.
 
 **Gap fields:** `truth` (observable truth that failed), `status` (failed | partial), `reason` (why it failed), `artifacts` (files with issues), `missing` (specific things to add/fix).
 
@@ -383,7 +383,7 @@ Consider `/ms:verify-work {phase}` to validate these through UAT.
 2. **{Truth 2}** — {reason}
    - Missing: {what needs to be added}
 
-Structured gaps in VERIFICATION.md frontmatter for `/ms:plan-phase --gaps`.
+Structured gaps in VERIFICATION.md frontmatter for gap triage.
 ```
 
 </output>
@@ -396,7 +396,7 @@ Structured gaps in VERIFICATION.md frontmatter for `/ms:plan-phase --gaps`.
 
 **DO NOT skip key link verification.** This is where 80% of stubs hide. The pieces exist but aren't connected.
 
-**Structure gaps in YAML frontmatter.** The planner (`/ms:plan-phase --gaps`) creates plans from your analysis.
+**Structure gaps in YAML frontmatter.** Gap triage routes gaps to the appropriate primitive based on scope analysis.
 
 **DO keep verification fast.** Use grep/file checks, not running the app. Goal is structural verification, not functional testing.
 
@@ -406,7 +406,7 @@ Structured gaps in VERIFICATION.md frontmatter for `/ms:plan-phase --gaps`.
 
 <success_criteria>
 
-- [ ] Gaps structured in YAML frontmatter (if gaps_found) — planner depends on this
+- [ ] Gaps structured in YAML frontmatter (if gaps_found) — gap triage depends on this
 - [ ] Key links verified — not just artifact existence; this is where stubs hide
 - [ ] Artifacts checked at all three levels (exists → substantive → wired)
 - [ ] SUMMARY.md claims verified against actual code, not trusted

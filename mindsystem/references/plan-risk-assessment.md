@@ -9,7 +9,6 @@ Provide lightweight risk assessment after plan creation to help users decide whe
 
 <skip_conditions>
 Skip risk assessment entirely when:
-- `--gaps` flag present (gap closure plans don't need risk assessment)
 - Zero plans created (error state)
 </skip_conditions>
 

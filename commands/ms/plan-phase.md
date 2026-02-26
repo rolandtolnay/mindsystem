@@ -1,7 +1,7 @@
 ---
 name: ms:plan-phase
 description: Create detailed execution plan for a phase (PLAN.md)
-argument-hint: "[phase] [--gaps]"
+argument-hint: "[phase]"
 allowed-tools:
   - Read
   - Bash
@@ -21,8 +21,6 @@ Create executable phase prompt with discovery, context injection, and task break
 Purpose: Break down roadmap phases into concrete, executable PLAN.md files that Claude can execute.
 Output: One or more PLAN.md files in the phase directory (.planning/phases/XX-name/{phase}-{plan}-PLAN.md)
 
-**Gap closure mode (`--gaps` flag):**
-When invoked with `--gaps`, plans address gaps identified by the verifier. Load VERIFICATION.md, create plans to close specific gaps.
 </objective>
 
 <execution_context>
@@ -32,7 +30,6 @@ When invoked with `--gaps`, plans address gaps identified by the verifier. Load 
 
 <context>
 Phase number: $ARGUMENTS (optional - auto-detects next unplanned phase if not provided)
-Gap closure mode: `--gaps` flag triggers gap closure workflow
 
 **Resolve phase if provided:**
 ```bash
@@ -76,17 +73,14 @@ Check for and read `.planning/TECH-DEBT.md` — prioritized issues for scope sel
 **Load codebase context if exists:**
 Check for `.planning/codebase/` and load relevant documents based on phase type.
 
-**If --gaps flag present, also load:**
-@.planning/phases/XX-name/{phase}-VERIFICATION.md — contains structured gaps in YAML frontmatter
 </context>
 
 <process>
 1. Check .planning/ directory exists (error if not - user should run /ms:new-project)
-2. Parse arguments: extract phase number and check for `--gaps` flag
+2. Parse arguments: extract phase number
 3. If phase number provided, validate it exists in roadmap
 4. If no phase number, detect next unplanned phase from roadmap
 
-**Standard mode (no --gaps flag):**
 5. Follow plan-phase.md workflow:
    - Load project state and accumulated decisions
    - Perform mandatory discovery (Level 0-3 as appropriate)
@@ -97,17 +91,9 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
    - Hand off tasks + proposed grouping + confirmed skills to plan-writer subagent
    - Create PLAN.md file(s) with executable structure
 
-**Gap closure mode (--gaps flag):**
-5. Follow plan-phase.md workflow with gap_closure_mode:
-   - Load VERIFICATION.md and parse `gaps:` YAML from frontmatter
-   - Read existing SUMMARYs to understand what's already built
-   - Create tasks from gaps (each gap.missing item → task candidates)
-   - Number plans sequentially after existing (if 01-03 exist, create 04, 05...)
-   - Create PLAN.md file(s) focused on closing specific gaps
-
 6. **Update last command:** `ms-tools set-last-command "ms:plan-phase $ARGUMENTS"`
 
-7. **Risk assessment** (skip if `--gaps` flag present)
+7. **Risk assessment**
    - Calculate risk score from context already loaded (task count, plan count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains)
    - Present score + top factors via AskUserQuestion
    - Tier-based recommendation: Skip (0-39), Optional (40-69), Verify (70+)
