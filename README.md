@@ -28,27 +28,40 @@ npx mindsystem-cc
 ## How it works
 
 ```
-  new-milestone          Define what to build next
-       │
-  create-roadmap         Derive requirements, map to phases
-       │
-       ▼
-  ┌─────────────────┐
-  │  Per Phase:      │
-  │                  │
-  │  discuss-phase ──┤  (optional) Lock intent, validate assumptions
-  │  design-phase  ──┤  (optional) Generate mockups, pick direction
-  │  research-phase ─┤  (optional) External docs, codebase patterns, community practices
-  │                  │
-  │  plan-phase ─────┤  Break into context-budgeted plans
-  │  execute-phase ──┤  Fresh subagents run each plan autonomously
-  │  verify-work ────┤  Manual acceptance tests, inline fixes
-  │                  │
-  │  ← repeat ───────┘
-  │
-  audit-milestone        Check requirements coverage, surface tech debt
-       │
-  complete-milestone     Archive, evolve PROJECT.md, start fresh
+  [ new-milestone ]         Define what to build next
+          │
+          ▼
+  [ create-roadmap ]        Derive requirements, map to phases
+          │
+          ▼
+╔════════════════════════════════════════════════════════════════════╗
+║ Per Phase:                                                         ║
+║                                                                    ║
+║   [ discuss-phase ]       (optional) Lock intent, validate context ║
+║           │                                                        ║
+║           ▼                                                        ║
+║   [ design-phase ]        (optional) Generate mockups, pick path   ║
+║           │                                                        ║
+║           ▼                                                        ║
+║   [ research-phase ]      (optional) External docs, code patterns  ║
+║           │                                                        ║
+║           ▼                                                        ║
+║   [ plan-phase ]          Break into context-budgeted plans        ║
+║           │                                                        ║
+║           ▼                                                        ║
+║   [ execute-phase ]       Fresh subagents run each plan            ║
+║           │                                                        ║
+║           ▼                                                        ║
+║   [ verify-work ]         Manual acceptance tests, inline fixes    ║
+║           │                                                        ║
+║           └─────── repeat for next phase ──────────────────────┐   ║
+╚═══════════╦════════════════════════════════════════════════════╧═══╝
+            │
+            ▼
+  [ audit-milestone ]       Check requirements coverage, surface tech debt
+            │
+            ▼
+  [ complete-milestone ]    Archive, evolve PROJECT.md, start fresh
 ```
 
 Each phase gets its own preparation depth. A database migration might skip straight to planning. A user-facing feature might need discussion, design mockups, and research first. You pick the depth.
