@@ -150,6 +150,10 @@ function isInteractive() {
  * @param {string} destPrefix - The destination prefix (e.g., 'commands/ms', 'agents')
  * @returns {Array<{relativePath: string, absolutePath: string}>}
  */
+// Directories and file patterns excluded from installation
+const EXCLUDED_DIRS = new Set(['.pytest_cache', '__pycache__', 'fixtures', 'node_modules', '.git', '.venv']);
+const EXCLUDED_FILE_PATTERNS = [/^test_/, /\.test\./, /\.spec\./];
+
 function collectFiles(baseDir, currentDir, destPrefix) {
   const files = [];
   if (!fs.existsSync(currentDir)) {
@@ -158,13 +162,17 @@ function collectFiles(baseDir, currentDir, destPrefix) {
 
   const entries = fs.readdirSync(currentDir, { withFileTypes: true });
   for (const entry of entries) {
+    if (EXCLUDED_DIRS.has(entry.name)) {
+      continue;
+    }
+
     const absolutePath = path.join(currentDir, entry.name);
     const relativeToCurrent = path.relative(baseDir, absolutePath);
     const relativePath = path.join(destPrefix, relativeToCurrent);
 
     if (entry.isDirectory()) {
       files.push(...collectFiles(baseDir, absolutePath, destPrefix));
-    } else {
+    } else if (!EXCLUDED_FILE_PATTERNS.some(p => p.test(entry.name))) {
       files.push({ relativePath, absolutePath });
     }
   }

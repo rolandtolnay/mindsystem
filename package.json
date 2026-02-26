@@ -10,7 +10,10 @@
     "commands",
     "mindsystem",
     "agents",
-    "scripts",
+    "scripts/ms-tools.py",
+    "scripts/ms-lookup-wrapper.sh",
+    "scripts/ms-lookup",
+    "scripts/compare_mockups.py",
     "skills"
   ],
   "keywords": [
