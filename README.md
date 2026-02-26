@@ -288,23 +288,18 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 
 ```
 .planning/
-│
-│   Project identity
 ├── PROJECT.md                        # Living spec — vision, users, flows, decisions
 ├── MILESTONES.md                     # Registry of completed milestones
 │
-│   Current milestone state
 ├── STATE.md                          # Active phase, blockers, recent decisions
 ├── MILESTONE-CONTEXT.md              # new-milestone → brainstorm that grounds the roadmap
 ├── ROADMAP.md                        # Phase breakdown with goals and success criteria
 ├── REQUIREMENTS.md                   # Checkable REQ-IDs mapped to phases
 │
-│   Accumulated over time
 ├── TECH-DEBT.md                      # Prioritized debt — TD-IDs, severity tiers
 ├── config.json                       # Subsystems, code review tiers, preferences
 │
-│   Active milestone phases
-├── phases/
+├── phases/                           # Active milestone work
 │   │
 │   ├── 01-auth-foundation/           # ── Fully executed phase ──
 │   │   ├── CONTEXT.md                # discuss-phase → locked intent and decisions
@@ -328,14 +323,12 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │       ├── CONTEXT.md                #   discussed, not yet planned
 │       └── 02-01-PLAN.md             #   planned, not yet executed
 │
-│   Accumulated knowledge — persists across milestones
-├── knowledge/
+├── knowledge/                        # Persists across milestones
 │   ├── auth.md                       # Patterns, decisions, pitfalls per subsystem
 │   ├── api.md                        # Enriched after every execute and verify cycle
 │   └── ui.md                         # Future phases load relevant files automatically
 │
-│   Codebase analysis (map-codebase)
-├── codebase/
+├── codebase/                         # /ms:map-codebase → existing repo analysis
 │   ├── STACK.md                      # Runtime, frameworks, key dependencies
 │   ├── ARCHITECTURE.md               # Modules, layers, data flow patterns
 │   ├── STRUCTURE.md                  # Directory layout and file organization
@@ -344,34 +337,29 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │   ├── INTEGRATIONS.md               # External services and API connections
 │   └── CONCERNS.md                   # Known issues, areas requiring care
 │
-│   Domain research (research-project)
-├── research/
+├── research/                         # /ms:research-project → domain ecosystem
 │   ├── STACK.md                      # Technology recommendations for this domain
 │   ├── ARCHITECTURE.md               # Common system structure patterns
 │   ├── FEATURES.md                   # Feature landscape in this domain
 │   ├── PITFALLS.md                   # Mistakes to avoid
 │   └── SUMMARY.md                    # Synthesized findings with roadmap implications
 │
-│   Out-of-pipeline work (adhoc)
-├── adhoc/
+├── adhoc/                            # /ms:adhoc → out-of-pipeline work
 │   └── 2026-01-15-fix-token/
 │       ├── adhoc-01-SUMMARY.md       # Execution results and learnings
 │       └── adhoc-01-changes.patch    # Code diff
 │
-│   Structured debugging (debug)
-├── debug/
+├── debug/                            # /ms:debug → structured investigations
 │   ├── websocket-reconnect.md        # Active investigation — survives /clear
 │   └── resolved/
 │       └── race-condition-login.md   # Root cause found, fix documented
 │
-│   Captured work items (add-todo)
-├── todos/
+├── todos/                            # /ms:add-todo → captured work items
 │   ├── 2026-02-01-rate-limiting.md   # Pending — priority, estimate, subsystem
 │   └── done/
-│       └── 2026-01-20-header-fix.md  # Completed via adhoc
+│       └── 2026-01-20-header-fix.md  # Completed via /ms:adhoc
 │
-│   Completed milestone archives
-└── milestones/
+└── milestones/                       # /ms:complete-milestone → archived history
     └── mvp/
         ├── ROADMAP.md                # Historical phase breakdown
         ├── REQUIREMENTS.md           # Final requirement status
