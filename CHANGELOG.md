@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.0.2] - 2026-02-26
+
+### Changed
+- Gap closure simplified: the `--gaps` flag and `diagnose-issues` workflow are replaced by scope-based triage routing through existing primitives (`/ms:adhoc`, `/ms:insert-phase`, `/ms:add-phase`, `/ms:add-todo`). Unfixed issues now route through standard paths instead of a dedicated multi-step chain.
+- Config operations (`config.json` reads, writes, deletes) moved from inline jq calls to `ms-tools config-get`, `config-set`, and `config-delete` subcommands. Removes jq as an implicit dependency and reduces prompt context across 12 files.
+
+### Fixed
+- Test artifacts (fixtures, `__pycache__`, `.pytest_cache`) no longer included in npm package or copied during installation. Existing installs auto-clean orphaned files on next update via manifest diffing.
+- UAT.md gaps now correctly trigger gap-closure triage routing, matching the behavior already documented for VERIFICATION.md gaps.
+
 ## [4.0.1] - 2026-02-26
 
 ### Removed
@@ -584,7 +594,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.2...HEAD
+[4.0.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v4.0.0
 [3.22.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.0...v3.22.1
