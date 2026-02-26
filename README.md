@@ -19,7 +19,7 @@ npx mindsystem-cc
 
 <br>
 
-[How it works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick start](#quick-start) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
+[How it works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick start](#quick-start) · [.planning](#the-planning-directory) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
 
 </div>
 
@@ -279,6 +279,115 @@ You'll get `.planning/` with your project vision, milestone context, requirement
 Codebase mapping produces 7 documents covering your stack, conventions, and architecture. Then you define what to build, and all downstream planning respects what's already there.
 
 **Returning after a break?** Run `/ms:progress` to see where you left off and what to do next.
+
+---
+
+## The .planning directory
+
+Every artifact Mindsystem generates lives in `.planning/` — a markdown knowledge base that grows with your project. Commands read from it, execution enriches it, and it all survives `/clear` boundaries and context resets. Here's what a project looks like after a couple of milestones:
+
+```
+.planning/
+│
+│   Project identity
+├── PROJECT.md                        # Living spec — vision, users, flows, decisions
+├── MILESTONES.md                     # Registry of completed milestones
+│
+│   Current milestone state
+├── STATE.md                          # Active phase, blockers, recent decisions
+├── MILESTONE-CONTEXT.md              # new-milestone → brainstorm that grounds the roadmap
+├── ROADMAP.md                        # Phase breakdown with goals and success criteria
+├── REQUIREMENTS.md                   # Checkable REQ-IDs mapped to phases
+│
+│   Accumulated over time
+├── TECH-DEBT.md                      # Prioritized debt — TD-IDs, severity tiers
+├── config.json                       # Subsystems, code review tiers, preferences
+│
+│   Active milestone phases
+├── phases/
+│   │
+│   ├── 01-auth-foundation/           # ── Fully executed phase ──
+│   │   ├── CONTEXT.md                # discuss-phase → locked intent and decisions
+│   │   ├── DESIGN.md                 # design-phase → exact tokens, layout, interactions
+│   │   ├── RESEARCH.md               # research-phase → library picks, patterns, tradeoffs
+│   │   ├── 01-01-PLAN.md             # plan-phase → executable prompt, one per budget slice
+│   │   ├── 01-02-PLAN.md             #
+│   │   ├── EXECUTION-ORDER.md        # plan-phase → wave grouping and dependencies
+│   │   ├── 01-01-SUMMARY.md          # execute-phase → what changed, patterns, learnings
+│   │   ├── 01-02-SUMMARY.md          #
+│   │   ├── VERIFICATION.md           # execute-phase → goal-backward pass/fail
+│   │   ├── UAT.md                    # verify-work → manual acceptance test results
+│   │   ├── 01-changes.patch          # execute-phase → diff of all code changes
+│   │   ├── 01-uat-fixes.patch        # verify-work → diff of fixes applied during testing
+│   │   └── mockups/                  # design-phase → HTML/CSS design exploration
+│   │       ├── variant-a.html        #   self-contained mockup
+│   │       ├── variant-b.html        #   self-contained mockup
+│   │       └── comparison.html       #   side-by-side view, opens in browser
+│   │
+│   └── 02-payment-flow/              # ── Phase in progress ──
+│       ├── CONTEXT.md                #   discussed, not yet planned
+│       └── 02-01-PLAN.md             #   planned, not yet executed
+│
+│   Accumulated knowledge — persists across milestones
+├── knowledge/
+│   ├── auth.md                       # Patterns, decisions, pitfalls per subsystem
+│   ├── api.md                        # Enriched after every execute and verify cycle
+│   └── ui.md                         # Future phases load relevant files automatically
+│
+│   Codebase analysis (map-codebase)
+├── codebase/
+│   ├── STACK.md                      # Runtime, frameworks, key dependencies
+│   ├── ARCHITECTURE.md               # Modules, layers, data flow patterns
+│   ├── STRUCTURE.md                  # Directory layout and file organization
+│   ├── CONVENTIONS.md                # Naming, style, established patterns
+│   ├── TESTING.md                    # Test framework, coverage, how to add tests
+│   ├── INTEGRATIONS.md               # External services and API connections
+│   └── CONCERNS.md                   # Known issues, areas requiring care
+│
+│   Domain research (research-project)
+├── research/
+│   ├── STACK.md                      # Technology recommendations for this domain
+│   ├── ARCHITECTURE.md               # Common system structure patterns
+│   ├── FEATURES.md                   # Feature landscape in this domain
+│   ├── PITFALLS.md                   # Mistakes to avoid
+│   └── SUMMARY.md                    # Synthesized findings with roadmap implications
+│
+│   Out-of-pipeline work (adhoc)
+├── adhoc/
+│   └── 2026-01-15-fix-token/
+│       ├── adhoc-01-SUMMARY.md       # Execution results and learnings
+│       └── adhoc-01-changes.patch    # Code diff
+│
+│   Structured debugging (debug)
+├── debug/
+│   ├── websocket-reconnect.md        # Active investigation — survives /clear
+│   └── resolved/
+│       └── race-condition-login.md   # Root cause found, fix documented
+│
+│   Captured work items (add-todo)
+├── todos/
+│   ├── 2026-02-01-rate-limiting.md   # Pending — priority, estimate, subsystem
+│   └── done/
+│       └── 2026-01-20-header-fix.md  # Completed via adhoc
+│
+│   Completed milestone archives
+└── milestones/
+    └── mvp/
+        ├── ROADMAP.md                # Historical phase breakdown
+        ├── REQUIREMENTS.md           # Final requirement status
+        ├── PHASE-SUMMARIES.md        # Consolidated execution summaries
+        ├── MILESTONE-AUDIT.md        # Requirements coverage, integration check
+        ├── CONTEXT.md                # Original milestone brainstorm
+        ├── research/                 # Archived domain research
+        │   └── ...
+        └── phases/                   # Archived phase artifacts
+            └── 01-foundation/
+                ├── 01-01-SUMMARY.md  #   execution summaries retained
+                ├── 01-changes.patch  #   code diffs retained
+                └── ...
+```
+
+Everything is plain markdown (plus `config.json` and `.patch` diffs). The entire directory is greppable, diffable, and readable by any team member or AI assistant. Phase 1 starts from scratch. Phase 10 starts with everything the project has learned.
 
 ---
 
