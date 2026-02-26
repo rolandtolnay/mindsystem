@@ -299,6 +299,20 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 ├── TECH-DEBT.md                      # Prioritized debt — TD-IDs, severity tiers
 ├── config.json                       # Subsystems, code review tiers, preferences
 │
+├── knowledge/                        # Persists across milestones
+│   ├── auth.md                       # Patterns, decisions, pitfalls per subsystem
+│   ├── api.md                        # Enriched after every execute and verify cycle
+│   └── ui.md                         # Future phases load relevant files automatically
+│
+├── codebase/                         # /ms:map-codebase → existing repo analysis
+│   ├── STACK.md                      # Runtime, frameworks, key dependencies
+│   ├── ARCHITECTURE.md               # Modules, layers, data flow patterns
+│   ├── STRUCTURE.md                  # Directory layout and file organization
+│   ├── CONVENTIONS.md                # Naming, style, established patterns
+│   ├── TESTING.md                    # Test framework, coverage, how to add tests
+│   ├── INTEGRATIONS.md               # External services and API connections
+│   └── CONCERNS.md                   # Known issues, areas requiring care
+│
 ├── phases/                           # Active milestone work
 │   │
 │   ├── 01-auth-foundation/           # ── Fully executed phase ──
@@ -322,20 +336,6 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │   └── 02-payment-flow/              # ── Phase in progress ──
 │       ├── CONTEXT.md                #   discussed, not yet planned
 │       └── 02-01-PLAN.md             #   planned, not yet executed
-│
-├── knowledge/                        # Persists across milestones
-│   ├── auth.md                       # Patterns, decisions, pitfalls per subsystem
-│   ├── api.md                        # Enriched after every execute and verify cycle
-│   └── ui.md                         # Future phases load relevant files automatically
-│
-├── codebase/                         # /ms:map-codebase → existing repo analysis
-│   ├── STACK.md                      # Runtime, frameworks, key dependencies
-│   ├── ARCHITECTURE.md               # Modules, layers, data flow patterns
-│   ├── STRUCTURE.md                  # Directory layout and file organization
-│   ├── CONVENTIONS.md                # Naming, style, established patterns
-│   ├── TESTING.md                    # Test framework, coverage, how to add tests
-│   ├── INTEGRATIONS.md               # External services and API connections
-│   └── CONCERNS.md                   # Known issues, areas requiring care
 │
 ├── research/                         # /ms:research-project → domain ecosystem
 │   ├── STACK.md                      # Technology recommendations for this domain
