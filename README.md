@@ -252,25 +252,27 @@ Requirements you want but haven't shipped yet are tracked in `PROJECT.md` with o
 
 ```
 /ms:new-project
+/ms:new-milestone
 /ms:create-roadmap
 /ms:plan-phase 1
 /ms:execute-phase 1
 /ms:verify-work 1
 ```
 
-You'll get `.planning/` with your project vision, requirements, roadmap, and the first phase implemented with commits, patch files, and knowledge files.
+You'll get `.planning/` with your project vision, milestone context, requirements, roadmap, and the first phase implemented with commits, patch files, and knowledge files.
 
 ### Existing project
 
 ```
 /ms:new-project
 /ms:map-codebase
+/ms:new-milestone
 /ms:create-roadmap
 /ms:plan-phase 1
 /ms:execute-phase 1
 ```
 
-Codebase mapping produces 7 documents covering your stack, conventions, and architecture. All downstream planning and execution respects what's already there.
+Codebase mapping produces 7 documents covering your stack, conventions, and architecture. Then you define what to build, and all downstream planning respects what's already there.
 
 **Returning after a break?** Run `/ms:progress` to see where you left off and what to do next.
 
@@ -278,26 +280,38 @@ Codebase mapping produces 7 documents covering your stack, conventions, and arch
 
 ## Configuration
 
-Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to set up code reviewers, mockup preferences, gitignore patterns, and git remote.
+Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to change these interactively.
 
-### Code review tiers
-
-```json
+```jsonc
 {
+  // Canonical subsystem names. Drives knowledge file scoping.
+  // Populated by /ms:new-project, refined by /ms:doctor.
+  "subsystems": ["auth", "api", "database"],
+
+  // Code review after execution. One reviewer per tier.
+  //   null              → no review (default)
+  //   "ms-code-reviewer"    → structural: architecture and design issues
+  //   "ms-code-simplifier"  → clarity: readability and maintainability
+  //   "skip"            → explicitly disable
+  //   "<custom-agent>"  → your own reviewer agent
   "code_review": {
     "adhoc": null,
     "phase": null,
     "milestone": null
+  },
+
+  // How /ms:design-phase opens the mockup comparison page.
+  //   "auto" (default) | "ask" | "off"
+  "open_mockups": "auto",
+
+  // External task tracker integration (Linear only for now).
+  //   null → disabled (default)
+  "task_tracker": {
+    "type": "linear",
+    "cli": "path/to/linear-cli"
   }
 }
 ```
-
-| Value | Behavior |
-| ----- | -------- |
-| `null` | No reviewer (default) |
-| `"ms-code-reviewer"` | Structural analysis: architectural and design issues |
-| `"ms-code-simplifier"` | Clarity-focused: improves readability and maintainability |
-| `"skip"` | Disable review for that tier |
 
 ---
 
