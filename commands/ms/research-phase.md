@@ -69,7 +69,7 @@ cat .planning/phases/${PHASE}-*/${PHASE}-DESIGN.md 2>/dev/null
 grep -A30 "### Decisions Made" .planning/STATE.md 2>/dev/null
 
 # Prior knowledge — match subsystem(s) by comparing phase description against config.json names
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+ms-tools config-get subsystems
 cat .planning/knowledge/{matched_subsystem}.md 2>/dev/null
 ```
 

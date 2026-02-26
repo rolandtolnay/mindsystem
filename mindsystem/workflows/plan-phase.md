@@ -146,7 +146,7 @@ For niche domains (3D, games, audio, shaders, ML), suggest `/ms:research-phase` 
 - Phase name from ROADMAP.md phase description
 
 ```bash
-SUBSYSTEM=$(jq -r '.subsystems[0] // empty' .planning/config.json 2>/dev/null)
+SUBSYSTEM=$(ms-tools config-get subsystems.0)
 PHASE_NAME=$(grep -A2 "Phase ${PHASE}:" .planning/ROADMAP.md 2>/dev/null | head -1 | sed 's/.*Phase [0-9]*: *//')
 ```
 
@@ -357,7 +357,7 @@ After the user confirms the plan structure, check if project skills could improv
 <step name="handoff_to_writer">
 **Spawn ms-plan-writer subagent with task list and context.**
 
-**Subsystem determination:** Read config.json subsystems list via `jq -r '.subsystems[]' .planning/config.json`. Select best match for this phase based on phase goal and task analysis.
+**Subsystem determination:** Read config.json subsystems list via `ms-tools config-get subsystems`. Select best match for this phase based on phase goal and task analysis.
 
 **Learnings assembly:** Collect matched learnings from step 6 into `<learnings>` section. Omit section entirely if no matches. Include source paths for attribution.
 

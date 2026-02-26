@@ -93,7 +93,7 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved
 2. `mkdir -p .planning/debug`
 3. Read project context for frontmatter:
    ```bash
-   jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+   ms-tools config-get subsystems
    grep "^Phase:" .planning/STATE.md 2>/dev/null | head -1
    ```
 4. Create file with initial state including all 10 frontmatter fields:

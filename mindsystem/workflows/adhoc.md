@@ -38,8 +38,8 @@ Read STATE.md for project context (current phase, accumulated decisions, blocker
 **Ticket detection:** Check `task_tracker` in config.json. If configured and `$ARGUMENTS` matches the ticket ID pattern, lazy-load `~/.claude/mindsystem/references/{type}-cli.md` and follow its **Ticket Detection** process. If no tracker configured or no match, proceed with `$ARGUMENTS` as free-text.
 
 ```bash
-TRACKER_TYPE=$(jq -r '.task_tracker.type // empty' .planning/config.json 2>/dev/null)
-TRACKER_CLI=$(jq -r '.task_tracker.cli // empty' .planning/config.json 2>/dev/null)
+TRACKER_TYPE=$(ms-tools config-get task_tracker.type)
+TRACKER_CLI=$(ms-tools config-get task_tracker.cli)
 ```
 
 **Todo detection:** If `$ARGUMENTS` matches a `.planning/todos/*.md` file path and the file exists, lazy-load `~/.claude/mindsystem/references/todo-file.md` and follow its **Todo Detection** process. Todo detection is independent of ticket detection — both can be inactive.
@@ -50,7 +50,7 @@ Read subsystems and match knowledge files to work description:
 
 ```bash
 # Read subsystems from config
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+ms-tools config-get subsystems
 ```
 
 Match keywords from work description against subsystem names. Read matching `.planning/knowledge/*.md` files (1-3 most relevant).
@@ -152,7 +152,8 @@ The executor reads the plan, executes tasks with atomic commits, creates SUMMARY
 Read code review agent from config:
 
 ```bash
-CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.adhoc // .code_review.phase // empty')
+CODE_REVIEW=$(ms-tools config-get code_review.adhoc)
+[ -z "$CODE_REVIEW" ] && CODE_REVIEW=$(ms-tools config-get code_review.phase)
 ```
 
 **If CODE_REVIEW = "skip":** Skip to generate_patch.

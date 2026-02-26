@@ -58,7 +58,7 @@ Infer priority, estimate, and subsystem from description and conversation contex
 | L | 5 | Multi-file feature, new subsystem area |
 | XL | 8 | Cross-cutting concern, architectural change |
 
-**Subsystem:** Read `jq -r '.subsystems[]' .planning/config.json 2>/dev/null`. Match against description and conversation context. Must match config.json vocabulary.
+**Subsystem:** Read `ms-tools config-get subsystems`. Match against description and conversation context. Must match config.json vocabulary.
 </step>
 
 <step name="confirm">

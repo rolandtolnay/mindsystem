@@ -140,6 +140,99 @@ def parse_json_config(planning: Path) -> dict:
         return {}
 
 
+# ---------------------------------------------------------------------------
+# config.json dot-path helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_dot_path(data: Any, key: str) -> tuple[Any, bool]:
+    """Traverse dot-notation path through nested dicts/lists.
+
+    Returns (value, found). Array indices are supported: ``subsystems.0``.
+    """
+    parts = key.split(".")
+    current = data
+    for part in parts:
+        if isinstance(current, dict):
+            if part not in current:
+                return None, False
+            current = current[part]
+        elif isinstance(current, list):
+            try:
+                idx = int(part)
+            except ValueError:
+                return None, False
+            if idx < 0 or idx >= len(current):
+                return None, False
+            current = current[idx]
+        else:
+            return None, False
+    return current, True
+
+
+def _set_dot_path(data: dict, key: str, value: Any) -> dict:
+    """Set *value* at dot-path, creating intermediate dicts as needed."""
+    parts = key.split(".")
+    current = data
+    for part in parts[:-1]:
+        if isinstance(current, dict):
+            if part not in current or not isinstance(current[part], (dict, list)):
+                current[part] = {}
+            current = current[part]
+        elif isinstance(current, list):
+            idx = int(part)
+            current = current[idx]
+        else:
+            raise ValueError(f"Cannot traverse into {type(current).__name__} at '{part}'")
+    last = parts[-1]
+    if isinstance(current, dict):
+        current[last] = value
+    elif isinstance(current, list):
+        current[int(last)] = value
+    return data
+
+
+def _delete_dot_path(data: dict, key: str) -> bool:
+    """Remove key at dot-path. Return whether it existed."""
+    parts = key.split(".")
+    current = data
+    for part in parts[:-1]:
+        if isinstance(current, dict):
+            if part not in current:
+                return False
+            current = current[part]
+        elif isinstance(current, list):
+            try:
+                idx = int(part)
+            except ValueError:
+                return False
+            if idx < 0 or idx >= len(current):
+                return False
+            current = current[idx]
+        else:
+            return False
+    last = parts[-1]
+    if isinstance(current, dict) and last in current:
+        del current[last]
+        return True
+    if isinstance(current, list):
+        try:
+            idx = int(last)
+        except ValueError:
+            return False
+        if 0 <= idx < len(current):
+            current.pop(idx)
+            return True
+    return False
+
+
+def _write_config_atomic(config_path: Path, data: dict) -> None:
+    """Write JSON via tmp file + os.replace for atomic update."""
+    tmp = config_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, indent=2, cls=_SafeEncoder) + "\n", encoding="utf-8")
+    os.replace(str(tmp), str(config_path))
+
+
 def in_range(phase_num: str, start: int, end: int) -> bool:
     """Check if a phase number (possibly decimal) is within start..end range."""
     try:
@@ -2772,6 +2865,95 @@ def cmd_uat_status(args: argparse.Namespace) -> None:
 
 
 # ===================================================================
+# config-get / config-set / config-delete
+# ===================================================================
+
+
+def cmd_config_get(args: argparse.Namespace) -> None:
+    """Read a value from .planning/config.json by dot-notation key."""
+    planning = Path(".planning")
+    config = parse_json_config(planning)
+    value, found = _resolve_dot_path(config, args.key)
+
+    if not found or value is None:
+        # Use default if provided, otherwise empty string
+        if args.default is not None:
+            sys.stdout.write(args.default + "\n")
+        return
+
+    if args.json_output:
+        json.dump(value, sys.stdout, cls=_SafeEncoder)
+        sys.stdout.write("\n")
+        return
+
+    # Output formatting: scalar → raw, list → one per line, dict → JSON
+    if isinstance(value, list):
+        for item in value:
+            sys.stdout.write(str(item) + "\n")
+    elif isinstance(value, dict):
+        json.dump(value, sys.stdout, indent=2, cls=_SafeEncoder)
+        sys.stdout.write("\n")
+    elif isinstance(value, bool):
+        sys.stdout.write(str(value).lower() + "\n")
+    else:
+        sys.stdout.write(str(value) + "\n")
+
+
+def cmd_config_set(args: argparse.Namespace) -> None:
+    """Set a value in .planning/config.json at dot-notation key."""
+    planning = Path(".planning")
+    config_path = planning / "config.json"
+
+    # Determine value from exactly one of: positional, --json, --append
+    has_positional = args.value is not None
+    has_json = args.json_value is not None
+    has_append = args.append_value is not None
+
+    mode_count = sum([has_positional, has_json, has_append])
+    if mode_count == 0:
+        print("Error: provide a value, --json, or --append", file=sys.stderr)
+        sys.exit(1)
+    if mode_count > 1:
+        print("Error: use exactly one of: positional value, --json, --append", file=sys.stderr)
+        sys.exit(1)
+
+    config = parse_json_config(planning)
+
+    if has_json:
+        try:
+            parsed = json.loads(args.json_value)
+        except json.JSONDecodeError as exc:
+            print(f"Error: invalid JSON: {exc}", file=sys.stderr)
+            sys.exit(1)
+        _set_dot_path(config, args.key, parsed)
+    elif has_append:
+        existing, found = _resolve_dot_path(config, args.key)
+        if found and not isinstance(existing, list):
+            print(f"Error: '{args.key}' is not an array", file=sys.stderr)
+            sys.exit(1)
+        if not found or existing is None:
+            _set_dot_path(config, args.key, [args.append_value])
+        else:
+            existing.append(args.append_value)
+    else:
+        _set_dot_path(config, args.key, args.value)
+
+    planning.mkdir(parents=True, exist_ok=True)
+    _write_config_atomic(config_path, config)
+
+
+def cmd_config_delete(args: argparse.Namespace) -> None:
+    """Remove a key from .planning/config.json. Idempotent."""
+    planning = Path(".planning")
+    config_path = planning / "config.json"
+    config = parse_json_config(planning)
+
+    existed = _delete_dot_path(config, args.key)
+    if existed:
+        _write_config_atomic(config_path, config)
+
+
+# ===================================================================
 # Argument parser setup
 # ===================================================================
 
@@ -2889,6 +3071,26 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser("uat-status", help="Output UAT status as JSON")
     p.add_argument("phase", help="Phase number")
     p.set_defaults(func=cmd_uat_status)
+
+    # --- config-get ---
+    p = subparsers.add_parser("config-get", help="Read a value from config.json by dot-path")
+    p.add_argument("key", help="Dot-notation key (e.g. subsystems, code_review.phase, subsystems.0)")
+    p.add_argument("--default", default=None, dest="default", help="Fallback value when key is missing/null")
+    p.add_argument("--json", action="store_true", dest="json_output", help="Output raw JSON")
+    p.set_defaults(func=cmd_config_get)
+
+    # --- config-set ---
+    p = subparsers.add_parser("config-set", help="Set a value in config.json at dot-path")
+    p.add_argument("key", help="Dot-notation key")
+    p.add_argument("value", nargs="?", default=None, help="Scalar string value")
+    p.add_argument("--json", default=None, dest="json_value", help="JSON value (objects, arrays, numbers, booleans, null)")
+    p.add_argument("--append", default=None, dest="append_value", help="Append to existing array (or create new one)")
+    p.set_defaults(func=cmd_config_set)
+
+    # --- config-delete ---
+    p = subparsers.add_parser("config-delete", help="Remove a key from config.json")
+    p.add_argument("key", help="Dot-notation key to remove")
+    p.set_defaults(func=cmd_config_delete)
 
     return parser
 

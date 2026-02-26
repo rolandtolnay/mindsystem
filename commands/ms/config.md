@@ -76,12 +76,10 @@ If "Custom": use AskUserQuestion for each tier (adhoc, phase, milestone) individ
 
 If "Skip code review": set all three values to `"skip"`.
 
-Update config.json with selected values via jq:
+Update config.json:
 
 ```bash
-jq '.code_review = {"adhoc": $a, "phase": $p, "milestone": $m}' \
-  --arg a "$ADHOC" --arg p "$PHASE" --arg m "$MILESTONE" \
-  .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+ms-tools config-set code_review --json '{"adhoc": "'"$ADHOC"'", "phase": "'"$PHASE"'", "milestone": "'"$MILESTONE"'"}'
 ```
 
 </step>
@@ -119,7 +117,7 @@ If no selections: skip gitignore changes.
 Read current value:
 
 ```bash
-CURRENT=$(cat .planning/config.json 2>/dev/null | jq -r '.open_mockups // "auto"')
+CURRENT=$(ms-tools config-get open_mockups --default "auto")
 echo "Current open_mockups: $CURRENT"
 ```
 
@@ -136,10 +134,10 @@ Map selection to config value:
 - "Ask first" → `"ask"`
 - "Don't open" → `"off"`
 
-Update config.json with selected value via jq:
+Update config.json:
 
 ```bash
-jq --arg v "$VALUE" '.open_mockups = $v' .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+ms-tools config-set open_mockups "$VALUE"
 ```
 
 </step>
@@ -149,7 +147,7 @@ jq --arg v "$VALUE" '.open_mockups = $v' .planning/config.json > .planning/confi
 Read current value:
 
 ```bash
-CURRENT=$(cat .planning/config.json 2>/dev/null | jq -r '.task_tracker.type // "not configured"')
+CURRENT=$(ms-tools config-get task_tracker.type --default "not configured")
 echo "Current task_tracker: $CURRENT"
 ```
 
@@ -175,13 +173,13 @@ If "Custom path": ask user for path via AskUserQuestion.
 Write to config.json:
 
 ```bash
-jq '.task_tracker = {"type": "linear", "cli": $cli}' --arg cli "$CLI_PATH" .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+ms-tools config-set task_tracker --json '{"type": "linear", "cli": "'"$CLI_PATH"'"}'
 ```
 
 If "None / not yet":
 
 ```bash
-jq '.task_tracker = null' .planning/config.json > .planning/config.tmp && mv .planning/config.tmp .planning/config.json
+ms-tools config-delete task_tracker
 ```
 
 </step>

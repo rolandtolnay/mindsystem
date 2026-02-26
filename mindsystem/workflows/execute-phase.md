@@ -295,7 +295,7 @@ Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow
 Read code review agent name from config:
 
 ```bash
-CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.phase // empty')
+CODE_REVIEW=$(ms-tools config-get code_review.phase)
 ```
 
 **If CODE_REVIEW = "skip":**

@@ -111,7 +111,7 @@ ms-compare-mockups "${PHASE_DIR}/mockups"
 Read the `open_mockups` config setting:
 
 ```bash
-OPEN_MOCKUPS=$(cat .planning/config.json 2>/dev/null | jq -r '.open_mockups // "auto"')
+OPEN_MOCKUPS=$(ms-tools config-get open_mockups --default "auto")
 ```
 
 Branch on the value:

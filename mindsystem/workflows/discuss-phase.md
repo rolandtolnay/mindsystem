@@ -57,7 +57,7 @@ Load milestone artifacts and prior knowledge. Handle gracefully when any file is
 cat .planning/PROJECT.md 2>/dev/null
 cat .planning/MILESTONE-CONTEXT.md 2>/dev/null
 cat .planning/REQUIREMENTS.md 2>/dev/null
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+ms-tools config-get subsystems
 grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
 ```
 

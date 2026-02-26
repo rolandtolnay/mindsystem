@@ -191,7 +191,7 @@ Route by status (see `<offer_next>`).
 Read code review agent from config:
 
 ```bash
-CODE_REVIEW=$(cat .planning/config.json 2>/dev/null | jq -r '.code_review.milestone // empty')
+CODE_REVIEW=$(ms-tools config-get code_review.milestone)
 ```
 
 **If CODE_REVIEW = "skip":**

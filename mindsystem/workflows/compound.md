@@ -55,7 +55,7 @@ Thoroughness: "medium".
 Read config.json subsystems and match changes:
 
 ```bash
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+ms-tools config-get subsystems
 ```
 
 **Git/file mode:** Match file paths from diff stats against subsystem names via keyword matching.
@@ -94,7 +94,7 @@ Agent reads changes, reads affected knowledge files, writes updates, returns rep
 **Update config.json** (if new subsystems were confirmed in step 4):
 ```bash
 # Add new subsystem to config.json
-jq '.subsystems += ["new-subsystem"]' .planning/config.json > tmp.$$.json && mv tmp.$$.json .planning/config.json
+ms-tools config-set subsystems --append "new-subsystem"
 ```
 
 **Commit changes:**

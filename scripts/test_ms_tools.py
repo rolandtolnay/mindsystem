@@ -42,6 +42,13 @@ _parse_milestone_name_mapping = _mod._parse_milestone_name_mapping
 _SafeEncoder = _mod._SafeEncoder
 cmd_set_last_command = _mod.cmd_set_last_command
 cmd_gather_milestone_stats = _mod.cmd_gather_milestone_stats
+_resolve_dot_path = _mod._resolve_dot_path
+_set_dot_path = _mod._set_dot_path
+_delete_dot_path = _mod._delete_dot_path
+_write_config_atomic = _mod._write_config_atomic
+cmd_config_get = _mod.cmd_config_get
+cmd_config_set = _mod.cmd_config_set
+cmd_config_delete = _mod.cmd_config_delete
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -1699,3 +1706,358 @@ class TestCmdUatStatus:
              pytest.raises(SystemExit) as exc:
             cmd_uat_status(args)
         assert exc.value.code == 1
+
+
+# ===================================================================
+# Part 5: config-get / config-set / config-delete
+# ===================================================================
+
+
+class TestResolveDotPath:
+    """Tests for _resolve_dot_path."""
+
+    def test_top_level_key(self):
+        assert _resolve_dot_path({"a": 1}, "a") == (1, True)
+
+    def test_nested_key(self):
+        assert _resolve_dot_path({"a": {"b": 2}}, "a.b") == (2, True)
+
+    def test_deeply_nested(self):
+        d = {"a": {"b": {"c": 3}}}
+        assert _resolve_dot_path(d, "a.b.c") == (3, True)
+
+    def test_array_index(self):
+        assert _resolve_dot_path({"items": ["x", "y"]}, "items.0") == ("x", True)
+
+    def test_array_index_second(self):
+        assert _resolve_dot_path({"items": ["x", "y"]}, "items.1") == ("y", True)
+
+    def test_missing_top_level(self):
+        assert _resolve_dot_path({"a": 1}, "b") == (None, False)
+
+    def test_missing_nested(self):
+        assert _resolve_dot_path({"a": {"b": 2}}, "a.c") == (None, False)
+
+    def test_missing_deep(self):
+        assert _resolve_dot_path({"a": 1}, "a.b.c") == (None, False)
+
+    def test_null_value(self):
+        assert _resolve_dot_path({"a": None}, "a") == (None, True)
+
+    def test_array_out_of_bounds(self):
+        assert _resolve_dot_path({"items": ["x"]}, "items.5") == (None, False)
+
+    def test_array_negative_index(self):
+        assert _resolve_dot_path({"items": ["x"]}, "items.-1") == (None, False)
+
+    def test_non_int_on_list(self):
+        assert _resolve_dot_path({"items": [1, 2]}, "items.foo") == (None, False)
+
+    def test_traverse_into_scalar(self):
+        assert _resolve_dot_path({"a": "string"}, "a.b") == (None, False)
+
+    def test_empty_dict(self):
+        assert _resolve_dot_path({}, "a") == (None, False)
+
+
+class TestSetDotPath:
+    """Tests for _set_dot_path."""
+
+    def test_set_top_level(self):
+        d = {}
+        _set_dot_path(d, "a", 1)
+        assert d == {"a": 1}
+
+    def test_set_nested_creates_intermediate(self):
+        d = {}
+        _set_dot_path(d, "a.b.c", 42)
+        assert d == {"a": {"b": {"c": 42}}}
+
+    def test_overwrite_existing(self):
+        d = {"a": "old"}
+        _set_dot_path(d, "a", "new")
+        assert d == {"a": "new"}
+
+    def test_overwrite_nested(self):
+        d = {"a": {"b": "old"}}
+        _set_dot_path(d, "a.b", "new")
+        assert d == {"a": {"b": "new"}}
+
+    def test_array_index_set(self):
+        d = {"items": ["a", "b", "c"]}
+        _set_dot_path(d, "items.1", "B")
+        assert d == {"items": ["a", "B", "c"]}
+
+    def test_preserves_siblings(self):
+        d = {"a": 1, "b": 2}
+        _set_dot_path(d, "a", 10)
+        assert d == {"a": 10, "b": 2}
+
+    def test_set_complex_value(self):
+        d = {}
+        _set_dot_path(d, "code_review", {"adhoc": "skip", "phase": "skip"})
+        assert d == {"code_review": {"adhoc": "skip", "phase": "skip"}}
+
+
+class TestDeleteDotPath:
+    """Tests for _delete_dot_path."""
+
+    def test_delete_top_level(self):
+        d = {"a": 1, "b": 2}
+        assert _delete_dot_path(d, "a") is True
+        assert d == {"b": 2}
+
+    def test_delete_nested(self):
+        d = {"a": {"b": 1, "c": 2}}
+        assert _delete_dot_path(d, "a.b") is True
+        assert d == {"a": {"c": 2}}
+
+    def test_delete_missing_returns_false(self):
+        d = {"a": 1}
+        assert _delete_dot_path(d, "b") is False
+        assert d == {"a": 1}
+
+    def test_delete_missing_nested_returns_false(self):
+        d = {"a": {"b": 1}}
+        assert _delete_dot_path(d, "a.c") is False
+        assert d == {"a": {"b": 1}}
+
+    def test_delete_array_element(self):
+        d = {"items": ["a", "b", "c"]}
+        assert _delete_dot_path(d, "items.1") is True
+        assert d == {"items": ["a", "c"]}
+
+    def test_delete_deep_missing_parent(self):
+        d = {"a": 1}
+        assert _delete_dot_path(d, "x.y.z") is False
+
+
+class TestCmdConfigGet:
+    """Tests for cmd_config_get via CLI arguments."""
+
+    @staticmethod
+    def _write_config(tmp_path, data):
+        planning = tmp_path / ".planning"
+        planning.mkdir(exist_ok=True)
+        (planning / "config.json").write_text(json.dumps(data))
+
+    def test_scalar_string(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"name": "hello"})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="name", default=None, json_output=False))
+        assert capsys.readouterr().out == "hello\n"
+
+    def test_scalar_int(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"count": 42})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="count", default=None, json_output=False))
+        assert capsys.readouterr().out == "42\n"
+
+    def test_bool_value(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"enabled": True})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="enabled", default=None, json_output=False))
+        assert capsys.readouterr().out == "true\n"
+
+    def test_array_one_per_line(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"subsystems": ["api", "web", "db"]})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="subsystems", default=None, json_output=False))
+        assert capsys.readouterr().out == "api\nweb\ndb\n"
+
+    def test_object_as_json(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"code_review": {"adhoc": "skip"}})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="code_review", default=None, json_output=False))
+        assert json.loads(capsys.readouterr().out) == {"adhoc": "skip"}
+
+    def test_nested_key(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"code_review": {"phase": "ms-code-simplifier"}})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="code_review.phase", default=None, json_output=False))
+        assert capsys.readouterr().out == "ms-code-simplifier\n"
+
+    def test_array_index(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"subsystems": ["api", "web"]})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="subsystems.0", default=None, json_output=False))
+        assert capsys.readouterr().out == "api\n"
+
+    def test_missing_key_empty_output(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"a": 1})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="missing", default=None, json_output=False))
+        assert capsys.readouterr().out == ""
+
+    def test_missing_key_with_default(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"a": 1})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="missing", default="fallback", json_output=False))
+        assert capsys.readouterr().out == "fallback\n"
+
+    def test_null_value_with_default(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"tracker": None})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="tracker", default="none", json_output=False))
+        assert capsys.readouterr().out == "none\n"
+
+    def test_json_output_flag(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"items": [1, 2, 3]})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="items", default=None, json_output=True))
+        assert json.loads(capsys.readouterr().out) == [1, 2, 3]
+
+    def test_json_output_scalar(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"name": "hello"})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="name", default=None, json_output=True))
+        assert json.loads(capsys.readouterr().out) == "hello"
+
+    def test_no_config_file(self, tmp_path, capsys, monkeypatch):
+        (tmp_path / ".planning").mkdir()
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="anything", default=None, json_output=False))
+        assert capsys.readouterr().out == ""
+
+    def test_no_planning_dir(self, tmp_path, capsys, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="anything", default=None, json_output=False))
+        assert capsys.readouterr().out == ""
+
+    def test_empty_array(self, tmp_path, capsys, monkeypatch):
+        self._write_config(tmp_path, {"items": []})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_get(argparse.Namespace(key="items", default=None, json_output=False))
+        assert capsys.readouterr().out == ""
+
+
+class TestCmdConfigSet:
+    """Tests for cmd_config_set."""
+
+    @staticmethod
+    def _write_config(tmp_path, data):
+        planning = tmp_path / ".planning"
+        planning.mkdir(exist_ok=True)
+        (planning / "config.json").write_text(json.dumps(data))
+
+    @staticmethod
+    def _read_config(tmp_path):
+        return json.loads((tmp_path / ".planning" / "config.json").read_text())
+
+    def test_set_scalar(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="name", value="hello", json_value=None, append_value=None))
+        assert self._read_config(tmp_path) == {"name": "hello"}
+
+    def test_set_nested(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="a.b", value="deep", json_value=None, append_value=None))
+        assert self._read_config(tmp_path) == {"a": {"b": "deep"}}
+
+    def test_json_object(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="code_review", value=None,
+                                          json_value='{"adhoc":"skip","phase":"skip"}', append_value=None))
+        assert self._read_config(tmp_path)["code_review"] == {"adhoc": "skip", "phase": "skip"}
+
+    def test_json_number(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="count", value=None, json_value="42", append_value=None))
+        assert self._read_config(tmp_path)["count"] == 42
+
+    def test_json_bool(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="enabled", value=None, json_value="true", append_value=None))
+        assert self._read_config(tmp_path)["enabled"] is True
+
+    def test_json_invalid(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        with pytest.raises(SystemExit):
+            cmd_config_set(argparse.Namespace(key="bad", value=None, json_value="{invalid", append_value=None))
+
+    def test_append_existing_array(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"items": ["a", "b"]})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="items", value=None, json_value=None, append_value="c"))
+        assert self._read_config(tmp_path)["items"] == ["a", "b", "c"]
+
+    def test_append_new_array(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="items", value=None, json_value=None, append_value="first"))
+        assert self._read_config(tmp_path)["items"] == ["first"]
+
+    def test_append_non_array_fails(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"items": "string"})
+        monkeypatch.chdir(tmp_path)
+        with pytest.raises(SystemExit):
+            cmd_config_set(argparse.Namespace(key="items", value=None, json_value=None, append_value="x"))
+
+    def test_preserves_existing_keys(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"a": 1, "b": 2})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="c", value="3", json_value=None, append_value=None))
+        assert self._read_config(tmp_path) == {"a": 1, "b": 2, "c": "3"}
+
+    def test_no_mode_fails(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {})
+        monkeypatch.chdir(tmp_path)
+        with pytest.raises(SystemExit):
+            cmd_config_set(argparse.Namespace(key="x", value=None, json_value=None, append_value=None))
+
+    def test_overwrite_scalar(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"name": "old"})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="name", value="new", json_value=None, append_value=None))
+        assert self._read_config(tmp_path)["name"] == "new"
+
+    def test_creates_planning_dir(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        cmd_config_set(argparse.Namespace(key="name", value="hello", json_value=None, append_value=None))
+        assert self._read_config(tmp_path) == {"name": "hello"}
+
+
+class TestCmdConfigDelete:
+    """Tests for cmd_config_delete."""
+
+    @staticmethod
+    def _write_config(tmp_path, data):
+        planning = tmp_path / ".planning"
+        planning.mkdir(exist_ok=True)
+        (planning / "config.json").write_text(json.dumps(data))
+
+    @staticmethod
+    def _read_config(tmp_path):
+        return json.loads((tmp_path / ".planning" / "config.json").read_text())
+
+    def test_delete_top_level(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"a": 1, "b": 2})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_delete(argparse.Namespace(key="a"))
+        assert self._read_config(tmp_path) == {"b": 2}
+
+    def test_delete_nested(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"a": {"b": 1, "c": 2}})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_delete(argparse.Namespace(key="a.b"))
+        assert self._read_config(tmp_path) == {"a": {"c": 2}}
+
+    def test_delete_missing_no_write(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"a": 1})
+        config_path = tmp_path / ".planning" / "config.json"
+        mtime_before = config_path.stat().st_mtime
+        monkeypatch.chdir(tmp_path)
+        cmd_config_delete(argparse.Namespace(key="missing"))
+        assert config_path.stat().st_mtime == mtime_before
+
+    def test_delete_missing_no_error(self, tmp_path, monkeypatch):
+        self._write_config(tmp_path, {"a": 1})
+        monkeypatch.chdir(tmp_path)
+        cmd_config_delete(argparse.Namespace(key="missing"))
+        assert self._read_config(tmp_path) == {"a": 1}

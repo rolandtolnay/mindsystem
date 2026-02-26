@@ -132,7 +132,7 @@ If exists, extract:
 Match subsystem(s) to this phase by comparing ROADMAP phase description against subsystem names in config.json. Load matching knowledge files:
 
 ```bash
-jq -r '.subsystems[]' .planning/config.json 2>/dev/null
+ms-tools config-get subsystems
 cat .planning/knowledge/{matched_subsystem}.md 2>/dev/null
 ```
 
