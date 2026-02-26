@@ -370,9 +370,9 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
         │   └── ...
         └── phases/                   # Archived phase artifacts
             └── 01-foundation/
-                ├── 01-01-SUMMARY.md  #   execution summaries retained
                 ├── 01-changes.patch  #   code diffs retained
-                └── ...
+                └── mockups/          #   design mockups retained
+                    └── ...
 ```
 
 Everything is plain markdown (plus `config.json` and `.patch` diffs). The entire directory is greppable, diffable, and readable by any team member or AI assistant. Phase 1 starts from scratch. Phase 10 starts with everything the project has learned.
