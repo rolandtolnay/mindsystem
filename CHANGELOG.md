@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.0.3] - 2026-02-26
+
+### Fixed
+- Codebase researcher no longer scans for removed `LEARNINGS.md` file. The knowledge system replaced learnings files, and prior knowledge is already injected by the orchestrator — the agent's independent scan was redundant and could cause errors.
+
 ## [4.0.2] - 2026-02-26
 
 ### Changed
@@ -594,7 +599,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.3...HEAD
+[4.0.3]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v4.0.0
