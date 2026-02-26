@@ -6,6 +6,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-02-26
+
+### Added
+- **`/ms:compound` command** for on-demand knowledge compounding. When work happens outside the Mindsystem pipeline — direct Claude sessions, manual edits, merged branches — this command takes a git ref, file path, description, or conversation context and updates the relevant knowledge files. Closes the gap where the knowledge base went stale without a full plan-execute-consolidate cycle.
+- **Adhoc reworked into knowledge-aware execution flow.** Adhoc now reads subsystem knowledge files, spawns parallel context-gathering agents, generates a standard-format PLAN.md, executes with the full pipeline, runs code review, and consolidates learnings — all within a single context window. Per-execution artifacts saved in `.planning/adhoc/{timestamp}-{slug}/`. Replaces the previous lightweight 2-task mode.
+- **Linear ticket integration in adhoc.** Pass a ticket ID (e.g., `MIN-123`) as adhoc input and the system auto-fetches ticket context as work input. Lazy-loaded reference keeps zero cost for non-tracker users.
+- **Todo file integration in adhoc.** Pass a todo file path as adhoc input — the system reads the problem description, executes the work, and moves the todo to `done/` with an outcome section.
+- **Deferred requirements lifecycle.** New Deferred section in PROJECT.md tracks requirements the user wants but hasn't shipped yet, with origin milestone and deferral reason. `complete-milestone` triages deferred items before archiving; `create-roadmap` consumes them as candidates for new milestones.
+- **`ms-code-reviewer` agent** for structural code analysis across any tech stack. Replaces the Flutter-only reviewer as the default for milestone audits, analyzing architectural and design issues.
+- **`/ms:update` command** with version checks in doctor and progress. Detects install mode (local/global), compares against npm registry, and runs non-interactive install. Doctor gains a version check category; progress shows an "Update Available" banner when behind.
+- **Simplified todo capture.** Rewritten as flat file logging with Linear-inspired metadata (priority 1-4, estimate XS-XL, inferred subsystem).
+
+### Changed
+- **Adhoc assumption-based briefing.** Instead of generic "present approach" prompts, adhoc now externalizes assumptions with confidence levels, then asks targeted questions only for genuine behavioral ambiguity the user must resolve.
+- **Audit-milestone code review** collapsed from dual-path branching (analyze-only vs simplifier) into a single outcome-based flow — spawns the reviewer, reacts to outcomes, and presents quality-phase decisions only for high-impact findings.
+
+### Fixed
+- **Milestone stats** now discover completed plans from SUMMARY.md when PLAN.md files have been cleaned up after execution, fixing incorrect 0/0 progress counts.
+
+### Removed
+- **`/ms:plan-milestone-gaps` command.** Existing composable commands (`add-phase`, `insert-phase`, `adhoc`) fully cover the batch-phase-creation use case.
+- **`/ms:check-todos` command.** Todo capture simplified to flat file logging; checking and execution handled by adhoc.
+
 ## [3.22.1] - 2026-02-25
 
 ### Changed
@@ -556,7 +579,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v4.0.0
 [3.22.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.0...v3.22.1
 [3.22.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.21.0...v3.22.0
 [3.21.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.20.0...v3.21.0
