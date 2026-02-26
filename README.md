@@ -289,11 +289,11 @@ Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to
   "subsystems": ["auth", "api", "database"],
 
   // Code review after execution. One reviewer per tier.
-  //   null              → no review (default)
+  //   null                  → falls back to "ms-code-simplifier" (default)
   //   "ms-code-reviewer"    → structural: architecture and design issues
   //   "ms-code-simplifier"  → clarity: readability and maintainability
-  //   "skip"            → explicitly disable
-  //   "<custom-agent>"  → your own reviewer agent
+  //   "skip"                → explicitly disable review
+  //   "<custom-agent>"      → your own reviewer agent
   "code_review": {
     "adhoc": null,
     "phase": null,
@@ -312,6 +312,8 @@ Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to
   }
 }
 ```
+
+Linear integration requires the [Linear CLI skill](https://github.com/rolandtolnay/llm-toolkit/tree/main/skills/linear). Point `task_tracker.cli` at the downloaded script.
 
 ---
 
@@ -400,3 +402,7 @@ npx mindsystem-cc@latest
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+Inspired by [GSD](https://github.com/gsd-build/get-shit-done) and [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin).
