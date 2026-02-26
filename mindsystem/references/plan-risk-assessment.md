@@ -2,7 +2,7 @@
 Optional verification step for plan-phase workflow. Calculates risk score from already-loaded context and prompts user to verify or skip.
 
 <purpose>
-Provide lightweight risk assessment after plan creation to help users decide whether to run the ms-plan-checker before execution.
+Provide lightweight risk assessment after plan creation to help users decide whether to run plan verification before execution.
 
 **Key principle:** All information is already in context from earlier workflow steps. No additional file reads or subagent spawns needed for scoring.
 </purpose>

@@ -61,7 +61,7 @@ Initialize → (Optional Research) → Roadmap → Plan → Execute → Verify �
 
 Common deviations:
 - Existing repo: `/ms:map-codebase` after `/ms:new-project` (or before — either works)
-- Plan looks wrong: `/ms:discuss-phase <phase>` or `/ms:check-phase <phase>`
+- Plan looks wrong: `/ms:discuss-phase <phase>`
 - Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
 - Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
 - Execution gaps: `/ms:plan-phase <phase> --gaps` then `/ms:execute-phase <phase>`
@@ -201,16 +201,6 @@ Execute all unexecuted plans in a phase with wave-based parallelization.
 Usage: `/ms:execute-phase 5`
 
 ### Verification
-
-**`/ms:check-phase <number>`**
-Verify phase plans before execution (optional quality gate).
-
-- Use when: the phase is complex or risky and you want a “will this actually achieve the goal?” sanity check before executing.
-- Spawns plan checker agent to analyze PLAN.md files
-- Checks requirement coverage, task completeness, dependencies
-- Use for complex phases before committing to execution
-
-Usage: `/ms:check-phase 5`
 
 **`/ms:verify-work [number]`**
 User acceptance testing of phase or plan.
@@ -479,7 +469,6 @@ Usage: `/ms:release-notes`
 
 ```
 /ms:plan-phase 5                 # Create one or more PLAN.md files
-/ms:check-phase 5                # (optional) Sanity check: plans will achieve goal
 /ms:execute-phase 5              # Execute; produces SUMMARY + VERIFICATION
 # If gaps found during verification:
 /ms:plan-phase 5 --gaps          # Create additional plans to close verifier gaps

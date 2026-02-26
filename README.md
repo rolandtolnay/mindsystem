@@ -197,7 +197,7 @@ Orchestration metadata (wave grouping, dependencies) lives in `EXECUTION-ORDER.m
 
 ### Built-in Code Review
 
-Configurable per tier — adhoc, phase, or milestone. Runs after execution and produces separate commits for inspection. Choose between structural analysis (`ms-code-reviewer`) or clarity-focused simplification (`ms-code-simplifier`). Or disable review entirely.
+Configurable per tier — adhoc, phase, or milestone. Runs after execution and produces separate commits for inspection. Ships with structural analysis (`ms-code-reviewer`) and clarity-focused simplification (`ms-code-simplifier`), but you can point any tier at your own custom reviewer agent via `.planning/config.json`.
 
 ### Structured Debugging
 
@@ -306,8 +306,7 @@ Full docs live in `/ms:help`.
 | `/ms:design-phase <number>` | Generate UI/UX spec and optional HTML mockups |
 | `/ms:review-design [scope]` | Audit and improve existing UI quality |
 | `/ms:research-phase <number>` | Deep research for niche phase domains |
-| `/ms:plan-phase [number] [--gaps]` | Create context-budgeted plans with optional risk scoring |
-| `/ms:check-phase <number>` | Sanity-check plans before execution |
+| `/ms:plan-phase [number]` | Create context-budgeted plans with optional risk scoring |
 | `/ms:execute-phase <number>` | Run all unexecuted plans in fresh subagents |
 | `/ms:verify-work [number]` | Batched manual UAT with inline fixes |
 | `/ms:debug [description]` | Structured debugging that survives `/clear` |
@@ -328,6 +327,12 @@ Full docs live in `/ms:help`.
 ## Updating
 
 Inside Claude Code:
+
+```
+/ms:update
+```
+
+Check what changed:
 
 ```
 /ms:release-notes
@@ -352,6 +357,10 @@ npx mindsystem-cc@latest
 
 - Run `/ms:help` to verify installation.
 - Re-run `npx mindsystem-cc` to reinstall.
+
+**Outdated project structure after a major update?**
+
+- Run `/ms:doctor` to detect and fix stale artifacts, missing config fields, and directory structure changes between versions.
 
 **Updating to the latest version?**
 

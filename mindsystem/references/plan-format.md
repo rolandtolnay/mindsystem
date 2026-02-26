@@ -195,7 +195,7 @@ Execution order lives in a single `EXECUTION-ORDER.md` file alongside the plans.
 |----------|--------|
 | How does the verifier find must-haves? | Reads `## Must-Haves` section |
 | How does the executor know the subsystem? | Reads inline metadata (`**Subsystem:**`) |
-| How does the plan-checker validate plans? | Reads EXECUTION-ORDER.md + plan structure |
+| How is plan verification done? | Reads EXECUTION-ORDER.md + plan structure |
 | What triggers TDD lazy-loading? | `**Type:** tdd` in inline metadata |
 | How does the executor know why an approach was chosen? | Reads `## Context` section |
 | How does the executor find existing utilities? | Reads `**Files:**` lines and inline references in `## Changes` |
