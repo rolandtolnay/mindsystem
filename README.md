@@ -2,22 +2,16 @@
 
 # MINDSYSTEM
 
-**Spec-driven development for Claude Code, built for engineers who ship production code.**
+**A meta-prompting and context engineering system for Claude Code.**
 
-**Solves context rot — the quality degradation that happens as Claude fills its context window.**
-
-_Built on the philosophy of [GSD](https://github.com/glittercowboy/get-shit-done) by TÂCHES._
-
-[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-
-<br>
+Every piece of work makes the next one better. Mindsystem structures your Claude Code sessions into plannable, executable, verifiable phases — and compounds what it learns into persistent knowledge files that survive `/clear`. The result: context rot stops being the bottleneck, and quality stays consistent from phase 1 to phase 20.
 
 ```bash
 npx mindsystem-cc
 ```
 
-**Works on macOS, Windows, and Linux.**
+[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 <br>
 
@@ -25,278 +19,255 @@ npx mindsystem-cc
 
 <br>
 
-[Why](#why-engineers-use-this) · [Install](#installation) · [Mental model](#mental-model) · [Playbooks](#playbooks) · [Why this works](#why-this-works) · [Config](#configuration) · [Commands](#command-index-one-liners) · [Troubleshooting](#troubleshooting)
+[How It Works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick Start](#quick-start) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
 
 </div>
 
 ---
 
-## Why Engineers Use This
+## How It Works
 
-> _"I'm a solo developer. I don't write code — Claude Code does. Other spec-driven development tools exist; BMAD, Speckit... But they all seem to make things way more complicated than they need to be. I'm not a 50-person software company. I don't want to play enterprise theater. I'm just a creative person trying to build great things that work."_
->
-> — **TÂCHES**, creator of the original [GSD](https://github.com/glittercowboy/get-shit-done)
+```
+  new-milestone          Define what to build next
+       │
+  create-roadmap         Derive requirements, map to phases
+       │
+       ▼
+  ┌─────────────────┐
+  │  Per Phase:      │
+  │                  │
+  │  discuss-phase ──┤  (optional) Lock intent, validate assumptions
+  │  design-phase  ──┤  (optional) Generate mockups, pick direction
+  │  research-phase ─┤  (optional) External docs, codebase patterns, community practices
+  │                  │
+  │  plan-phase ─────┤  Break into context-budgeted plans
+  │  execute-phase ──┤  Fresh subagents run each plan autonomously
+  │  verify-work ────┤  Manual acceptance tests, inline fixes
+  │                  │
+  │  ← repeat ───────┘
+  │
+  audit-milestone        Check requirements coverage, surface tech debt
+       │
+  complete-milestone     Archive, evolve PROJECT.md, clean slate
+```
 
-This philosophy resonated. GSD proved that spec-driven development could be simple and effective.
+Each phase gets its own preparation depth. A database migration might skip straight to planning. A user-facing feature might warrant discussion, design mockups, and research first. You pick the depth; the system adapts.
 
-Mindsystem takes that foundation and optimizes it for a specific kind of user: **Claude Code power users who ship production code**. You're not vibe coding. You want speed, but you also want control, reviewable diffs, and quality gates. You care about what the output code looks like.
-
-Where GSD went broad, Mindsystem goes deep — more verification, more quality gates, more ways to inspect and override. Less magic, more engineering.
-
-### What you get
-
-- **Consistent quality across long sessions.** You plan in the main chat; work runs in fresh subagents at peak context quality.
-- **A single source of truth.** Your `.planning/` folder holds what you're building and what you've proven works — not a scrolling chat transcript.
-- **Reviewable diffs.** Every change creates a commit _and_ a `.patch` file you can inspect, apply, or throw away.
-- **Smart division of labor.** Scripts handle mechanics. Models handle judgment calls and code.
-
-### Beyond the foundation
-
-The original GSD established the philosophy and core infrastructure. Mindsystem extends it with features you'll actually need when shipping production code:
-
-- **Batched UAT with inline fixing.** `/ms:verify-work` shows you tests in batches, fixes failures on the spot (inline or via subagents), and loops until things pass.
-- **Mock-assisted testing.** Generate mock states for tricky scenarios (errors, empty states, role-based views) without shipping mock code.
-- **Patch files everywhere.** Phase execution and UAT fixes produce `.patch` files (`{phase}-changes.patch`, `{phase}-uat-fixes.patch`) so you can diff before you commit.
-- **UI quality tools.** `/ms:design-phase` writes UI/UX specs. `/ms:review-design` audits existing UI and suggests improvements.
-- **Fast research via CLI.** `ms-lookup` searches APIs (Context7 docs, Perplexity) with caching and JSON output. Example: `ms-lookup docs react "useEffect cleanup"`.
-- **Lean milestone management.** Finishing a milestone consolidates decisions into `vX.Y-DECISIONS.md` and archives the rest, keeping `.planning/` tidy.
-- **Configurable code reviews.** Reviewers run after execution and at milestone audits, creating separate commits. Milestone reviews can be report-only — you decide what gets fixed.
-- **Design mockups.** `/ms:design-phase` generates parallel HTML/CSS mockup variants to explore visual directions before locking a design spec.
-- **Cross-milestone learnings.** Milestone completion extracts curated patterns into `LEARNINGS.md` so planning in future milestones starts smarter.
-- **Structured tech debt.** `/ms:audit-milestone` maintains `TECH-DEBT.md` — a single source of truth for debt items with severity, source, and suggested fixes.
+Execution happens in fresh subagent contexts — each plan gets up to 200k tokens of headroom at peak quality, regardless of how much planning you did in the main conversation.
 
 ---
 
-## Mental Model
+## End-to-End Walkthrough
+
+### 1. New Milestone
 
 ```
-PLAN     You decide scope, design, and break work into small tasks
-           ↓
-EXECUTE  Fresh subagents run each task (commits + .patch files)
-           ↓
-VERIFY   You test manually, Mindsystem fixes inline, repeat until done
-           ↓
-SHIP     Audit milestone, archive decisions, start fresh
-```
-
----
-
-## Installation
-
-```bash
-npx mindsystem-cc
-```
-
-This adds Mindsystem slash commands to `~/.claude/` (global) or `./.claude/` (local).
-
-Restart Claude Code after installing so it picks up the new commands, then run:
-
-```
-/ms:help
-```
-
-<details>
-<summary><strong>Non-interactive install (Docker, CI, scripts)</strong></summary>
-
-```bash
-npx mindsystem-cc --global   # Install to ~/.claude/
-npx mindsystem-cc --local    # Install to ./.claude/
-```
-
-</details>
-
-<details>
-<summary><strong>Staying updated</strong></summary>
-
-Inside Claude Code:
-
-```
-/ms:release-notes
-```
-
-Or via npm:
-
-```bash
-npx mindsystem-cc@latest
-```
-
-</details>
-
-<details>
-<summary><strong>Development installation</strong></summary>
-
-Clone and run the installer locally:
-
-```bash
-git clone https://github.com/rolandtolnay/mindsystem.git
-cd mindsystem
-node bin/install.js --local
-```
-
-This installs to `./.claude/` so you can test changes before contributing.
-
-</details>
-
----
-
-## Playbooks
-
-Replace `<N>` with the phase number you're working on.
-
-### New project (greenfield)
-
-**When:** You're starting fresh — new repo or blank slate.
-
-**Run:**
-
-```
-/ms:new-project
-/ms:research-project        # optional (recommended when domain is new)
-/ms:create-roadmap
-/ms:plan-phase 1
-/ms:execute-phase 1
-```
-
-**What you'll get:**
-
-- `.planning/PROJECT.md` — vision and constraints
-- `.planning/REQUIREMENTS.md` — checkable scope
-- `.planning/ROADMAP.md` + `.planning/STATE.md` — plan and project memory
-
-**Tip:** For UI-heavy phases, run `/ms:design-phase 1` before `/ms:plan-phase 1`.
-
-### Existing project (brownfield adoption)
-
-**When:** You have a codebase and want Mindsystem to respect its structure, conventions, and tests.
-
-**Run:**
-
-```
-/ms:map-codebase
-/ms:new-project
-/ms:research-project        # optional (use for new domain areas)
-/ms:create-roadmap
-/ms:plan-phase 1
-/ms:execute-phase 1
-```
-
-**What you'll get:**
-
-- `.planning/codebase/*` — captured conventions and structure
-- `.planning/PROJECT.md` / `.planning/REQUIREMENTS.md` / `.planning/ROADMAP.md`
-
-### Add feature (existing product)
-
-**When:** You already have a `.planning/` folder and want to add a traceable feature.
-
-**Run:**
-
-```
-/ms:add-phase "Feature: <short name>"
-/ms:discuss-phase <N>       # optional (lock intent before planning)
-/ms:design-phase <N>        # optional (UI-heavy)
-/ms:plan-phase <N>
-/ms:execute-phase <N>
-```
-
-**What you'll get:**
-
-- `.planning/ROADMAP.md` updated with the new phase
-- `.planning/phases/<N>-*/<N>-01-PLAN.md` + `*-SUMMARY.md`
-
-**Tip:** Use `/ms:insert-phase <after> "..."` instead of `/ms:add-phase` when work must happen _before_ the next planned phase.
-
-### Work on feature (plan → execute → verify loop)
-
-**When:** You want real confidence — implementation, review, and manual UAT.
-
-**Run:**
-
-```
-/ms:plan-phase <N>
-/ms:execute-phase <N>
-/ms:verify-work <N>
-```
-
-**What you'll get:**
-
-- `.planning/phases/<N>-*/<N>-changes.patch` — phase implementation diff
-- `.planning/phases/<N>-*/<N>-VERIFICATION.md` — phase goal verification report
-- `.planning/phases/<N>-*/<N>-UAT.md` + `<N>-uat-fixes.patch` — manual test log and fixes diff
-
-**How it works:** `/ms:verify-work` fixes issues in-session (inline or via subagent), commits them as `fix(<N>-uat): ...`, and asks you to re-test.
-
-**Tip:** For UI that works but feels off, run `/ms:review-design <scope>` to audit and improve quality.
-
-### Fix bug
-
-**When:** Something's broken and you want a structured investigation that survives `/clear`.
-
-**Run:**
-
-```
-/ms:debug "Describe symptoms and what you observed"
-```
-
-**Then route the fix:**
-
-- **Discovered work for this context:** `/ms:adhoc "Fix <bug>"`
-- **Must happen before next phase:** `/ms:insert-phase <after> "Hotfix: <bug>"` → `/ms:plan-phase <N>` → `/ms:execute-phase <N>`
-- **Belongs in current phase after verification gaps:** `/ms:plan-phase <N> --gaps` → `/ms:execute-phase <N>`
-
-### Scope change (what to use when)
-
-**When:** You discover new work mid-stream.
-
-| Situation                     | Command                          |
-| ----------------------------- | -------------------------------- |
-| Non-urgent work for later     | `/ms:add-phase "..."`            |
-| Urgent work before next phase | `/ms:insert-phase <after> "..."` |
-| Task to capture for later     | `/ms:add-todo "..."`             |
-| Discovered work to do now     | `/ms:adhoc "..."`              |
-
-### Milestone ship (finishing a version)
-
-**When:** A version is ready and you want to lock it down cleanly.
-
-**Run:**
-
-```
-/ms:audit-milestone
-/ms:complete-milestone
 /ms:new-milestone
 ```
 
-**What you'll get:**
+Claude reads your project history — tech debt, deferred requirements, validated decisions — and surfaces strategic directions. You articulate the vision. The output is a `MILESTONE-CONTEXT.md` that grounds everything downstream.
 
-- `.planning/milestones/mvp/` — archived milestone (ROADMAP, REQUIREMENTS, DECISIONS, research)
-- Active docs stay lean; full detail lives in the version folder
+This is dream extraction: Claude acts as product owner, helping you think through what to build next by asking the right questions rather than prescribing answers.
 
-**Tip:** Milestone review can be **report-only** so you stay in control. Create a quality phase, or accept tech debt explicitly — your call.
+### 2. Create Roadmap
+
+```
+/ms:create-roadmap
+```
+
+Claude derives requirements from your milestone context, assigns each a `REQ-ID`, and maps them to phases with success criteria. You approve scope and phase grouping.
+
+Requirements define what must be TRUE when you ship, not what to build. This goal-backward framing means verification can check outcomes, not task completion.
+
+**Creates:** `REQUIREMENTS.md`, `ROADMAP.md`, `STATE.md`, phase directories.
+
+### 3. Discuss Phase (optional, recommended)
+
+```
+/ms:discuss-phase 1
+```
+
+The most impactful human moment in the pipeline. Claude loads milestone context, feature knowledge files, and competitor research — then surfaces its assumptions with confidence levels. You validate intent, make tradeoff decisions, correct misunderstandings.
+
+Everything downstream flows from decisions made here. The assumption-based briefing catches misalignment before a single line of code is written.
+
+**Creates:** `CONTEXT.md` with vision, essentials, and reasoning-backed decisions.
+
+### 4. Design Phase (optional)
+
+```
+/ms:design-phase 1
+```
+
+Claude generates parallel HTML/CSS mockup variants and a side-by-side comparison page that opens in your browser. You pick a direction, iterate with feedback.
+
+The output is a `DESIGN.md` with exact design tokens — hex colors, px spacing, font weights — not descriptions of what things should look like. Implementable, not interpretive.
+
+### 5. Research Phase (optional)
+
+```
+/ms:research-phase 1
+```
+
+Three parallel agents investigate simultaneously: one queries external documentation through Perplexity and Context7, one analyzes your codebase for existing patterns, one surveys community best practices. Claude synthesizes findings into `RESEARCH.md` with confidence levels and source attribution.
+
+You resolve library conflicts if any arise. Otherwise, this phase runs with minimal input.
+
+### 6. Plan Phase
+
+```
+/ms:plan-phase 1
+```
+
+Claude breaks the phase into tasks, groups them into plans targeting 25-45% of the context budget. Plans are pure markdown — no YAML frontmatter, no XML containers. The plan IS the executable prompt, with ~90% actionable content and ~10% structure.
+
+Independent plans are grouped into waves for parallel execution. A risk score (0-100) flags complex plans for optional verification before you commit to running them.
+
+You approve the plan structure and can adjust granularity.
+
+**Creates:** `PLAN.md` files, `EXECUTION-ORDER.md`.
+
+### 7. Execute Phase
+
+```
+/ms:execute-phase 1
+```
+
+Fully autonomous. Each plan runs in a fresh subagent with the full context window available. Goal-backward verification checks that the phase achieved its intended outcome — not that tasks were marked complete.
+
+Configurable code review produces separate commits for review changes. Patch files are generated for manual inspection.
+
+After execution, knowledge consolidation updates subsystem-scoped knowledge files. Future phases that touch the same subsystems start with accumulated context about decisions made, patterns established, and pitfalls encountered.
+
+**Creates:** `SUMMARY.md`, `VERIFICATION.md`, `.patch` files, knowledge file updates.
+
+### 8. Verify Work
+
+```
+/ms:verify-work 1
+```
+
+The quality gate. You run manual acceptance tests presented in batches of 4. Claude fixes issues inline or via subagent, then asks you to re-test until passing.
+
+For hard-to-test scenarios — error states, loading screens, role-based views — mock generation creates temporary inline states without shipping test infrastructure.
+
+Fixes compound into knowledge files through automatic consolidation. This is where edge cases, UI tweaks, and small bugs get caught before moving on.
+
+**Creates:** `UAT.md`, `uat-fixes.patch`, knowledge file updates.
+
+### 9. Repeat
+
+Run steps 3-8 for each phase. Pick the preparation depth each phase needs.
+
+### 10. Audit Milestone
+
+```
+/ms:audit-milestone
+```
+
+Claude checks requirements coverage against `REQ-IDs`, spawns an integration checker for cross-phase wiring, aggregates untested UAT assumptions, and consolidates tech debt into `TECH-DEBT.md` with severity tiers and `TD-IDs`.
+
+Optional code review with quality-phase decisions for high-impact findings — you decide what gets fixed vs. accepted as debt.
+
+### 11. Complete Milestone
+
+```
+/ms:complete-milestone
+```
+
+Full `PROJECT.md` evolution: validates core value proposition, moves shipped requirements to validated, triages deferred items. Archives the milestone to `.planning/milestones/{name}/` with the roadmap, requirements, and phase summaries.
+
+Updates `MILESTONES.md` with stats and accomplishments. Clean slate for the next `/ms:new-milestone`.
 
 ---
 
-## Why This Works
+## Features
 
-**Context rot is handled structurally.** The truth lives in `.planning/` files (scope, decisions, plans, verification), not buried in a scrolling chat.
+### Knowledge Compounding
 
-**Execution stays sharp.** Plans are small by design and run in fresh subagents, so implementation doesn't inherit long-chat drift.
+The core differentiator. Subsystem-scoped knowledge files are enriched after every phase. Execute-phase consolidates implementation decisions. Verify-work compounds fixes and edge cases. `/ms:compound` catches out-of-pipeline work — direct Claude sessions, manual edits, merged branches.
 
-**Verification is built in.** Phase verification plus `/ms:verify-work` gives you a human-in-the-loop UAT loop with inline fixes and mock support.
+The effect accumulates: phase 1 starts from scratch; phase 10 starts with a knowledge base that captures what works, what failed, and why.
 
-**Review fits your workflow.** Changes become commits and `.patch` files. Milestone reviews can be report-only when you want full control.
+### Context Budget Management
 
-**Planning docs stay readable.** Milestones consolidate and archive decisions so active files don't grow forever.
+Plans target 25-45% of the context window. Execution runs in fresh subagents — no inherited drift from long planning conversations. The 50% rule ensures plans complete before quality degrades.
+
+Orchestration metadata (wave grouping, dependencies) lives in `EXECUTION-ORDER.md`, separate from plans. Plans carry only what the executor needs: context, changes, verification, must-haves.
+
+### Built-in Code Review
+
+Configurable per tier — adhoc, phase, or milestone. Runs after execution and produces separate commits for inspection. Choose between structural analysis (`ms-code-reviewer`) or clarity-focused simplification (`ms-code-simplifier`). Or disable review entirely.
+
+### Structured Debugging
+
+`/ms:debug` creates investigation state that persists across `/clear`. Scientific method: gather evidence, form hypotheses, test. Resume any debug session by running `/ms:debug` with no arguments. Archives resolved issues to `.planning/debug/resolved/`.
+
+### Adhoc Execution
+
+Work that's too coherent for a todo but too small for formal phase planning. `/ms:adhoc` reads existing knowledge files, generates a standard-format plan, executes, reviews, and consolidates learnings — all in one context. Accepts Linear ticket IDs, todo file paths, or plain descriptions.
+
+### Design Mockups
+
+`/ms:design-phase` generates parallel HTML/CSS variant mockups with a side-by-side comparison page. Design tokens in the output are exact values (hex, px, font-weight), not descriptions. `/ms:review-design` audits existing screens using screenshots for retroactive design improvement.
+
+### Project Health
+
+`/ms:doctor` runs 10 health checks: subsystem vocabulary, directory structure, milestone naming, knowledge files, CLI wrappers, API keys, version freshness. Fixes are applied in dependency order with atomic commits. Safe to run repeatedly.
+
+### Smart Routing
+
+`/ms:progress` reads project state and tells you what to run next. Visual progress bar, recent work summary, pending todos, active debug sessions. Reconstructs `STATE.md` from artifacts if it's missing. Also detects available updates.
+
+### Deferred Requirements
+
+Requirements you want but haven't shipped track in `PROJECT.md` with origin milestone and deferral reason. `complete-milestone` triages them before archiving; `create-roadmap` consumes them as candidates for new milestones. Nothing falls through the cracks.
+
+### Task Capture
+
+`/ms:add-todo` with Linear-inspired metadata: priority (1-4), estimate (XS-XL), inferred subsystem. Todos live as flat files in `.planning/todos/`. Address them later via `/ms:adhoc`, which reads the problem description, executes the work, and moves the todo to `done/`.
+
+### Codebase Mapping
+
+`/ms:map-codebase` spawns 4 parallel agents producing 7 structured documents: stack, architecture, conventions, testing, integrations, directory structure, and concerns. Use on brownfield projects so Mindsystem respects your existing patterns.
+
+---
+
+## Quick Start
+
+### New project
+
+```
+/ms:new-project
+/ms:create-roadmap
+/ms:plan-phase 1
+/ms:execute-phase 1
+/ms:verify-work 1
+```
+
+You'll get `.planning/` with your project vision, requirements, roadmap, and the first phase implemented with commits, patch files, and knowledge files.
+
+### Existing project
+
+```
+/ms:new-project
+/ms:map-codebase
+/ms:create-roadmap
+/ms:plan-phase 1
+/ms:execute-phase 1
+```
+
+Codebase mapping produces 7 documents covering your stack, conventions, and architecture. All downstream planning and execution respects what's already there.
+
+**Returning after a break?** Run `/ms:progress` — it shows where you left off and what to do next.
 
 ---
 
 ## Configuration
 
-Mindsystem stores project config in `.planning/config.json`.
+Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to set up code reviewers, mockup preferences, gitignore patterns, and git remote.
 
-### Code review
-
-After `/ms:execute-phase` (and optionally `/ms:audit-milestone`), Mindsystem runs a reviewer that produces a **separate commit** for easy inspection.
+### Code review tiers
 
 ```json
 {
@@ -308,48 +279,65 @@ After `/ms:execute-phase` (and optionally `/ms:audit-milestone`), Mindsystem run
 }
 ```
 
-**Options:**
-
-| Value                     | What it does                                                   |
-| ------------------------- | -------------------------------------------------------------- |
-| `null`                 | No reviewer (default)                                       |
-| `"ms-code-simplifier"` | Generic reviewer — improves clarity and maintainability      |
-| `"skip"`               | Disable review for that level                                |
+| Value | Behavior |
+| ----- | -------- |
+| `null` | No reviewer (default) |
+| `"ms-code-reviewer"` | Structural analysis — architectural and design issues |
+| `"ms-code-simplifier"` | Clarity-focused — improves readability and maintainability |
+| `"skip"` | Disable review for that tier |
 
 ---
 
-## Command Index (One-Liners)
+## Command Reference
 
-Full docs live in `/ms:help` (same content as `commands/ms/help.md`).
+Full docs live in `/ms:help`.
 
-| Command                                  | What it does                                                  |
-| ---------------------------------------- | ------------------------------------------------------------- |
-| `/ms:help`                               | Show the full command reference                               |
-| `/ms:progress`                           | Show where you are and what to run next                       |
-| `/ms:new-project`                        | Initialize `.planning/` and capture intent                    |
-| `/ms:map-codebase`                       | Document existing repo's stack, structure, and conventions    |
-| `/ms:research-project`                   | Do domain research and save findings to `.planning/research/` |
-| `/ms:create-roadmap`                     | Define requirements and create phases mapped to them          |
-| `/ms:discuss-phase <number>`             | Product-informed collaborative thinking before planning       |
-| `/ms:design-phase <number>`              | Generate UI/UX spec for UI-heavy work                         |
-| `/ms:review-design [scope]`              | Audit and improve existing UI quality                         |
-| `/ms:research-phase <number>`            | Do deep research for niche phase domains                      |
-| `/ms:plan-phase [number] [--gaps]`       | Create small, verifiable plans with optional risk-based verification |
-| `/ms:check-phase <number>`               | Sanity-check plans before execution                           |
-| `/ms:execute-phase <phase-number>`       | Run all unexecuted plans in fresh subagents                   |
-| `/ms:verify-work [number]`               | Batched manual UAT with inline fixes                          |
-| `/ms:debug [issue description]`          | Structured debugging that survives `/clear`                   |
-| `/ms:adhoc <description>`              | Execute discovered work with knowledge-aware planning         |
-| `/ms:add-phase <description>`            | Append a new phase to the roadmap                             |
-| `/ms:insert-phase <after> <description>` | Insert urgent work between phases                             |
-| `/ms:remove-phase <number>`              | Delete a future phase and renumber                            |
-| `/ms:audit-milestone [version]`          | Audit completion and surface gaps                             |
-| `/ms:complete-milestone <version>`       | Archive and consolidate decisions                             |
-| `/ms:new-milestone [name]`               | Discover what to build next, start new milestone              |
-| `/ms:add-todo [description]`             | Capture a deferred task in `.planning/todos/`                 |
-| `/ms:check-todos [area]`                 | List pending todos and route into work                        |
-| `/ms:doctor`                             | Health check and fix project configuration                    |
-| `/ms:release-notes`                      | Show full release notes with update status                    |
+| Command | What it does |
+| ------- | ------------ |
+| `/ms:help` | Show the full command reference |
+| `/ms:progress` | Show where you are and what to run next |
+| `/ms:new-project` | Initialize `.planning/` and capture project intent |
+| `/ms:config` | Configure code reviewers, mockups, gitignore, git remote |
+| `/ms:map-codebase` | Document existing repo's stack, structure, and conventions |
+| `/ms:research-project` | Domain research saved to `.planning/research/` |
+| `/ms:create-roadmap` | Define requirements and create phases mapped to them |
+| `/ms:new-milestone [name]` | Discover what to build next, start new milestone |
+| `/ms:discuss-phase <number>` | Product-informed collaborative thinking before planning |
+| `/ms:design-phase <number>` | Generate UI/UX spec and optional HTML mockups |
+| `/ms:review-design [scope]` | Audit and improve existing UI quality |
+| `/ms:research-phase <number>` | Deep research for niche phase domains |
+| `/ms:plan-phase [number] [--gaps]` | Create context-budgeted plans with optional risk scoring |
+| `/ms:check-phase <number>` | Sanity-check plans before execution |
+| `/ms:execute-phase <number>` | Run all unexecuted plans in fresh subagents |
+| `/ms:verify-work [number]` | Batched manual UAT with inline fixes |
+| `/ms:debug [description]` | Structured debugging that survives `/clear` |
+| `/ms:adhoc <description>` | Knowledge-aware execution for discovered work |
+| `/ms:compound [input]` | Compound out-of-pipeline changes into knowledge files |
+| `/ms:add-phase <description>` | Append a new phase to the roadmap |
+| `/ms:insert-phase <after> <description>` | Insert urgent work between phases |
+| `/ms:remove-phase <number>` | Delete a future phase and renumber |
+| `/ms:add-todo [description]` | Capture a task with priority, estimate, subsystem |
+| `/ms:audit-milestone [name]` | Audit completion and surface gaps |
+| `/ms:complete-milestone [name]` | Archive milestone and prepare for next |
+| `/ms:doctor` | Health check and fix project configuration |
+| `/ms:update` | Check for and install latest version |
+| `/ms:release-notes` | Show full release notes with update status |
+
+---
+
+## Updating
+
+Inside Claude Code:
+
+```
+/ms:release-notes
+```
+
+From your terminal:
+
+```bash
+npx mindsystem-cc@latest
+```
 
 ---
 
@@ -376,11 +364,3 @@ npx mindsystem-cc@latest
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-
-**Claude Code is powerful. Mindsystem makes it reliable.**
-
-</div>
