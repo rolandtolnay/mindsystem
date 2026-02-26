@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-02-26
+
+### Removed
+- `ms:check-phase` slash command — functionality absorbed into `ms:plan-phase` via inline risk scoring. The `ms-plan-checker` agent is unchanged and still spawned by the plan-phase workflow.
+
 ## [4.0.0] - 2026-02-26
 
 ### Added
@@ -579,7 +584,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/rolandtolnay/mindsystem/releases/tag/v4.0.0
 [3.22.1]: https://github.com/rolandtolnay/mindsystem/compare/v3.22.0...v3.22.1
 [3.22.0]: https://github.com/rolandtolnay/mindsystem/compare/v3.21.0...v3.22.0
