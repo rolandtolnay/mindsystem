@@ -155,23 +155,27 @@ ms-tools list-artifacts [current-phase-number]
 
 State: "This phase has {X} plans, {Y} summaries."
 
-**Step 1.5: Check for unaddressed UAT gaps**
+**Step 1.5: Check for unaddressed gaps**
 
-Check for UAT.md files with status "diagnosed" (has gaps needing fixes).
+Check for VERIFICATION.md with gaps or UAT.md with diagnosed gaps.
 
 ```bash
+# Check for verification gaps
+grep -l "status: gaps_found" .planning/phases/[current-phase-dir]/*-VERIFICATION.md 2>/dev/null
+
 # Check for diagnosed UAT with gaps
 grep -l "status: diagnosed" .planning/phases/[current-phase-dir]/*-UAT.md 2>/dev/null
 ```
 
 Track:
+- `verification_gaps`: VERIFICATION.md files with status "gaps_found"
 - `uat_with_gaps`: UAT.md files with status "diagnosed" (gaps need fixing)
 
 **Step 2: Route based on counts**
 
 | Condition | Meaning | Action |
 |-----------|---------|--------|
-| uat_with_gaps > 0 | UAT gaps need fix plans | Go to **Route E** |
+| verification_gaps > 0 OR uat_with_gaps > 0 | Gaps need resolution | Go to **Route E** |
 | summaries < plans | Unexecuted plans exist | Go to **Route A** |
 | summaries = plans AND plans > 0 | Phase complete | Go to Step 3 |
 | plans = 0 | Phase not yet planned | Go to **Route B** |

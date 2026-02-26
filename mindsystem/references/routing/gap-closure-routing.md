@@ -1,10 +1,10 @@
 # Gap Closure Routing
 
-Reference for triaging verification gaps by scope and routing to the appropriate primitive. Used by execute-phase and progress commands.
+Reference for triaging verification and UAT gaps by scope and routing to the appropriate primitive. Used by execute-phase and progress commands.
 
 ## Purpose
 
-Analyze VERIFICATION.md gaps and recommend the best primitive based on scope and urgency.
+Analyze VERIFICATION.md or UAT.md gaps and recommend the best primitive based on scope and urgency.
 
 ## Variables
 
@@ -17,14 +17,18 @@ From calling context:
 
 ## Information to Extract
 
-Read VERIFICATION.md for the phase:
+Read the gap source for the phase (one or both may exist):
 
 ```bash
-cat .planning/phases/${phase_dir}/${phase}-VERIFICATION.md
+# Code verification gaps
+cat .planning/phases/${phase_dir}/${phase}-VERIFICATION.md 2>/dev/null
+
+# User testing gaps (status: diagnosed means root causes identified)
+cat .planning/phases/${phase_dir}/${phase}-UAT.md 2>/dev/null
 ```
 
-Extract:
-- Score (must-haves verified count)
+Extract from whichever exists (combine if both present):
+- Score (must-haves verified count, from VERIFICATION.md)
 - Gap count and severity (critical vs non-critical)
 - Gap summaries from gaps section
 
