@@ -4,7 +4,7 @@
 
 **A meta-prompting and context engineering system for Claude Code.**
 
-Every piece of work makes the next one better. Mindsystem structures your Claude Code sessions into plannable, executable, verifiable phases, and compounds what it learns into persistent knowledge files that survive `/clear`. Context rot stops being the bottleneck. Quality stays consistent from phase 1 to phase 20.
+Every piece of work makes the next one better. Mindsystem structures your Claude Code sessions into plannable, executable, verifiable phases, and compounds what it learns into persistent knowledge files that survive `/clear`. Context rot stops being the bottleneck. Every prompt in the system is tested against research on how LLMs actually follow instructions, so quality stays consistent from phase 1 to phase 20.
 
 ```bash
 npx mindsystem-cc
@@ -207,6 +207,10 @@ Phase 1 starts from scratch. Phase 10 starts with a knowledge base that knows wh
 Plans target 25-45% of the context window. Execution runs in fresh subagents with no inherited drift from long planning conversations. The 50% rule ensures plans complete before quality degrades.
 
 Orchestration metadata (wave grouping, dependencies) lives in `EXECUTION-ORDER.md`, separate from plans. Plans carry only what the executor needs: context, changes, verification, must-haves.
+
+### Research-backed prompts
+
+Unnecessary instructions aren't wasted space — they interfere with the ones that matter. Each instruction passes a reliability test: does removing this degrade output in the actual runtime context? Every command, workflow, and agent definition gets audited to cut that interference. Audited agents show 35-39% context reduction with no behavioral regression.
 
 ### Built-in code review
 
