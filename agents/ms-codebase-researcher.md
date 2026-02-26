@@ -37,19 +37,15 @@ Grep/Glob for imports, class names, and file patterns related to the research qu
 
 Read `.planning/codebase/*.md` if they exist (from `/ms:map-codebase`). Extract relevant conventions, stack info, architecture patterns.
 
-## 4. Learnings
-
-Grep `.planning/LEARNINGS.md` for entries matching phase keywords, subsystem, or tech terms. Extract matched entries verbatim.
-
-## 5. Prior Phase Summaries
+## 4. Prior Phase Summaries
 
 Scan `.planning/phases/*/SUMMARY.md` frontmatter only (first 25 lines) for `tech-stack`, `patterns-established`, `key-decisions` matching the phase domain. Read full summary only for direct matches.
 
-## 6. Debug Resolutions
+## 5. Debug Resolutions
 
 Scan `.planning/debug/resolved/*.md` for root causes related to the phase domain.
 
-## 7. Adhoc Summaries
+## 6. Adhoc Summaries
 
 Scan `.planning/adhoc/*-SUMMARY.md` learnings arrays for relevant entries.
 
@@ -71,7 +67,7 @@ Return as text (not file). Orchestrator reads this for synthesis.
 [Pattern name, files, description — how the project already handles similar work]
 
 ### Relevant Learnings
-[Verbatim entries from LEARNINGS.md, debug resolutions, summary deviations that match]
+[Debug resolutions, adhoc learnings, summary deviations that match]
 
 ### Reusable Components
 [Existing code that could be extended or reused for this phase]
@@ -99,7 +95,7 @@ Return as text (not file). Orchestrator reads this for synthesis.
 - [ ] All findings include file:line references
 - [ ] Empty sections explicitly noted
 - [ ] Structured output returned (not written to file)
-- [ ] Learnings scanned for relevant entries
+- [ ] Debug resolutions and adhoc summaries scanned for relevant entries
 - [ ] Prior summaries checked (frontmatter only)
 - [ ] Debug resolutions checked
 </success_criteria>
