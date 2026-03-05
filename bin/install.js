@@ -444,11 +444,6 @@ function ensurePathHook(claudeDir, isGlobal, configDir) {
   if (!Array.isArray(settings.hooks.SessionStart))
     settings.hooks.SessionStart = [];
 
-  // Idempotent — skip if already present
-  const marker = 'mindsystem/bin';
-  if (settings.hooks.SessionStart.some(e => JSON.stringify(e).includes(marker)))
-    return;
-
   // Build PATH expression
   let binExpr;
   if (isGlobal) {
@@ -459,6 +454,14 @@ function ensurePathHook(claudeDir, isGlobal, configDir) {
     binExpr = '$CLAUDE_PROJECT_DIR/.claude/bin';
   }
 
+  // Self-healing: remove all existing Mindsystem PATH hooks, then add exactly one.
+  // This deduplicates any prior entries AND prevents future duplicates.
+  const before = settings.hooks.SessionStart.length;
+  settings.hooks.SessionStart = settings.hooks.SessionStart.filter(
+    e => !JSON.stringify(e).includes('CLAUDE_ENV_FILE')
+  );
+  const removed = before - settings.hooks.SessionStart.length;
+
   settings.hooks.SessionStart.push({
     matcher: '',
     hooks: [{
@@ -468,7 +471,11 @@ function ensurePathHook(claudeDir, isGlobal, configDir) {
   });
 
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-  console.log(`  ${green}✓${reset} Configured PATH hook`);
+  if (removed > 0) {
+    console.log(`  ${green}✓${reset} Configured PATH hook (cleaned ${removed} duplicate(s))`);
+  } else {
+    console.log(`  ${green}✓${reset} Configured PATH hook`);
+  }
 }
 
 /**
