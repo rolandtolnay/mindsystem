@@ -420,9 +420,9 @@ function generateWrappers(claudeDir) {
   fs.mkdirSync(binDir, { recursive: true });
 
   const wrappers = {
-    'ms-tools': '#!/usr/bin/env bash\nexec uv run "$(dirname "$0")/../mindsystem/scripts/ms-tools.py" "$@"\n',
+    'ms-tools': '#!/usr/bin/env bash\n[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"\nexec uv run "$(dirname "$0")/../mindsystem/scripts/ms-tools.py" "$@"\n',
     'ms-lookup': '#!/usr/bin/env bash\nexec "$(dirname "$0")/../mindsystem/scripts/ms-lookup-wrapper.sh" "$@"\n',
-    'ms-compare-mockups': '#!/usr/bin/env bash\nexec uv run "$(dirname "$0")/../mindsystem/scripts/compare_mockups.py" "$@"\n',
+    'ms-compare-mockups': '#!/usr/bin/env bash\n[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"\nexec uv run "$(dirname "$0")/../mindsystem/scripts/compare_mockups.py" "$@"\n',
   };
 
   for (const [name, content] of Object.entries(wrappers)) {
@@ -659,6 +659,20 @@ async function install(isGlobal) {
     } catch (e) {
       console.log(`  ${yellow}⚠${reset} Python not found - ms-lookup CLI requires Python 3.9+`);
     }
+  }
+
+  // Phase 8b: Check uv
+  try {
+    const { execSync } = require('child_process');
+    const uvVersion = execSync('uv --version 2>&1', { encoding: 'utf8' }).trim();
+    console.log(`  ${green}✓${reset} Found ${uvVersion}`);
+  } catch (e) {
+    const isWin = process.platform === 'win32';
+    const installCmd = isWin
+      ? 'powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"'
+      : 'curl -LsSf https://astral.sh/uv/install.sh | sh';
+    console.log(`  ${yellow}⚠${reset} uv not found — CLI wrappers (ms-tools, ms-compare-mockups) require it`);
+    console.log(`    Install: ${cyan}${installCmd}${reset}`);
   }
 
   // Phase 9: Cleanup orphaned files

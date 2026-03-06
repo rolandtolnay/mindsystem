@@ -250,6 +250,15 @@ Requirements you want but haven't shipped yet are tracked in `PROJECT.md` with o
 
 ---
 
+## Prerequisites
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+- [Node.js](https://nodejs.org/) (for `npx`)
+- [uv](https://docs.astral.sh/uv/) — Python package runner used by CLI scripts (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- Python 3.10+ (used by uv for scripts)
+
+---
+
 ## Quick start
 
 ### New project

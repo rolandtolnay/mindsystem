@@ -761,19 +761,67 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
                 record("PASS", "PLAN Cleanup")
     print()
 
-    # ---- CHECK 7: CLI Wrappers ----
+    # ---- CHECK 7: CLI Wrappers & Environment ----
     print("=== CLI Wrappers ===")
     wrapper_names = ["ms-tools", "ms-lookup", "ms-compare-mockups"]
-    missing_wrappers = [w for w in wrapper_names if shutil.which(w) is None]
-    if missing_wrappers:
+
+    # 7a: Check bin directory exists
+    global_bin = Path.home() / ".claude" / "bin"
+    local_bin = Path(".claude") / "bin"
+    bin_dir = global_bin if global_bin.is_dir() else (local_bin if local_bin.is_dir() else None)
+
+    if bin_dir is None:
         print("Status: FAIL")
-        print(f"Not on PATH: {', '.join(missing_wrappers)}")
-        print("Fix: re-run `npx mindsystem-cc` to regenerate wrappers and PATH hook")
+        print("Bin directory not found (~/.claude/bin/ or .claude/bin/)")
+        print("Fix: re-run `npx mindsystem-cc` to generate wrappers")
         record("FAIL", "CLI Wrappers")
     else:
-        print("Status: PASS")
-        print(f"All {len(wrapper_names)} CLI wrappers found on PATH")
-        record("PASS", "CLI Wrappers")
+        # 7b: Check wrapper files present
+        missing_files = [w for w in wrapper_names if not (bin_dir / w).exists()]
+        if missing_files:
+            print("Status: FAIL")
+            print(f"Wrapper files missing from {bin_dir}: {', '.join(missing_files)}")
+            print("Fix: re-run `npx mindsystem-cc` to regenerate wrappers")
+            record("FAIL", "CLI Wrappers")
+        else:
+            # 7c: Check bin dir in PATH
+            path_dirs = os.environ.get("PATH", "").split(os.pathsep)
+            bin_in_path = str(bin_dir.resolve()) in [os.path.realpath(p) for p in path_dirs]
+
+            # 7d: Check wrappers resolvable
+            missing_wrappers = [w for w in wrapper_names if shutil.which(w) is None]
+
+            if missing_wrappers:
+                print("Status: FAIL")
+                print(f"Not resolvable: {', '.join(missing_wrappers)}")
+                if not bin_in_path:
+                    print(f"Cause: {bin_dir} not in PATH")
+                    print("Fix: restart Claude Code session (PATH hook fires on SessionStart)")
+                else:
+                    print("Fix: re-run `npx mindsystem-cc` to regenerate wrappers and PATH hook")
+                record("FAIL", "CLI Wrappers")
+            else:
+                print(f"All {len(wrapper_names)} CLI wrappers found on PATH")
+
+                # 7e: Check uv available
+                uv_ok = shutil.which("uv") is not None
+                # 7f: Check Python available
+                py_ok = shutil.which("python3") is not None or shutil.which("python") is not None
+
+                issues = []
+                if not uv_ok:
+                    issues.append("uv not found — install: `curl -LsSf https://astral.sh/uv/install.sh | sh`")
+                if not py_ok:
+                    issues.append("Python not found — install Python 3.10+")
+
+                if issues:
+                    print("Status: WARN")
+                    for issue in issues:
+                        print(f"  {issue}")
+                    record("WARN", "CLI Wrappers")
+                else:
+                    print("Status: PASS")
+                    record("PASS", "CLI Wrappers")
     print()
 
     # ---- CHECK 8: Milestone Naming Convention ----

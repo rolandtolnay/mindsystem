@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run health checks on project configuration. Detect and fix structural drift across 10 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers, research API keys, and Mindsystem version.
+Run health checks on project configuration. Detect and fix structural drift across 10 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers and environment diagnostics, research API keys, and Mindsystem version.
 
 Idempotent.
 </objective>
@@ -117,7 +117,7 @@ Display results as a markdown table:
 | Knowledge files          | FAIL   | Directory missing                |
 | Phase summaries          | FAIL   | 2 milestones missing summaries   |
 | PLAN cleanup             | FAIL   | 9 leftover PLAN.md files         |
-| CLI wrappers             | FAIL   | ms-tools not on PATH             |
+| CLI wrappers             | FAIL   | Not resolvable; bin dir not in PATH |
 | Research API Keys        | WARN   | PERPLEXITY_API_KEY not set        |
 | Mindsystem version       | WARN   | v3.21.0 → v3.22.1 available       |
 ```
@@ -143,7 +143,7 @@ If "Review each" → use AskUserQuestion for each failed check with its details 
 
 Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_milestone_naming → fix_phase_archival → fix_plan_cleanup → fix_knowledge. Skip any fix whose check passed or was skipped by user.
 
-Phase summaries are resolved by fix_phase_archival. CLI wrappers require manual PATH configuration (no automated fix). WARN checks (Research API Keys) are informational — no fix offered, only displayed in the report.
+Phase summaries are resolved by fix_phase_archival. CLI wrapper failures have specific fixes: bin dir not in PATH → restart Claude Code session; missing wrappers or bin dir → re-run `npx mindsystem-cc`; uv not found → `curl -LsSf https://astral.sh/uv/install.sh | sh`. WARN checks (Research API Keys, missing uv) are informational — no automated fix, only displayed in the report.
 </step>
 
 <step name="apply_fixes">
