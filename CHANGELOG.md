@@ -6,6 +6,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.0.4] - 2026-03-06
+
+### Fixed
+- Wrapper scripts for `ms-tools` and `ms-compare-mockups` now source the uv environment before invoking uv, fixing "command not found" errors on systems where uv is installed but not in the default PATH.
+- `ms:doctor` CHECK 7 now walks a 6-step diagnostic chain (bin dir → wrapper files → PATH → resolvable → uv → python) with targeted fix suggestions per failure mode, replacing the previous generic check.
+- SessionStart PATH hook no longer duplicates on every install. The idempotency check was matching the wrong marker string, causing a new hook entry each time. Now self-heals by deduplicating any prior mess automatically.
+
 ## [4.0.3] - 2026-02-26
 
 ### Fixed
@@ -599,7 +606,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.3...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.4...HEAD
+[4.0.4]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.0...v4.0.1
