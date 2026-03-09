@@ -200,11 +200,7 @@ Read current batch from UAT.md (test descriptions needed for presenting to user)
 **1. Handle mock generation (if needed):**
 
 If `mock_type` is not null AND different from previous batch:
-- Revert old mocks if any (from `mocked_files` in UAT.md frontmatter):
-  ```bash
-  git checkout -- <mocked_files>
-  ```
-- Clear mocked_files: `ms-tools uat-update $PHASE_NUMBER --session mocked_files=`
+- Revert old mocks: `ms-tools uat-revert-mocks $PHASE_NUMBER`
 - Go to `generate_mocks`
 
 If `mock_type` is null or same as previous:
@@ -382,53 +378,28 @@ Progress auto-recalculates on every `uat-update` call. No manual progress recalc
 **Apply fix inline:**
 
 **1. Stash mocks (if active):**
-```bash
-git stash push -m "mocks-batch-{N}" -- <mocked_files>
-```
-Use `mocked_files` list from UAT.md frontmatter.
+`ms-tools uat-stash-mocks $PHASE_NUMBER`
 
 **2. Make the fix:**
 - Edit the file(s)
 - Test that fix compiles/runs
 
-**3. Commit (amend on retry when safe):**
+**3. Commit and record fix:**
 ```bash
-git add [specific files]
-
-# Check if this is a retry AND HEAD matches the test's previous fix_commit:
-PREV_FIX=$(ms-tools uat-status $PHASE_NUMBER | python3 -c "import sys,json; d=json.load(sys.stdin); t=[x for x in d['fixing_tests'] if x['num']==N]; print(t[0].get('fix_commit','') if t else '')" 2>/dev/null)
-HEAD_SHORT=$(git rev-parse --short HEAD)
-
-if [ "$PREV_FIX" = "$HEAD_SHORT" ] && [ -n "$PREV_FIX" ]; then
-  git commit --amend --no-edit
-else
-  git commit -m "fix({phase}-uat): {description}"
-fi
+ms-tools uat-fix-commit $PHASE_NUMBER --test N --message "fix({phase}-uat): {description}" <files>
 ```
+Handles amend-on-retry automatically (amends if HEAD matches previous fix_commit for this test).
 
-Safety: only amend if HEAD matches recorded fix_commit. If HEAD has moved (other fixes in between), create new commit.
-
-**4. Record in UAT.md via ms-tools:**
+**4. Record fix details in UAT.md:**
+Use the `hash` from fix-commit JSON output:
 ```bash
-FIX_HASH=$(git rev-parse --short HEAD)
-ms-tools uat-update $PHASE_NUMBER --test N fix_status=applied fix_commit=$FIX_HASH
-echo '{"commit":"'$FIX_HASH'","test":N,"description":"what was fixed","files":["changed.ts"]}' | ms-tools uat-update $PHASE_NUMBER --append-fix
+echo '{"commit":"HASH","test":N,"description":"what was fixed","files":["changed.ts"]}' | ms-tools uat-update $PHASE_NUMBER --append-fix
 ```
-
-`append-fix` updates in-place if a fix for the same test already exists (amend support).
 
 **5. Restore mocks:**
-```bash
-git stash pop
-```
+`ms-tools uat-pop-mocks $PHASE_NUMBER`
 
-**Handle stash conflict:**
-```bash
-# Conflict means fix touched a mocked file — take the fix version
-git checkout --theirs <conflicted-file>
-git add <conflicted-file>
-```
-Remove conflicted file from `mocked_files` list in UAT.md (mock no longer needed for that file).
+Conflicts are resolved automatically (fix version wins, conflicted files removed from mocked_files).
 
 **6. Request re-test:**
 ```
@@ -444,9 +415,7 @@ Go to `handle_retest`.
 **Spawn fixer subagent for complex issue:**
 
 **1. Stash mocks (if active):**
-```bash
-git stash push -m "mocks-batch-{N}" -- <mocked_files>
-```
+`ms-tools uat-stash-mocks $PHASE_NUMBER`
 
 **2. Spawn ms-verify-fixer:**
 ```
@@ -489,12 +458,11 @@ Mocks are stashed — working tree is clean.
 
 **If FIX COMPLETE:**
 - Record fix via ms-tools (same as `apply_fix` step 4: `uat-update --test N` + `--append-fix`)
-- Restore mocks: `git stash pop`
-- Handle conflicts as in `apply_fix`
+- Restore mocks: `ms-tools uat-pop-mocks $PHASE_NUMBER`
 - Request re-test
 
 **If INVESTIGATION INCONCLUSIVE:**
-- Restore mocks: `git stash pop`
+- Restore mocks: `ms-tools uat-pop-mocks $PHASE_NUMBER`
 - Present options:
   ```
   Investigation didn't find root cause.
@@ -607,10 +575,7 @@ The `--session current_batch=N` call auto-syncs the Current Batch section with t
 **Complete UAT session:**
 
 **1. Revert mocks:**
-```bash
-git checkout -- <mocked_files>
-```
-Use `mocked_files` list from UAT.md frontmatter. Clear the list after reverting.
+`ms-tools uat-revert-mocks $PHASE_NUMBER`
 
 **2. Generate UAT fixes patch (if fixes were made):**
 ```bash

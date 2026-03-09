@@ -2463,6 +2463,7 @@ class UATFile:
             "current_batch": 1,
             "mocked_files": [],
             "pre_work_stash": None,
+            "stash_ref": None,
         }
 
         # Build tests
@@ -2733,6 +2734,22 @@ class UATFile:
         return "\n".join(lines)
 
 
+def _load_uat(args_phase: str) -> tuple[Path, "UATFile"]:
+    """Load UAT file for a phase. Returns (uat_path, uat). Exits 1 if missing."""
+    phase = normalize_phase(args_phase)
+    planning = find_planning_dir()
+    phase_dir = find_phase_dir(planning, phase)
+    if phase_dir is None:
+        print(f"Error: Phase directory not found for {phase}", file=sys.stderr)
+        sys.exit(1)
+    uat_path = phase_dir / f"{phase_dir.name}-UAT.md"
+    if not uat_path.is_file():
+        print(f"Error: UAT file not found: {uat_path}", file=sys.stderr)
+        sys.exit(1)
+    uat = UATFile.parse(uat_path.read_text(encoding="utf-8"))
+    return uat_path, uat
+
+
 # ===================================================================
 # Subcommand: uat-init
 # ===================================================================
@@ -2905,9 +2922,197 @@ def cmd_uat_status(args: argparse.Namespace) -> None:
         "pending_tests": pending_tests,
         "blocked_tests": blocked_tests,
         "pre_work_stash": uat.frontmatter.get("pre_work_stash"),
+        "stash_ref": uat.frontmatter.get("stash_ref"),
         "path": str(uat_path),
     }
 
+    json.dump(output, sys.stdout, cls=_SafeEncoder)
+    sys.stdout.write("\n")
+
+
+# ===================================================================
+# Subcommand: uat-stash-mocks
+# ===================================================================
+
+
+def cmd_uat_stash_mocks(args: argparse.Namespace) -> None:
+    """Stash mocked files before applying a fix.
+
+    Contract:
+        Args: phase (str) — phase number
+        Output: JSON — stash_ref and files list
+        Exit codes: 0 = success (or no-op), 1 = git failure
+        Side effects: git stash push, updates UAT.md stash_ref
+    """
+    uat_path, uat = _load_uat(args.phase)
+
+    mocked_files = uat.frontmatter.get("mocked_files", [])
+    if not mocked_files:
+        print("No mocked files to stash", file=sys.stderr)
+        return
+
+    current_batch = uat.frontmatter.get("current_batch", 1)
+
+    try:
+        run_git("stash", "push", "-m", f"mocks-batch-{current_batch}", "--", *mocked_files)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: git stash push failed: {e.stderr}", file=sys.stderr)
+        sys.exit(1)
+
+    uat.update_session({"stash_ref": "stash@{0}"})
+    uat_path.write_text(uat.serialize(), encoding="utf-8")
+
+    output = {"stash_ref": "stash@{0}", "files": mocked_files}
+    json.dump(output, sys.stdout, cls=_SafeEncoder)
+    sys.stdout.write("\n")
+
+
+# ===================================================================
+# Subcommand: uat-pop-mocks
+# ===================================================================
+
+
+def cmd_uat_pop_mocks(args: argparse.Namespace) -> None:
+    """Restore stashed mocks after fix is committed.
+
+    Contract:
+        Args: phase (str) — phase number
+        Output: JSON — status and conflicts list
+        Exit codes: 0 = success (or no-op), 1 = unexpected failure
+        Side effects: git stash pop, updates UAT.md stash_ref/mocked_files
+    """
+    uat_path, uat = _load_uat(args.phase)
+
+    stash_ref = uat.frontmatter.get("stash_ref")
+    if not stash_ref:
+        print("No stash to pop", file=sys.stderr)
+        return
+
+    try:
+        run_git("stash", "pop", stash_ref)
+        uat.update_session({"stash_ref": ""})
+        uat_path.write_text(uat.serialize(), encoding="utf-8")
+        output = {"status": "restored", "conflicts": []}
+        json.dump(output, sys.stdout, cls=_SafeEncoder)
+        sys.stdout.write("\n")
+    except subprocess.CalledProcessError:
+        # Check for merge conflicts
+        try:
+            conflict_output = run_git("diff", "--name-only", "--diff-filter=U")
+        except subprocess.CalledProcessError:
+            conflict_output = ""
+
+        conflicts = [f.strip() for f in conflict_output.splitlines() if f.strip()]
+        if not conflicts:
+            print("Error: stash pop failed with no merge conflicts — unexpected failure", file=sys.stderr)
+            sys.exit(1)
+
+        # Resolve conflicts by taking the fix version (theirs)
+        for f in conflicts:
+            run_git("checkout", "--theirs", f)
+            run_git("add", f)
+
+        # Drop the stash (failed pop doesn't auto-drop)
+        try:
+            run_git("stash", "drop", stash_ref)
+        except subprocess.CalledProcessError:
+            pass  # Best effort
+
+        # Remove conflicted files from mocked_files
+        mocked = uat.frontmatter.get("mocked_files", [])
+        removed = [f for f in conflicts if f in mocked]
+        uat.frontmatter["mocked_files"] = [f for f in mocked if f not in conflicts]
+        uat.update_session({"stash_ref": ""})
+        uat_path.write_text(uat.serialize(), encoding="utf-8")
+
+        output = {"status": "restored_with_conflicts", "conflicts": conflicts, "removed_from_mocks": removed}
+        json.dump(output, sys.stdout, cls=_SafeEncoder)
+        sys.stdout.write("\n")
+
+
+# ===================================================================
+# Subcommand: uat-fix-commit
+# ===================================================================
+
+
+def cmd_uat_fix_commit(args: argparse.Namespace) -> None:
+    """Stage files, commit (or amend), and record fix in UAT.md.
+
+    Contract:
+        Args: phase (str), --test (int), --message (str), files (list)
+        Output: JSON — hash and amend flag
+        Exit codes: 0 = success, 1 = no files or git failure
+        Side effects: git add/commit, updates UAT.md fix_status/fix_commit
+    """
+    uat_path, uat = _load_uat(args.phase)
+
+    if not args.files:
+        print("Error: No files to commit", file=sys.stderr)
+        sys.exit(1)
+
+    test_num = args.test
+
+    # Find previous fix_commit for this test
+    prev_fix_commit = ""
+    for t in uat.tests:
+        if t["num"] == str(test_num):
+            prev_fix_commit = t.get("fix_commit", "")
+            break
+
+    run_git("add", *args.files)
+
+    amend = False
+    if prev_fix_commit:
+        head_short = run_git("rev-parse", "--short", "HEAD")
+        if head_short == prev_fix_commit:
+            amend = True
+
+    if amend:
+        run_git("commit", "--amend", "--no-edit")
+    else:
+        run_git("commit", "-m", args.message)
+
+    new_hash = run_git("rev-parse", "--short", "HEAD")
+    uat.update_test(test_num, {"fix_status": "applied", "fix_commit": new_hash})
+    uat_path.write_text(uat.serialize(), encoding="utf-8")
+
+    output = {"hash": new_hash, "amend": amend}
+    json.dump(output, sys.stdout, cls=_SafeEncoder)
+    sys.stdout.write("\n")
+
+
+# ===================================================================
+# Subcommand: uat-revert-mocks
+# ===================================================================
+
+
+def cmd_uat_revert_mocks(args: argparse.Namespace) -> None:
+    """Revert mocked files and clear the mocked_files list.
+
+    Contract:
+        Args: phase (str) — phase number
+        Output: JSON — reverted files list
+        Exit codes: 0 = success (or no-op), 1 = git failure
+        Side effects: git checkout, clears mocked_files in UAT.md
+    """
+    uat_path, uat = _load_uat(args.phase)
+
+    mocked_files = uat.frontmatter.get("mocked_files", [])
+    if not mocked_files:
+        print("No mocked files to revert", file=sys.stderr)
+        return
+
+    try:
+        run_git("checkout", "--", *mocked_files)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: git checkout failed: {e.stderr}", file=sys.stderr)
+        sys.exit(1)
+
+    reverted = list(mocked_files)
+    uat.frontmatter["mocked_files"] = []
+    uat_path.write_text(uat.serialize(), encoding="utf-8")
+
+    output = {"reverted": reverted}
     json.dump(output, sys.stdout, cls=_SafeEncoder)
     sys.stdout.write("\n")
 
@@ -3119,6 +3324,29 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser("uat-status", help="Output UAT status as JSON")
     p.add_argument("phase", help="Phase number")
     p.set_defaults(func=cmd_uat_status)
+
+    # --- uat-stash-mocks ---
+    p = subparsers.add_parser("uat-stash-mocks", help="Stash mocked files before fix")
+    p.add_argument("phase", help="Phase number")
+    p.set_defaults(func=cmd_uat_stash_mocks)
+
+    # --- uat-pop-mocks ---
+    p = subparsers.add_parser("uat-pop-mocks", help="Restore stashed mocks after fix")
+    p.add_argument("phase", help="Phase number")
+    p.set_defaults(func=cmd_uat_pop_mocks)
+
+    # --- uat-fix-commit ---
+    p = subparsers.add_parser("uat-fix-commit", help="Commit fix and record in UAT.md")
+    p.add_argument("phase", help="Phase number")
+    p.add_argument("--test", type=int, required=True, help="Test number")
+    p.add_argument("--message", required=True, help="Commit message")
+    p.add_argument("files", nargs="*", help="Files to stage and commit")
+    p.set_defaults(func=cmd_uat_fix_commit)
+
+    # --- uat-revert-mocks ---
+    p = subparsers.add_parser("uat-revert-mocks", help="Revert mocked files to clean state")
+    p.add_argument("phase", help="Phase number")
+    p.set_defaults(func=cmd_uat_revert_mocks)
 
     # --- config-get ---
     p = subparsers.add_parser("config-get", help="Read a value from config.json by dot-path")

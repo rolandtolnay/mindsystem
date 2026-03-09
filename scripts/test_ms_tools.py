@@ -1026,6 +1026,10 @@ UATFile = _mod.UATFile
 cmd_uat_init = _mod.cmd_uat_init
 cmd_uat_update = _mod.cmd_uat_update
 cmd_uat_status = _mod.cmd_uat_status
+cmd_uat_stash_mocks = _mod.cmd_uat_stash_mocks
+cmd_uat_pop_mocks = _mod.cmd_uat_pop_mocks
+cmd_uat_fix_commit = _mod.cmd_uat_fix_commit
+cmd_uat_revert_mocks = _mod.cmd_uat_revert_mocks
 
 # Shared fixture: a complete UAT.md matching the template format
 UAT_FIXTURE = """\
@@ -1038,6 +1042,7 @@ updated: '2026-02-24 10:30'
 current_batch: 2
 mocked_files: [auth_service.dart]
 pre_work_stash: null
+stash_ref: null
 ---
 
 ## Progress
@@ -1135,6 +1140,7 @@ updated: '2026-02-24 10:00'
 current_batch: 1
 mocked_files: []
 pre_work_stash: null
+stash_ref: null
 ---
 
 ## Progress
@@ -1705,6 +1711,362 @@ class TestCmdUatStatus:
         with self._patch_git_root(tmp_path), \
              pytest.raises(SystemExit) as exc:
             cmd_uat_status(args)
+        assert exc.value.code == 1
+
+    def test_status_includes_stash_ref(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+        # Set stash_ref in fixture
+        content = uat_path.read_text().replace("stash_ref: null", 'stash_ref: "stash@{0}"')
+        uat_path.write_text(content)
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path):
+            cmd_uat_status(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["stash_ref"] == "stash@{0}"
+
+
+# ===================================================================
+# Part 4b: UAT Git Operations Tests
+# ===================================================================
+
+
+class TestCmdUatStashMocks:
+    """Tests for uat-stash-mocks command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path.write_text(content)
+        return uat_path
+
+    def test_stash_success(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        def mock_run_git(*args):
+            if args[:2] == ("stash", "push"):
+                return "Saved working directory"
+            return ""
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_stash_mocks(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["stash_ref"] == "stash@{0}"
+        assert output["files"] == ["auth_service.dart"]
+
+        # Verify UAT.md was updated
+        uat = UATFile.parse(uat_path.read_text())
+        assert uat.frontmatter["stash_ref"] == "stash@{0}"
+
+    def test_no_mocked_files(self, tmp_path, capsys):
+        # UAT_MINIMAL has phase 03-setup with empty mocked_files
+        phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
+        phase_dir.mkdir(parents=True)
+        (phase_dir / "03-setup-UAT.md").write_text(UAT_MINIMAL)
+
+        args = argparse.Namespace(phase="3")
+        with mock.patch.object(_mod, "find_git_root", return_value=tmp_path):
+            cmd_uat_stash_mocks(args)
+
+        captured = capsys.readouterr()
+        assert "No mocked files to stash" in captured.err
+        assert captured.out == ""
+
+    def test_git_failure(self, tmp_path):
+        self._setup_uat(tmp_path)
+
+        import subprocess
+        def mock_run_git(*args):
+            raise subprocess.CalledProcessError(1, "git", stderr="stash error")
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git), \
+             pytest.raises(SystemExit) as exc:
+            cmd_uat_stash_mocks(args)
+        assert exc.value.code == 1
+
+
+class TestCmdUatPopMocks:
+    """Tests for uat-pop-mocks command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_uat(self, tmp_path, content=UAT_FIXTURE, stash_ref=None):
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+        uat_path = phase_dir / "05-auth-UAT.md"
+        if stash_ref:
+            content = content.replace("stash_ref: null", f'stash_ref: "{stash_ref}"')
+        uat_path.write_text(content)
+        return uat_path
+
+    def test_pop_clean(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path, stash_ref="stash@{0}")
+
+        def mock_run_git(*args):
+            if args[:2] == ("stash", "pop"):
+                return "Dropped refs/stash@{0}"
+            return ""
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_pop_mocks(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["status"] == "restored"
+        assert output["conflicts"] == []
+
+        # Verify stash_ref cleared
+        uat = UATFile.parse(uat_path.read_text())
+        assert uat.frontmatter.get("stash_ref") is None
+
+    def test_no_stash(self, tmp_path, capsys):
+        self._setup_uat(tmp_path)  # stash_ref: null
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path):
+            cmd_uat_pop_mocks(args)
+
+        captured = capsys.readouterr()
+        assert "No stash to pop" in captured.err
+
+    def test_pop_with_conflicts(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path, stash_ref="stash@{0}")
+
+        import subprocess
+        call_log = []
+
+        def mock_run_git(*args):
+            call_log.append(args)
+            if args[:2] == ("stash", "pop"):
+                raise subprocess.CalledProcessError(1, "git", stderr="conflict")
+            if args[:2] == ("diff", "--name-only"):
+                return "auth_service.dart"
+            if args[:2] == ("checkout", "--theirs"):
+                return ""
+            if args[0] == "add":
+                return ""
+            if args[:2] == ("stash", "drop"):
+                return ""
+            return ""
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_pop_mocks(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["status"] == "restored_with_conflicts"
+        assert "auth_service.dart" in output["conflicts"]
+        assert "auth_service.dart" in output["removed_from_mocks"]
+
+        # Verify mocked_files updated
+        uat = UATFile.parse(uat_path.read_text())
+        assert "auth_service.dart" not in uat.frontmatter.get("mocked_files", [])
+
+    def test_non_conflict_failure(self, tmp_path):
+        self._setup_uat(tmp_path, stash_ref="stash@{0}")
+
+        import subprocess
+
+        def mock_run_git(*args):
+            if args[:2] == ("stash", "pop"):
+                raise subprocess.CalledProcessError(1, "git", stderr="error")
+            if args[:2] == ("diff", "--name-only"):
+                return ""  # No conflicts — unexpected
+            return ""
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git), \
+             pytest.raises(SystemExit) as exc:
+            cmd_uat_pop_mocks(args)
+        assert exc.value.code == 1
+
+
+class TestCmdUatFixCommit:
+    """Tests for uat-fix-commit command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path.write_text(content)
+        return uat_path
+
+    def test_new_commit(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+        # Test 4 has no fix_commit
+        call_log = []
+
+        def mock_run_git(*args):
+            call_log.append(args)
+            if args[0] == "add":
+                return ""
+            if args[0] == "commit":
+                return ""
+            if args[:2] == ("rev-parse", "--short"):
+                return "def5678"
+            return ""
+
+        args = argparse.Namespace(phase="5", test=4, message="fix(05-uat): fix expired token", files=["auth.dart"])
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_fix_commit(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["hash"] == "def5678"
+        assert output["amend"] is False
+
+        # Verify UAT.md updated
+        uat = UATFile.parse(uat_path.read_text())
+        t4 = next(t for t in uat.tests if t["num"] == "4")
+        assert t4["fix_status"] == "applied"
+        assert t4["fix_commit"] == "def5678"
+
+        # Verify commit -m was called (not amend)
+        commit_calls = [c for c in call_log if c[0] == "commit"]
+        assert any("-m" in c for c in commit_calls)
+
+    def test_amend_commit(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+        # Test 3 has fix_commit=abc1234
+
+        def mock_run_git(*args):
+            if args[0] == "add":
+                return ""
+            if args[:2] == ("rev-parse", "--short"):
+                return "abc1234"  # HEAD matches fix_commit → amend
+            if args[0] == "commit":
+                return ""
+            return ""
+
+        args = argparse.Namespace(phase="5", test=3, message="fix(05-uat): better error", files=["auth.dart"])
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_fix_commit(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["amend"] is True
+
+    def test_head_moved_no_amend(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+        # Test 3 has fix_commit=abc1234, but HEAD has moved
+
+        call_log = []
+
+        def mock_run_git(*args):
+            call_log.append(args)
+            if args[0] == "add":
+                return ""
+            if args[:2] == ("rev-parse", "--short"):
+                return "zzz9999"  # HEAD different from abc1234 → new commit
+            if args[0] == "commit":
+                return ""
+            return ""
+
+        args = argparse.Namespace(phase="5", test=3, message="fix(05-uat): retry fix", files=["auth.dart"])
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_fix_commit(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["amend"] is False
+
+        # Verify commit -m was called
+        commit_calls = [c for c in call_log if c[0] == "commit"]
+        assert any("-m" in c for c in commit_calls)
+
+    def test_no_files_exits(self, tmp_path):
+        self._setup_uat(tmp_path)
+
+        args = argparse.Namespace(phase="5", test=3, message="fix", files=[])
+        with self._patch_git_root(tmp_path), \
+             pytest.raises(SystemExit) as exc:
+            cmd_uat_fix_commit(args)
+        assert exc.value.code == 1
+
+
+class TestCmdUatRevertMocks:
+    """Tests for uat-revert-mocks command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
+        phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
+        phase_dir.mkdir(parents=True)
+        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path.write_text(content)
+        return uat_path
+
+    def test_revert_success(self, tmp_path, capsys):
+        uat_path = self._setup_uat(tmp_path)
+
+        def mock_run_git(*args):
+            if args[0] == "checkout":
+                return ""
+            return ""
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git):
+            cmd_uat_revert_mocks(args)
+
+        captured = capsys.readouterr()
+        output = json.loads(captured.out)
+        assert output["reverted"] == ["auth_service.dart"]
+
+        # Verify mocked_files cleared
+        uat = UATFile.parse(uat_path.read_text())
+        assert uat.frontmatter["mocked_files"] == []
+
+    def test_no_files(self, tmp_path, capsys):
+        # UAT_MINIMAL has phase 03-setup with empty mocked_files
+        phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
+        phase_dir.mkdir(parents=True)
+        (phase_dir / "03-setup-UAT.md").write_text(UAT_MINIMAL)
+
+        args = argparse.Namespace(phase="3")
+        with mock.patch.object(_mod, "find_git_root", return_value=tmp_path):
+            cmd_uat_revert_mocks(args)
+
+        captured = capsys.readouterr()
+        assert "No mocked files to revert" in captured.err
+
+    def test_git_failure(self, tmp_path):
+        self._setup_uat(tmp_path)
+
+        import subprocess
+        def mock_run_git(*args):
+            raise subprocess.CalledProcessError(1, "git", stderr="checkout error")
+
+        args = argparse.Namespace(phase="5")
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod, "run_git", side_effect=mock_run_git), \
+             pytest.raises(SystemExit) as exc:
+            cmd_uat_revert_mocks(args)
         assert exc.value.code == 1
 
 
