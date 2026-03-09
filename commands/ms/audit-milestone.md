@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Task
   - Write
+  - AskUserQuestion
 ---
 
 <objective>
@@ -37,7 +38,7 @@ Glob: .planning/phases/*/*-SUMMARY.md
 Glob: .planning/phases/*/*-VERIFICATION.md
 
 **Tech Debt:**
-Read `.planning/TECH-DEBT.md` at Step 8.5 (lazy — only needed for de-duplication)
+Read `.planning/TECH-DEBT.md` at Step 7.5 (lazy — only needed for de-duplication)
 </context>
 
 <process>
@@ -119,20 +120,14 @@ Produce a wiring summary:
 - **Gaps:** N unsatisfied (list each: from-phase → to-phase, what's missing)
 - **Score:** wiring = connected / (connected + gaps)
 
-## 4. Collect Results
-
-Combine:
-- Phase-level gaps and tech debt (from Step 2)
-- Cross-phase wiring gaps (from Step 3)
-
-## 5. Check Requirements Coverage
+## 4. Check Requirements Coverage
 
 For each requirement in REQUIREMENTS.md mapped to this milestone:
 - Find owning phase
 - Check phase verification status
 - Determine: satisfied | partial | unsatisfied
 
-## 6. Aggregate into MILESTONE-AUDIT.md
+## 5. Aggregate into MILESTONE-AUDIT.md
 
 Create `.planning/MILESTONE-AUDIT.md` with:
 
@@ -182,11 +177,11 @@ Plus full markdown report with tables for requirements, phases, integration, and
 - `gaps_found` — critical blockers exist
 - `tech_debt` — no blockers but accumulated deferred items need review
 
-## 7. Present Results
+## 6. Present Audit Summary
 
-Route by status (see `<offer_next>`).
+Present the audit summary (status, scores, gaps) to the user. Continue to Step 7.
 
-## 8. Code Review (Milestone)
+## 7. Code Review (Milestone)
 
 Read code review agent from config:
 
@@ -202,7 +197,7 @@ Proceed to next steps.
 Report: "No milestone reviewer configured. Run `/ms:config` to set one."
 Skip code review step (proceed to next steps).
 
-### Step 8.1: Get Changed Files
+### Step 7.1: Get Changed Files
 
 ```bash
 # Find first commit in milestone (first phase commit)
@@ -213,7 +208,7 @@ FIRST_COMMIT=$(git log --oneline --grep="(${FIRST_PHASE}-" --format="%H" | tail 
 CHANGED_FILES=$(git diff --name-only ${FIRST_COMMIT}^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
 ```
 
-### Step 8.2: Spawn Code Review Agent
+### Step 7.2: Spawn Code Review Agent
 
 ```
 Task(
@@ -246,7 +241,7 @@ Task(
 )
 ```
 
-### Step 8.3: Handle Results
+### Step 7.3: Handle Results
 
 The agent controls its own behavior — it may modify files, report findings, or both. React to what actually happened.
 
@@ -295,7 +290,7 @@ Add markdown section to report body:
 {Include full findings report from reviewer}
 ```
 
-Code review findings flow into `.planning/TECH-DEBT.md` via Step 8.5 — do NOT add them to `tech_debt` YAML.
+Code review findings flow into `.planning/TECH-DEBT.md` via Step 7.5 — do NOT add them to `tech_debt` YAML.
 
 **If any findings were reported**, present a decision gate. Recommend based on findings profile:
 
@@ -360,9 +355,9 @@ Continue to offer_next section.
 
 **If user chooses "Accept as tech debt":**
 
-Findings are already tracked in `.planning/TECH-DEBT.md` via Step 8.5. Continue to offer_next section.
+Findings are already tracked in `.planning/TECH-DEBT.md` via Step 7.5. Continue to offer_next section.
 
-## 8.5. Generate/Update TECH-DEBT.md
+## 7.5. Generate/Update TECH-DEBT.md
 
 After code review (all sources now available), generate or update `.planning/TECH-DEBT.md`:
 
@@ -378,7 +373,7 @@ After code review (all sources now available), generate or update `.planning/TEC
 5. **Assign `TD-{N}` IDs** continuing from highest existing ID
 6. **Write/update** `.planning/TECH-DEBT.md` — group items under `## Critical`, `## High`, `## Medium`, `## Low` sections per template. Omit empty sections.
 
-## 9. Commit Audit Report
+## 8. Commit Audit Report
 
 ```bash
 git add .planning/MILESTONE-AUDIT.md .planning/TECH-DEBT.md
@@ -402,12 +397,10 @@ Read `~/.claude/mindsystem/references/routing/audit-result-routing.md` and follo
 - [ ] If quality phase chosen: Phase directory created, ROADMAP updated with TECH-DEBT.md scope
 - [ ] If files modified by reviewer: changes committed
 - [ ] If findings reported: parsed and added to MILESTONE-AUDIT.md
-- [ ] MILESTONE-AUDIT.md and TECH-DEBT.md committed to git
-- [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
-- [ ] UAT assumptions collected and aggregated by phase
-- [ ] Cross-phase wiring checked from verification and summary artifacts
 - [ ] Code review completed (or skipped if config says "skip")
-- [ ] All phase VERIFICATION.md files read
-- [ ] MILESTONE-AUDIT.md created with assumptions section
+- [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
+- [ ] UAT assumptions collected, aggregated by phase, and included in MILESTONE-AUDIT.md
+- [ ] MILESTONE-AUDIT.md and TECH-DEBT.md committed to git
+- [ ] Cross-phase wiring checked from all phase verification and summary artifacts
 - [ ] Results presented with actionable next steps
 </success_criteria>
