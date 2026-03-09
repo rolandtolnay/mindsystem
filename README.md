@@ -315,6 +315,7 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │
 ├── STATE.md                          # Active phase, blockers, recent decisions
 ├── MILESTONE-CONTEXT.md              # new-milestone → brainstorm that grounds the roadmap
+├── MILESTONE-RESEARCH.md             # research-milestone → domain research before roadmapping
 ├── ROADMAP.md                        # Phase breakdown with goals and success criteria
 ├── REQUIREMENTS.md                   # Checkable REQ-IDs mapped to phases
 │
@@ -358,9 +359,6 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │   └── 02-payment-flow/              # ── Phase in progress ──
 │       ├── CONTEXT.md                #   discussed, not yet planned
 │       └── 02-01-PLAN.md             #   planned, not yet executed
-│
-├── MILESTONE-RESEARCH.md              # /ms:research-milestone → domain ecosystem
-│                                      #   Technology, product landscape, architecture, risks
 │
 ├── adhoc/                            # /ms:adhoc → out-of-pipeline work
 │   └── 2026-01-15-fix-token/
