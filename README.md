@@ -31,6 +31,9 @@ npx mindsystem-cc
 [ new-milestone ]       Define what to build next
         │
         ▼
+[ research-milestone ]  (optional) Research domain before roadmapping
+        │
+        ▼
 [ create-roadmap ]      Derive requirements, map to phases
         │
         ▼
@@ -82,7 +85,17 @@ Claude reads your project history (tech debt, deferred requirements, validated d
 
 Think of it as guided brainstorming: Claude asks the right questions rather than prescribing answers, helping you figure out what to build next.
 
-### 2. Create roadmap
+### 2. Research milestone (optional)
+
+```
+/ms:research-milestone
+```
+
+Spawns 2-5 research agents adapted to your milestone scope — ecosystem/stack, product landscape, codebase feasibility, architecture, pitfalls. You approve which dimensions to research, then agents run in parallel.
+
+Produces `MILESTONE-RESEARCH.md` that the roadmapper consumes for better phase breakdowns. Valuable when entering unfamiliar domains, evaluating new tech stacks, or starting a project's first milestone.
+
+### 3. Create roadmap
 
 ```
 /ms:create-roadmap
@@ -94,7 +107,7 @@ Requirements define what must be TRUE when you ship, not what to build. This goa
 
 **Creates:** `REQUIREMENTS.md`, `ROADMAP.md`, `STATE.md`, phase directories.
 
-### 3. Discuss phase (optional, recommended)
+### 4. Discuss phase (optional, recommended)
 
 ```
 /ms:discuss-phase 1
@@ -106,7 +119,7 @@ Worth taking seriously. Decisions here propagate through everything that follows
 
 **Creates:** `CONTEXT.md` with vision, essentials, and reasoning-backed decisions.
 
-### 4. Design phase (optional)
+### 5. Design phase (optional)
 
 ```
 /ms:design-phase 1
@@ -116,7 +129,7 @@ Claude generates parallel HTML/CSS mockup variants and a side-by-side comparison
 
 The output is a `DESIGN.md` with exact design tokens (hex colors, px spacing, font weights), not descriptions of what things should look like.
 
-### 5. Research phase (optional)
+### 6. Research phase (optional)
 
 ```
 /ms:research-phase 1
@@ -126,7 +139,7 @@ Three parallel agents investigate at once: one queries external documentation th
 
 You resolve library conflicts if any come up. Otherwise, this runs with minimal input.
 
-### 6. Plan phase
+### 7. Plan phase
 
 ```
 /ms:plan-phase 1
@@ -140,7 +153,7 @@ You approve the plan structure and can adjust granularity.
 
 **Creates:** `PLAN.md` files, `EXECUTION-ORDER.md`.
 
-### 7. Execute phase
+### 8. Execute phase
 
 ```
 /ms:execute-phase 1
@@ -154,7 +167,7 @@ After execution, knowledge consolidation updates subsystem-scoped knowledge file
 
 **Creates:** `SUMMARY.md`, `VERIFICATION.md`, `.patch` files, knowledge file updates.
 
-### 8. Verify work
+### 9. Verify work
 
 ```
 /ms:verify-work 1
@@ -168,11 +181,11 @@ Fixes compound into knowledge files through automatic consolidation. This is whe
 
 **Creates:** `UAT.md`, `uat-fixes.patch`, knowledge file updates.
 
-### 9. Repeat
+### 10. Repeat
 
-Run steps 3-8 for each phase. Pick the preparation depth each phase needs.
+Run steps 4-9 for each phase. Pick the preparation depth each phase needs.
 
-### 10. Audit milestone
+### 11. Audit milestone
 
 ```
 /ms:audit-milestone
@@ -182,7 +195,7 @@ Claude checks requirements coverage against `REQ-IDs`, verifies cross-phase wiri
 
 Optional code review with quality-phase decisions for high-impact findings. You decide what gets fixed vs. accepted as debt.
 
-### 11. Complete milestone
+### 12. Complete milestone
 
 ```
 /ms:complete-milestone
