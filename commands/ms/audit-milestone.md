@@ -14,7 +14,7 @@ allowed-tools:
 <objective>
 Verify milestone achieved its definition of done. Check requirements coverage, cross-phase integration, and end-to-end flows.
 
-**This command IS the orchestrator.** Reads existing VERIFICATION.md files (phases already verified during execute-phase), generates/updates `.planning/TECH-DEBT.md` as single source of truth for tech debt, then spawns integration checker for cross-phase wiring.
+**This command IS the orchestrator.** Reads existing VERIFICATION.md files (phases already verified during execute-phase), generates/updates `.planning/TECH-DEBT.md` as single source of truth for tech debt, then checks cross-phase wiring inline from verification and summary artifacts.
 </objective>
 
 <execution_context>
@@ -100,28 +100,30 @@ assumptions:
           reason: "Can't manipulate time in tests"
 ```
 
-## 3. Spawn Integration Checker
+## 3. Cross-Phase Wiring Check
 
-With phase context collected:
+Check aggregate cross-phase connections that per-phase verifiers miss.
 
-```
-Task(
-  prompt="Check cross-phase integration and E2E flows.
+From the SUMMARY.md and VERIFICATION.md files already loaded in Step 2:
 
-Phases: {phase_dirs}
-Phase exports: {from SUMMARYs}
-API routes: {routes created}
+1. **Build provides/consumes map** — For each phase SUMMARY, extract key exports, files created, APIs defined. Identify what each phase provides and what it consumes from other phases.
 
-Verify cross-phase wiring and E2E user flows.",
-  subagent_type="ms-integration-checker"
-)
-```
+2. **Cross-reference verification results** — For each cross-phase dependency (Phase N consumes something Phase M provides), check Phase M's VERIFICATION.md:
+   - Provider artifact is VERIFIED → connection satisfied
+   - Provider artifact is STUB, MISSING, or ORPHANED → wiring gap
+
+3. **Flag aggregate patterns** — Multiple orphaned artifacts across phases (systemic wiring issue). APIs/exports created but consumed by no other phase's SUMMARY. A phase depending on another phase with status: gaps_found.
+
+Produce a wiring summary:
+- **Connected:** N cross-phase dependencies satisfied
+- **Gaps:** N unsatisfied (list each: from-phase → to-phase, what's missing)
+- **Score:** wiring = connected / (connected + gaps)
 
 ## 4. Collect Results
 
 Combine:
-- Phase-level gaps and tech debt (from step 2)
-- Integration checker's report (wiring gaps, broken flows)
+- Phase-level gaps and tech debt (from Step 2)
+- Cross-phase wiring gaps (from Step 3)
 
 ## 5. Check Requirements Coverage
 
@@ -142,12 +144,10 @@ status: passed | gaps_found | tech_debt
 scores:
   requirements: N/M
   phases: N/M
-  integration: N/M
-  flows: N/M
+  wiring: N/M
 gaps:  # Critical blockers
   requirements: [...]
-  integration: [...]
-  flows: [...]
+  wiring: [...]
 tech_debt: see .planning/TECH-DEBT.md
 assumptions:  # Tests skipped during UAT
   count: [N]
@@ -369,7 +369,7 @@ After code review (all sources now available), generate or update `.planning/TEC
 1. **Read existing** `.planning/TECH-DEBT.md` (if exists) — parse active items and dismissed list, note highest `TD-{N}` ID
 2. **Read template** from `@~/.claude/mindsystem/templates/tech-debt.md`
 3. **Collect tech debt** from all sources with severity mapping:
-   - Integration checker bugs → **Critical**
+   - Cross-phase wiring gaps → **Critical**
    - Unfixed UAT issues (result: `issue`, fix_status ≠ `verified`) → **Critical** (blocker) / **High** (major) / **Medium** (minor) / **Low** (cosmetic)
    - Code review findings → pass through reviewer severity (**High** / **Medium** / **Low**)
    - Phase VERIFICATION.md anti-patterns → **Medium** or **Low** (blockers go to `gaps`, not tech debt)
@@ -386,7 +386,7 @@ git commit -m "$(cat <<'EOF'
 docs(milestone): complete {name} audit
 
 Status: {status}
-Scores: Requirements {N}/{M} | Phases {N}/{M} | Integration {N}/{M} | Flows {N}/{M}
+Scores: Requirements {N}/{M} | Phases {N}/{M} | Wiring {N}/{M}
 EOF
 )"
 ```
@@ -405,7 +405,7 @@ Read `~/.claude/mindsystem/references/routing/audit-result-routing.md` and follo
 - [ ] MILESTONE-AUDIT.md and TECH-DEBT.md committed to git
 - [ ] Tech debt collected into .planning/TECH-DEBT.md (de-duplicated, TD-{N} IDs assigned)
 - [ ] UAT assumptions collected and aggregated by phase
-- [ ] Integration checker spawned for cross-phase wiring
+- [ ] Cross-phase wiring checked from verification and summary artifacts
 - [ ] Code review completed (or skipped if config says "skip")
 - [ ] All phase VERIFICATION.md files read
 - [ ] MILESTONE-AUDIT.md created with assumptions section

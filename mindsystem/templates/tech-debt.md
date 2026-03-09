@@ -10,7 +10,7 @@ Created and updated by `/ms:audit-milestone`. Items persist across milestones. U
 
 **Item IDs** use `TD-{N}` format — monotonically increasing, never reused. New items continue from highest existing ID.
 
-**Sources:** Phase verifications (anti-patterns, non-critical gaps), code review findings, integration checker bugs, unfixed UAT issues.
+**Sources:** Phase verifications (anti-patterns, non-critical gaps), code review findings, cross-phase wiring gaps, unfixed UAT issues.
 
 ---
 
@@ -30,7 +30,7 @@ Created and updated by `/ms:audit-milestone`. Items persist across milestones. U
 - **Location:** {file:line or component}
 - **Impact:** {what this causes and why it matters}
 - **Fix:** {how to address}
-- <sub>Phase {source phase} | {verification | integration-check | code-review} | v{milestone}</sub>
+- <sub>Phase {source phase} | {verification | wiring-check | code-review} | v{milestone}</sub>
 
 ---
 
@@ -47,13 +47,13 @@ Created and updated by `/ms:audit-milestone`. Items persist across milestones. U
 ## Guidelines
 
 **Severity levels:**
-- `Critical` — Breaks behavior or risks data loss. Integration checker bugs (broken cross-phase wiring, failed E2E flows) always map here.
+- `Critical` — Breaks behavior or risks data loss. Cross-phase wiring gaps (broken cross-phase connections, orphaned artifacts spanning phases) always map here.
 - `High` — Causes cascading changes if left unaddressed. Fragile patterns that spread to new code, missing abstractions forcing workarounds.
 - `Medium` — Contained friction. TODOs, missing validation, incomplete error handling. Impact stays local.
 - `Low` — Won't compound. Style inconsistencies, minor naming issues, improvement opportunities.
 
 **Severity mapping from sources:**
-- Integration checker bugs → Critical
+- Cross-phase wiring gaps → Critical
 - Unfixed UAT issues → Critical (blocker) / High (major) / Medium (minor) / Low (cosmetic)
 - Code review findings → pass through reviewer severity (High/Medium/Low)
 - Phase verification anti-patterns → Medium or Low (blockers go to `gaps`, not tech debt)

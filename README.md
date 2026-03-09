@@ -178,7 +178,7 @@ Run steps 3-8 for each phase. Pick the preparation depth each phase needs.
 /ms:audit-milestone
 ```
 
-Claude checks requirements coverage against `REQ-IDs`, spawns an integration checker for cross-phase wiring, aggregates untested UAT assumptions, and consolidates tech debt into `TECH-DEBT.md` with severity tiers and `TD-IDs`.
+Claude checks requirements coverage against `REQ-IDs`, verifies cross-phase wiring from verification artifacts, aggregates untested UAT assumptions, and consolidates tech debt into `TECH-DEBT.md` with severity tiers and `TD-IDs`.
 
 Optional code review with quality-phase decisions for high-impact findings. You decide what gets fixed vs. accepted as debt.
 
@@ -369,7 +369,7 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
         ├── ROADMAP.md                # Historical phase breakdown
         ├── REQUIREMENTS.md           # Final requirement status
         ├── PHASE-SUMMARIES.md        # Consolidated execution summaries
-        ├── MILESTONE-AUDIT.md        # Requirements coverage, integration check
+        ├── MILESTONE-AUDIT.md        # Requirements coverage, cross-phase wiring check
         ├── CONTEXT.md                # Original milestone brainstorm
         ├── MILESTONE-RESEARCH.md     # Archived domain research (if existed)
         └── phases/                   # Archived phase artifacts

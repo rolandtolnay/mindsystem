@@ -236,7 +236,7 @@ Audit milestone completion against original intent.
 
 - Use when: you think you’re “done” and want cross-phase integration + requirements coverage checked before archiving.
 - Reads phase VERIFICATION.md files and aggregates results
-- Spawns integration checker for cross-phase wiring
+- Checks cross-phase wiring from verification artifacts
 - Maintains TECH-DEBT.md as single source of truth for debt items
 - Creates MILESTONE-AUDIT.md with gaps and tech debt
 
