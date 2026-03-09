@@ -6,6 +6,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-03-09
+
+### Added
+- **Milestone-level research command** (`/ms:research-milestone`). Replaces the multi-file research project approach with a single consolidated `MILESTONE-RESEARCH.md` output — less context overhead, easier to reference during roadmap creation.
+- **UAT git helper subcommands** in ms-tools (`uat-stash-mocks`, `uat-pop-mocks`, `uat-fix-commit`, `uat-revert-mocks`). Abstracts raw git operations during UAT fix iteration so the verify-work workflow is simpler and less error-prone.
+
+### Changed
+- **Audit-milestone consolidation.** Inlined the integration checker directly into the audit-milestone command (~20 lines of behavioral instructions) instead of spawning a separate 425-line subagent. Per-phase verifiers already cover 90%+ of integration checking; the remaining cross-phase view reads existing VERIFICATION.md and SUMMARY.md artifacts.
+- **Verify-work workflow** now uses ms-tools UAT subcommands instead of raw git commands.
+
+### Removed
+- `ms-integration-checker` agent — replaced by inline instructions in audit-milestone.
+- `ms-research-synthesizer` agent and multi-file research templates (`STACK.md`, `ARCHITECTURE.md`, `FEATURES.md`, `PITFALLS.md`, `SUMMARY.md`) — replaced by consolidated milestone research approach.
+- `/ms:research-project` command and workflow — replaced by `/ms:research-milestone`.
+
 ## [4.0.4] - 2026-03-06
 
 ### Fixed
@@ -606,7 +621,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.4...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.0...HEAD
+[4.1.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.4...v4.1.0
 [4.0.4]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.1...v4.0.2
