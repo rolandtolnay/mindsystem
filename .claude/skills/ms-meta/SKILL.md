@@ -57,7 +57,7 @@ The critical judgment when evaluating any Mindsystem feature: **does this step's
 
 Reserve subagents for autonomous execution work, not collaborative thinking.
 
-**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: STATE.md updates via `ms-tools update-state`, execution order validation via `ms-tools validate-execution-order`, patch generation via `ms-tools generate-phase-patch`. Prompts handle reasoning and decisions; scripts handle mechanical operations.
+**Script + prompt hybrid.** Deterministic chores live in scripts (`scripts/`); language models do what they're good at: interpreting intent, making trade-offs, and writing code. Examples: STATE.md updates via `ms-tools update-state`, execution order validation via `ms-tools validate-execution-order`, patch generation via `ms-tools generate-phase-patch`. Prompts handle reasoning and decisions; scripts handle mechanical operations. When extracting bash from prompts into ms-tools, evaluate by **total context cost** (bash + surrounding explanation), design **self-contained operations** that read their own state rather than dumb wrappers, and bundle operations that always happen together. See `references/script-extraction.md` for detailed methodology.
 
 **User as collaborator.** Trust that users can contribute meaningfully. Maintain:
 - **Control** — User decides when to proceed, what to skip
@@ -287,6 +287,7 @@ Read source files directly for detailed knowledge:
 | Adhoc execution | `commands/ms/adhoc.md`, `mindsystem/workflows/adhoc.md` |
 | Todo management | `commands/ms/add-todo.md` |
 | Health checks & config healing | `commands/ms/doctor.md` |
+| Script extraction methodology | `.claude/skills/ms-meta/references/script-extraction.md` |
 | All agents | `ls agents/` |
 | All commands | `ls commands/ms/` |
 | All workflows | `ls mindsystem/workflows/` |

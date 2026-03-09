@@ -2,7 +2,7 @@
 Define concrete, checkable requirements for v1.
 
 Two modes:
-1. **With research** — Transform FEATURES.md into scoped requirements
+1. **With research** — Transform MILESTONE-RESEARCH.md Product Landscape into scoped requirements
 2. **Without research** — Gather requirements through questioning
 </purpose>
 
@@ -103,7 +103,7 @@ Here are the features for [domain]:
 - OAuth (Google, GitHub)
 - 2FA
 
-**Research notes:** [any relevant notes from FEATURES.md]
+**Research notes:** [any relevant notes from MILESTONE-RESEARCH.md]
 
 ---
 
@@ -112,8 +112,8 @@ Here are the features for [domain]:
 ```
 
 For each category, include:
-- Table stakes from FEATURES.md
-- Differentiators from FEATURES.md
+- Table stakes from MILESTONE-RESEARCH.md
+- Differentiators from MILESTONE-RESEARCH.md
 - Any anti-features flagged (with warnings)
 - Complexity notes where relevant
 </step>

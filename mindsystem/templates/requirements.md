@@ -82,7 +82,7 @@ Which phases cover which requirements. Updated by create-roadmap.
 - Checkbox: Only for v1 requirements (v2 are not yet actionable)
 
 **Categories:**
-- Derive from research FEATURES.md categories
+- Derive from MILESTONE-RESEARCH.md Product Landscape categories
 - Keep consistent with domain conventions
 - Typical: Authentication, Content, Social, Notifications, Moderation, Payments, Admin
 
