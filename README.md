@@ -346,12 +346,8 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │       ├── CONTEXT.md                #   discussed, not yet planned
 │       └── 02-01-PLAN.md             #   planned, not yet executed
 │
-├── research/                         # /ms:research-project → domain ecosystem
-│   ├── STACK.md                      # Technology recommendations for this domain
-│   ├── ARCHITECTURE.md               # Common system structure patterns
-│   ├── FEATURES.md                   # Feature landscape in this domain
-│   ├── PITFALLS.md                   # Mistakes to avoid
-│   └── SUMMARY.md                    # Synthesized findings with roadmap implications
+├── MILESTONE-RESEARCH.md              # /ms:research-milestone → domain ecosystem
+│                                      #   Technology, product landscape, architecture, risks
 │
 ├── adhoc/                            # /ms:adhoc → out-of-pipeline work
 │   └── 2026-01-15-fix-token/
@@ -375,8 +371,7 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
         ├── PHASE-SUMMARIES.md        # Consolidated execution summaries
         ├── MILESTONE-AUDIT.md        # Requirements coverage, integration check
         ├── CONTEXT.md                # Original milestone brainstorm
-        ├── research/                 # Archived domain research
-        │   └── ...
+        ├── MILESTONE-RESEARCH.md     # Archived domain research (if existed)
         └── phases/                   # Archived phase artifacts
             └── 01-foundation/
                 ├── 01-changes.patch  #   code diffs retained
@@ -438,7 +433,7 @@ Full docs live in `/ms:help`.
 | `/ms:new-project` | Initialize `.planning/` and capture project intent |
 | `/ms:config` | Configure code reviewers, mockups, gitignore, git remote |
 | `/ms:map-codebase` | Document existing repo's stack, structure, and conventions |
-| `/ms:research-project` | Domain research saved to `.planning/research/` |
+| `/ms:research-milestone` | Milestone-scoped research saved to `.planning/MILESTONE-RESEARCH.md` |
 | `/ms:create-roadmap` | Define requirements and create phases mapped to them |
 | `/ms:new-milestone [name]` | Discover what to build next, start new milestone |
 | `/ms:discuss-phase <number>` | Product-informed collaborative thinking before planning |

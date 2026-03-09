@@ -30,7 +30,7 @@ Output ONLY the reference content below. Do NOT add:
 
 1. `/ms:new-project` — Initialize project with brief
 2. `/ms:config` — (optional) Configure code reviewers and gitignore
-3. `/ms:research-project` — (optional) Research domain ecosystem
+3. `/ms:research-milestone` — (optional) Research domain ecosystem
 4. `/ms:create-roadmap` — Define requirements and create roadmap
 5. `/ms:plan-phase 1` — Create detailed plan for first phase
 6. `/ms:execute-phase 1` — Execute with parallel agents
@@ -62,7 +62,7 @@ Initialize → (Optional Research) → Roadmap → Plan → Execute → Verify �
 Common deviations:
 - Existing repo: `/ms:map-codebase` after `/ms:new-project` (or before — either works)
 - Plan looks wrong: `/ms:discuss-phase <phase>`
-- Unknown domain: `/ms:research-project` or `/ms:research-phase <phase>`
+- Unknown domain: `/ms:research-milestone` before roadmap, or `/ms:research-phase <phase>` before planning
 - Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
 - New urgent work: `/ms:insert-phase <after> "<desc>"`
 - New non-urgent work: `/ms:add-todo "<desc>"`
@@ -109,15 +109,15 @@ Configure Mindsystem preferences — code reviewers, mockup preferences, gitigno
 
 Usage: `/ms:config`
 
-**`/ms:research-project`**
-Research domain ecosystem before creating roadmap.
+**`/ms:research-milestone`**
+Research milestone domain before creating roadmap.
 
 - Use when: you’re unsure about stack choices, common pitfalls, or “what good looks like” in this domain.
-- Spawns parallel agents to investigate stack, features, architecture, pitfalls
-- Creates `.planning/research/` with ecosystem knowledge
-- Recommended for best results; skip only if you need speed over thoroughness
+- Spawns 2-5 adaptive agents based on milestone scope (stack, product landscape, codebase feasibility, architecture, pitfalls)
+- Creates `.planning/MILESTONE-RESEARCH.md` — single file consumed by roadmapper
+- Research conclusions flow through ROADMAP.md to all downstream phase commands
 
-Usage: `/ms:research-project`
+Usage: `/ms:research-milestone`
 
 **`/ms:create-roadmap`**
 Define requirements and create roadmap with phases.
@@ -287,7 +287,7 @@ Discover what to build next and start a new milestone.
 - Collaborative discovery through adaptive questioning
 - Updates PROJECT.md with new goals
 - Creates MILESTONE-CONTEXT.md for downstream consumption (roadmap, planning)
-- Routes to create-roadmap or research-project
+- Routes to create-roadmap or research-milestone
 
 Usage: `/ms:new-milestone`
 Usage: `/ms:new-milestone "Push Notifications"`
@@ -423,7 +423,7 @@ Usage: `/ms:release-notes`
 ├── ROADMAP.md            # Current phase breakdown
 ├── STATE.md              # Project memory & context
 ├── config.json           # Workflow settings
-├── research/             # Domain ecosystem research
+├── MILESTONE-RESEARCH.md # Domain ecosystem research (from /ms:research-milestone)
 ├── todos/                # Captured ideas and tasks
 │   ├── *.md              # Pending todos (flat files)
 │   └── done/             # Completed todos
@@ -460,7 +460,7 @@ Usage: `/ms:release-notes`
 ```
 /ms:new-project                 # Extract your idea through questions
 /ms:config                      # (optional) Configure code reviewers and gitignore
-/ms:research-project            # (recommended) Research domain ecosystem
+/ms:research-milestone            # (recommended) Research domain ecosystem
 /ms:create-roadmap              # Define requirements and create phases
 /ms:plan-phase 1                # Create detailed plan
 /ms:execute-phase 1             # Execute with parallel agents
@@ -472,7 +472,7 @@ Usage: `/ms:release-notes`
 /ms:new-project                 # Step 1: Questions focus on business context and vision
 /ms:map-codebase                # Step 2: Analyze existing code
 /ms:config                      # (optional) Configure code reviewers and gitignore
-/ms:research-project            # (optional) Research new domain areas
+/ms:research-milestone            # (optional) Research new domain areas
 /ms:create-roadmap              # Define requirements and create roadmap
 /ms:plan-phase 1                # Codebase docs load automatically
 /ms:execute-phase 1             # Claude knows your patterns & conventions
@@ -526,7 +526,7 @@ Common options:
 
 ```
 /ms:new-milestone                     # Discover what to build, update PROJECT.md
-/ms:research-project                  # (optional) Domain / stack research
+/ms:research-milestone                  # (optional) Domain / stack research
 /ms:create-roadmap                    # New phases mapped to requirements
 /ms:plan-phase                        # Auto-detect next unplanned phase
 /ms:execute-phase <phase>

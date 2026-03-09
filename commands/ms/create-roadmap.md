@@ -13,7 +13,7 @@ allowed-tools:
 <objective>
 Define project requirements and create roadmap with phase breakdown.
 
-Run after `/ms:new-milestone` or `/ms:new-project` + optional `/ms:research-project`.
+Run after `/ms:new-milestone` or `/ms:new-project` + optional `/ms:research-milestone`.
 </objective>
 
 <execution_context>
@@ -23,8 +23,7 @@ Run after `/ms:new-milestone` or `/ms:new-project` + optional `/ms:research-proj
 <context>
 @.planning/PROJECT.md
 @.planning/MILESTONE-CONTEXT.md (if exists)
-@.planning/research/FEATURES.md (if exists)
-@.planning/research/SUMMARY.md (if exists)
+@.planning/MILESTONE-RESEARCH.md (if exists)
 </context>
 
 <process>
@@ -36,7 +35,7 @@ Run after `/ms:new-milestone` or `/ms:new-project` + optional `/ms:research-proj
 
 # Detect available context
 [ -f .planning/MILESTONE-CONTEXT.md ] && echo "HAS_MILESTONE_CONTEXT" || echo "NO_MILESTONE_CONTEXT"
-[ -d .planning/research ] && echo "HAS_RESEARCH" || echo "NO_RESEARCH"
+[ -f .planning/MILESTONE-RESEARCH.md ] && echo "HAS_RESEARCH" || echo "NO_RESEARCH"
 [ -f .planning/REQUIREMENTS.md ] && echo "REQUIREMENTS_EXISTS" || echo "NO_REQUIREMENTS"
 [ -f .planning/ROADMAP.md ] && echo "ROADMAP_EXISTS" || echo "NO_ROADMAP"
 ```
@@ -64,7 +63,7 @@ If "Replace": Continue
 
 **If MILESTONE-CONTEXT.md exists:** Skip (context ready for agent).
 
-**If no MILESTONE-CONTEXT.md but HAS_RESEARCH:** Skip (research provides feature context).
+**If no MILESTONE-CONTEXT.md but HAS_RESEARCH:** Skip (MILESTONE-RESEARCH.md provides feature context).
 
 **If neither exists (first milestone, no research):**
 
@@ -122,8 +121,7 @@ Task(
 **Starting phase number:** $START_PHASE
 
 **Research (if exists):**
-@.planning/research/FEATURES.md
-@.planning/research/SUMMARY.md
+@.planning/MILESTONE-RESEARCH.md
 
 **Config:**
 @.planning/config.json

@@ -538,7 +538,7 @@ Archived to milestones/{slug}/:
 - phases/ (phase directories moved from .planning/phases/)
 - MILESTONE-AUDIT.md (if audit was run)
 - CONTEXT.md (if milestone context existed)
-- research/ (if research existed)
+- MILESTONE-RESEARCH.md (if existed)
 
 Cleaned:
 - Raw phase artifacts deleted (CONTEXT, DESIGN, RESEARCH, SUMMARY, UAT, VERIFICATION, EXECUTION-ORDER)
@@ -548,7 +548,7 @@ Cleaned:
 Deleted (fresh for next milestone):
 - ROADMAP.md
 - REQUIREMENTS.md
-- .planning/research/ (archived to milestone)
+- MILESTONE-RESEARCH.md (archived to milestone)
 
 Updated:
 - MILESTONES.md (new entry)
@@ -574,7 +574,7 @@ Shipped:
 Archived to milestones/{slug}/:
 - ROADMAP.md
 - REQUIREMENTS.md
-- research/ (if existed)
+- MILESTONE-RESEARCH.md (if existed)
 
 Summary: .planning/MILESTONES.md
 
@@ -590,7 +590,7 @@ Summary: .planning/MILESTONES.md
 
 **Next milestone flow:**
 1. `/ms:new-milestone` — discover what to build, update PROJECT.md with goals
-2. `/ms:research-project` — (optional) research ecosystem
+2. `/ms:research-milestone` — (optional) research ecosystem
 3. `/ms:create-roadmap` — define requirements and plan how to build it
 
 ---

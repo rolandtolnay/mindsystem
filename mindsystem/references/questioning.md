@@ -16,7 +16,7 @@ Don't interrogate. Collaborate. Don't follow a script. Follow the thread.
 
 By the end of questioning, you need enough clarity to write a PROJECT.md that downstream phases can act on:
 
-- **research-project** needs: product domain, target audience, core problem, what unknowns exist
+- **research-milestone** needs: product domain, target audience, core problem, what unknowns exist
 - **create-roadmap** needs: clear vision with business context grounding — who it's for, what problem it solves, how it's different — to decompose into phases
 - **plan-phase** needs: audience context for task weighting, specific requirements for implementation choices
 - **discuss-phase** needs: business context for PO-style analysis — audience, problem, differentiation inform scope recommendations

@@ -11,8 +11,7 @@ Two modes:
 
 1. ~/.claude/mindsystem/templates/requirements.md
 2. .planning/PROJECT.md
-3. .planning/research/FEATURES.md (if exists)
-4. .planning/research/SUMMARY.md (if exists)
+3. .planning/MILESTONE-RESEARCH.md (if exists)
 </required_reading>
 
 <process>
@@ -20,7 +19,7 @@ Two modes:
 <step name="detect_mode">
 Check for research:
 ```bash
-[ -f .planning/research/FEATURES.md ] && echo "HAS_RESEARCH" || echo "NO_RESEARCH"
+[ -f .planning/MILESTONE-RESEARCH.md ] && echo "HAS_RESEARCH" || echo "NO_RESEARCH"
 ```
 
 **If HAS_RESEARCH:** Follow steps load_context → present_features → scope_categories
@@ -33,17 +32,16 @@ Read PROJECT.md and extract:
 - Stated constraints (budget, timeline, tech limitations)
 - Any explicit scope boundaries from project definition
 
-Read research/FEATURES.md and extract:
+Read MILESTONE-RESEARCH.md and extract from Product Landscape:
 - Table stakes (users expect these)
 - Differentiators (competitive advantage)
 - Anti-features (commonly requested, often problematic)
-- Feature dependencies
-- MVP vs full product recommendations
 
-Read research/SUMMARY.md for:
-- Overall confidence level
-- Key architectural constraints
-- Suggested phase structure (informational only)
+Extract from other sections:
+- Technology constraints and decisions
+- Architecture dependencies
+- Feasibility constraints
+- Key risks and pitfalls
 </step>
 
 <step name="load_project" mode="without_research">

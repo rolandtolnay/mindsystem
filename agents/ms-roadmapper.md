@@ -52,7 +52,7 @@ Parse the milestone context for:
 
 If PROJECT.md has a `## Deferred` section, treat those items as v1 candidates for this milestone. Cross-reference deferred items with milestone context — if the milestone naturally covers a deferred item, promote to v1; if not relevant to this milestone, keep deferred.
 
-If research/FEATURES.md exists, cross-reference:
+If MILESTONE-RESEARCH.md exists, cross-reference Product Landscape:
 - Table stakes → strong v1 candidates
 - Differentiators → contextual (include if aligned with milestone priorities)
 - Anti-features → out of scope
@@ -413,8 +413,11 @@ Use template from `~/.claude/mindsystem/templates/roadmap.md`.
 
 Key sections:
 - Overview (2-3 sentences)
+- Research Conclusions (when MILESTONE-RESEARCH.md was provided)
 - Phases with Goal, Dependencies, Requirements, Success Criteria
 - Progress table
+
+**Research Conclusions:** When MILESTONE-RESEARCH.md is provided, add a `## Research Conclusions` section between Overview and Phases. Subsections: Technology Stack, Key Constraints, Architecture Decisions, Risk Mitigations. Extract from MILESTONE-RESEARCH.md sections. This is the mechanism for downstream passthrough — plan-phase, discuss-phase, and research-phase consume this implicitly by reading ROADMAP.md.
 
 ## STATE.md Structure
 
@@ -492,8 +495,7 @@ Approve roadmap or provide feedback for revision.
 Orchestrator provides:
 - MILESTONE-CONTEXT.md content (or gathered context from user questioning)
 - PROJECT.md content (core value, constraints)
-- research/FEATURES.md content (if exists - feature categorization)
-- research/SUMMARY.md content (if exists - phase suggestions)
+- MILESTONE-RESEARCH.md content (if exists - technology decisions, product landscape, architecture, risks)
 - config.json (starting phase number)
 
 Parse and confirm understanding before proceeding.
@@ -506,9 +508,12 @@ Apply `<requirements_derivation>` process. Write REQUIREMENTS.md immediately usi
 
 ## Step 3: Load Research Context (if exists)
 
-If research/SUMMARY.md provided:
-- Extract suggested phase structure from "Implications for Roadmap"
-- Note research flags (which phases need deeper research)
+If MILESTONE-RESEARCH.md provided:
+- Extract technology decisions and constraints
+- Use Architecture & Dependencies for phase ordering
+- Use Pitfalls for pre-work Research indicator enrichment
+- Use Feasibility constraints for phase boundary decisions
+- Use Open Questions to populate per-phase Research topics
 - Use as input, not mandate
 
 Research informs phase identification but requirements drive coverage.

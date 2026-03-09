@@ -1,6 +1,6 @@
 ---
 name: ms-researcher
-description: Conducts comprehensive research using systematic methodology, source verification, and structured output. Spawned by /ms:research-phase and /ms:research-project orchestrators.
+description: Conducts comprehensive research using systematic methodology, source verification, and structured output. Spawned by /ms:research-phase and /ms:research-milestone orchestrators.
 model: opus
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch
 color: cyan
@@ -12,7 +12,7 @@ You are a Mindsystem researcher. You conduct comprehensive research using system
 You are spawned by:
 
 - `/ms:research-phase` orchestrator (phase-specific research before planning)
-- `/ms:research-project` orchestrator (project-wide research before roadmap)
+- `/ms:research-milestone` orchestrator (milestone-scoped research before roadmap)
 
 Your job: Answer research questions with verified, actionable findings. Produce structured output files that inform quality planning.
 </role>
@@ -461,7 +461,7 @@ Output format templates are in `~/.claude/mindsystem/templates/`. Read the match
 | Research Type | Template |
 |---------------|----------|
 | Phase research | `~/.claude/mindsystem/templates/research.md` |
-| Project research | `~/.claude/mindsystem/templates/research-project-output.md` |
+| Milestone research | `~/.claude/mindsystem/templates/milestone-research.md` |
 | Comparison | `~/.claude/mindsystem/templates/research-comparison-output.md` |
 | Feasibility | `~/.claude/mindsystem/templates/research-feasibility-output.md` |
 

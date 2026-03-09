@@ -11,6 +11,21 @@ Template for `.planning/ROADMAP.md`.
 
 [One paragraph describing the journey from start to finish]
 
+## Research Conclusions
+[Present only when /ms:research-milestone informed the roadmap]
+
+### Technology Stack
+- [Technology]: [purpose] — [rationale]
+
+### Key Constraints
+- [Constraint and impact]
+
+### Architecture Decisions
+- [Decision and rationale]
+
+### Risk Mitigations
+- Phase [N]: [pitfall] — [prevention]
+
 ## Phases
 
 **Phase Numbering:**
@@ -122,6 +137,11 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 ```
 
 <guidelines>
+**Research Conclusions section:**
+- Populated by roadmapper when MILESTONE-RESEARCH.md exists
+- Downstream commands (plan-phase, discuss-phase, research-phase) consume this implicitly by reading ROADMAP.md
+- Omitted entirely when no milestone research was performed
+
 **Initial planning:**
 - Phase count derived from actual work (not a target number)
 - Each phase delivers something coherent

@@ -69,7 +69,7 @@ Empty section if none — that's fine.]
 - If user didn't express priorities, derive from emphasis during conversation
 
 **Open Questions:**
-- Feed into `/ms:research-project` if research is needed
+- Feed into `/ms:research-milestone` if research is needed
 - Empty section is fine — not every milestone has unknowns
 - Questions should be specific enough to research
 

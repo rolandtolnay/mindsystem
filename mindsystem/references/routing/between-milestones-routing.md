@@ -36,7 +36,7 @@ Ready to plan the next milestone.
 
 **Next milestone flow:**
 1. `/ms:new-milestone` — discover what to build, update PROJECT.md
-2. `/ms:research-project` — (optional) research ecosystem
+2. `/ms:research-milestone` — (optional) research ecosystem
 3. `/ms:create-roadmap` — plan how to build it
 
 ---

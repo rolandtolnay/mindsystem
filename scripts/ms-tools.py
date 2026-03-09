@@ -1354,15 +1354,15 @@ def cmd_archive_milestone_files(args: argparse.Namespace) -> None:
         print("Archived: MILESTONE-CONTEXT.md → CONTEXT.md")
         archived += 1
 
-    # Research directory
-    research = planning_dir / "research"
-    if research.is_dir():
-        shutil.move(str(research), str(milestone_dir / "research"))
-        print("Archived: research/ → research/")
+    # MILESTONE-RESEARCH.md
+    research_file = planning_dir / "MILESTONE-RESEARCH.md"
+    if research_file.is_file():
+        shutil.move(str(research_file), str(milestone_dir / "MILESTONE-RESEARCH.md"))
+        print("Archived: MILESTONE-RESEARCH.md")
         archived += 1
 
     if archived == 0:
-        print("No optional files to archive (audit, context, research all absent)")
+        print("No optional files to archive (audit, context, milestone research all absent)")
     else:
         print()
         print(f"Archived {archived} item(s) to milestones/{milestone}/")

@@ -16,7 +16,7 @@ Start a new milestone by helping the user discover what to build next, then upda
 
 Self-contained command — three phases: Orient (load context, present directions), Deepen (collaborative discovery), Commit (update files, route forward).
 
-Output: Updated PROJECT.md, new MILESTONE-CONTEXT.md, routes to create-roadmap or research-project
+Output: Updated PROJECT.md, new MILESTONE-CONTEXT.md, routes to create-roadmap or research-milestone
 </objective>
 
 <execution_context>
@@ -278,7 +278,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 19. **Route to next step:**
 
-    Based on the conversation, recommend ONE path. If unfamiliar domains or open questions surfaced during discovery, recommend `/ms:research-project`. Otherwise recommend `/ms:create-roadmap`.
+    Based on the conversation, recommend ONE path. If unfamiliar domains or open questions surfaced during discovery, recommend `/ms:research-milestone`. Otherwise recommend `/ms:create-roadmap`.
 
     ```
     Milestone [Name] initialized.
@@ -311,5 +311,5 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 - MILESTONE-CONTEXT.md created with vision, features, scope, priorities
 - STATE.md reset for new milestone
 - Git commit made
-- User routed to create-roadmap (or research-project if unknowns surfaced)
+- User routed to create-roadmap (or research-milestone if unknowns surfaced)
 </success_criteria>

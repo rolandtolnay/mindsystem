@@ -79,5 +79,5 @@ The pre-planning commands (discuss, design, research) are optional and independe
 ## Bootstrap chain (one-time, strictly sequential)
 
 ```
-new-project → research-project (optional) → create-roadmap → phase work
+new-project → research-milestone (optional) → create-roadmap → phase work
 ```
