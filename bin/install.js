@@ -471,8 +471,8 @@ function ensurePathHook(claudeDir, isGlobal, configDir) {
   });
 
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-  if (removed > 0) {
-    console.log(`  ${green}✓${reset} Configured PATH hook (cleaned ${removed} duplicate(s))`);
+  if (removed > 1) {
+    console.log(`  ${green}✓${reset} Configured PATH hook (cleaned ${removed - 1} duplicate(s))`);
   } else {
     console.log(`  ${green}✓${reset} Configured PATH hook`);
   }
