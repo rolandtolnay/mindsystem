@@ -278,7 +278,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 19. **Route to next step:**
 
-    Based on the conversation, recommend ONE path. If unfamiliar domains or open questions surfaced during discovery, recommend `/ms:research-milestone`. Otherwise recommend `/ms:create-roadmap`.
+    Default to `/ms:research-milestone` — domain research improves roadmap quality for most milestones. Only recommend `/ms:create-roadmap` directly when the domain is clearly familiar, no open questions surfaced, and there are no external APIs, new libraries, or unfamiliar patterns involved.
 
     ```
     Milestone [Name] initialized.
@@ -311,5 +311,5 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 - MILESTONE-CONTEXT.md created with vision, features, scope, priorities
 - STATE.md reset for new milestone
 - Git commit made
-- User routed to create-roadmap (or research-milestone if unknowns surfaced)
+- User routed to research-milestone (or create-roadmap if domain is clearly familiar)
 </success_criteria>

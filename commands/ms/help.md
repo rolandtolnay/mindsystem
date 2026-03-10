@@ -43,11 +43,12 @@ Optional: `/ms:config` — Configure code reviewers, gitignore, and other prefer
 ### Building features (repeat per milestone)
 
 1. `/ms:new-milestone` — Discover what to build next
-2. `/ms:research-milestone` — (optional) Research domain ecosystem
+2. `/ms:research-milestone` — Research domain ecosystem (recommended)
 3. `/ms:create-roadmap` — Define requirements and create roadmap
-4. `/ms:plan-phase 1` — Create detailed plan for first phase
-5. `/ms:execute-phase 1` — Execute with parallel agents
-6. `/ms:verify-work 1` — (optional) Manual acceptance testing
+4. `/ms:discuss-phase 1` — Gather context before planning (recommended)
+5. `/ms:plan-phase 1` — Create detailed plan for first phase
+6. `/ms:execute-phase 1` — Execute with parallel agents
+7. `/ms:verify-work 1` — (optional) Manual acceptance testing
 
 ## Staying Updated
 
@@ -63,14 +64,14 @@ Release notes: `/ms:release-notes`
 ## Core Workflow
 
 ```
-Initialize → (Optional Research) → Roadmap → Plan → Execute → Verify → Milestone
+Initialize → Research → Roadmap → Discuss → Plan → Execute → Verify → Milestone
 ```
 
 Common deviations:
 - Existing repo: `/ms:map-codebase` after `/ms:new-project` (or before — either works)
-- Plan looks wrong: `/ms:discuss-phase <phase>`
-- Unknown domain: `/ms:research-milestone` before roadmap, or `/ms:research-phase <phase>` before planning
-- Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (all optional before plan)
+- Skip research-milestone: domain is familiar, no external APIs or new patterns
+- Skip discuss-phase: purely mechanical work (config-only, rename-only, version bump)
+- Phase prep: `/ms:discuss-phase` → `/ms:design-phase` → `/ms:research-phase` → `/ms:plan-phase` (discuss recommended, others when flagged)
 - New urgent work: `/ms:insert-phase <after> "<desc>"`
 - New non-urgent work: `/ms:add-todo "<desc>"`
 
@@ -482,8 +483,9 @@ Optional: `/ms:config` — configure code reviewers, gitignore, and other prefer
 
 ```
 /ms:new-milestone               # Discover what to build next
-/ms:research-milestone          # (optional) Research domain ecosystem
+/ms:research-milestone          # Research domain ecosystem (recommended)
 /ms:create-roadmap              # Define requirements and create phases
+/ms:discuss-phase 1             # Gather context before planning (recommended)
 /ms:plan-phase 1                # Create detailed plan
 /ms:execute-phase 1             # Execute with parallel agents
 /ms:verify-work 1               # (optional) Manual acceptance testing
@@ -537,8 +539,9 @@ Common options:
 
 ```
 /ms:new-milestone                     # Discover what to build, update PROJECT.md
-/ms:research-milestone                  # (optional) Domain / stack research
+/ms:research-milestone                # Research domain ecosystem (recommended)
 /ms:create-roadmap                    # New phases mapped to requirements
+/ms:discuss-phase <phase>             # Gather context before planning (recommended)
 /ms:plan-phase                        # Auto-detect next unplanned phase
 /ms:execute-phase <phase>
 ```

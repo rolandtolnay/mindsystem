@@ -44,6 +44,8 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 
 The critical judgment when evaluating any Mindsystem feature: **does this step's quality improvement justify its time cost?** If a step doesn't measurably increase the chance of correct output, it's noise — remove it regardless of how reasonable it sounds in theory. Conversely, if removing a step causes regressions, it's a quality gate — keep it even if it adds latency.
 
+**Thoroughness by default.** At every routing decision, default to the more thorough path. Research before roadmap. Discuss before plan. Design before plan (when UI-heavy). The user can always skip — but the system never assumes they want to. Skipping a step requires a specific reason (domain is familiar, no UI involved, no open questions). This prevents the most common failure mode: planning with unvalidated assumptions. Investment in upstream steps (research, discuss, design) compounds into fewer errors and rework downstream.
+
 **Modularity over bundling.** Commands stay small, explicit, and composable. Avoid mega-flows. Users pick the depth they need (quick fix vs. new feature vs. UI-heavy system). Each command has a clear purpose — no consulting documentation to understand which to use. When in doubt, keep commands separate rather than unifying into one large command.
 
 **Composability over flags.** Commands handle their primary purpose — no optional flags or modes for edge cases. When a flag is proposed, ask: which existing command already handles this? Edge-case handling inside core commands degrades prompt quality for the happy path — the majority of invocations. Keep commands focused; let users compose them. Example: `--gaps` was removed from plan-phase because adhoc, insert-phase, add-phase, and add-todo already compose to cover every gap scenario.
@@ -153,13 +155,14 @@ mindsystem/
 
 1. `/ms:new-milestone` → Discover what to build, update PROJECT.md
 1b. `/ms:config` → (optional) Configure code reviewers, gitignore, git remote
+1c. `/ms:research-milestone` → (recommended) Research domain ecosystem before roadmap
 2. `/ms:create-roadmap` → REQUIREMENTS.md + ROADMAP.md + STATE.md
 
 **Per phase (repeat for each):**
 
-3. `/ms:discuss-phase N` (optional) → Gather context before planning
-4. `/ms:design-phase N` (optional) → DESIGN.md for UI-heavy phases
-5. `/ms:research-phase N` (optional) → Research implementation approach
+3. `/ms:discuss-phase N` (recommended) → Gather context before planning
+4. `/ms:design-phase N` (when UI-heavy) → DESIGN.md for UI-heavy phases
+5. `/ms:research-phase N` (when technical unknowns) → Research implementation approach
 6. `/ms:plan-phase N` → PLAN.md files + EXECUTION-ORDER.md
 7. `/ms:execute-phase N` → Subagents execute plans, create SUMMARY.md
 8. `/ms:verify-work N` (optional) → UAT verification with mock generation and inline fixing

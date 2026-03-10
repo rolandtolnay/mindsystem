@@ -300,25 +300,9 @@ Requirements and roadmap created:
 - Roadmap: .planning/ROADMAP.md
 - State: .planning/STATE.md
 - [X] v1 requirements, [M] phases defined
-
----
-
-## ▶ Next Up
-
-**Phase 1: [Name]** — [Goal from ROADMAP.md]
-
-`/ms:plan-phase 1`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:discuss-phase 1` — gather context first
-- `/ms:research-phase 1` — investigate unknowns
-
----
 ```
+
+Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for Phase $START_PHASE.
 </step>
 
 <step name="update_last_command">
