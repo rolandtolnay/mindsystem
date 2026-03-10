@@ -239,14 +239,63 @@ EOF
 <step name="fix_knowledge">
 **Only if Knowledge Files failed.**
 
-Spawn a `general-purpose` subagent (Task tool) to generate knowledge files retroactively. Provide the subagent with:
+### 1. Detect knowledge source
 
-- Subsystem vocabulary from config.json
-- Instructions to read all PHASE-SUMMARIES.md from `milestones/*/PHASE-SUMMARIES.md` AND any remaining SUMMARY files in `phases/`
-- The knowledge template at `~/.claude/mindsystem/templates/knowledge.md`
-- Instructions to read any existing knowledge files and merge (rewrite semantics — current state, not append)
-- Instructions to create `.planning/knowledge/` directory if missing
-- Instructions to write `.planning/knowledge/{subsystem}.md` for each missing subsystem
+Run in main context before spawning agent:
+
+```bash
+SUMMARIES=$(ls .planning/milestones/*/PHASE-SUMMARIES.md .planning/phases/*/*-SUMMARY.md 2>/dev/null | wc -l | tr -d ' ')
+HAS_CODEBASE_DOCS=$([ -d .planning/codebase ] && echo "yes" || echo "no")
+HAS_PROJECT=$([ -f .planning/PROJECT.md ] && echo "yes" || echo "no")
+```
+
+If `SUMMARIES > 0`: **artifact mode**. If `SUMMARIES == 0`: **source code mode**.
+
+### 2. Spawn subagent
+
+Spawn a `general-purpose` subagent (Task tool) with the following structured prompt. Inject detected mode, subsystem list from config.json, and environment flags into the prompt.
+
+---
+
+**Prompt content for subagent:**
+
+> **Task:** Generate `.planning/knowledge/{subsystem}.md` for each subsystem listed below.
+>
+> **Subsystems:** {inject list from config.json}
+>
+> **Knowledge template:** Read `~/.claude/mindsystem/templates/knowledge.md` for format reference.
+>
+> **Mode: {artifact | source code}**
+>
+> **If artifact mode:** Read all PHASE-SUMMARIES.md from `milestones/*/PHASE-SUMMARIES.md` and any remaining `*-SUMMARY.md` in `phases/`. {If HAS_CODEBASE_DOCS=yes: "Also read `.planning/codebase/ARCHITECTURE.md`, `STACK.md`, `STRUCTURE.md` for structural context."} {If HAS_PROJECT=yes: "Read `.planning/PROJECT.md` for product context."}
+>
+> **If source code mode:** No pipeline artifacts exist. {If HAS_CODEBASE_DOCS=yes: "Read `.planning/codebase/ARCHITECTURE.md`, `STACK.md`, `STRUCTURE.md` first for orientation, then dive into source code per subsystem."} {If HAS_CODEBASE_DOCS=no: "Explore from package manifests (package.json, pubspec.yaml, Cargo.toml, etc.) and directory structure to understand the codebase, then analyze source code per subsystem."} {If HAS_PROJECT=yes: "Read `.planning/PROJECT.md` for product context."}
+>
+> **Extraction guide — what to extract per subsystem:**
+>
+> | Source Signal | Target Knowledge Section |
+> |--------------|------------------------|
+> | Library/framework choices, version constraints | Decisions |
+> | Component structure, data flow, API contracts | Architecture |
+> | UI patterns, design tokens, interaction behaviors | Design |
+> | Error handling patterns, edge cases, workarounds | Pitfalls |
+> | Main modules, entry points, config files | Key Files |
+>
+> **Critical rules:**
+> - Extract knowledge, not descriptions. "Has login endpoint" is a description. "POST /auth/login with bcrypt + JWT httpOnly cookie" is architecture knowledge.
+> - Preserve rationale when visible in code comments or config. Do not fabricate reasons.
+> - Do not fabricate specific numbers (limits, thresholds, counts) — read from source or omit.
+> - Omit empty sections. No Design section if subsystem has no UI.
+> - Rewrite semantics — if existing knowledge files exist, merge by producing current state.
+> - Cross-reference between subsystems where relevant: "(see api subsystem)".
+> - Decisions table: 5-10 words per cell. Source column: `"existing"` for source code mode, artifact reference for artifact mode.
+> - Key files must reference actual paths verified to exist.
+> - `mkdir -p .planning/knowledge/` before writing.
+> - No commits.
+
+---
+
+### 3. Verify and commit
 
 After subagent completes, verify files exist:
 
@@ -254,7 +303,7 @@ After subagent completes, verify files exist:
 ls .planning/knowledge/*.md
 ```
 
-Commit:
+Commit (use detected mode in message):
 
 ```bash
 git add .planning/knowledge/
@@ -264,10 +313,12 @@ git add .planning/knowledge/
 git commit -m "$(cat <<'EOF'
 chore(doctor): generate knowledge files
 
-Created per-subsystem knowledge files from phase summaries.
+Created per-subsystem knowledge files from {phase summaries|source code analysis}.
 EOF
 )"
 ```
+
+Replace `{phase summaries|source code analysis}` with the appropriate phrase based on detected mode.
 </step>
 
 </process>
