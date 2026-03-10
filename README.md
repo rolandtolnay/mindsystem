@@ -2,9 +2,9 @@
 
 # MINDSYSTEM
 
-**A meta-prompting and context engineering system for Claude Code.**
+**The engineer's meta-prompting system for Claude Code.**
 
-Every piece of work makes the next one better. Mindsystem structures your Claude Code sessions into plannable, executable, verifiable phases, and compounds what it learns into persistent knowledge files that survive `/clear`. Context rot stops being the bottleneck. Every prompt in the system is tested against research on how LLMs actually follow instructions, so quality stays consistent from phase 1 to phase 20.
+Amplifies every step of the development workflow you already follow — discovery, research, design, planning, execution, verification. Each one refined, parallelized, and compounded into persistent knowledge. Built for engineers who want to multiply their output without giving up control.
 
 ```bash
 npx mindsystem-cc
@@ -19,9 +19,29 @@ npx mindsystem-cc
 
 <br>
 
-[How it works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick start](#quick-start) · [.planning](#the-planning-directory) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
+[Why Mindsystem](#why-mindsystem) · [How it works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick start](#quick-start) · [.planning](#the-planning-directory) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
 
 </div>
+
+---
+
+## Why Mindsystem
+
+Fully autonomous coding tools take a spec and run for hours until a product emerges. That works for prototypes and one-shot projects.
+
+Mindsystem takes the opposite approach. It follows the same workflow a thorough engineer already uses — and amplifies each step:
+
+| What you'd do manually | What Mindsystem does |
+|---|---|
+| Talk through requirements, catch misalignment early | **Discuss phase** surfaces assumptions with confidence levels, forces tradeoff decisions before any code gets written |
+| Google libraries, read a few docs | **Research phase** runs 3 parallel agents across documentation, your codebase, and community practices — 10x more sources, synthesized in minutes |
+| Try design directions, pick the best one | **Design phase** generates parallel HTML/CSS mockups with side-by-side comparison and exact design tokens |
+| Plan from what you remember about the codebase | **Plan phase** loads knowledge files capturing every decision, pattern, and pitfall from prior phases |
+| Figure out what states to test, mock them manually | **Verify work** determines mock states automatically — you validate visually or programmatically |
+
+The workflow stays yours. Each step finishes in minutes instead of hours. Everything learned compounds into knowledge that survives context resets — phase 10 starts with everything the project learned from phases 1–9.
+
+This is not an autopilot. It's a force multiplier.
 
 ---
 
@@ -521,4 +541,4 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-Inspired by [GSD](https://github.com/gsd-build/get-shit-done) and [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin).
+Originally rooted in [GSD](https://github.com/gsd-build/get-shit-done), now an independent system with its own philosophy. Knowledge compounding inspired by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin).
