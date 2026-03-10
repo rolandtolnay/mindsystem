@@ -95,6 +95,12 @@ Execution happens in fresh subagent contexts, so each plan gets up to 200k token
 
 ## End-to-end walkthrough
 
+### Project setup
+
+Before building features, initialize the project once with `/ms:new-project`. For existing codebases, also run `/ms:map-codebase` (analyzes your stack, conventions, and architecture into 7 structured documents) and `/ms:doctor` (validates config and generates per-subsystem knowledge files from source code). See [Quick start](#quick-start) for the exact sequences.
+
+Everything below is the feature-building loop, identical for new and existing projects.
+
 ### 1. New milestone
 
 ```
@@ -294,31 +300,37 @@ Requirements you want but haven't shipped yet are tracked in `PROJECT.md` with o
 
 ## Quick start
 
-### New project
+### Project setup (one-time)
+
+**New project:**
 
 ```
 /ms:new-project
-/ms:new-milestone
-/ms:create-roadmap
-/ms:plan-phase 1
-/ms:execute-phase 1
-/ms:verify-work 1
 ```
 
-You'll get `.planning/` with your project vision, milestone context, requirements, roadmap, and the first phase implemented with commits, patch files, and knowledge files.
-
-### Existing project
+**Existing codebase:**
 
 ```
-/ms:new-project
-/ms:map-codebase
-/ms:new-milestone
-/ms:create-roadmap
-/ms:plan-phase 1
-/ms:execute-phase 1
+/ms:new-project                 # Business context and vision
+/ms:map-codebase                # Analyze code → 7 structured documents
+/ms:doctor                      # Validate config, generate knowledge files
 ```
 
-Codebase mapping produces 7 documents covering your stack, conventions, and architecture. Then you define what to build, and all downstream planning respects what's already there.
+Optional: `/ms:config` — configure code reviewers, gitignore, and other preferences.
+
+### Building features
+
+Once the project is set up, the workflow is the same for new and existing codebases:
+
+```
+/ms:new-milestone               # Discover what to build next
+/ms:create-roadmap              # Define requirements, map to phases
+/ms:plan-phase 1                # Create detailed plan
+/ms:execute-phase 1             # Run in fresh subagents
+/ms:verify-work 1               # Manual acceptance testing
+```
+
+Repeat for each milestone. All downstream planning automatically loads codebase docs and knowledge files.
 
 **Returning after a break?** Run `/ms:progress` to see where you left off and what to do next.
 

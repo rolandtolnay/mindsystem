@@ -26,21 +26,28 @@ Output ONLY the reference content below. Do NOT add:
 
 ## Quick Start
 
-### Greenfield (new project)
+### Project setup (one-time)
+
+**New project:**
 
 1. `/ms:new-project` — Initialize project with brief
-2. `/ms:config` — (optional) Configure code reviewers and gitignore
-3. `/ms:research-milestone` — (optional) Research domain ecosystem
-4. `/ms:create-roadmap` — Define requirements and create roadmap
-5. `/ms:plan-phase 1` — Create detailed plan for first phase
-6. `/ms:execute-phase 1` — Execute with parallel agents
 
-### Brownfield (existing codebase)
+**Existing codebase:**
 
 1. `/ms:new-project` — Questions focus on business context and vision
-2. `/ms:map-codebase` — Analyze existing code
-3. `/ms:config` — (optional) Configure code reviewers and gitignore
-4. Continue with research/roadmap/plan/execute
+2. `/ms:map-codebase` — Analyze existing code for patterns and conventions
+3. `/ms:doctor` — Validate config and generate knowledge files from source code
+
+Optional: `/ms:config` — Configure code reviewers, gitignore, and other preferences
+
+### Building features (repeat per milestone)
+
+1. `/ms:new-milestone` — Discover what to build next
+2. `/ms:research-milestone` — (optional) Research domain ecosystem
+3. `/ms:create-roadmap` — Define requirements and create roadmap
+4. `/ms:plan-phase 1` — Create detailed plan for first phase
+5. `/ms:execute-phase 1` — Execute with parallel agents
+6. `/ms:verify-work 1` — (optional) Manual acceptance testing
 
 ## Staying Updated
 
@@ -455,27 +462,31 @@ Usage: `/ms:release-notes`
 
 ## Common Workflows
 
-**Starting a new project (greenfield):**
+**Project setup — new project:**
 
 ```
 /ms:new-project                 # Extract your idea through questions
-/ms:config                      # (optional) Configure code reviewers and gitignore
-/ms:research-milestone            # (recommended) Research domain ecosystem
+```
+
+**Project setup — existing codebase:**
+
+```
+/ms:new-project                 # Business context and vision
+/ms:map-codebase                # Analyze code → 7 structured documents
+/ms:doctor                      # Validate config, generate knowledge files
+```
+
+Optional: `/ms:config` — configure code reviewers, gitignore, and other preferences
+
+**Building features (repeat per milestone):**
+
+```
+/ms:new-milestone               # Discover what to build next
+/ms:research-milestone          # (optional) Research domain ecosystem
 /ms:create-roadmap              # Define requirements and create phases
 /ms:plan-phase 1                # Create detailed plan
 /ms:execute-phase 1             # Execute with parallel agents
-```
-
-**Starting with existing code (brownfield):**
-
-```
-/ms:new-project                 # Step 1: Questions focus on business context and vision
-/ms:map-codebase                # Step 2: Analyze existing code
-/ms:config                      # (optional) Configure code reviewers and gitignore
-/ms:research-milestone            # (optional) Research new domain areas
-/ms:create-roadmap              # Define requirements and create roadmap
-/ms:plan-phase 1                # Codebase docs load automatically
-/ms:execute-phase 1             # Claude knows your patterns & conventions
+/ms:verify-work 1               # (optional) Manual acceptance testing
 ```
 
 **Not sure what to do next / returning after a break:**

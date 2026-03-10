@@ -246,6 +246,11 @@ Present completion summary and next steps.
 wc -l .planning/codebase/*.md
 ```
 
+**Detect project state:**
+```bash
+[ -f .planning/PROJECT.md ] && echo "HAS_PROJECT=true" || echo "HAS_PROJECT=false"
+```
+
 **Output format:**
 
 ```
@@ -259,22 +264,40 @@ Created .planning/codebase/:
 - TESTING.md ([N] lines) - Test structure and practices
 - INTEGRATIONS.md ([N] lines) - External services and APIs
 - CONCERNS.md ([N] lines) - Technical debt and issues
+```
 
+**Routing (based on project state):**
 
+**If HAS_PROJECT=false** (map-codebase ran before new-project):
+
+```
 ---
 
 ## ▶ Next Up
 
-`/ms:new-project` — use codebase context for planning
+`/ms:new-project` — initialize project with business context (codebase docs load automatically)
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+```
+
+**If HAS_PROJECT=true** (map-codebase ran after new-project):
+
+```
+---
+
+## ▶ Next Up
+
+`/ms:doctor` — validate project configuration and generate knowledge files
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- Re-run mapping: `/ms:map-codebase`
-- Review specific file: `cat .planning/codebase/STACK.md`
-- Edit any document before proceeding
+- `/ms:config` — configure code reviewers, gitignore, and other preferences
+- `/ms:new-milestone` — skip doctor, go straight to defining what to build
 
 ---
 ```
