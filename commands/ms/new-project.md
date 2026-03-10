@@ -242,13 +242,16 @@ Project updated:
 - Config: .planning/config.json
 ```
 
-**Routing (both modes):**
+**Routing:**
 
 ```
 ---
 
 ## ▶ Next Up
 
+[If brownfield detected and no codebase map:]
+`/ms:map-codebase` — Analyze existing codebase for technical context
+[Otherwise:]
 `/ms:new-milestone` — Discover what to build first, create requirements and roadmap
 
 <sub>`/clear` first → fresh context window</sub>
@@ -257,7 +260,8 @@ Project updated:
 
 **Also available:**
 - `/ms:config` — Configure code reviewers, gitignore, and other preferences
-[If brownfield detected and no codebase map:] - `/ms:map-codebase` — Analyze existing codebase for technical context
+- `/ms:doctor` — Health check and fix project configuration
+[If brownfield detected and no codebase map:] - `/ms:new-milestone` — Discover what to build first, create requirements and roadmap
 
 ---
 ```
