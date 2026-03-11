@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.1.1] - 2026-03-11
+
+### Changed
+- **Next-up routing defaults to thoroughness.** After `new-milestone`, the system now routes to `research-milestone` by default; after `create-roadmap`, to `discuss-phase`. Users can still skip, but the system no longer assumes the quick path.
+- **Brownfield knowledge generation in `ms:doctor`** improved with mode detection and structured extraction. Running doctor on existing codebases now produces more accurate and effective knowledge files.
+- **New-project routing** now conditionally branches between brownfield and greenfield paths instead of a single flow.
+
+### Fixed
+- PATH hook duplicate cleanup no longer reports "cleaned up duplicates" when none existed.
+
 ## [4.1.0] - 2026-03-09
 
 ### Added
@@ -621,7 +631,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.1...HEAD
+[4.1.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.4...v4.1.0
 [4.0.4]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.2...v4.0.3
