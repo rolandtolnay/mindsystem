@@ -1,7 +1,7 @@
 {
   "name": "mindsystem-cc",
   "version": "4.1.2",
-  "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code by TÂCHES.",
+  "description": "The engineer's meta-prompting system for Claude Code.",
   "bin": {
     "mindsystem-cc": "bin/install.js"
   },
