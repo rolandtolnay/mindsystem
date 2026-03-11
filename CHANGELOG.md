@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.1.2] - 2026-03-11
+
+### Changed
+- Research agents now use explicit decision rules for tool selection instead of vague suggestions — library API docs route to `ms-lookup docs`, deep synthesis to `ms-lookup deep`, and discovery to WebSearch. Prevents agents from defaulting to WebSearch when `ms-lookup` would produce better results.
+
 ## [4.1.1] - 2026-03-11
 
 ### Changed
@@ -631,7 +636,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.2...HEAD
+[4.1.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.1...v4.1.2
 [4.1.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.4...v4.1.0
 [4.0.4]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.3...v4.0.4
