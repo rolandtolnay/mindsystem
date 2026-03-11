@@ -123,12 +123,12 @@ Phase Research — External Documentation focus.
 
 <focus>
 Library documentation, APIs, version-specific behavior, verified code examples.
-Use the ms-lookup CLI for library docs and deep research:
-  ms-lookup docs <library> '<query>'
-  ms-lookup deep '<query>'
-Use WebSearch for ecosystem discovery.
-Focus on finding authoritative, current documentation for the libraries and tools
-needed to implement this phase.
+Focus on finding authoritative, current documentation for the libraries and tools needed to implement this phase.
+
+Tool selection rules:
+- Library API docs, syntax, configuration → `ms-lookup docs <library> '<query>'`
+- Complex architecture/approach synthesis → `ms-lookup deep '<query>'` (limit: 3-4 calls)
+- Library discovery, trends, ecosystem survey → WebSearch
 </focus>
 
 <existing_tech>
@@ -225,10 +225,12 @@ Phase Research — Best Practices & Community Consensus focus.
 
 <focus>
 Community consensus, common pitfalls, proven approaches, state of the art.
-Use the ms-lookup CLI for deep research on high-value questions:
-  ms-lookup deep '<query>'
-Use WebSearch for community articles, blog posts, Stack Overflow patterns.
 Focus on what practitioners recommend and what mistakes to avoid.
+
+Tool selection rules:
+- Complex best-practices synthesis, architecture decisions → `ms-lookup deep '<query>'` (limit: 3-4 calls)
+- Community opinions, blog posts, trends, library discovery → WebSearch
+- Library-specific API verification (when confirming a recommendation) → `ms-lookup docs <library> '<query>'`
 </focus>
 
 <existing_tech>
