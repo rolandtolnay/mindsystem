@@ -311,7 +311,7 @@ Use CODE_REVIEW value directly as agent name.
 1. **Gather changed files:**
    ```bash
    # Get all files changed in this phase's commits
-   PHASE_COMMITS=$(git log --oneline --grep="(${PHASE_NUMBER}-" --format="%H")
+   PHASE_COMMITS=$(ms-tools find-phase-commits ${PHASE_NUMBER})
    CHANGED_FILES=$(git diff --name-only $(echo "$PHASE_COMMITS" | tail -1)^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
    ```
 
@@ -447,7 +447,7 @@ Check what changed during this phase:
 
 ```bash
 # Get all source changes from this phase's commits
-PHASE_COMMITS=$(git log --oneline --grep="({phase_number}-" --format="%H" | head -20)
+PHASE_COMMITS=$(ms-tools find-phase-commits {phase_number})
 if [ -n "$PHASE_COMMITS" ]; then
   FIRST=$(echo "$PHASE_COMMITS" | tail -1)
   git diff --name-only ${FIRST}^..HEAD 2>/dev/null | grep -v "^\.planning/"

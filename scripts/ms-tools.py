@@ -297,6 +297,80 @@ def build_exclude_pathspecs() -> list[str]:
     return [f":!{p}" for p in PATCH_EXCLUSIONS]
 
 
+# -------------------------------------------------------------------
+# Helper: find_phase_commit_hashes
+# -------------------------------------------------------------------
+
+
+def find_phase_commit_hashes(phase_input: str, suffix: str = "") -> list[str]:
+    """Find commit hashes matching a phase's commit convention.
+
+    Contract:
+        Args: phase_input (str), suffix (str, optional)
+        Output: list of commit hash strings (newest first)
+        Side effects: none (reads git log only)
+    """
+    padded_phase = normalize_phase(phase_input)
+    # Strip leading zeros from integer part, preserve decimal: "02.1" -> "2.1"
+    m = re.match(r"^(\d+)(.*)", padded_phase)
+    raw_phase = str(int(m.group(1))) + m.group(2) if m else padded_phase
+
+    # Build alternation pattern matching both padded and raw forms
+    if padded_phase == raw_phase:
+        phase_alt = re.escape(raw_phase)
+    else:
+        phase_alt = f"(?:0*{re.escape(raw_phase)})"
+
+    # Build commit pattern based on suffix
+    if suffix:
+        if suffix == "uat-fixes":
+            commit_pattern = f"\\({phase_alt}-uat\\):"
+        else:
+            commit_pattern = f"\\({phase_alt}-{re.escape(suffix)}\\):"
+    else:
+        commit_pattern = f"\\({phase_alt}-"
+
+    # Find matching commits
+    try:
+        log_output = run_git("log", "--oneline")
+    except subprocess.CalledProcessError:
+        raise
+
+    hashes = []
+    for line in log_output.splitlines():
+        if re.search(commit_pattern, line):
+            hashes.append(line.split()[0])
+    return hashes
+
+
+# -------------------------------------------------------------------
+# Subcommand: find-phase-commits
+# -------------------------------------------------------------------
+
+
+def cmd_find_phase_commits(args: argparse.Namespace) -> None:
+    """Print commit hashes matching a phase's commit convention.
+
+    Contract:
+        Args: phase (str), --suffix (str, optional)
+        Output: text — one commit hash per line (newest first), empty if no matches
+        Exit codes: 0 = success (including zero matches), 1 = git error
+        Side effects: none
+    """
+    git_root = find_git_root()
+    import os
+    os.chdir(git_root)
+
+    try:
+        hashes = find_phase_commit_hashes(args.phase, args.suffix)
+    except subprocess.CalledProcessError:
+        print("Error: Failed to read git log", file=sys.stderr)
+        sys.exit(1)
+
+    for h in hashes:
+        print(h)
+
+
 # ===================================================================
 # Subcommand: update-state
 # ===================================================================
@@ -1071,38 +1145,24 @@ def cmd_generate_phase_patch(args: argparse.Namespace) -> None:
     import os
     os.chdir(git_root)
 
-    # Normalize phase number
-    if re.match(r"^\d$", phase_input):
-        phase_number = f"{int(phase_input):02d}"
-    else:
-        phase_number = phase_input
+    padded_phase = normalize_phase(phase_input)
 
-    # Determine commit pattern
     if suffix:
         if suffix == "uat-fixes":
-            commit_pattern = f"\\({phase_number}-uat\\):"
-            print(f"Generating UAT fixes patch for phase {phase_number}...")
+            print(f"Generating UAT fixes patch for phase {padded_phase}...")
         else:
-            commit_pattern = f"\\({phase_number}-{suffix}\\):"
-            print(f"Generating {suffix} patch for phase {phase_number}...")
+            print(f"Generating {suffix} patch for phase {padded_phase}...")
     else:
-        commit_pattern = f"\\({phase_number}-"
-        print(f"Generating patch for phase {phase_number}...")
+        print(f"Generating patch for phase {padded_phase}...")
 
-    # Find matching commits
     try:
-        log_output = run_git("log", "--oneline")
+        phase_commits = find_phase_commit_hashes(phase_input, suffix)
     except subprocess.CalledProcessError:
         print("Error: Failed to read git log", file=sys.stderr)
         sys.exit(1)
 
-    phase_commits = []
-    for line in log_output.splitlines():
-        if re.search(commit_pattern, line):
-            phase_commits.append(line.split()[0])
-
     if not phase_commits:
-        print(f"No commits found matching pattern: {commit_pattern}")
+        print("No commits found matching phase convention")
         print("Patch skipped")
         return
 
@@ -1120,7 +1180,7 @@ def cmd_generate_phase_patch(args: argparse.Namespace) -> None:
 
     # Find output directory
     phases_dir = Path(".planning/phases")
-    phase_dir_matches = sorted(phases_dir.glob(f"{phase_number}-*")) if phases_dir.is_dir() else []
+    phase_dir_matches = sorted(phases_dir.glob(f"{padded_phase}-*")) if phases_dir.is_dir() else []
     phase_dir = str(phase_dir_matches[0]) if phase_dir_matches else str(phases_dir)
 
     Path(phase_dir).mkdir(parents=True, exist_ok=True)
@@ -1128,9 +1188,9 @@ def cmd_generate_phase_patch(args: argparse.Namespace) -> None:
 
     # Determine output filename
     if suffix:
-        patch_file = f"{phase_dir}/{phase_number}-{suffix}.patch"
+        patch_file = f"{phase_dir}/{padded_phase}-{suffix}.patch"
     else:
-        patch_file = f"{phase_dir}/{phase_number}-changes.patch"
+        patch_file = f"{phase_dir}/{padded_phase}-changes.patch"
 
     # Generate diff
     exclude_args = build_exclude_pathspecs()
@@ -3249,6 +3309,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("phase", help="Phase number (e.g., 04 or 4)")
     p.add_argument("--suffix", default="", help="Filter commits and customize output filename")
     p.set_defaults(func=cmd_generate_phase_patch)
+
+    # --- find-phase-commits ---
+    p = subparsers.add_parser("find-phase-commits", help="Find commit hashes matching phase convention")
+    p.add_argument("phase", help="Phase number (e.g., 04 or 4)")
+    p.add_argument("--suffix", default="", help="Filter by suffix (e.g., uat)")
+    p.set_defaults(func=cmd_find_phase_commits)
 
     # --- generate-adhoc-patch ---
     p = subparsers.add_parser("generate-adhoc-patch", help="Generate patch from an adhoc commit or range")

@@ -202,7 +202,7 @@ Skip code review step (proceed to next steps).
 ```bash
 # Find first commit in milestone (first phase commit)
 FIRST_PHASE=$(ls -d .planning/phases/*/ | sort -V | head -1 | xargs basename | cut -d- -f1)
-FIRST_COMMIT=$(git log --oneline --grep="(${FIRST_PHASE}-" --format="%H" | tail -1)
+FIRST_COMMIT=$(ms-tools find-phase-commits ${FIRST_PHASE} | tail -1)
 
 # Get all implementation files changed since first commit
 CHANGED_FILES=$(git diff --name-only ${FIRST_COMMIT}^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')

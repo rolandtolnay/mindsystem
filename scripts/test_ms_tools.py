@@ -49,6 +49,8 @@ _write_config_atomic = _mod._write_config_atomic
 cmd_config_get = _mod.cmd_config_get
 cmd_config_set = _mod.cmd_config_set
 cmd_config_delete = _mod.cmd_config_delete
+find_phase_commit_hashes = _mod.find_phase_commit_hashes
+cmd_find_phase_commits = _mod.cmd_find_phase_commits
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -2423,3 +2425,143 @@ class TestCmdConfigDelete:
         monkeypatch.chdir(tmp_path)
         cmd_config_delete(argparse.Namespace(key="missing"))
         assert self._read_config(tmp_path) == {"a": 1}
+
+
+# ===================================================================
+# find_phase_commit_hashes Tests
+# ===================================================================
+
+
+class TestFindPhaseCommitHashes:
+    """Unit tests for find_phase_commit_hashes (mock run_git)."""
+
+    def _mock_log(self, lines):
+        return mock.patch.object(_mod, "run_git", return_value="\n".join(lines))
+
+    def test_matches_padded_format(self):
+        lines = [
+            "abc1234 feat(01-setup): init project",
+            "def5678 docs: update readme",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1")
+        assert result == ["abc1234"]
+
+    def test_matches_raw_format(self):
+        lines = [
+            "abc1234 feat(1-setup): init project",
+            "def5678 docs: update readme",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1")
+        assert result == ["abc1234"]
+
+    def test_matches_both_formats(self):
+        lines = [
+            "aaa1111 feat(01-auth): login",
+            "bbb2222 fix(1-auth): typo",
+            "ccc3333 feat(02-billing): stripe",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1")
+        assert result == ["aaa1111", "bbb2222"]
+
+    def test_no_matches_returns_empty(self):
+        lines = [
+            "abc1234 feat(03-billing): stripe",
+            "def5678 docs: update readme",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1")
+        assert result == []
+
+    def test_suffix_filter(self):
+        lines = [
+            "aaa1111 feat(01-setup): init",
+            "bbb2222 fix(01-review): feedback",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1", "review")
+        assert result == ["bbb2222"]
+
+    def test_uat_fixes_suffix(self):
+        lines = [
+            "aaa1111 feat(01-setup): init",
+            "bbb2222 fix(01-uat): fix button",
+            "ccc3333 fix(1-uat): another fix",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1", "uat-fixes")
+        assert result == ["bbb2222", "ccc3333"]
+
+    def test_already_padded_input(self):
+        lines = [
+            "aaa1111 feat(05-api): endpoints",
+            "bbb2222 feat(5-api): more endpoints",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("05")
+        assert result == ["aaa1111", "bbb2222"]
+
+    def test_double_digit_no_false_positive(self):
+        lines = [
+            "aaa1111 feat(01-setup): init",
+            "bbb2222 feat(10-deploy): deploy",
+            "ccc3333 feat(11-monitor): monitor",
+            "ddd4444 feat(1-setup): another",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("1")
+        assert result == ["aaa1111", "ddd4444"]
+
+    def test_decimal_phase(self):
+        lines = [
+            "aaa1111 feat(02.1-hotfix): urgent",
+            "bbb2222 feat(2.1-hotfix): also urgent",
+            "ccc3333 feat(02-billing): stripe",
+            "ddd4444 feat(2-billing): more stripe",
+        ]
+        with self._mock_log(lines):
+            result = find_phase_commit_hashes("2.1")
+        assert result == ["aaa1111", "bbb2222"]
+
+    def test_empty_log(self):
+        with self._mock_log([""]):
+            result = find_phase_commit_hashes("1")
+        assert result == []
+
+
+class TestCmdFindPhaseCommits:
+    """CLI contract tests for cmd_find_phase_commits."""
+
+    def test_prints_hashes_one_per_line(self, capsys, monkeypatch):
+        monkeypatch.setattr(_mod, "find_git_root", lambda: "/fake")
+        monkeypatch.setattr(_mod.os, "chdir", lambda _: None)
+        lines = [
+            "aaa1111 feat(01-setup): init",
+            "bbb2222 fix(1-setup): typo",
+        ]
+        with mock.patch.object(_mod, "run_git", return_value="\n".join(lines)):
+            cmd_find_phase_commits(argparse.Namespace(phase="1", suffix=""))
+        out = capsys.readouterr().out
+        assert out == "aaa1111\nbbb2222\n"
+
+    def test_no_matches_prints_nothing(self, capsys, monkeypatch):
+        monkeypatch.setattr(_mod, "find_git_root", lambda: "/fake")
+        monkeypatch.setattr(_mod.os, "chdir", lambda _: None)
+        with mock.patch.object(_mod, "run_git", return_value="abc123 docs: readme"):
+            cmd_find_phase_commits(argparse.Namespace(phase="1", suffix=""))
+        out = capsys.readouterr().out
+        assert out == ""
+
+    def test_git_error_exits_1(self, monkeypatch):
+        monkeypatch.setattr(_mod, "find_git_root", lambda: "/fake")
+        monkeypatch.setattr(_mod.os, "chdir", lambda _: None)
+        import subprocess
+        with mock.patch.object(
+            _mod, "run_git",
+            side_effect=subprocess.CalledProcessError(1, "git"),
+        ):
+            with pytest.raises(SystemExit) as exc_info:
+                cmd_find_phase_commits(argparse.Namespace(phase="1", suffix=""))
+            assert exc_info.value.code == 1
