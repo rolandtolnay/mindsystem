@@ -80,8 +80,9 @@ cat .planning/knowledge/{subsystem}.md 2>/dev/null
 Check if CONTEXT.md already exists for this phase:
 
 ```bash
-ls .planning/phases/${PHASE}-*/CONTEXT.md 2>/dev/null
-ls .planning/phases/${PHASE}-*/${PHASE}-CONTEXT.md 2>/dev/null
+ms-tools find-phase "${PHASE}"
+# Extract PHASE_DIR from the `dir` field, PHASE from `phase` field (normalized, e.g. "02")
+ls ${PHASE_DIR}/*CONTEXT.md 2>/dev/null
 ```
 
 **If exists:**
@@ -242,10 +243,10 @@ Create CONTEXT.md capturing the user's vision and decisions.
 
 Use template from ~/.claude/mindsystem/templates/context.md
 
-**File location:** `.planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md`
+**File location:** `${PHASE_DIR}/${PHASE}-CONTEXT.md`
 
 **If phase directory doesn't exist yet:**
-Create it: `.planning/phases/${PHASE}-${SLUG}/`
+Create it using normalized `${PHASE}` from find-phase output: `.planning/phases/${PHASE}-${SLUG}/`
 
 Use roadmap phase name for slug (lowercase, hyphens).
 
@@ -271,7 +272,7 @@ Write file.
 Present CONTEXT.md summary:
 
 ```
-Created: .planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md
+Created: ${PHASE_DIR}/${PHASE}-CONTEXT.md
 
 ## Vision
 [How they imagine it working]
@@ -306,7 +307,7 @@ Created: .planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md
 
 ```bash
 ms-tools set-last-command "ms:discuss-phase ${PHASE}"
-git add .planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md .planning/STATE.md
+git add ${PHASE_DIR}/${PHASE}-CONTEXT.md .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs(${PHASE}): capture phase context
 

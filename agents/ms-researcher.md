@@ -483,7 +483,8 @@ Orchestrator provides:
 
 ```bash
 # For phase research, check for CONTEXT.md from discuss-phase
-PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
+ms-tools find-phase "${PHASE}"
+# Extract PHASE_DIR from the `dir` field of the JSON output
 if [ -n "$PHASE_DIR" ]; then
   cat "${PHASE_DIR}"/*-CONTEXT.md 2>/dev/null
 fi

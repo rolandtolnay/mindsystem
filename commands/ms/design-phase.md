@@ -30,9 +30,14 @@ Create design specifications for a phase. Spawns ms-designer agent with phase co
 <context>
 Phase number: $ARGUMENTS (required)
 
+Resolve phase directory:
+```bash
+ms-tools find-phase "$ARGUMENTS"
+```
+
 Check for existing design:
 ```bash
-ls .planning/phases/${PHASE}-*/*DESIGN.md 2>/dev/null
+ls ${PHASE_DIR}/*DESIGN.md 2>/dev/null
 ```
 </context>
 
@@ -52,8 +57,7 @@ ms-tools find-phase "$ARGUMENTS"
 ## 2. Check Existing Design
 
 ```bash
-# Check for existing DESIGN.md
-PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
+# PHASE_DIR already resolved from find-phase in <context>
 ls "${PHASE_DIR}"/*-DESIGN.md 2>/dev/null
 ```
 
@@ -119,7 +123,7 @@ Extract from ROADMAP.md:
 **4b. Optional context - CONTEXT.md (from discuss-phase):**
 
 ```bash
-cat .planning/phases/${PHASE}-*/${PHASE}-CONTEXT.md 2>/dev/null
+cat ${PHASE_DIR}/*-CONTEXT.md 2>/dev/null
 ```
 
 If exists, extract:
@@ -377,7 +381,7 @@ Task(
 
 ```bash
 ms-tools set-last-command "ms:design-phase $ARGUMENTS"
-git add .planning/phases/${PHASE}-*/*-DESIGN.md .planning/STATE.md
+git add ${PHASE_DIR}/*-DESIGN.md .planning/STATE.md
 git commit -m "docs: create design for phase ${PHASE}"
 ```
 

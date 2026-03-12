@@ -39,11 +39,9 @@ Options:
 Confirm phase exists and has plans:
 
 ```bash
-PHASE_DIR=$(ls -d .planning/phases/${PHASE_ARG}* 2>/dev/null | head -1)
-if [ -z "$PHASE_DIR" ]; then
-  echo "ERROR: No phase directory matching '${PHASE_ARG}'"
-  exit 1
-fi
+ms-tools find-phase "${PHASE_ARG}"
+# Extract PHASE_DIR from the `dir` field of the JSON output
+# If dir is null, error: "No phase directory matching '${PHASE_ARG}'"
 
 PLAN_COUNT=$(ls -1 "$PHASE_DIR"/*-PLAN.md 2>/dev/null | wc -l | tr -d ' ')
 if [ "$PLAN_COUNT" -eq 0 ]; then

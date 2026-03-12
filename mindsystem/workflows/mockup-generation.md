@@ -79,8 +79,9 @@ Extract the HTML scaffold from the `<template>` block.
 
 <step name="spawn_agents">
 ```bash
-PHASE_DIR=$(ls -d .planning/phases/${PHASE}-* 2>/dev/null | head -1)
-# Assumes single match. If empty, phase directory is missing — stop and report.
+ms-tools find-phase "${PHASE}"
+# Extract PHASE_DIR from the `dir` field of the JSON output
+# If dir is null, phase directory is missing — stop and report.
 mkdir -p "${PHASE_DIR}/mockups"
 ```
 

@@ -31,6 +31,11 @@ Phase: $ARGUMENTS (optional)
 - If provided: Test specific phase (e.g., "4")
 - If not provided: Check for active sessions or prompt for phase
 
+Resolve phase directory:
+```bash
+ms-tools find-phase "$ARGUMENTS"
+```
+
 @.planning/STATE.md
 @.planning/ROADMAP.md
 @.planning/PROJECT.md

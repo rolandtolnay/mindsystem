@@ -26,7 +26,8 @@ Extract:
 Check for existing context files:
 
 ```bash
-PHASE_DIR=$(ls -d .planning/phases/${NEXT_PHASE}-* 2>/dev/null | head -1)
+ms-tools find-phase "${NEXT_PHASE}"
+# Extract PHASE_DIR from the `dir` field of the JSON output
 [ -f "$PHASE_DIR"/*-CONTEXT.md ] && echo "CONTEXT_EXISTS"
 [ -f "$PHASE_DIR"/*-DESIGN.md ] && echo "DESIGN_EXISTS"
 [ -f "$PHASE_DIR"/*-RESEARCH.md ] && echo "RESEARCH_EXISTS"

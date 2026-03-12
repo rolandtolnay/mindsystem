@@ -40,7 +40,7 @@ Use `find-phase` output from context. **If phase not found (dir is null):** Erro
 ## 2. Check Existing Research
 
 ```bash
-ls .planning/phases/${PHASE}-*/RESEARCH.md 2>/dev/null
+ls ${PHASE_DIR}/*RESEARCH.md 2>/dev/null
 ```
 
 **If exists:** Offer: 1) Update research, 2) View existing, 3) Skip. Wait for response.
@@ -61,9 +61,9 @@ grep -A20 "Phase ${PHASE}:" .planning/ROADMAP.md
 # Requirements
 cat .planning/REQUIREMENTS.md 2>/dev/null
 
-# Phase-specific context and design
-cat .planning/phases/${PHASE}-*/${PHASE}-CONTEXT.md 2>/dev/null
-cat .planning/phases/${PHASE}-*/${PHASE}-DESIGN.md 2>/dev/null
+# Phase-specific context and design (PHASE_DIR from find-phase in <context>)
+cat ${PHASE_DIR}/*-CONTEXT.md 2>/dev/null
+cat ${PHASE_DIR}/*-DESIGN.md 2>/dev/null
 
 # Locked decisions
 grep -A30 "### Decisions Made" .planning/STATE.md 2>/dev/null
@@ -304,7 +304,7 @@ Write RESEARCH.md to `.planning/phases/{phase}-{slug}/{phase}-RESEARCH.md` using
 
 ```bash
 ms-tools set-last-command "ms:research-phase $ARGUMENTS"
-git add .planning/phases/${PHASE}-*/*-RESEARCH.md .planning/STATE.md
+git add ${PHASE_DIR}/*-RESEARCH.md .planning/STATE.md
 git commit -m "docs: complete research for phase ${PHASE}"
 ```
 

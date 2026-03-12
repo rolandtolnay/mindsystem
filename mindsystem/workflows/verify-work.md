@@ -74,7 +74,8 @@ Provide a phase number to start testing (e.g., /ms:verify-work 4)
 **Find SUMMARY.md files for the phase:**
 
 ```bash
-PHASE_DIR=$(ls -d .planning/phases/${PHASE_ARG}* 2>/dev/null | head -1)
+ms-tools find-phase "${PHASE_ARG}"
+# Extract PHASE_DIR from the `dir` field of the JSON output
 ls "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
 ```
 
