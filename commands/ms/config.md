@@ -33,6 +33,36 @@ Manages code reviewer agents, mockup preferences, browser verification, .gitigno
 git remote -v 2>/dev/null || echo "NO_REMOTE"
 ```
 
+**Determine mode** from `code_review` values in config.json:
+
+- **Setup mode** — all `code_review` values are null (or no config file): first-time configuration.
+- **Edit mode** — any `code_review` value is non-null: reconfiguration.
+
+</step>
+
+<step name="route">
+
+**Setup mode:** Proceed through all setting steps sequentially (git_remote → code_reviewers → gitignore_patterns → mockup_preferences → browser_verification → task_tracker). Then go to `validation_summary`.
+
+**Edit mode:** Display all current settings with values from config.json, git remote, and .gitignore:
+
+```
+## Current Settings
+
+1. **Git remote** — {remote URL or "none configured"}
+2. **Code reviewers** — adhoc: {value or "not set"}, phase: {value or "not set"}, milestone: {value or "not set"}
+3. **Gitignore** — {current .planning/ patterns or "no .planning/ patterns"}
+4. **Mockups** — open: {auto / ask / off}
+5. **Browser verification** — {enabled / disabled}
+6. **Task tracker** — {type + cli path, or "none"}
+```
+
+Ask: "Which settings would you like to change? Enter the numbers (e.g. 1, 3, 5), 'all' to reconfigure everything, or 'done' if everything looks good."
+
+- **"done"** → skip to `validation_summary` (no changes)
+- **"all"** → proceed through all setting steps sequentially
+- **Specific numbers** → proceed through only the corresponding setting steps, skip the rest
+
 </step>
 
 <step name="git_remote">
@@ -248,29 +278,17 @@ EOF
 
 </step>
 
-<step name="done">
-
-Present next steps using the "Next Up" format:
-
-- **If PROJECT.md exists:** recommend `/ms:new-milestone` — Discover what to build next, create requirements and roadmap
-- **If no PROJECT.md:** recommend `/ms:new-project` — Initialize project with business context and vision
-
-Also list: `/ms:doctor` — Verify subsystems and artifact health
-
-</step>
-
 </process>
 
 <success_criteria>
 
+- [ ] Setup mode triggered when all code_review values null; edit mode otherwise
+- [ ] Edit mode displays numbered settings with current values
+- [ ] Only user-selected settings modified in edit mode
 - [ ] Changes committed (if any)
-- [ ] User routed to next step
 - [ ] Gitignore patterns applied (if selected)
 - [ ] Git remote offered (if missing)
 - [ ] Validation summary displayed
-- [ ] Config.json code_review values set (or preserved if skipped)
-- [ ] Config.json open_mockups value set (or preserved if skipped)
-- [ ] Config.json browser_verification value set (or preserved if skipped)
-- [ ] Config.json task_tracker value set (or preserved if skipped)
+- [ ] Terminates after commit/summary — no Next Up routing
 
 </success_criteria>
