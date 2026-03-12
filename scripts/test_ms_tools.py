@@ -51,6 +51,10 @@ cmd_config_set = _mod.cmd_config_set
 cmd_config_delete = _mod.cmd_config_delete
 find_phase_commit_hashes = _mod.find_phase_commit_hashes
 cmd_find_phase_commits = _mod.cmd_find_phase_commits
+find_phase_dir = _mod.find_phase_dir
+parse_roadmap_phases = _mod.parse_roadmap_phases
+cmd_create_phase_dirs = _mod.cmd_create_phase_dirs
+cmd_uat_init = _mod.cmd_uat_init
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -123,6 +127,163 @@ class TestNormalizePhase:
 
     def test_already_padded_integer(self):
         assert normalize_phase("05") == "05"
+
+
+class TestFindPhaseDir:
+    """Tests for resilient find_phase_dir."""
+
+    def test_canonical_padded(self, tmp_path):
+        (tmp_path / "phases" / "05-auth").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "05") == tmp_path / "phases" / "05-auth"
+
+    def test_unpadded_variant(self, tmp_path):
+        (tmp_path / "phases" / "5-auth").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "05") == tmp_path / "phases" / "5-auth"
+
+    def test_bare_padded(self, tmp_path):
+        (tmp_path / "phases" / "05").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "05") == tmp_path / "phases" / "05"
+
+    def test_bare_unpadded(self, tmp_path):
+        (tmp_path / "phases" / "5").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "05") == tmp_path / "phases" / "5"
+
+    def test_canonical_preferred(self, tmp_path):
+        """When both canonical and unpadded exist, canonical wins."""
+        (tmp_path / "phases" / "05-auth").mkdir(parents=True)
+        (tmp_path / "phases" / "5-old").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "05") == tmp_path / "phases" / "05-auth"
+
+    def test_no_phases_dir(self, tmp_path):
+        assert find_phase_dir(tmp_path, "05") is None
+
+    def test_no_match(self, tmp_path):
+        (tmp_path / "phases").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "05") is None
+
+    def test_decimal_phase(self, tmp_path):
+        (tmp_path / "phases" / "02.1-fix").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "02.1") == tmp_path / "phases" / "02.1-fix"
+
+    def test_decimal_unpadded(self, tmp_path):
+        (tmp_path / "phases" / "2.1-fix").mkdir(parents=True)
+        assert find_phase_dir(tmp_path, "02.1") == tmp_path / "phases" / "2.1-fix"
+
+    def test_files_ignored(self, tmp_path):
+        """Files matching the pattern should not be returned."""
+        (tmp_path / "phases").mkdir(parents=True)
+        (tmp_path / "phases" / "05-notes.md").write_text("file")
+        assert find_phase_dir(tmp_path, "05") is None
+
+
+class TestParseRoadmapPhases:
+    """Tests for parse_roadmap_phases."""
+
+    def test_basic_phases(self, tmp_path):
+        roadmap = tmp_path / "ROADMAP.md"
+        roadmap.write_text("### Phase 1: Foundation\n### Phase 2: Auth\n")
+        result = parse_roadmap_phases(roadmap)
+        assert result == [("1", "Foundation"), ("2", "Auth")]
+
+    def test_decimal_phase(self, tmp_path):
+        roadmap = tmp_path / "ROADMAP.md"
+        roadmap.write_text("### Phase 2.1: Fix\n")
+        result = parse_roadmap_phases(roadmap)
+        assert result == [("2.1", "Fix")]
+
+    def test_strips_inserted_marker(self, tmp_path):
+        roadmap = tmp_path / "ROADMAP.md"
+        roadmap.write_text("### Phase 3: Cleanup (INSERTED)\n")
+        result = parse_roadmap_phases(roadmap)
+        assert result == [("3", "Cleanup")]
+
+    def test_strips_generated_marker(self, tmp_path):
+        roadmap = tmp_path / "ROADMAP.md"
+        roadmap.write_text("### Phase 4: Deploy (Generated)\n")
+        result = parse_roadmap_phases(roadmap)
+        assert result == [("4", "Deploy")]
+
+    def test_preserves_lowercase_parens(self, tmp_path):
+        roadmap = tmp_path / "ROADMAP.md"
+        roadmap.write_text("### Phase 5: Setup (with extras)\n")
+        result = parse_roadmap_phases(roadmap)
+        assert result == [("5", "Setup (with extras)")]
+
+    def test_empty_file(self, tmp_path):
+        roadmap = tmp_path / "ROADMAP.md"
+        roadmap.write_text("")
+        assert parse_roadmap_phases(roadmap) == []
+
+    def test_missing_file(self, tmp_path):
+        assert parse_roadmap_phases(tmp_path / "ROADMAP.md") == []
+
+
+class TestCmdCreatePhaseDirs:
+    """Tests for create-phase-dirs command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def test_creates_all_dirs(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "ROADMAP.md").write_text(
+            "### Phase 1: Foundation\n### Phase 2: Auth\n### Phase 3: Deploy\n"
+        )
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path):
+            cmd_create_phase_dirs(args)
+        captured = capsys.readouterr()
+        assert "3 created, 0 skipped" in captured.out
+        assert (planning / "phases" / "01-foundation").is_dir()
+        assert (planning / "phases" / "02-auth").is_dir()
+        assert (planning / "phases" / "03-deploy").is_dir()
+
+    def test_skips_existing(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "phases" / "01-foundation").mkdir(parents=True)
+        (planning / "ROADMAP.md").write_text(
+            "### Phase 1: Foundation\n### Phase 2: Auth\n"
+        )
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path):
+            cmd_create_phase_dirs(args)
+        captured = capsys.readouterr()
+        assert "1 created, 1 skipped" in captured.out
+
+    def test_skips_unpadded_existing(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "phases" / "1-foundation").mkdir(parents=True)
+        (planning / "ROADMAP.md").write_text("### Phase 1: Foundation\n")
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path):
+            cmd_create_phase_dirs(args)
+        captured = capsys.readouterr()
+        assert "0 created, 1 skipped" in captured.out
+
+    def test_idempotent(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "ROADMAP.md").write_text("### Phase 1: Foundation\n")
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path):
+            cmd_create_phase_dirs(args)
+        capsys.readouterr()
+        with self._patch_git_root(tmp_path):
+            cmd_create_phase_dirs(args)
+        captured = capsys.readouterr()
+        assert "0 created, 1 skipped" in captured.out
+
+    def test_no_roadmap_exits(self, tmp_path):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), \
+             pytest.raises(SystemExit) as exc:
+            cmd_create_phase_dirs(args)
+        assert exc.value.code == 1
 
 
 class TestInRange:
@@ -1441,7 +1602,7 @@ class TestCmdUatInit:
         assert "Login works" in content
         assert "Logout works" in content
 
-    def test_auto_creates_phase_dir(self, tmp_path, capsys):
+    def test_missing_phase_dir_exits(self, tmp_path, capsys):
         (tmp_path / ".planning" / "phases").mkdir(parents=True)
 
         input_json = json.dumps({
@@ -1452,12 +1613,12 @@ class TestCmdUatInit:
 
         args = argparse.Namespace(phase="99")
         with self._patch_git_root(tmp_path), \
-             mock.patch.object(_mod.sys, "stdin", io.StringIO(input_json)):
+             mock.patch.object(_mod.sys, "stdin", io.StringIO(input_json)), \
+             pytest.raises(SystemExit) as exc:
             cmd_uat_init(args)
-
+        assert exc.value.code == 1
         captured = capsys.readouterr()
-        assert "1 tests" in captured.out
-        assert (tmp_path / ".planning" / "phases" / "99").is_dir()
+        assert "create-phase-dirs" in captured.err
 
     def test_invalid_json_exits(self, tmp_path):
         (tmp_path / ".planning" / "phases" / "05-auth").mkdir(parents=True)

@@ -292,6 +292,19 @@ EOF
 ```
 </step>
 
+<step name="create_phase_dirs">
+Create phase directories from the roadmap:
+
+```bash
+ms-tools create-phase-dirs
+```
+
+```bash
+git add .planning/phases/
+git commit -m "chore: create phase directories from roadmap"
+```
+</step>
+
 <step name="done">
 ```
 Requirements and roadmap created:

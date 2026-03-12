@@ -109,13 +109,63 @@ def normalize_phase(phase_str: str) -> str:
 
 
 def find_phase_dir(planning: Path, phase: str) -> Path | None:
-    """Find the phase directory matching a normalized phase number."""
+    """Find the phase directory matching a normalized phase number.
+
+    Tries three patterns in priority order:
+    1. Canonical padded: {phase}-* (e.g., 05-*)
+    2. Unpadded variant: {raw}-* (e.g., 5-*) — only when raw != phase
+    3. Bare directory: {phase}/ or {raw}/ — only directories
+    """
     phases_dir = planning / "phases"
     if not phases_dir.is_dir():
         return None
+
+    # Derive raw (unpadded) form: "05" -> "5", "02.1" -> "2.1"
+    raw_match = re.match(r"^0*(\d.*)", phase)
+    raw = raw_match.group(1) if raw_match else phase
+
+    # Tier 1: canonical padded glob
     matches = sorted(phases_dir.glob(f"{phase}-*"))
     dirs = [m for m in matches if m.is_dir()]
-    return dirs[0] if dirs else None
+    if dirs:
+        return dirs[0]
+
+    # Tier 2: unpadded variant glob (skip when raw == phase)
+    if raw != phase:
+        matches = sorted(phases_dir.glob(f"{raw}-*"))
+        dirs = [m for m in matches if m.is_dir()]
+        if dirs:
+            return dirs[0]
+
+    # Tier 3: bare directory
+    bare_padded = phases_dir / phase
+    if bare_padded.is_dir():
+        return bare_padded
+    if raw != phase:
+        bare_raw = phases_dir / raw
+        if bare_raw.is_dir():
+            return bare_raw
+
+    return None
+
+
+def parse_roadmap_phases(roadmap_path: Path) -> list[tuple[str, str]]:
+    """Parse phase headers from ROADMAP.md.
+
+    Returns list of (phase_number, phase_name) tuples.
+    Strips markers like (INSERTED), (Generated) from names.
+    """
+    if not roadmap_path.is_file():
+        return []
+    text = roadmap_path.read_text(encoding="utf-8")
+    results: list[tuple[str, str]] = []
+    for line in text.splitlines():
+        m = re.match(r"^###\s+Phase\s+(\d+(?:\.\d+)?)\s*:\s*(.+)$", line)
+        if m:
+            num = m.group(1)
+            name = re.sub(r"\s*\([A-Z][A-Za-z]*\)\s*$", "", m.group(2)).strip()
+            results.append((num, name))
+    return results
 
 
 def run_git(*args: str) -> str:
@@ -604,12 +654,6 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
         else:
             skip_count += 1
 
-    def format_phase_prefix(phase: str) -> str:
-        if "." in phase:
-            int_part, dec_part = phase.split(".", 1)
-            return f"{int(int_part):02d}.{dec_part}"
-        return f"{int(phase):02d}"
-
     def parse_phase_numbers(line: str) -> list[str]:
         """Parse phase numbers from a 'Phases completed' line."""
         range_match = re.search(r"(\d+)-(\d+)", line)
@@ -703,7 +747,7 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
             orphans: list[str] = []
             for line in phase_lines:
                 for phase_num in parse_phase_numbers(line):
-                    prefix = format_phase_prefix(phase_num)
+                    prefix = normalize_phase(phase_num)
                     if phases_dir.is_dir():
                         for d in phases_dir.glob(f"{prefix}-*/"):
                             if d.is_dir():
@@ -802,7 +846,7 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
             leftovers: list[str] = []
             for line in phase_lines:
                 for phase_num in parse_phase_numbers(line):
-                    prefix = format_phase_prefix(phase_num)
+                    prefix = normalize_phase(phase_num)
                     if phases_dir.is_dir():
                         for d in phases_dir.glob(f"{prefix}-*/"):
                             if d.is_dir():
@@ -951,6 +995,47 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
         record("WARN", "Research API Keys")
     print()
 
+    # ---- CHECK 10: Phase Directory Naming ----
+    print("=== Phase Directory Naming ===")
+    roadmap_path = planning / "ROADMAP.md"
+    roadmap_phases = parse_roadmap_phases(roadmap_path)
+    if not roadmap_phases:
+        print("Status: SKIP")
+        print("No ROADMAP.md or no phases found")
+        record("SKIP", "Phase Directory Naming")
+    else:
+        non_canonical: list[str] = []
+        missing_dirs: list[str] = []
+        for num, name in roadmap_phases:
+            padded = normalize_phase(num)
+            slug = slugify(name)
+            canonical = f"{padded}-{slug}"
+            canonical_path = phases_dir / canonical if phases_dir.is_dir() else None
+            if canonical_path and canonical_path.is_dir():
+                continue
+            found = find_phase_dir(planning, padded)
+            if found is not None:
+                non_canonical.append(f"  {found.name} → git mv .planning/phases/{found.name} .planning/phases/{canonical}")
+            else:
+                missing_dirs.append(f"  {canonical} (missing, run: ms-tools create-phase-dirs)")
+        if non_canonical:
+            print("Status: FAIL")
+            print(f"Found {len(non_canonical)} non-canonical phase directory name(s):")
+            for line in non_canonical:
+                print(line)
+            record("FAIL", "Phase Directory Naming")
+        elif missing_dirs:
+            print("Status: WARN")
+            print(f"Found {len(missing_dirs)} missing phase directory(ies):")
+            for line in missing_dirs:
+                print(line)
+            record("WARN", "Phase Directory Naming")
+        else:
+            print("Status: PASS")
+            print("All phase directories use canonical naming")
+            record("PASS", "Phase Directory Naming")
+    print()
+
     # ---- SUMMARY ----
     total = pass_count + warn_count + fail_count + skip_count
     print("=== Summary ===")
@@ -962,6 +1047,44 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
         print("No failures — warnings are informational")
     else:
         print("All checks passed")
+
+
+# ===================================================================
+# Subcommand: create-phase-dirs
+# ===================================================================
+
+
+def cmd_create_phase_dirs(args: argparse.Namespace) -> None:
+    """Create phase directories from ROADMAP.md headers.
+
+    Reads ### Phase N: Name headers, creates .planning/phases/{padded}-{slug}/
+    for each. Skips phases that already have a directory (found via resilient
+    find_phase_dir).
+    """
+    planning = find_planning_dir()
+    roadmap_path = planning / "ROADMAP.md"
+    phases = parse_roadmap_phases(roadmap_path)
+    if not phases:
+        print("Error: No phases found in ROADMAP.md (or file missing)", file=sys.stderr)
+        sys.exit(1)
+
+    phases_dir = planning / "phases"
+    phases_dir.mkdir(parents=True, exist_ok=True)
+
+    created = 0
+    skipped = 0
+    for num, name in phases:
+        padded = normalize_phase(num)
+        if find_phase_dir(planning, padded) is not None:
+            skipped += 1
+            continue
+        slug = slugify(name)
+        dir_name = f"{padded}-{slug}"
+        (phases_dir / dir_name).mkdir(parents=True, exist_ok=True)
+        print(f"Created: {dir_name}")
+        created += 1
+
+    print(f"\n{created} created, {skipped} skipped (already exist)")
 
 
 # ===================================================================
@@ -1056,28 +1179,32 @@ def cmd_gather_milestone_stats(args: argparse.Namespace) -> None:
 
     all_commits: list[str] = []
 
-    # Integer phases
+    # Integer phases — try both padded and raw formats
     for i in range(start, end + 1):
-        phase = f"{i:02d}"
-        try:
-            out = run_git("log", "--all", "--format=%H %ai %s", f"--grep=({phase}-")
-            if out:
-                all_commits.extend(out.splitlines())
-        except subprocess.CalledProcessError:
-            pass
+        padded = normalize_phase(str(i))
+        raw = str(i)
+        for p in ([padded, raw] if padded != raw else [padded]):
+            try:
+                out = run_git("log", "--all", "--format=%H %ai %s", f"--grep=({p}-")
+                if out:
+                    all_commits.extend(out.splitlines())
+            except subprocess.CalledProcessError:
+                pass
 
-    # Decimal phases
+    # Decimal phases — try both directory-derived and padded forms
     for d in sorted(phases_dir.iterdir()):
         if not d.is_dir():
             continue
         phase_num = d.name.split("-", 1)[0]
         if "." in phase_num and in_range(phase_num, start, end):
-            try:
-                out = run_git("log", "--all", "--format=%H %ai %s", f"--grep=({phase_num}-")
-                if out:
-                    all_commits.extend(out.splitlines())
-            except subprocess.CalledProcessError:
-                pass
+            padded = normalize_phase(phase_num)
+            for p in ([padded, phase_num] if padded != phase_num else [padded]):
+                try:
+                    out = run_git("log", "--all", "--format=%H %ai %s", f"--grep=({p}-")
+                    if out:
+                        all_commits.extend(out.splitlines())
+                except subprocess.CalledProcessError:
+                    pass
 
     # Deduplicate and sort by date
     seen: set[str] = set()
@@ -2836,10 +2963,8 @@ def cmd_uat_init(args: argparse.Namespace) -> None:
 
     phase_dir = find_phase_dir(planning, phase)
     if phase_dir is None:
-        phases_dir = planning / "phases"
-        phases_dir.mkdir(parents=True, exist_ok=True)
-        phase_dir = phases_dir / phase
-        phase_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Error: Phase directory not found for {phase}. Run: ms-tools create-phase-dirs", file=sys.stderr)
+        sys.exit(1)
 
     phase_name = phase_dir.name
     uat = UATFile.from_init_json(data, phase_name)
@@ -3297,6 +3422,10 @@ def build_parser() -> argparse.ArgumentParser:
     # --- doctor-scan ---
     p = subparsers.add_parser("doctor-scan", help="Diagnostic scan of .planning/ tree")
     p.set_defaults(func=cmd_doctor_scan)
+
+    # --- create-phase-dirs ---
+    p = subparsers.add_parser("create-phase-dirs", help="Create phase directories from ROADMAP.md")
+    p.set_defaults(func=cmd_create_phase_dirs)
 
     # --- gather-milestone-stats ---
     p = subparsers.add_parser("gather-milestone-stats", help="Gather milestone readiness and git statistics")
