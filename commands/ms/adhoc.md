@@ -57,7 +57,8 @@ Create execution directory, assemble context, spawn ms-adhoc-planner.
 </step>
 
 <step name="review_plan">
-Read generated plan, show summary to user, allow edits.
+Read generated plan, show summary to user.
+AskUserQuestion: approve, request edits, or abort.
 </step>
 
 <step name="spawn_executor">

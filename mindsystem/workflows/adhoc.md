@@ -132,7 +132,12 @@ Present a summary to the user:
 - Key files affected
 - Must-Haves checklist
 
-Allow the user to approve, request edits, or abort. If edits requested, apply them directly to the plan file.
+**AskUserQuestion** with options:
+- Approve and execute
+- Request edits (let me describe)
+- Abort
+
+If edits requested, apply them directly to the plan file, then re-present and ask again. If aborted, clean up `${exec_dir}` and stop.
 </step>
 
 <step name="spawn_executor">
@@ -209,7 +214,7 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 
 **Update state and commit:**
 ```bash
-ms-tools set-last-command "ms:adhoc $ARGUMENTS"
+ms-tools set-last-command "ms:adhoc ${slug}"
 git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" .planning/STATE.md
 # Only include patch if it was generated
 [ -f "${exec_dir}/adhoc-01-changes.patch" ] && git add "${exec_dir}/adhoc-01-changes.patch"
@@ -238,9 +243,7 @@ Artifacts:
 ```
 ---
 
-Continue with current work or check project status:
-- `/ms:progress` — see project status
-- `/ms:execute-phase` — continue phase execution
+Check `/ms:progress` to see project status and next steps.
 ```
 </step>
 
