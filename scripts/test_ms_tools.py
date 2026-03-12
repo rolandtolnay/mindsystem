@@ -55,6 +55,10 @@ find_phase_dir = _mod.find_phase_dir
 parse_roadmap_phases = _mod.parse_roadmap_phases
 cmd_create_phase_dirs = _mod.cmd_create_phase_dirs
 cmd_uat_init = _mod.cmd_uat_init
+_detect_web_project = _mod._detect_web_project
+_check_skill_installed = _mod._check_skill_installed
+_get_claude_config_dir = _mod._get_claude_config_dir
+cmd_browser_check = _mod.cmd_browser_check
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -2726,3 +2730,207 @@ class TestCmdFindPhaseCommits:
             with pytest.raises(SystemExit) as exc_info:
                 cmd_find_phase_commits(argparse.Namespace(phase="1", suffix=""))
             assert exc_info.value.code == 1
+
+
+# ===================================================================
+# Browser Verification Tests
+# ===================================================================
+
+
+class TestDetectWebProject:
+    """Tests for _detect_web_project helper."""
+
+    def test_package_json_with_react(self, tmp_path):
+        pkg = tmp_path / "package.json"
+        pkg.write_text(json.dumps({"dependencies": {"react": "^18.0.0", "react-dom": "^18.0.0"}}))
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "react" in signal
+
+    def test_package_json_no_web_deps(self, tmp_path):
+        pkg = tmp_path / "package.json"
+        pkg.write_text(json.dumps({"dependencies": {"express": "^4.0.0"}}))
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is False
+
+    def test_next_config_exists(self, tmp_path):
+        (tmp_path / "next.config.ts").write_text("export default {}")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "next.config.*" in signal
+
+    def test_monorepo_child_package(self, tmp_path):
+        child = tmp_path / "web"
+        child.mkdir(parents=True)
+        (child / "package.json").write_text(json.dumps({"dependencies": {"vue": "^3.0.0"}}))
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "vue" in signal
+        assert "web/package.json" in signal
+
+    def test_project_md_mentions_react(self, tmp_path):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "PROJECT.md").write_text("# My Project\n\nBuilt with React and TypeScript.")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "react" in signal.lower()
+
+    def test_no_indicators(self, tmp_path):
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is False
+        assert "no web framework" in signal
+
+    def test_node_modules_ignored_in_monorepo(self, tmp_path):
+        nm = tmp_path / "node_modules" / "some-pkg"
+        nm.mkdir(parents=True)
+        (nm / "package.json").write_text(json.dumps({"dependencies": {"react": "^18.0.0"}}))
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is False
+
+    def test_malformed_package_json(self, tmp_path):
+        (tmp_path / "package.json").write_text("not json{{{")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is False
+
+
+class TestCheckSkillInstalled:
+    """Tests for _check_skill_installed helper."""
+
+    def test_skill_at_user_path(self, tmp_path):
+        skill_dir = tmp_path / ".claude" / "skills" / "agent-browser"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# Agent Browser Skill")
+        with mock.patch.object(_mod, "_get_claude_config_dir", return_value=tmp_path / ".claude"):
+            ok, detail = _check_skill_installed("agent-browser")
+        assert ok is True
+        assert "user" in detail
+
+    def test_skill_at_project_path(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        skill_dir = tmp_path / ".claude" / "skills" / "agent-browser"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# Agent Browser Skill")
+        # Ensure user path doesn't exist
+        fake_config = tmp_path / "fake-config"
+        with mock.patch.object(_mod, "_get_claude_config_dir", return_value=fake_config):
+            ok, detail = _check_skill_installed("agent-browser")
+        assert ok is True
+        assert "project" in detail
+
+    def test_skill_not_found(self, tmp_path):
+        fake_config = tmp_path / "fake-config"
+        with mock.patch.object(_mod, "_get_claude_config_dir", return_value=fake_config):
+            ok, detail = _check_skill_installed("agent-browser")
+        assert ok is False
+        assert "not found" in detail
+
+
+class TestCmdBrowserCheck:
+    """Tests for browser-check subcommand."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def test_config_disabled_exits_skip(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": False}}
+        (planning / "config.json").write_text(json.dumps(config))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 2
+        captured = capsys.readouterr()
+        assert "SKIP" in captured.out
+
+    def test_not_web_project_exits_skip(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": True}}
+        (planning / "config.json").write_text(json.dumps(config))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 2
+        captured = capsys.readouterr()
+        assert "SKIP" in captured.out
+        assert "not a web project" in captured.out
+
+    def test_web_project_all_deps_ready(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": True}}
+        (planning / "config.json").write_text(json.dumps(config))
+        (tmp_path / "package.json").write_text(json.dumps({"dependencies": {"react": "^18"}}))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", return_value="/usr/local/bin/agent-browser"), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")), \
+             pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 0
+        captured = capsys.readouterr()
+        assert "READY" in captured.out
+
+    def test_web_project_cli_missing_exits_1(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": True}}
+        (planning / "config.json").write_text(json.dumps(config))
+        (tmp_path / "package.json").write_text(json.dumps({"dependencies": {"react": "^18"}}))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", return_value=None), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")), \
+             pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 1
+        captured = capsys.readouterr()
+        assert "MISSING_DEPS" in captured.out
+
+    def test_web_project_skill_missing_exits_1(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": True}}
+        (planning / "config.json").write_text(json.dumps(config))
+        (tmp_path / "package.json").write_text(json.dumps({"dependencies": {"react": "^18"}}))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", return_value="/usr/local/bin/agent-browser"), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(False, "not found")), \
+             pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 1
+        captured = capsys.readouterr()
+        assert "MISSING_DEPS" in captured.out
+
+    def test_no_planning_dir_defaults_enabled(self, tmp_path, capsys):
+        """No .planning/ dir — defaults to enabled, still checks web/CLI/skill."""
+        (tmp_path / "package.json").write_text(json.dumps({"dependencies": {"next": "^14"}}))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", return_value="/usr/local/bin/agent-browser"), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")), \
+             pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 0
+        captured = capsys.readouterr()
+        assert "READY" in captured.out
+
+    def test_malformed_config_defaults_enabled(self, tmp_path, capsys):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "config.json").write_text("not json{{{")
+
+        # Not a web project, so should skip
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 2  # defaults enabled, but not web → SKIP

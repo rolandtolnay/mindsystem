@@ -1,6 +1,6 @@
 ---
 name: ms:config
-description: Configure Mindsystem preferences — code reviewers, mockups, gitignore, git remote, task tracker
+description: Configure Mindsystem preferences — code reviewers, mockups, browser verification, gitignore, git remote, task tracker
 allowed-tools:
   - Read
   - Write
@@ -12,7 +12,7 @@ allowed-tools:
 
 Configure Mindsystem preferences for the current project.
 
-Manages code reviewer agents, mockup preferences, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
+Manages code reviewer agents, mockup preferences, browser verification, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
 
 </objective>
 
@@ -100,12 +100,14 @@ Use AskUserQuestion (multiSelect):
 - options:
   - "Phase patch files (`.planning/phases/**/*.patch`)" — Large binary diffs, regeneratable
   - "Design mockups (`.planning/phases/**/*.html`)" — Generated HTML mockups from design-phase
+  - "Browser screenshots (`.planning/phases/**/screenshots/`)" — Browser verification screenshots
 
 Apply selected patterns to `.gitignore`. Create the file if needed:
 
 ```bash
-echo '.planning/phases/**/*.patch' >> .gitignore  # if selected
-echo '.planning/phases/**/*.html' >> .gitignore   # if selected
+echo '.planning/phases/**/*.patch' >> .gitignore       # if selected
+echo '.planning/phases/**/*.html' >> .gitignore        # if selected
+echo '.planning/phases/**/screenshots/' >> .gitignore  # if selected
 ```
 
 If no selections: skip gitignore changes.
@@ -138,6 +140,34 @@ Update config.json:
 
 ```bash
 ms-tools config-set open_mockups "$VALUE"
+```
+
+</step>
+
+<step name="browser_verification">
+
+Read current value:
+
+```bash
+CURRENT=$(ms-tools config-get browser_verification.enabled --default "true")
+echo "Current browser_verification.enabled: $CURRENT"
+```
+
+Use AskUserQuestion:
+- header: "Browser verification"
+- question: "Enable automated browser verification during execute-phase? (Tests your web UI after code changes)"
+- options:
+  - "Enabled (Recommended)" — Automatically test web UI after phase execution
+  - "Disabled" — Skip browser verification
+
+Map selection:
+- "Enabled" → `true`
+- "Disabled" → `false`
+
+Update config.json:
+
+```bash
+ms-tools config-set browser_verification --json '{"enabled": true}'   # or false
 ```
 
 </step>
@@ -193,6 +223,7 @@ Configuration updated:
 
 - Code reviewers: [adhoc / phase / milestone values]
 - Mockup open: [auto / ask / off]
+- Browser verification: [enabled / disabled]
 - Gitignore: [patterns added, or "no changes"]
 - Git remote: [remote URL, or "none configured"]
 - Task tracker: [type + cli path, or "none"]
@@ -239,6 +270,7 @@ Also list: `/ms:doctor` — Verify subsystems and artifact health
 - [ ] Validation summary displayed
 - [ ] Config.json code_review values set (or preserved if skipped)
 - [ ] Config.json open_mockups value set (or preserved if skipped)
+- [ ] Config.json browser_verification value set (or preserved if skipped)
 - [ ] Config.json task_tracker value set (or preserved if skipped)
 
 </success_criteria>

@@ -77,29 +77,35 @@ ms-tools find-phase "$ARGUMENTS"
      - `passed` → continue to step 7
      - `gaps_found` → present gaps, route via gap-closure-routing.md triage
 
-7. **Code review (optional)**
+7. **Browser verification (web projects)**
+   - Run `ms-tools browser-check` for prerequisites
+   - If ready: handle auth, spawn `ms-browser-verifier` for functional testing
+   - Verifier tests observable truths in browser, fixes issues inline
+   - If skipped: not a web project or browser verification disabled
+
+8. **Code review (optional)**
    - Read `code_review.phase` from config.json (default: `ms-code-simplifier`)
-   - If `"skip"`: proceed to step 8
+   - If `"skip"`: proceed to step 9
    - Spawn code review agent with phase file scope
    - If changes made: commit as `refactor({phase}): code review improvements`
 
-8. **Generate phase patch**
+9. **Generate phase patch**
    - Run: `ms-tools generate-phase-patch ${PHASE_NUMBER}`
    - Outputs to `.planning/phases/{phase_dir}/{phase}-changes.patch`
    - Verify: patch file exists OR skip message logged
    - Note: Patch captures all changes including simplifications
 
-9. **Consolidate knowledge**
-   - Spawn `ms-consolidator` with phase directory and number
-   - Consolidator reads phase artifacts and existing knowledge files
-   - Produces updated `.planning/knowledge/{subsystem}.md` files
-   - Deletes PLAN.md files (execution instructions consumed)
-   - Verify: knowledge files written to `.planning/knowledge/`
+10. **Consolidate knowledge**
+    - Spawn `ms-consolidator` with phase directory and number
+    - Consolidator reads phase artifacts and existing knowledge files
+    - Produces updated `.planning/knowledge/{subsystem}.md` files
+    - Deletes PLAN.md files (execution instructions consumed)
+    - Verify: knowledge files written to `.planning/knowledge/`
 
-10. **Update roadmap and state**
+11. **Update roadmap and state**
     - Update ROADMAP.md, STATE.md
 
-11. **Update requirements**
+12. **Update requirements**
     Mark phase requirements as Complete:
     - Read ROADMAP.md, find this phase's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
     - Read REQUIREMENTS.md traceability table
@@ -107,7 +113,7 @@ ms-tools find-phase "$ARGUMENTS"
     - Write updated REQUIREMENTS.md
     - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-12. **Commit phase completion**
+13. **Commit phase completion**
     Bundle all phase metadata updates in one commit:
     - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
     - Stage knowledge files: `git add .planning/knowledge/*.md`
@@ -115,10 +121,10 @@ ms-tools find-phase "$ARGUMENTS"
     - Stage REQUIREMENTS.md if updated: `git add .planning/REQUIREMENTS.md`
     - Commit: `docs({phase}): complete {phase-name} phase`
 
-13. **Offer next steps**
+14. **Offer next steps**
     - Route to next action (see `<offer_next>`)
 
-14. **Update last command:** `ms-tools set-last-command "ms:execute-phase $ARGUMENTS"`
+15. **Update last command:** `ms-tools set-last-command "ms:execute-phase $ARGUMENTS"`
 </process>
 
 <offer_next>
@@ -247,6 +253,7 @@ After all plans in phase complete:
 - [ ] All incomplete plans in phase executed
 - [ ] Code review completed (or skipped if config says "skip")
 - [ ] Phase goal verified (Must-Haves checked against codebase)
+- [ ] Browser verification completed or skipped (non-web/disabled)
 - [ ] VERIFICATION.md created in phase directory
 - [ ] Patch file generated OR explicitly skipped with message
 - [ ] Knowledge files written to .planning/knowledge/ (consolidation complete)

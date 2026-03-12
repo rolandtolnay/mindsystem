@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run health checks on project configuration. Detect and fix structural drift across 11 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers and environment diagnostics, research API keys, phase directory naming, and Mindsystem version.
+Run health checks on project configuration. Detect and fix structural drift across 12 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers and environment diagnostics, research API keys, phase directory naming, browser verification prerequisites, and Mindsystem version.
 
 Idempotent.
 </objective>
@@ -120,6 +120,7 @@ Display results as a markdown table:
 | CLI wrappers             | FAIL   | Not resolvable; bin dir not in PATH |
 | Research API Keys        | WARN   | PERPLEXITY_API_KEY not set        |
 | Phase directory naming   | FAIL   | 1 non-canonical directory         |
+| Browser Verification     | WARN   | Web project, missing agent-browser CLI |
 | Mindsystem version       | WARN   | v3.21.0 → v3.22.1 available       |
 ```
 
@@ -181,6 +182,7 @@ Final summary table:
 | CLI wrappers             | PASS   | ...                              |
 | Research API Keys        | PASS   | ...                              |
 | Phase directory naming   | PASS   | ...                              |
+| Browser Verification     | PASS   | ...                              |
 | Mindsystem version       | PASS   | ...                              |
 
 All checks passed.
@@ -197,6 +199,6 @@ Include counts: checks total, passed, warned, fixed during this run.
 - [ ] Re-scan verifies all checks pass after fixes
 - [ ] Each fix group committed atomically
 - [ ] Fixes applied in dependency order: subsystems → dirs → milestone naming → archival → cleanup → knowledge
-- [ ] All 11 categories reported with PASS/FAIL/WARN/SKIP
+- [ ] All 12 categories reported with PASS/FAIL/WARN/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>

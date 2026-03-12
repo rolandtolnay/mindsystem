@@ -600,6 +600,166 @@ def cmd_validate_execution_order(args: argparse.Namespace) -> None:
 
 
 # ===================================================================
+# Subcommand: browser-check
+# ===================================================================
+
+
+def _get_claude_config_dir() -> Path:
+    """Cross-platform Claude Code config directory."""
+    if sys.platform == "win32":
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            return Path(appdata) / "Claude"
+        return Path.home() / "AppData" / "Roaming" / "Claude"
+    return Path.home() / ".claude"
+
+
+WEB_FRAMEWORK_DEPS = {
+    "react", "react-dom", "vue", "next", "nuxt", "@angular/core",
+    "svelte", "@sveltejs/kit", "solid-js", "astro", "@remix-run/react",
+    "gatsby", "preact",
+}
+
+WEB_CONFIG_FILES = [
+    "next.config.*", "nuxt.config.*", "vite.config.*", "angular.json",
+    "svelte.config.*", "astro.config.*", "remix.config.*",
+]
+
+
+def _detect_web_project(git_root: Path) -> tuple[bool, str]:
+    """Detect if project is a web project. Returns (is_web, signal_description)."""
+    # Signal 1: package.json deps
+    pkg = git_root / "package.json"
+    if pkg.is_file():
+        try:
+            data = json.loads(pkg.read_text(encoding="utf-8"))
+            all_deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+            found = WEB_FRAMEWORK_DEPS & set(all_deps.keys())
+            if found:
+                return True, f"{', '.join(sorted(found))} in package.json"
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Signal 2: Framework config files (glob at root)
+    for pattern in WEB_CONFIG_FILES:
+        if list(git_root.glob(pattern)):
+            return True, f"{pattern} found"
+
+    # Signal 3: One level deep package.json (monorepo)
+    for child_pkg in git_root.glob("*/package.json"):
+        if "node_modules" in str(child_pkg):
+            continue
+        try:
+            data = json.loads(child_pkg.read_text(encoding="utf-8"))
+            all_deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+            found = WEB_FRAMEWORK_DEPS & set(all_deps.keys())
+            if found:
+                return True, f"{', '.join(sorted(found))} in {child_pkg.relative_to(git_root)}"
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Signal 4: PROJECT.md tech stack mentions
+    project_md = git_root / ".planning" / "PROJECT.md"
+    if project_md.is_file():
+        try:
+            content = project_md.read_text(encoding="utf-8").lower()
+            web_keywords = ["react", "vue", "next.js", "nextjs", "nuxt", "angular", "svelte", "sveltekit", "astro", "remix"]
+            for kw in web_keywords:
+                if kw in content:
+                    return True, f"'{kw}' mentioned in PROJECT.md"
+        except OSError:
+            pass
+
+    return False, "no web framework in package.json, no framework config files, no web stack in PROJECT.md"
+
+
+def _check_skill_installed(skill_name: str) -> tuple[bool, str]:
+    """Check if a Claude Code skill is installed. Cross-platform."""
+    config_dir = _get_claude_config_dir()
+    locations = [
+        ("user", config_dir / "skills" / skill_name / "SKILL.md"),
+        ("project", Path.cwd() / ".claude" / "skills" / skill_name / "SKILL.md"),
+    ]
+    for label, path in locations:
+        if path.is_file():
+            return True, f"{label}: {path}"
+    return False, "not found in ~/.claude/skills/ or .claude/skills/"
+
+
+def cmd_browser_check(args: argparse.Namespace) -> None:
+    """Check browser verification prerequisites.
+
+    Contract:
+        Output: text — section-based status report
+        Exit codes: 0 = READY, 1 = MISSING_DEPS, 2 = SKIP
+        Side effects: read-only
+    """
+    git_root = find_git_root()
+    planning = git_root / ".planning"
+
+    # 1. Config check
+    print("=== Browser Verification Config ===")
+    enabled = True  # default
+    config_path = planning / "config.json" if planning.is_dir() else None
+    if config_path and config_path.is_file():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            bv = config.get("browser_verification", {})
+            if isinstance(bv, dict):
+                enabled = bv.get("enabled", True)
+            # else: malformed, default to enabled
+        except (json.JSONDecodeError, OSError):
+            pass  # malformed config, default to enabled
+    print(f"Status: {'enabled' if enabled else 'disabled'}")
+
+    if not enabled:
+        print("\nResult: SKIP (disabled in config)")
+        sys.exit(2)
+
+    # 2. Web project check
+    print("\n=== Web Project Detection ===")
+    is_web, signal = _detect_web_project(git_root)
+    print(f"Web project: {is_web}")
+    print(f"Signal: {signal}")
+
+    if not is_web:
+        print("\nResult: SKIP (not a web project)")
+        sys.exit(2)
+
+    # 3. CLI check
+    print("\n=== Browser CLI ===")
+    cli_path = shutil.which("agent-browser")
+    if cli_path:
+        print(f"agent-browser: {cli_path}")
+    else:
+        print("agent-browser: not found")
+        print("Install: npm install -g agent-browser")
+
+    # 4. Skill check
+    print("\n=== Browser Skill ===")
+    skill_ok, skill_detail = _check_skill_installed("agent-browser")
+    if skill_ok:
+        print(f"agent-browser skill: {skill_detail}")
+    else:
+        print(f"agent-browser skill: {skill_detail}")
+        print("Install: add agent-browser skill to ~/.claude/skills/")
+
+    # Result
+    missing: list[str] = []
+    if not cli_path:
+        missing.append("agent-browser CLI")
+    if not skill_ok:
+        missing.append("agent-browser skill")
+
+    if missing:
+        print(f"\nResult: MISSING_DEPS ({', '.join(missing)})")
+        sys.exit(1)
+
+    print("\nResult: READY")
+    sys.exit(0)
+
+
+# ===================================================================
 # Subcommand: doctor-scan
 # ===================================================================
 
@@ -1034,6 +1194,43 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
             print("Status: PASS")
             print("All phase directories use canonical naming")
             record("PASS", "Phase Directory Naming")
+    print()
+
+    # ---- CHECK 11: Browser Verification ----
+    print("=== Browser Verification ===")
+    bv_enabled = True
+    bv_config = config.get("browser_verification", {})
+    if isinstance(bv_config, dict):
+        bv_enabled = bv_config.get("enabled", True)
+
+    if not bv_enabled:
+        print("Status: SKIP")
+        print("Disabled in config.json")
+        record("SKIP", "Browser Verification")
+    else:
+        is_web, web_signal = _detect_web_project(git_root)
+        if not is_web:
+            print("Status: SKIP")
+            print(f"Not a web project ({web_signal})")
+            record("SKIP", "Browser Verification")
+        else:
+            bv_missing: list[str] = []
+            cli_path = shutil.which("agent-browser")
+            if not cli_path:
+                bv_missing.append("agent-browser CLI (npm install -g agent-browser)")
+            skill_ok, _ = _check_skill_installed("agent-browser")
+            if not skill_ok:
+                bv_missing.append("agent-browser skill")
+            if bv_missing:
+                print("Status: WARN")
+                print(f"Web project detected ({web_signal}) but missing:")
+                for m in bv_missing:
+                    print(f"  {m}")
+                record("WARN", "Browser Verification")
+            else:
+                print("Status: PASS")
+                print(f"Web project ({web_signal}), CLI and skill installed")
+                record("PASS", "Browser Verification")
     print()
 
     # ---- SUMMARY ----
@@ -3418,6 +3615,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser("validate-execution-order", help="Validate EXECUTION-ORDER.md against plan files")
     p.add_argument("phase_dir", help="Phase directory path")
     p.set_defaults(func=cmd_validate_execution_order)
+
+    # --- browser-check ---
+    p = subparsers.add_parser("browser-check", help="Check browser verification prerequisites")
+    p.set_defaults(func=cmd_browser_check)
 
     # --- doctor-scan ---
     p = subparsers.add_parser("doctor-scan", help="Diagnostic scan of .planning/ tree")

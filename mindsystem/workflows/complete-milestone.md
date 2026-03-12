@@ -38,7 +38,7 @@ When a milestone completes, this workflow:
 
 **PHASE-SUMMARIES** consolidates all `*-SUMMARY.md` files from phase directories, organized by phase and plan, before artifacts are deleted.
 
-**phases/** contains the phase directories themselves (with remaining files like `.patch`, `mockups/`) moved from `.planning/phases/`.
+**phases/** contains the phase directories themselves (with remaining files like `.patch`, `mockups/`, `screenshots/`) moved from `.planning/phases/`.
 
 **REQUIREMENTS archive** contains:
 - All v1 requirements marked complete with outcomes

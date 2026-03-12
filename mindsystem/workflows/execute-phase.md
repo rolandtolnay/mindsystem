@@ -291,6 +291,38 @@ If the verifier's return includes "Items Not Verified Programmatically" (uncerta
 Read `~/.claude/mindsystem/references/routing/gap-closure-routing.md` and follow its triage instructions to present gap summary and route to the appropriate primitive based on scope analysis.
 </step>
 
+<step name="browser_verification">
+Run browser verification prerequisites check:
+
+```bash
+ms-tools browser-check
+```
+
+**If exit 0 (READY):**
+
+Read `~/.claude/mindsystem/references/browser-verification.md` and follow its Auth Flow and Spawn sections.
+
+After verifier returns, if fixes were made:
+- Report: "Browser verification: {N} issues found and fixed"
+- Include report summary in consolidator prompt (step `consolidate_knowledge`)
+
+**If exit 1 (MISSING_DEPS):**
+
+Parse output for missing items. Use AskUserQuestion:
+- header: "Browser verification"
+- question: "Browser verification prerequisites are missing. How to proceed?"
+- options:
+  - "Install missing dependencies" — follow install instructions from output
+  - "Skip browser verification" — proceed to code_review
+
+If user installs: re-run `ms-tools browser-check`.
+If user skips: proceed to code_review.
+
+**If exit 2 (SKIP):**
+
+Proceed silently to code_review.
+</step>
+
 <step name="code_review">
 Read code review agent name from config:
 

@@ -5,5 +5,8 @@
     "phase": null,
     "milestone": null
   },
-  "open_mockups": "auto"
+  "open_mockups": "auto",
+  "browser_verification": {
+    "enabled": true
+  }
 }
