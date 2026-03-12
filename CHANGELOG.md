@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-03-12
+
+### Added
+- **Browser verification in execute-phase.** Web projects now get an optional browser-based UAT check between structural verification and code review. Uses `agent-browser` to launch a real browser against the running dev server, screenshot each page, and verify observable truths from VERIFICATION.md. Issues found are fixed inline and re-verified after hot reload. Auth is handled automatically — existing browser state is reused, or a visible browser opens for you to log in once.
+- **`create-phase-dirs` ms-tools subcommand** that auto-creates phase directories from ROADMAP.md. Phase directory lookup (`find_phase_dir`) now falls back through canonical, unpadded, and bare name variants for resilient matching.
+- **Phase directory naming check (CHECK 10) in doctor.** Detects non-canonical and missing phase directories with automated fix support via `ms-tools create-phase-dirs` and `git mv`.
+
+### Changed
+- **`ms:config` now has setup/edit modes.** First run walks through all settings sequentially. Subsequent runs display current settings as a numbered list and let you pick which to change — no more Next Up routing after configuration.
+- **Centralized phase commit resolution.** New `find-phase-commits` CLI command and shared `find_phase_commit_hashes()` helper handle both padded and raw phase number formats. Used by `generate-phase-patch`, `execute-phase`, and `audit-milestone`.
+
 ## [4.1.2] - 2026-03-11
 
 ### Changed
@@ -636,7 +647,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.2...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.2...v4.2.0
 [4.1.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.1...v4.1.2
 [4.1.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.0.4...v4.1.0
