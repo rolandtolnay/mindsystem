@@ -1,7 +1,7 @@
 ---
 name: ms-browser-verifier
 description: Automated functional verification via browser. Tests observable truths, fixes issues inline, reports patterns for knowledge compounding.
-model: opus
+model: sonnet
 tools: Read, Write, Edit, Bash, Grep, Glob
 skills:
   - agent-browser
