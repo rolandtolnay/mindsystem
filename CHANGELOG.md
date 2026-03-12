@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.2.1] - 2026-03-12
+
+### Changed
+- Browser verifier redesigned as a visual PR reviewer. Instead of testing against VERIFICATION.md, it now receives a checklist derived from execution SUMMARYs, runs environment preflight, enforces behavioral stop signals (e.g., investigation leaving project source, repeated root-cause theories, 3 edit-screenshot cycles), and produces structured reports with screenshot evidence.
+- Verify-work is now the default "Next Up" after phase execution, with next-phase and audit-milestone moving to "Also available".
+
+### Fixed
+- Adhoc workflow now enforces a proper decision gate at plan review and simplifies completion next-up to a single progress nudge. State tracking improved with set-last-command running before the commit.
+- Commit patterns harmonized across commands — set-last-command runs before git commit, single-line HEREDOCs converted to inline `-m`, and lint rejects file-level `.planning/` adds.
+
 ## [4.2.0] - 2026-03-12
 
 ### Added
@@ -647,7 +657,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.1...HEAD
+[4.2.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.2...v4.2.0
 [4.1.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.1...v4.1.2
 [4.1.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.0...v4.1.1
