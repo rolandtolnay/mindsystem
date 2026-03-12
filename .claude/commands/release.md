@@ -145,6 +145,7 @@ When uncertain, include. The user can remove during confirmation.
 - **Scale description length to impact.** High-impact changes deserve 2-3 sentences explaining the benefit. Low-impact changes can be a single clause. Minor related items (language polish, UX tweaks across multiple commands) consolidate into one line.
 - **Consolidate related commits into one entry.** Multiple commits that tell one story (e.g., a feature + its default behavior change + command it absorbs) become a single entry reflecting the final state. Don't split one feature across Added/Changed/Removed when it reads better as one cohesive entry.
 - **Omit purely internal changes** that users never interact with (structural guards on internal agents, internal architectural refactors with no user-facing effect). When uncertain, include.
+- **Describe behavior, not plumbing.** Omit internal component names (agent names, ms-tools subcommands, doctor check numbers, helper functions) unless users invoke them directly. Describe what the user experiences — "launches a real browser and screenshots each page" not "new ms-browser-verifier agent and browser-check ms-tools subcommand." If a feature auto-detects something, say it does — don't enumerate what it detects.
 - Write from user perspective: what changed and why it benefits them. Use ticket Problem/Solution context when available.
 - Never include ticket identifiers (e.g., `[MIN-86]`) in changelog lines
 </step>
