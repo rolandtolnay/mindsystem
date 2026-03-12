@@ -145,8 +145,10 @@ Then route based on status:
 | Status | Route |
 |--------|-------|
 | `gaps_found` | Route C (gap closure) |
-| `passed` + more phases | Route A (next phase) |
-| `passed` + last phase | Route B (milestone complete) |
+| `passed` + more phases | Route A (verify + next phase) |
+| `passed` + last phase | Route B (verify + milestone complete) |
+
+Thoroughness by default: verify-work is the primary "Next Up" in both routes. Assess skip context per workflow `offer_next` step.
 
 ---
 
@@ -159,19 +161,40 @@ Then route based on status:
 All {Y} plans finished. Phase goal verified.
 ```
 
-2. Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present the "Next Up" section with pre-work context for Phase {Z+1}.
+2. Assess skip context (see workflow `offer_next` step for criteria).
 
-3. After the "Next Up" section, add:
+3. Present verify-work as "Next Up":
 ```
+## ▶ Next Up
+
+`/ms:verify-work {Z}` — validate {phase name} through manual acceptance testing
+
+<sub>`/clear` first → fresh context window</sub>
+
+{If skip context: "Phase involved only {description} with no user-facing changes — skip if structural verification is sufficient."}
+```
+
+4. Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` to determine the most appropriate command for Phase {Z+1}. Present next phase context and options:
+```
+**Phase {Z+1}: {Name}** — {Goal}
+{If pre-work flagged: brief note about recommendations}
+
 **Also available:**
-- `/ms:verify-work {Z}` — manual acceptance testing before continuing
+- `/ms:{suggested} {Z+1}` — {reason}
+- `/ms:plan-phase {Z+1}` — skip pre-work, plan directly
 ```
 
 ---
 
 **Route B: Phase verified, milestone complete**
 
-Show phase completion summary, then read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and follow its instructions to present the milestone complete section.
+Follow Route A steps 1-3, then present milestone options:
+```
+**Also available:**
+- `/ms:audit-milestone` — verify requirements, cross-phase integration, E2E flows
+- `/ms:complete-milestone` — skip audit, archive directly
+- `/ms:add-phase <description>` — add another phase first
+```
 
 ---
 

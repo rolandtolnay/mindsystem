@@ -511,23 +511,67 @@ git commit -m "docs: update codebase map after phase {X}"
 <step name="offer_next">
 Present next steps based on milestone status.
 
+**Thoroughness by default:** Verification is the natural next step after execution. The user can skip, but the system always suggests it first.
+
 **First, surface user actions:**
 
 Read `## User Actions Required` from all `*-SUMMARY.md` files in the phase directory. If any non-empty actions exist, present as `## ⚠ Action Required` block before route-specific content. Skip if all "None".
 
+**Then, assess skip context** from SUMMARYs and VERIFICATION.md already in context:
+- If all Must-Haves verified programmatically (uncertain = 0) AND phase involved only internal/structural changes (no user-facing UI, behavior, or API changes): include a brief skip note.
+- Otherwise: present verify-work without qualification — human verification adds clear value.
+
+**Present verify-work as Next Up:**
+
+```markdown
+## ✓ Phase {Z}: {Name} Complete
+
+All {Y} plans finished. Phase goal verified.
+
+---
+
+## ▶ Next Up
+
+`/ms:verify-work {Z}` — validate {phase name} through manual acceptance testing
+
+<sub>`/clear` first → fresh context window</sub>
+
+{If skip context applies: "Phase involved only {description} with no user-facing changes — skip if structural verification is sufficient."}
+```
+
+**Then present "Also available" based on milestone status:**
+
 **If more phases remain:**
 
-Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for the next phase.
+Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` to determine the most appropriate command for the next phase (discuss/design/research/plan based on pre-work flags). Present concisely under "Also available":
 
-After the "Next Up" section, add:
 ```markdown
+---
+
+**Phase {Z+1}: {Name}** — {Goal}
+{If pre-work flagged: brief note about recommendations}
+
 **Also available:**
-- `/ms:verify-work {Z}` — manual acceptance testing before continuing
+- `/ms:{suggested} {Z+1}` — {reason from routing}
+- `/ms:plan-phase {Z+1}` — skip pre-work, plan directly
+
+---
 ```
+
+Include the pre-work recommendations table from the routing reference if any pre-work is flagged as "Likely".
 
 **If milestone complete:**
 
-Read `~/.claude/mindsystem/references/routing/milestone-complete-routing.md` and follow its instructions to present the milestone complete section.
+```markdown
+---
+
+**Also available:**
+- `/ms:audit-milestone` — verify requirements, cross-phase integration, E2E flows
+- `/ms:complete-milestone` — skip audit, archive directly
+- `/ms:add-phase <description>` — add another phase first
+
+---
+```
 </step>
 
 </process>
