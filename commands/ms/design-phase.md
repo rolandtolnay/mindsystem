@@ -373,10 +373,11 @@ Task(
 
 **`## DESIGN COMPLETE`:**
 
-Commit the design file:
+**Update state and commit:**
 
 ```bash
-git add .planning/phases/${PHASE}-*/*-DESIGN.md
+ms-tools set-last-command "ms:design-phase $ARGUMENTS"
+git add .planning/phases/${PHASE}-*/*-DESIGN.md .planning/STATE.md
 git commit -m "docs: create design for phase ${PHASE}"
 ```
 
@@ -430,12 +431,6 @@ Read `~/.claude/mindsystem/templates/design-iteration.md` and use the iteration 
    - Verify "what worked well" was preserved
    - Verify "what needs improvement" was addressed
    - Update design version in DESIGN.md frontmatter
-
-## 9. Update Last Command
-
-```bash
-ms-tools set-last-command "ms:design-phase $ARGUMENTS"
-```
 
 </process>
 

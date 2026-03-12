@@ -259,14 +259,13 @@ Update any internal references to reflect new numbering.
 </step>
 
 <step name="commit">
-Stage and commit the removal:
+**Update state and commit:**
 
 ```bash
+ms-tools set-last-command "ms:remove-phase $ARGUMENTS"
 git add .planning/
 git commit -m "chore: remove phase {target} ({original-phase-name})"
 ```
-
-The commit message preserves the historical record of what was removed.
 </step>
 
 <step name="completion">
@@ -294,12 +293,6 @@ Would you like to:
 - Review roadmap
 
 ---
-```
-</step>
-
-<step name="update_last_command">
-```bash
-ms-tools set-last-command "ms:remove-phase $ARGUMENTS"
 ```
 </step>
 

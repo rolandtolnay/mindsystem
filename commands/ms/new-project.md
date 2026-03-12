@@ -195,9 +195,11 @@ These values are used throughout the system for consistent categorization of sum
 
 <step name="commit">
 
-**First run:**
+**First run — update state and commit:**
 ```bash
+ms-tools set-last-command "ms:new-project"
 git add .planning/PROJECT.md .planning/config.json
+[ -f .planning/STATE.md ] && git add .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs: initialize [project-name]
 
@@ -208,9 +210,10 @@ EOF
 )"
 ```
 
-**Update mode:**
+**Update mode — update state and commit:**
 ```bash
-git add .planning/PROJECT.md .planning/config.json
+ms-tools set-last-command "ms:new-project"
+git add .planning/PROJECT.md .planning/config.json .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs: update [project-name] project context
 
@@ -266,12 +269,6 @@ Project updated:
 ---
 ```
 
-</step>
-
-<step name="update_last_command">
-```bash
-ms-tools set-last-command "ms:new-project"
-```
 </step>
 
 </process>

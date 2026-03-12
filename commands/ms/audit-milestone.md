@@ -373,10 +373,11 @@ After code review (all sources now available), generate or update `.planning/TEC
 5. **Assign `TD-{N}` IDs** continuing from highest existing ID
 6. **Write/update** `.planning/TECH-DEBT.md` — group items under `## Critical`, `## High`, `## Medium`, `## Low` sections per template. Omit empty sections.
 
-## 8. Commit Audit Report
+## 8. Update state and commit:
 
 ```bash
-git add .planning/MILESTONE-AUDIT.md .planning/TECH-DEBT.md
+ms-tools set-last-command "ms:audit-milestone $ARGUMENTS"
+git add .planning/MILESTONE-AUDIT.md .planning/TECH-DEBT.md .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs(milestone): complete {name} audit
 

@@ -97,20 +97,13 @@ Agent reads changes, reads affected knowledge files, writes updates, returns rep
 ms-tools config-set subsystems --append "new-subsystem"
 ```
 
-**Commit changes:**
-```bash
-git add .planning/knowledge/*.md
-# Only add config.json if modified
-git add .planning/config.json 2>/dev/null
-git commit -m "$(cat <<'EOF'
-docs: compound knowledge from <description>
-EOF
-)"
-```
-
-**Set last command:**
+**Update state and commit:**
 ```bash
 ms-tools set-last-command "ms:compound $ARGUMENTS"
+git add .planning/knowledge/*.md .planning/STATE.md
+# Only add config.json if modified
+git add .planning/config.json 2>/dev/null
+git commit -m "docs: compound knowledge from <description>"
 ```
 
 **Report:** Subsystems updated, entries added/changed/removed, new subsystems created (if any).

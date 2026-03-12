@@ -300,11 +300,13 @@ Created: .planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md
 
 </step>
 
-<step name="git_commit">
-Commit phase context:
+<step name="commit">
+
+**Update state and commit:**
 
 ```bash
-git add .planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md
+ms-tools set-last-command "ms:discuss-phase ${PHASE}"
+git add .planning/phases/${PHASE}-${SLUG}/${PHASE}-CONTEXT.md .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs(${PHASE}): capture phase context
 
@@ -315,18 +317,10 @@ Phase ${PHASE}: ${PHASE_NAME}
 EOF
 )"
 ```
-
-Confirm: "Committed: docs(${PHASE}): capture phase context"
 </step>
 
 <step name="show_prework_status">
 Read `~/.claude/mindsystem/references/prework-status.md` and present what's done vs still needed for this phase.
-</step>
-
-<step name="update_state">
-```bash
-ms-tools set-last-command "ms:discuss-phase ${PHASE}"
-```
 </step>
 
 </process>

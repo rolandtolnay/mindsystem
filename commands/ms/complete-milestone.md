@@ -124,15 +124,14 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved.
     - Update project reference with current core value and next focus
     - Reset current position for next milestone
 
-10. **Commit:**
+10. **Update state and commit:**
 
+    - Run: `ms-tools set-last-command "ms:complete-milestone $ARGUMENTS"`
     - Stage: MILESTONES.md, PROJECT.md, STATE.md, archive files, deletions
     - Commit: `chore: archive {{name}} milestone`
 
 11. **Offer next steps:**
     - `/ms:new-milestone` — discover goals and update PROJECT.md
-
-12. **Update last command:** `ms-tools set-last-command "ms:complete-milestone $ARGUMENTS"`
 
 </process>
 

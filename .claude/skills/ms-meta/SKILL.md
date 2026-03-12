@@ -264,6 +264,41 @@ When work is discovered after phase execution, route by scope:
 - **Backward phase flow** — never re-plan or re-execute a completed phase; route discovered work through deferred work routing
 </anti_patterns>
 
+<commit_patterns>
+Four patterns cover every commit section across commands and workflows.
+
+**Pattern A — Standard commit** (most commands — STATE.md always exists):
+```bash
+ms-tools set-last-command "ms:command $ARGUMENTS"
+git add <files> .planning/STATE.md
+git commit -m "type(scope): description"
+```
+
+**Pattern B — First-run commit** (STATE.md may not exist: `new-project` first run, `map-codebase`):
+```bash
+ms-tools set-last-command "ms:command $ARGUMENTS"
+git add <files>
+[ -f .planning/STATE.md ] && git add .planning/STATE.md
+git commit -m "type(scope): description"
+```
+
+**Pattern C — No state tracking** (utility commands: `config`, `add-todo`, `doctor-fixes`, per-task commits in `execute-plan`):
+```bash
+git add <files>
+git commit -m "type(scope): description"
+```
+
+**Pattern D — State update only** (commands that don't commit: `insert-phase`, `add-phase`, `plan-phase`, `debug`, `review-design`):
+```bash
+ms-tools set-last-command "ms:command $ARGUMENTS"
+```
+
+**Rules:**
+- Order is always: `set-last-command` → `git add` → `git commit`
+- Single-line commit messages use inline `-m "..."`, multi-line use HEREDOC
+- Prefer single `git add` line; use multiple lines only for conditionals or `git add -u`
+</commit_patterns>
+
 <deep_dive_paths>
 Read source files directly for detailed knowledge:
 

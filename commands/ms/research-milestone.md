@@ -285,10 +285,11 @@ Write Executive Summary (2-3 paragraphs) synthesizing all findings.
 
 Merge overlapping findings. Resolve conflicts by preferring higher-confidence sources.
 
-## 7. Present Results and Commit
+## 7. Update state and commit:
 
 ```bash
-git add .planning/MILESTONE-RESEARCH.md
+ms-tools set-last-command "ms:research-milestone"
+git add .planning/MILESTONE-RESEARCH.md .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs: complete milestone research
 
@@ -318,12 +319,6 @@ Key findings:
 `/ms:create-roadmap` — define requirements and create roadmap
 <sub>`/clear` first → fresh context window</sub>
 ---
-```
-
-## 8. Update Last Command
-
-```bash
-ms-tools set-last-command "ms:research-milestone"
 ```
 
 </process>

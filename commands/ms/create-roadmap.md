@@ -271,7 +271,8 @@ Return ROADMAP REVISED with changes made.
 </step>
 
 <step name="commit">
-After user approval:
+
+**Update state and commit:**
 
 ```bash
 git add .planning/REQUIREMENTS.md .planning/ROADMAP.md .planning/STATE.md
@@ -293,14 +294,13 @@ EOF
 </step>
 
 <step name="create_phase_dirs">
-Create phase directories from the roadmap:
+
+**Update state and commit:**
 
 ```bash
 ms-tools create-phase-dirs
-```
-
-```bash
-git add .planning/phases/
+ms-tools set-last-command "ms:create-roadmap"
+git add .planning/phases/ .planning/STATE.md
 git commit -m "chore: create phase directories from roadmap"
 ```
 </step>
@@ -316,12 +316,6 @@ Requirements and roadmap created:
 ```
 
 Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions to present "Next Up" with pre-work context for Phase $START_PHASE.
-</step>
-
-<step name="update_last_command">
-```bash
-ms-tools set-last-command "ms:create-roadmap"
-```
 </step>
 
 </process>

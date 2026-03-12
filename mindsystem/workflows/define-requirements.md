@@ -258,7 +258,8 @@ If "adjust": Return to scope_categories or identify_gaps as appropriate.
 </step>
 
 <step name="git_commit">
-Commit requirements:
+
+**Update state and commit:**
 
 ```bash
 git add .planning/REQUIREMENTS.md

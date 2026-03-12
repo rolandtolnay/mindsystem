@@ -2934,3 +2934,39 @@ class TestCmdBrowserCheck:
         with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
             cmd_browser_check(args)
         assert exc.value.code == 2  # defaults enabled, but not web → SKIP
+
+
+# ---------------------------------------------------------------------------
+# Prompt lint: commit pattern invariants
+# ---------------------------------------------------------------------------
+
+
+class TestCommitPatternLint:
+    """Prompt lint: set-last-command + git commit must stage STATE.md."""
+
+    @staticmethod
+    def _repo_root():
+        return Path(__file__).resolve().parent.parent
+
+    def _md_files(self):
+        root = self._repo_root()
+        yield from (root / "commands" / "ms").glob("*.md")
+        yield from (root / "mindsystem" / "workflows").glob("*.md")
+
+    def test_set_last_command_with_commit_stages_state(self):
+        failures = []
+        for md in self._md_files():
+            text = md.read_text()
+            has_set_last = "set-last-command" in text
+            has_commit = "git commit" in text
+            if has_set_last and has_commit:
+                has_state = (
+                    "STATE.md" in text
+                    or "git add .planning/\n" in text
+                )
+                if not has_state:
+                    failures.append(md.name)
+        assert not failures, (
+            f"Files with set-last-command + git commit but missing STATE.md staging: "
+            f"{', '.join(failures)}"
+        )

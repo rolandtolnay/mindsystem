@@ -217,10 +217,13 @@ Continue to commit_codebase_map.
 </step>
 
 <step name="commit_codebase_map">
-Commit the codebase map:
+
+**Update state and commit:**
 
 ```bash
+ms-tools set-last-command "ms:map-codebase $ARGUMENTS"
 git add .planning/codebase/*.md
+[ -f .planning/STATE.md ] && git add .planning/STATE.md
 git commit -m "$(cat <<'EOF'
 docs: map existing codebase
 

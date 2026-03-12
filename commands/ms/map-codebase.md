@@ -58,9 +58,8 @@ Check for .planning/STATE.md - loads context if project already initialized
    - Agent 4: concerns focus → writes CONCERNS.md
 4. Wait for agents to complete, collect confirmations (NOT document contents)
 5. Verify all 7 documents exist with line counts
-6. Commit codebase map
+6. Update last command and commit codebase map (together with STATE.md)
 7. Offer next steps (adapts: /ms:new-project if no PROJECT.md, /ms:doctor if PROJECT.md exists)
-8. **Update last command:** `ms-tools set-last-command "ms:map-codebase $ARGUMENTS"`
 </process>
 
 <success_criteria>

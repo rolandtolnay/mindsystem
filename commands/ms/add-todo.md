@@ -101,12 +101,12 @@ subsystem: [from config.json]
 </step>
 
 <step name="git_commit">
+
+**Update state and commit:**
+
 ```bash
 git add .planning/todos/[filename]
-git commit -m "$(cat <<'EOF'
-todo: [title] [subsystem|priority|estimate]
-EOF
-)"
+git commit -m "todo: [title] [subsystem|priority|estimate]"
 ```
 </step>
 

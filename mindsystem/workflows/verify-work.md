@@ -590,7 +590,7 @@ PRE_WORK_STASH=$(git stash list | grep "pre-verify-work" | head -1 | cut -d: -f1
 [ -n "$PRE_WORK_STASH" ] && git stash pop "$PRE_WORK_STASH"
 ```
 
-**4. Update UAT.md and commit together with STATE.md:**
+**4. Update state and commit:**
 ```bash
 ms-tools uat-update $PHASE_NUMBER --session status=complete current_batch= mocked_files=
 ms-tools set-last-command "ms:verify-work $ARGUMENTS"

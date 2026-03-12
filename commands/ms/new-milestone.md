@@ -254,14 +254,12 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
     Keep Accumulated Context (decisions, blockers) from previous milestone.
 
-17. **Git commit:**
+17. **Update state and commit:**
 
     ```bash
+    ms-tools set-last-command "ms:new-milestone $ARGUMENTS"
     git add .planning/PROJECT.md .planning/STATE.md .planning/MILESTONE-CONTEXT.md
-    git commit -m "$(cat <<'EOF'
-    docs: start milestone [Name]
-    EOF
-    )"
+    git commit -m "docs: start milestone [Name]"
     ```
 
 18. **Calculate next phase number:**
@@ -301,8 +299,6 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
     ---
     ```
-
-20. **Update last command:** `ms-tools set-last-command "ms:new-milestone $ARGUMENTS"`
 
 </process>
 

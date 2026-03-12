@@ -113,8 +113,8 @@ ms-tools find-phase "$ARGUMENTS"
     - Write updated REQUIREMENTS.md
     - Skip if: REQUIREMENTS.md doesn't exist, or phase has no Requirements line
 
-13. **Commit phase completion**
-    Bundle all phase metadata updates in one commit:
+13. **Update state and commit:**
+    - Run: `ms-tools set-last-command "ms:execute-phase $ARGUMENTS"`
     - Stage: `git add .planning/ROADMAP.md .planning/STATE.md`
     - Stage knowledge files: `git add .planning/knowledge/*.md`
     - Stage PLAN.md deletions: `git add -u .planning/phases/{phase_dir}/*-PLAN.md`
@@ -123,8 +123,6 @@ ms-tools find-phase "$ARGUMENTS"
 
 14. **Offer next steps**
     - Route to next action (see `<offer_next>`)
-
-15. **Update last command:** `ms-tools set-last-command "ms:execute-phase $ARGUMENTS"`
 </process>
 
 <offer_next>

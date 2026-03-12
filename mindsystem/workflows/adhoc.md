@@ -202,8 +202,14 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 
 **Finalize todo (when detected):** Follow the **Finalization**, **Commit Message Suffix**, and **Report Additions** sections from the loaded todo reference.
 
-**Commit knowledge updates:**
+**Update STATE.md** "Recent Adhoc Work" section:
+- Find or create "### Recent Adhoc Work" under "## Accumulated Context"
+- Add entry at top: `- [YYYY-MM-DD]: [description] ({exec_dir}/adhoc-01-SUMMARY.md)`
+- Keep last 5 entries (remove older ones from list)
+
+**Update state and commit:**
 ```bash
+ms-tools set-last-command "ms:adhoc $ARGUMENTS"
 git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" .planning/STATE.md
 # Only include patch if it was generated
 [ -f "${exec_dir}/adhoc-01-changes.patch" ] && git add "${exec_dir}/adhoc-01-changes.patch"
@@ -213,16 +219,6 @@ docs(adhoc): consolidate knowledge from $description
 Knowledge files updated, SUMMARY preserved.
 EOF
 )"
-```
-
-**Update STATE.md** "Recent Adhoc Work" section:
-- Find or create "### Recent Adhoc Work" under "## Accumulated Context"
-- Add entry at top: `- [YYYY-MM-DD]: [description] ({exec_dir}/adhoc-01-SUMMARY.md)`
-- Keep last 5 entries (remove older ones from list)
-
-**Set last command:**
-```bash
-ms-tools set-last-command "ms:adhoc $ARGUMENTS"
 ```
 
 **Report completion:**

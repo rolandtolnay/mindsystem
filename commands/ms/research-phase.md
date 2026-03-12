@@ -300,10 +300,11 @@ After all 3 agents return, read their structured outputs. Map findings to RESEAR
 
 Write RESEARCH.md to `.planning/phases/{phase}-{slug}/{phase}-RESEARCH.md` using the standard template structure (semantic XML tags: `<research_summary>`, `<standard_stack>`, `<architecture_patterns>`, `<dont_hand_roll>`, `<common_pitfalls>`, `<code_examples>`, `<sota_updates>`, `<open_questions>`, `<sources>`, `<metadata>`).
 
-## 7. Commit and Present
+## 7. Update state and commit:
 
 ```bash
-git add .planning/phases/${PHASE}-*/*-RESEARCH.md
+ms-tools set-last-command "ms:research-phase $ARGUMENTS"
+git add .planning/phases/${PHASE}-*/*-RESEARCH.md .planning/STATE.md
 git commit -m "docs: complete research for phase ${PHASE}"
 ```
 
@@ -323,12 +324,6 @@ If any section has LOW confidence or significant open questions, flag the weak a
 2. Try different research mode (e.g., ecosystem -> implementation)
 3. Proceed to planning with caveats noted
 4. Review full research
-
-## 8. Update Last Command
-
-```bash
-ms-tools set-last-command "ms:research-phase $ARGUMENTS"
-```
 
 </process>
 

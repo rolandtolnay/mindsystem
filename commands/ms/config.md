@@ -268,12 +268,11 @@ Check subsystems in config.json. If empty or missing, note:
 
 **Skip if no changes made.**
 
+**Update state and commit:**
+
 ```bash
 git add .planning/config.json .gitignore
-git commit -m "$(cat <<'EOF'
-chore: configure mindsystem preferences
-EOF
-)"
+git commit -m "chore: configure mindsystem preferences"
 ```
 
 </step>
