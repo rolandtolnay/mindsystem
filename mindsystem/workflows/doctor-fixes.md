@@ -80,7 +80,7 @@ For each flat file like `milestones/v0.1-ROADMAP.md`:
 3. `git mv` the file, stripping the version prefix from the filename:
    `git mv .planning/milestones/v0.1-ROADMAP.md .planning/milestones/v0.1/ROADMAP.md`
 
-**Note:** New milestones use slug-based directories (e.g., `milestones/mvp/`, `milestones/push-notifications/`). Old v-prefixed directories from previous format are valid and handled.
+New milestones use slug-based directories (e.g., `milestones/mvp/`, `milestones/push-notifications/`). Old v-prefixed directories from previous format are valid and handled.
 
 Commit:
 
@@ -106,7 +106,7 @@ EOF
 2. **Resolve slugs** — For each versioned dir, match to MILESTONES.md name mapping:
    - Standard dirs: version matches directly (v0.1 → "MVP" → slug "mvp")
    - Nested dirs: match sub-directory name to the milestone name in MILESTONES.md (v2.0.0/quests → "Quests Feature" → slug "quests-feature")
-   - Derive short slugs from names (Claude proposes, user confirms)
+   - Derive slugs from names: lowercase, hyphenated (e.g., "Demo Release" → "demo-release"). Claude proposes, user confirms
 
 3. **Present mapping** to user with AskUserQuestion:
 
@@ -236,6 +236,35 @@ EOF
 ```
 </step>
 
+<step name="fix_phase_dirs">
+**Only if Phase Directory Naming failed or warned.**
+
+1. Create any missing phase directories:
+
+```bash
+ms-tools create-phase-dirs
+```
+
+2. For non-canonical directories (reported as FAIL), rename using `git mv`:
+
+Parse each non-canonical suggestion from the doctor check output (format: `{old} → git mv .planning/phases/{old} .planning/phases/{canonical}`) and execute the `git mv`.
+
+Commit:
+
+```bash
+git add .planning/phases/
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(doctor): fix phase directory naming
+
+Created missing and renamed non-canonical phase directories.
+EOF
+)"
+```
+</step>
+
 <step name="fix_knowledge">
 **Only if Knowledge Files failed.**
 
@@ -253,7 +282,7 @@ If `SUMMARIES > 0`: **artifact mode**. If `SUMMARIES == 0`: **source code mode**
 
 ### 2. Spawn subagent
 
-Spawn a `general-purpose` subagent (Task tool) with the following structured prompt. Inject detected mode, subsystem list from config.json, and environment flags into the prompt.
+Spawn a `general-purpose` subagent (Task tool) with the following structured prompt. Inject detected mode, subsystem list from config.json, and detection results (SUMMARIES, HAS_CODEBASE_DOCS, HAS_PROJECT) into the prompt.
 
 ---
 
