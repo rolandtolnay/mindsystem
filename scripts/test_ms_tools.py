@@ -1600,7 +1600,7 @@ class TestCmdUatInit:
         assert "2 tests" in captured.out
         assert "1 batches" in captured.out
 
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         assert uat_path.is_file()
         content = uat_path.read_text()
         assert "Login works" in content
@@ -1659,7 +1659,7 @@ class TestCmdUatInit:
         captured = capsys.readouterr()
         assert "3 tests" in captured.out
         assert "2 batches" in captured.out
-        assert "03-setup-UAT.md" in captured.out
+        assert "03-UAT.md" in captured.out
 
 
 class TestCmdUatUpdate:
@@ -1671,7 +1671,7 @@ class TestCmdUatUpdate:
     def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
         phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
         phase_dir.mkdir(parents=True)
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         uat_path.write_text(content)
         return uat_path
 
@@ -1799,12 +1799,12 @@ class TestCmdUatUpdate:
         # Adjust path for phase 03-setup
         phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
         phase_dir.mkdir(parents=True, exist_ok=True)
-        (phase_dir / "03-setup-UAT.md").write_text(UAT_MINIMAL)
+        (phase_dir / "03-UAT.md").write_text(UAT_MINIMAL)
 
         with self._patch_git_root(tmp_path):
             cmd_uat_update(args)
 
-        uat = UATFile.parse((phase_dir / "03-setup-UAT.md").read_text())
+        uat = UATFile.parse((phase_dir / "03-UAT.md").read_text())
         assert uat.progress["passed"] == "1"
         assert uat.progress["tested"] == "1"
         assert uat.progress["pending"] == "1"
@@ -1819,7 +1819,7 @@ class TestCmdUatStatus:
     def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
         phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
         phase_dir.mkdir(parents=True)
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         uat_path.write_text(content)
         return uat_path
 
@@ -1909,7 +1909,7 @@ class TestCmdUatStashMocks:
     def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
         phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
         phase_dir.mkdir(parents=True)
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         uat_path.write_text(content)
         return uat_path
 
@@ -1939,7 +1939,7 @@ class TestCmdUatStashMocks:
         # UAT_MINIMAL has phase 03-setup with empty mocked_files
         phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
         phase_dir.mkdir(parents=True)
-        (phase_dir / "03-setup-UAT.md").write_text(UAT_MINIMAL)
+        (phase_dir / "03-UAT.md").write_text(UAT_MINIMAL)
 
         args = argparse.Namespace(phase="3")
         with mock.patch.object(_mod, "find_git_root", return_value=tmp_path):
@@ -1973,7 +1973,7 @@ class TestCmdUatPopMocks:
     def _setup_uat(self, tmp_path, content=UAT_FIXTURE, stash_ref=None):
         phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
         phase_dir.mkdir(parents=True)
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         if stash_ref:
             content = content.replace("stash_ref: null", f'stash_ref: "{stash_ref}"')
         uat_path.write_text(content)
@@ -2075,7 +2075,7 @@ class TestCmdUatFixCommit:
     def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
         phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
         phase_dir.mkdir(parents=True)
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         uat_path.write_text(content)
         return uat_path
 
@@ -2184,7 +2184,7 @@ class TestCmdUatRevertMocks:
     def _setup_uat(self, tmp_path, content=UAT_FIXTURE):
         phase_dir = tmp_path / ".planning" / "phases" / "05-auth"
         phase_dir.mkdir(parents=True)
-        uat_path = phase_dir / "05-auth-UAT.md"
+        uat_path = phase_dir / "05-UAT.md"
         uat_path.write_text(content)
         return uat_path
 
@@ -2213,7 +2213,7 @@ class TestCmdUatRevertMocks:
         # UAT_MINIMAL has phase 03-setup with empty mocked_files
         phase_dir = tmp_path / ".planning" / "phases" / "03-setup"
         phase_dir.mkdir(parents=True)
-        (phase_dir / "03-setup-UAT.md").write_text(UAT_MINIMAL)
+        (phase_dir / "03-UAT.md").write_text(UAT_MINIMAL)
 
         args = argparse.Namespace(phase="3")
         with mock.patch.object(_mod, "find_git_root", return_value=tmp_path):

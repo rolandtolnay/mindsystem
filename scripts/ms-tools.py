@@ -3126,7 +3126,7 @@ def _load_uat(args_phase: str) -> tuple[Path, "UATFile"]:
     if phase_dir is None:
         print(f"Error: Phase directory not found for {phase}", file=sys.stderr)
         sys.exit(1)
-    uat_path = phase_dir / f"{phase_dir.name}-UAT.md"
+    uat_path = phase_dir / f"{phase}-UAT.md"
     if not uat_path.is_file():
         print(f"Error: UAT file not found: {uat_path}", file=sys.stderr)
         sys.exit(1)
@@ -3166,7 +3166,7 @@ def cmd_uat_init(args: argparse.Namespace) -> None:
     phase_name = phase_dir.name
     uat = UATFile.from_init_json(data, phase_name)
 
-    out_path = phase_dir / f"{phase_name}-UAT.md"
+    out_path = phase_dir / f"{phase}-UAT.md"
     out_path.write_text(uat.serialize(), encoding="utf-8")
 
     n_tests = len(uat.tests)
@@ -3196,7 +3196,7 @@ def cmd_uat_update(args: argparse.Namespace) -> None:
         print(f"Error: Phase directory not found for {phase}", file=sys.stderr)
         sys.exit(1)
 
-    uat_path = phase_dir / f"{phase_dir.name}-UAT.md"
+    uat_path = phase_dir / f"{phase}-UAT.md"
     if not uat_path.is_file():
         print(f"Error: UAT file not found: {uat_path}", file=sys.stderr)
         sys.exit(1)
@@ -3264,7 +3264,7 @@ def cmd_uat_status(args: argparse.Namespace) -> None:
         print(f"Error: Phase directory not found for {phase}", file=sys.stderr)
         sys.exit(1)
 
-    uat_path = phase_dir / f"{phase_dir.name}-UAT.md"
+    uat_path = phase_dir / f"{phase}-UAT.md"
     if not uat_path.is_file():
         print(f"Error: UAT file not found: {uat_path}", file=sys.stderr)
         sys.exit(1)
