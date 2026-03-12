@@ -300,11 +300,13 @@ ms-tools browser-check
 
 **If exit 0 (READY):**
 
-Read `~/.claude/mindsystem/references/browser-verification.md` and follow its Auth Flow and Spawn sections.
+Ensure `$PHASE_DIR/*-SUMMARY.md` files are available (needed for checklist derivation — may already be in context from wave reports).
 
-After verifier returns, if fixes were made:
-- Report: "Browser verification: {N} issues found and fixed"
-- Include report summary in consolidator prompt (step `consolidate_knowledge`)
+Read `~/.claude/mindsystem/references/browser-verification.md` and follow its sections in order:
+1. **Auth Flow** — establish browser authentication
+2. **Derive Browser Checklist** — transform SUMMARYs into visual checklist items
+3. **Spawn** — launch verifier with derived checklist
+4. **Post-Verifier Handling** — route by report status
 
 **If exit 1 (MISSING_DEPS):**
 
