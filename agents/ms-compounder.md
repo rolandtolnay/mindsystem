@@ -19,7 +19,7 @@ You are a Mindsystem knowledge compounder spawned by the compound workflow to up
 ## Required Context (provided by compound workflow)
 
 - **Input mode:** `git`, `file`, or `description`
-- **Change reference:** Git ref/range (git mode), file path (file mode), or description + exploration summary (description mode)
+- **Change reference:** Git ref/range (git mode), file path (file mode), or description/conversation summary (description mode)
 - **Affected subsystems:** List confirmed by user in main context
 - **Subsystem vocabulary:** From config.json (for alignment validation)
 
@@ -47,7 +47,7 @@ Retrieve the raw changes based on input mode:
 
 - **Git mode:** `git show <ref>` for single commit, `git diff <range>` for ranges. Include `--stat` for file overview.
 - **File mode:** Read the file content. Run `git log --oneline -5 -- <path>` for recent history context.
-- **Description mode:** Use the provided exploration summary as change context. No additional reads needed.
+- **Description mode:** Use the provided summary (from exploration or conversation context) as change context. No additional reads needed.
 
 ## Step 2: Read Existing Knowledge Files
 

@@ -19,7 +19,7 @@ fi
 ```
 
 **Mode detection:**
-- If `$ARGUMENTS` empty: **description mode** — deduce from conversation context. Summarize what was discussed/changed in the current session.
+- If `$ARGUMENTS` empty: **conversation mode** — reflect on current conversation to build change summary. No Explore agents needed.
 - If matches git SHA pattern (7-40 hex chars), contains `..`, or starts with `HEAD`: **git mode**
 - If matches existing file path (`test -e "$ARGUMENTS"`): **file mode**
 - Otherwise: **description mode** — treat `$ARGUMENTS` as free-text description
@@ -42,7 +42,25 @@ git log --oneline -5 -- <path>
 ```
 Capture file path for passing to compounder.
 
-**Description mode (including no-args):**
+**Conversation mode (no args):**
+Build change summary from conversation context and git data.
+
+1. **Reflect on conversation:** Summarize what was discussed, changed, and decided
+   in the current session. Include rationale and key decisions.
+2. **Supplement with git data:**
+   ```bash
+   git diff --stat          # uncommitted changes
+   git log --stat -5        # recent commits with file lists
+   ```
+3. **Thin-context guard:** If conversation reflection produces little substance
+   (e.g., fresh context, unrelated discussion), use AskUserQuestion:
+   - "Describe what changed" — enter free-text, then proceed as description mode (spawn Explore agents)
+   - "Compound recent commits" — use git log output as change context
+   - "Cancel" — abort
+4. **Combine into change summary:** Merge conversation insights with git file paths
+   into a concise summary covering: what changed, why, which files, key decisions.
+
+**Description mode (free-text argument provided):**
 Spawn 1 Explore agent to find relevant code changes. If changes span multiple unrelated areas, spawn a second agent for the additional area. They return:
 - Which files changed or are relevant
 - Which subsystems are likely affected
@@ -60,7 +78,7 @@ ms-tools config-get subsystems
 
 **Git/file mode:** Match file paths from diff stats against subsystem names via keyword matching.
 
-**Description mode:** Use Explore agent findings for subsystem matching.
+**Description/conversation mode:** Use Explore agent findings or conversation summary for subsystem matching.
 
 **Detect potential new subsystems:** Changes in file areas that don't match any existing subsystem.
 
@@ -82,8 +100,8 @@ AskUserQuestion: "Compound knowledge for these subsystems?" with options:
 
 <step name="spawn_compounder">
 Spawn ms-compounder via Task tool with:
-- Input mode (`git`, `file`, or `description`)
-- Change reference (git ref/range, file path, or description + exploration findings)
+- Input mode (`git`, `file`, or `description` — conversation mode passes as `description`)
+- Change reference (git ref/range, file path, description + exploration findings, or conversation summary)
 - Confirmed affected subsystems list
 - Config.json subsystem vocabulary
 
@@ -91,7 +109,7 @@ Agent reads changes, reads affected knowledge files, writes updates, returns rep
 </step>
 
 <step name="finalize">
-**Update config.json** (if new subsystems were confirmed in step 4):
+**Update config.json** (if new subsystems were confirmed in confirm_with_user step):
 ```bash
 # Add new subsystem to config.json
 ms-tools config-set subsystems --append "new-subsystem"

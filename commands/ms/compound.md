@@ -19,7 +19,7 @@ Input modes:
 - **Git reference:** SHA, range (`HEAD~3..HEAD`), or any git ref
 - **File path:** Path to a changed file
 - **Description:** Free-text description of changes
-- **No args:** Infer from current conversation context
+- **No args:** Reflect on current conversation context + git data
 </objective>
 
 <execution_context>
@@ -34,7 +34,7 @@ Validate active project: check `.planning/config.json` exists.
 </step>
 
 <step name="resolve_change_context">
-Gather lightweight change context. Git mode: diff stats. File mode: recent git log. Description mode: spawn Explore agents to find relevant changes.
+Gather lightweight change context. Git mode: diff stats. File mode: recent git log. No-args mode: reflect on conversation context + git diff/log; if context is thin, ask user for intent. Description mode: spawn Explore agents to find relevant changes.
 </step>
 
 <step name="determine_subsystems">
@@ -50,7 +50,7 @@ Spawn ms-compounder with input mode, change reference, confirmed subsystems, and
 </step>
 
 <step name="finalize">
-Update config.json if new subsystems confirmed. Commit knowledge file changes. Set last command.
+Update config.json if new subsystems confirmed. Commit knowledge file changes. Set last command. Report results.
 </step>
 
 </process>
