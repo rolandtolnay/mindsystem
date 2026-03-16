@@ -534,6 +534,19 @@ Verify 100% requirement mapping:
 
 If gaps found, include in draft for user decision.
 
+## Step 6b: Evaluate Subsystem Coverage
+
+Compare phase domains against config.json `subsystems` array. Phases may introduce domains not in the current subsystem vocabulary.
+
+1. Parse `subsystems` from config.json (provided in planning context)
+2. For each phase, identify its primary domain (e.g., "Payment Processing" maps to `payments`)
+3. Match against existing subsystems — exact or close synonym counts as covered
+4. Collect unmatched domains as proposed additions
+
+Include proposals in the return under `### Subsystem Proposals`. Do not modify config.json — the orchestrator handles confirmation and update.
+
+If all phase domains map to existing subsystems, omit the section.
+
 ## Step 7: Write Files Immediately
 
 **Write files first, then return.** This ensures artifacts persist even if context is lost.
@@ -613,6 +626,16 @@ When files are written and returning to orchestrator:
 
 {For phases with Likely recommendations, include topics/focus}
 
+{If new subsystems proposed:}
+
+### Subsystem Proposals
+
+New domains detected that don't match existing subsystems:
+
+| Proposed | Source Phase | Rationale |
+|----------|-------------|-----------|
+| {name}   | Phase {N}: {phase-name} | {why this needs its own subsystem} |
+
 ### Files Ready for Review
 
 User can review actual files:
@@ -643,6 +666,16 @@ After incorporating user feedback and updating files:
 - .planning/REQUIREMENTS.md (if requirements adjusted)
 - .planning/ROADMAP.md
 - .planning/STATE.md (if needed)
+
+{If new subsystems proposed:}
+
+### Subsystem Proposals
+
+New domains detected that don't match existing subsystems:
+
+| Proposed | Source Phase | Rationale |
+|----------|-------------|-----------|
+| {name}   | Phase {N}: {phase-name} | {why this needs its own subsystem} |
 
 ### Updated Summary
 

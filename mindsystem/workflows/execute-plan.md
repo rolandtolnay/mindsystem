@@ -260,7 +260,9 @@ completed: YYYY-MM-DD
 ---
 ```
 
-**Subsystem:** Use inline `**Subsystem:**` metadata from plan header if present. Otherwise select from `ms-tools config-get subsystems`. If novel, append to config.json and log in decisions.
+**Subsystem:** Use inline `**Subsystem:**` metadata from plan header if present. Otherwise select the best match from `ms-tools config-get subsystems`.
+
+**Novel subsystem (safety net):** If the plan's work genuinely doesn't fit any existing subsystem, append: `ms-tools config-set subsystems --append "{name}"`. Use in SUMMARY frontmatter and log the addition in Decisions Made. This is a fallback — `create-roadmap` handles most subsystem additions proactively.
 
 **Mock hints:** Reflect on what you built. If UI with transient states (loading, animations, async transitions) or external data dependencies, populate accordingly. If purely backend or no async UI, write `mock_hints: none  # reason`. Always populate.
 

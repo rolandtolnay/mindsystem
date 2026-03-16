@@ -136,8 +136,9 @@ Task(
 5. Map every v1 requirement to exactly one phase
 6. Derive 2-5 success criteria per phase (observable user behaviors)
 7. Validate 100% coverage
-8. Write files immediately (REQUIREMENTS.md, ROADMAP.md, STATE.md)
-9. Return ROADMAP CREATED with combined requirements + roadmap summary
+8. Evaluate subsystem coverage — compare phase domains against config.json subsystems, propose additions for unmatched domains
+9. Write files immediately (REQUIREMENTS.md, ROADMAP.md, STATE.md)
+10. Return ROADMAP CREATED with combined requirements + roadmap summary
 
 Write files first, then return. This ensures artifacts persist even if context is lost.
 </instructions>
@@ -199,6 +200,18 @@ Pre-work: Research [Likely/Unlikely] | Discuss [Likely/Unlikely] | Design [Likel
 {If any Likely: topics/focus on next line}
 
 [... continue for all phases ...]
+
+{If roadmapper returned Subsystem Proposals:}
+
+### New Subsystems
+
+The roadmap introduces domains not covered by current subsystems:
+
+| Proposed | Source Phase | Rationale |
+|----------|-------------|-----------|
+| {name}   | Phase {N}   | {reason}  |
+
+These will be added to config.json upon approval.
 
 ---
 ```
@@ -275,7 +288,11 @@ Return ROADMAP REVISED with changes made.
 **Update state and commit:**
 
 ```bash
+# For each subsystem proposal the user approved (skip any rejected during revision):
+ms-tools config-set subsystems --append "{subsystem-name}"
+
 git add .planning/REQUIREMENTS.md .planning/ROADMAP.md .planning/STATE.md
+git diff --quiet .planning/config.json 2>/dev/null || git add .planning/config.json
 git commit -m "$(cat <<'EOF'
 docs: define requirements and create roadmap
 

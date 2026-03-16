@@ -105,7 +105,7 @@ Created after each plan execution via inline instructions in the executor workfl
 
 **Machine-readable frontmatter:** subsystem, provides, affects, patterns-established, key-decisions, key-files, mock_hints.
 
-**Subsystem vocabulary growth:** If plan work introduces a novel subsystem not in config.json, the executor appends it to the `subsystems` array, uses it in SUMMARY.md frontmatter, and logs the addition in the summary's decisions section. No blocking gate — append and log immediately. Future phases pick up the new subsystem automatically.
+**Subsystem vocabulary growth:** Primary mechanism is `create-roadmap` — the roadmapper compares phase domains against config.json subsystems and proposes additions during roadmap review. Secondary mechanism is `compound` — detects new domains from out-of-pipeline work. Safety net is the executor — if plan work introduces a novel subsystem not in config.json, append it and log in decisions. Future phases pick up new subsystems automatically.
 
 **Substantive one-liner:**
 - Good: "JWT auth with refresh rotation using jose library"

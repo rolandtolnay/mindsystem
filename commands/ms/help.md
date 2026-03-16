@@ -136,6 +136,7 @@ Define requirements and create roadmap with phases.
 - Creates `.planning/ROADMAP.md` (phase breakdown)
 - Creates `.planning/STATE.md` (project memory)
 - Creates `.planning/phases/` directories
+- Evaluates subsystem coverage — proposes new subsystems if phases introduce unmatched domains
 
 Usage: `/ms:create-roadmap`
 
