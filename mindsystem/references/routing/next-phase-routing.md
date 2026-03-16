@@ -1,17 +1,17 @@
 # Next Phase Routing
 
-Reference for presenting "Next Up" guidance when moving to the next phase. Used by execute-phase and verify-work.
+Reference for presenting "Next Up" guidance for a phase. Used by progress (current phase), execute-phase (next phase), and verify-work (next phase).
 
 ## Purpose
 
-Help user decide between Discuss/Research/Design/Plan for the NEXT phase without referencing external files.
+Help user decide between Discuss/Research/Design/Plan for a target phase using ROADMAP.md pre-work flags.
 
 ## Information to Extract
 
-From ROADMAP.md, get the next phase details:
+From ROADMAP.md, get the target phase details:
 
 ```bash
-grep -A 25 "### Phase ${NEXT_PHASE}:" .planning/ROADMAP.md
+grep -A 25 "### Phase ${TARGET_PHASE}:" .planning/ROADMAP.md
 ```
 
 Extract:
@@ -26,7 +26,7 @@ Extract:
 Check for existing context files:
 
 ```bash
-ms-tools find-phase "${NEXT_PHASE}"
+ms-tools find-phase "${TARGET_PHASE}"
 # Extract PHASE_DIR from the `dir` field of the JSON output
 [ -f "$PHASE_DIR"/*-CONTEXT.md ] && echo "CONTEXT_EXISTS"
 [ -f "$PHASE_DIR"/*-DESIGN.md ] && echo "DESIGN_EXISTS"

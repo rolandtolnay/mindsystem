@@ -11,8 +11,6 @@ allowed-tools:
 
 <objective>
 Check project progress, summarize recent work and what's ahead, then intelligently route to the next action - either executing an existing plan or creating the next one.
-
-Provides situational awareness before continuing work.
 </objective>
 
 
@@ -77,7 +75,7 @@ Compare versions. Store result for the report step. If npm fails or versions mat
 - Read `.planning/STATE.md` for living memory (position, decisions, issues)
 - Read `.planning/ROADMAP.md` for phase structure and objectives
 - Read `.planning/PROJECT.md` for current state (What This Is, Core Value, Requirements)
-  </step>
+</step>
 
 <step name="recent">
 **Gather recent work context:**
@@ -85,7 +83,7 @@ Compare versions. Store result for the report step. If npm fails or versions mat
 - Find the 2-3 most recent SUMMARY.md files
 - Extract from each: what was accomplished, key decisions, any issues logged
 - This shows "what we've been working on"
-  </step>
+</step>
 
 <step name="position">
 **Parse current position:**
@@ -97,7 +95,7 @@ Compare versions. Store result for the report step. If npm fails or versions mat
 - Check for DESIGN.md: For UI-heavy phases, check if `{phase}-DESIGN.md` exists in phase directory
 - Count pending todos: `ls .planning/todos/*.md 2>/dev/null | wc -l`
 - Check for active debug sessions: `ls .planning/debug/*.md 2>/dev/null | grep -v resolved | wc -l`
-  </step>
+</step>
 
 <step name="report">
 **Present rich status report:**
@@ -205,48 +203,7 @@ Read its `<objective>` section.
 
 **Route B: Phase needs planning**
 
-Check if `{phase}-CONTEXT.md` exists in phase directory.
-
-**If CONTEXT.md exists:**
-
-```
----
-
-## ▶ Next Up
-
-**Phase {N}: {Name}** — {Goal from ROADMAP.md}
-<sub>✓ Context gathered, ready to plan</sub>
-
-`/ms:plan-phase {phase-number}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-```
-
-**If CONTEXT.md does NOT exist:**
-
-```
----
-
-## ▶ Next Up
-
-**Phase {N}: {Name}** — {Goal from ROADMAP.md}
-
-`/ms:plan-phase {phase}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:discuss-phase {phase}` — gather context first
-- `/ms:design-phase {phase}` — create UI/UX specifications
-- `/ms:research-phase {phase}` — investigate unknowns
-- `/ms:discuss-phase {phase}` — gather context and validate assumptions
-
----
-```
+Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions for the **current** phase (not next phase) to present "Next Up" with pre-work context from ROADMAP.md flags.
 
 ---
 
@@ -299,22 +256,11 @@ A milestone was completed and archived. Read `~/.claude/mindsystem/references/ro
 
 </step>
 
-<step name="edge_cases">
-**Handle edge cases:**
-
-- Phase complete but next phase not planned → offer `/ms:plan-phase [next]`
-- All work complete → offer milestone completion
-- Blockers present → highlight before offering to continue
-  </step>
-
 </process>
 
 <success_criteria>
 
-- [ ] Rich context provided (recent work, decisions, issues)
-- [ ] Current position clear with visual progress
-- [ ] What's next clearly explained
-- [ ] Smart routing: /ms:execute-phase if plan exists, /ms:plan-phase if not
-- [ ] User confirms before any action
-- [ ] Seamless handoff to appropriate mindsystem command
-      </success_criteria>
+- [ ] Report includes recent work, decisions, blockers, and pending counts
+- [ ] Smart routing: /ms:execute-phase if plan exists, ROADMAP pre-work flags consulted if not
+- [ ] Presents copy-paste command — never auto-executes the routed action
+</success_criteria>
