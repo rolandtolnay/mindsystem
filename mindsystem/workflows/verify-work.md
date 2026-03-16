@@ -6,6 +6,7 @@ Complete verify-and-fix session: by session end, everything verified, issues fix
 
 <execution_context>
 <!-- mock-patterns.md loaded on demand for transient_state mocks (see generate_mocks step) -->
+<!-- knowledge files loaded on first fix attempt (see investigate_issue step) -->
 </execution_context>
 
 <process>
@@ -342,6 +343,19 @@ Progress auto-recalculates on every `uat-update` call. No manual progress recalc
 <step name="investigate_issue">
 **Investigate reported issue:**
 
+**0. Load knowledge (first issue only):**
+
+If this is the first issue requiring investigation in this session, load knowledge files now. On subsequent issues, knowledge is already in context — skip to step 1.
+
+```bash
+ms-tools config-get subsystems
+grep "^subsystem:" "$PHASE_DIR"/*-SUMMARY.md 2>/dev/null
+```
+
+Match SUMMARY.md subsystem values against config subsystems. Read matching `.planning/knowledge/{subsystem}.md` files (1-3 most relevant).
+
+This knowledge informs investigation (where to look, known pitfalls) and any subsequent fixes.
+
 **1. Lightweight investigation (2-3 tool calls):**
 
 ```
@@ -440,6 +454,10 @@ You are a Mindsystem verify-fixer. Investigate this issue, find the root cause, 
 ## What was already checked
 
 {lightweight_investigation_results}
+
+## Knowledge Context
+
+{loaded_knowledge_content or "No knowledge files loaded for this session."}
 
 ## Your task
 

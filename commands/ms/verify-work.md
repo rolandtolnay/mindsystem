@@ -54,9 +54,10 @@ ms-tools find-phase "$ARGUMENTS"
    - Present tests via AskUserQuestion (Pass / Can't test / Skip / Other)
    - Process results — UAT.md updates happen via `ms-tools uat-update` (auto-recalculates progress)
    - **For each issue found:**
-     - Lightweight investigation (2-3 tool calls)
+     - On first issue: load knowledge files (match phase subsystem against `.planning/knowledge/*.md`)
+     - Lightweight investigation (2-3 tool calls, informed by knowledge)
      - If simple: Fix inline, commit (amend previous fix commit on retry when HEAD matches fix_commit), ask for re-test
-     - If complex: Spawn ms-verify-fixer subagent
+     - If complex: Spawn ms-verify-fixer subagent (with knowledge context in prompt)
      - 2 retries on failed re-test, then offer options
 8. **On batch transition:**
    - If new mock_type: Revert old mocks (`git checkout -- <mocked_files>`), apply new ones
