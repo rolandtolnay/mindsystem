@@ -391,11 +391,11 @@ Display summary from agent response:
 - Screens designed
 - Key design decisions
 
-Then present pre-work status: Read `~/.claude/mindsystem/references/prework-status.md` and show what's done vs still needed for this phase.
-
 Also offer:
 - **Refine design** — Discuss changes conversationally
 - **View full design** — Display DESIGN.md
+
+Read `~/.claude/mindsystem/references/prework-status.md` and present what's done vs still needed for this phase.
 
 **`## DESIGN NEEDS CLARIFICATION`:**
 

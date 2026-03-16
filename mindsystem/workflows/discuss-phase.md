@@ -281,22 +281,6 @@ Created: ${PHASE_DIR}/${PHASE}-CONTEXT.md
 [What must be nailed]
 
 ---
-
-## ▶ Next Up
-
-**Phase ${PHASE}: [Name]** — [Goal from ROADMAP.md]
-
-`/ms:plan-phase ${PHASE}`
-
-<sub>`/clear` first → fresh context window</sub>
-
----
-
-**Also available:**
-- `/ms:research-phase ${PHASE}` — investigate unknowns
-- Review/edit CONTEXT.md before continuing
-
----
 ```
 
 </step>

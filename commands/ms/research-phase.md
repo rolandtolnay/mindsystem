@@ -308,22 +308,27 @@ git add ${PHASE_DIR}/*-RESEARCH.md .planning/STATE.md
 git commit -m "docs: complete research for phase ${PHASE}"
 ```
 
-Display research summary. Read `~/.claude/mindsystem/references/prework-status.md` to show what's done vs still needed for this phase.
+Display research summary.
 
 **Post-synthesis routing:**
 
 Scan the synthesized RESEARCH.md for LOW confidence sections and significant open questions.
 
-If all sections HIGH/MEDIUM confidence with no major gaps, use AskUserQuestion:
-1. Proceed to planning
-2. Dig deeper into specific area
-3. Review full research
+If all sections HIGH/MEDIUM confidence with no major gaps:
+
+Read `~/.claude/mindsystem/references/prework-status.md` and present what's done vs still needed for this phase.
+
+Also offer:
+- **Dig deeper** — into specific area
+- **Review full research** — display RESEARCH.md
 
 If any section has LOW confidence or significant open questions, flag the weak areas explicitly, then use AskUserQuestion:
 1. Dig deeper into [specific LOW area] — re-run targeted agent
 2. Try different research mode (e.g., ecosystem -> implementation)
-3. Proceed to planning with caveats noted
+3. Proceed with caveats noted
 4. Review full research
+
+When user selects "Proceed with caveats noted", read `~/.claude/mindsystem/references/prework-status.md` and present what's done vs still needed for this phase.
 
 </process>
 
