@@ -34,13 +34,22 @@ Open the app URL headless. If redirected to login, report auth failure and exit 
 <step name="environment_preflight">
 Navigate to the app's main route. Screenshot `00-preflight.png`.
 
-Evaluate:
-- Does the app load?
-- Visible backend errors? Console errors? Blank page?
+Read diagnostics:
+```bash
+agent-browser console
+agent-browser errors
+agent-browser network requests
+```
 
-**If systemic issue** (app won't load, white screen, critical error):
+Evaluate:
+- Does the app load visually?
+- Console errors or uncaught exceptions?
+- Failed network requests (4xx/5xx)?
+- Blank page?
+
+**If systemic issue** (app won't load, white screen, critical error, cascade of failed requests):
 - Screenshot the failure
-- Return `environment_blocked` report to orchestrator with screenshot evidence
+- Return `environment_blocked` report to orchestrator with screenshot and diagnostic output
 - Stop — no point testing individual items
 
 **If app loads with minor warnings:**
@@ -59,16 +68,23 @@ mkdir -p {screenshots_dir}
 For each checklist item:
 
 ```
+agent-browser errors --clear   ← isolate errors per item
+
 Navigate to route → Screenshot → Evaluate
 
 Match expected?
 YES → PASSED, next item
-NO → Environment issue? (API error, 404, empty data, console network errors)
+NO → Read diagnostics:
+     agent-browser errors
+     agent-browser console
+     agent-browser network requests
+
+     Environment issue? (uncaught exception, failed API request, 4xx/5xx, empty data)
      YES → ENVIRONMENT_BLOCKED for this item
            Same error on 2+ consecutive items? → stop, return report
            Otherwise → next item
-     NO → Investigate in project source files
-          → Hit a stop signal? (see Investigation boundaries + Fix discipline) → ISSUE with screenshot evidence, next item
+     NO → Investigate in project source files (diagnostics narrow the search)
+          → Hit a stop signal? (see Investigation boundaries + Fix discipline) → ISSUE with screenshot and diagnostic evidence, next item
           → Root cause found → Fix attempt → re-screenshot
             Fix worked? → FIXED (commit), next item
             Fix failed? → Different root-cause theory available?
@@ -105,10 +121,10 @@ Close the browser. Return a structured report to the orchestrator:
 - {what was wrong} → {what was fixed} | Commit: {hash}
 
 ### Issues Found
-- {description} | Screenshot: {filename} | Evidence: {what the screenshot shows}
+- {description} | Screenshot: {filename} | Evidence: {what the screenshot shows} | Diagnostics: {console errors, failed network requests, or "none"}
 
 ### Environment Blockers
-- {description} | Screenshot: {filename}
+- {description} | Screenshot: {filename} | Diagnostics: {error messages, failed requests}
 ```
 </step>
 
@@ -124,7 +140,7 @@ Close the browser. Return a structured report to the orchestrator:
 ## Investigation boundaries
 - Only read project source files — never node_modules, dist, build output, or generated directories
 - Never read framework/library source to understand why something doesn't work internally
-- Check network responses and console errors before investigating code — if the data source is the problem, it's ENVIRONMENT_BLOCKED
+- Read `agent-browser errors`, `agent-browser console`, and `agent-browser network requests` before investigating source code — if diagnostics show a failed API call or server error, it's ENVIRONMENT_BLOCKED, not a code fix
 - If 2+ consecutive items show the same failure pattern, identify the shared root cause rather than investigating each individually
 
 ## Fix discipline
