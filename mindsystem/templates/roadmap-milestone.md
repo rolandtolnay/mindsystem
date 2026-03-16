@@ -18,12 +18,6 @@ Template for reorganizing `ROADMAP.md` after first milestone ships. Collapse com
 
 ### Phase 1: [Name]
 **Goal**: [What this phase delivers]
-**Plans**: 3 plans
-
-Plans:
-- [x] 01-01: [Brief description]
-- [x] 01-02: [Brief description]
-- [x] 01-03: [Brief description]
 
 [... remaining phases ...]
 
@@ -36,11 +30,6 @@ Plans:
 #### Phase 5: [Name]
 **Goal**: [What this phase delivers]
 **Depends on**: Phase 4
-**Plans**: 2 plans
-
-Plans:
-- [ ] 05-01: [Brief description]
-- [ ] 05-02: [Brief description]
 
 [... remaining phases ...]
 
@@ -52,11 +41,11 @@ Plans:
 
 ## Progress
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Foundation | MVP | 3/3 | Complete | YYYY-MM-DD |
-| 2. Features | MVP | 2/2 | Complete | YYYY-MM-DD |
-| 5. Security | Security & Polish | 0/2 | Not started | - |
+| Phase | Milestone | Status | Completed |
+|-------|-----------|--------|-----------|
+| 1. Foundation | MVP | Complete | YYYY-MM-DD |
+| 2. Features | MVP | Complete | YYYY-MM-DD |
+| 5. Security | Security & Polish | Not started | - |
 ```
 
 **Notes:**

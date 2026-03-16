@@ -345,7 +345,6 @@ Extract completed milestone details and create archive file.
    - {{DATE}} — Today's date
    - {{PHASE_START}} — First phase number in milestone
    - {{PHASE_END}} — Last phase number in milestone
-   - {{TOTAL_PLANS}} — Count of all plans in milestone
    - {{MILESTONE_DESCRIPTION}} — From ROADMAP.md overview
    - {{PHASES_SECTION}} — Full phase details extracted
    - {{DECISIONS_FROM_PROJECT}} — Key decisions from PROJECT.md

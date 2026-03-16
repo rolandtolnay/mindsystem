@@ -148,10 +148,6 @@ Add the new phase entry to the roadmap:
    **Design focus**: {focus} ← only if Likely
    **Research**: {Likely (reason) | Unlikely (reason)}
    **Research topics**: {topics} ← only if Likely
-   **Plans:** 0 plans
-
-   Plans:
-   - [ ] TBD (run /ms:plan-phase {N} to break down)
 
    **Details:**
    [To be added during planning]

@@ -52,12 +52,6 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Discuss**: Unlikely (mechanical setup, zero design decisions)
 **Design**: Unlikely (backend only)
 **Research**: Unlikely (established patterns)
-**Plans**: [Number of plans, e.g., "3 plans" or "TBD"]
-
-Plans:
-- [ ] 01-01: [Brief description of first plan]
-- [ ] 01-02: [Brief description of second plan]
-- [ ] 01-03: [Brief description of third plan]
 
 ### Phase 2: [Name]
 **Goal**: [What this phase delivers]
@@ -72,21 +66,12 @@ Plans:
 **Design focus**: [What to design]
 **Research**: Likely (new integration)
 **Research topics**: [What needs investigating]
-**Plans**: [Number of plans]
-
-Plans:
-- [ ] 02-01: [Brief description]
-- [ ] 02-02: [Brief description]
 
 ### Phase 2.1: Critical Fix (INSERTED)
 **Goal**: [Urgent work inserted between phases]
 **Depends on**: Phase 2
 **Success Criteria** (what must be TRUE):
   1. [What the fix achieves]
-**Plans**: 1 plan
-
-Plans:
-- [ ] 02.1-01: [Description]
 
 ### Phase 3: [Name]
 **Goal**: [What this phase delivers]
@@ -101,11 +86,6 @@ Plans:
 **Design**: Unlikely (API only)
 **Research**: Likely (external API)
 **Research topics**: [What needs investigating]
-**Plans**: [Number of plans]
-
-Plans:
-- [ ] 03-01: [Brief description]
-- [ ] 03-02: [Brief description]
 
 ### Phase 4: [Name]
 **Goal**: [What this phase delivers]
@@ -118,22 +98,18 @@ Plans:
 **Discuss topics**: [Priority rules, batch vs individual, error recovery]
 **Design**: Unlikely (backend only)
 **Research**: Unlikely (internal patterns)
-**Plans**: [Number of plans]
-
-Plans:
-- [ ] 04-01: [Brief description]
 
 ## Progress
 
 **Execution Order:**
 Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. [Name] | 0/3 | Not started | - |
-| 2. [Name] | 0/2 | Not started | - |
-| 3. [Name] | 0/2 | Not started | - |
-| 4. [Name] | 0/1 | Not started | - |
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| 1. [Name] | Not started | - |
+| 2. [Name] | Not started | - |
+| 3. [Name] | Not started | - |
+| 4. [Name] | Not started | - |
 ```
 
 <guidelines>
@@ -145,11 +121,9 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 **Initial planning:**
 - Phase count derived from actual work (not a target number)
 - Each phase delivers something coherent
-- Phases can have 1+ plans (split by orchestrator judgment — multiple subsystems, context budget, vertical slices)
 - Plans use naming: {phase}-{plan}-PLAN.md (e.g., 01-02-PLAN.md)
 - No time estimates (this isn't enterprise PM)
 - Progress table updated by execute workflow
-- Plan count can be "TBD" initially, refined during planning
 
 **Success criteria:**
 - 2-5 observable behaviors per phase (from user's perspective)

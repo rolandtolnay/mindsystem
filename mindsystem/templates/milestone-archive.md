@@ -10,8 +10,6 @@ This template is used by the complete-milestone workflow to create archive files
 
 **Status:** ✅ SHIPPED {{DATE}}
 **Phases:** {{PHASE_START}}-{{PHASE_END}}
-**Total Plans:** {{TOTAL_PLANS}}
-
 ## Overview
 
 {{MILESTONE_DESCRIPTION}}
@@ -26,13 +24,6 @@ This template is used by the complete-milestone workflow to create archive files
 
 **Goal**: {{PHASE_GOAL}}
 **Depends on**: {{DEPENDS_ON}}
-**Plans**: {{PLAN_COUNT}} plans
-
-Plans:
-
-- [x] {{PHASE}}-01: {{PLAN_DESCRIPTION}}
-- [x] {{PHASE}}-02: {{PLAN_DESCRIPTION}}
-      [... all plans ...]
 
 **Details:**
 {{PHASE_DETAILS_FROM_ROADMAP}}
@@ -43,11 +34,6 @@ Plans:
 
 **Goal**: Fix authentication bypass vulnerability
 **Depends on**: Phase 2
-**Plans**: 1 plan
-
-Plans:
-
-- [x] 02.1-01: Patch auth vulnerability
 
 **Details:**
 {{PHASE_DETAILS_FROM_ROADMAP}}

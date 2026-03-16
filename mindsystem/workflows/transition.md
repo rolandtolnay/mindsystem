@@ -97,7 +97,6 @@ Update the file:
 
 - Mark current phase: `[x] Complete`
 - Add completion date
-- Update plan count to final (e.g., "3/3 plans complete")
 - Update Progress table
 - Keep next phase as `[ ] Not started`
 
@@ -112,11 +111,11 @@ Update the file:
 
 ## Progress
 
-| Phase             | Plans Complete | Status      | Completed  |
-| ----------------- | -------------- | ----------- | ---------- |
-| 1. Foundation     | 3/3            | Complete    | 2025-01-15 |
-| 2. Authentication | 0/2            | Not started | -          |
-| 3. Core Features  | 0/1            | Not started | -          |
+| Phase             | Status      | Completed  |
+| ----------------- | ----------- | ---------- |
+| 1. Foundation     | Complete    | 2025-01-15 |
+| 2. Authentication | Not started | -          |
+| 3. Core Features  | Not started | -          |
 ```
 
 </step>
@@ -442,7 +441,6 @@ Respect user judgment — they know if work matters.
 
 **If marking complete with incomplete plans:**
 
-- Update ROADMAP: "2/3 plans complete" (not "3/3")
 - Note in transition message which plans were skipped
 
 </partial_completion>
@@ -453,7 +451,7 @@ Transition is complete when:
 
 - [ ] Current phase plan summaries verified (all exist or user chose to skip)
 - [ ] Any stale handoffs deleted
-- [ ] ROADMAP.md updated with completion status and plan count
+- [ ] ROADMAP.md updated with completion status
 - [ ] PROJECT.md evolved (requirements, decisions, description if needed)
 - [ ] STATE.md updated (position, project reference, context, session)
 - [ ] Progress table updated
