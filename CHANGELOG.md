@@ -6,6 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-03-16
+
+### Added
+- **Subsystem evolution** — knowledge subsystems can now be added mid-project as work outgrows the original domain boundaries. The roadmapper evaluates coverage and proposes additions when work doesn't fit existing categories, surfacing proposals during roadmap approval.
+- **Knowledge-aware verification** — verify-work loads relevant knowledge files when first encountering an issue, so fixes are informed by known patterns, past decisions, and subsystem context rather than operating blind.
+- **Programmatic browser diagnostics** — browser verification reads console logs, JavaScript errors, and network failures programmatically instead of visual-only inspection. Errors are cleared between checklist items for proper isolation.
+- **Conversation mode for `/ms:compound`** — running without arguments enters a reflection mode that analyzes session context and git changes to determine what knowledge to capture.
+
+### Changed
+- All phase commands (discuss, design, research) now suggest the next action on completion, matching execute and verify behavior.
+- Browser verification screenshots automatically converted to WebP, reducing file size. Doctor check warns if `cwebp` is not installed.
+
+### Fixed
+- Phase directory lookups no longer fail when passing unpadded numbers (e.g., "2" instead of "02") — all patterns replaced with robust `ms-tools find-phase`.
+- UAT filenames use consistent phase-number prefix (e.g., `02-UAT.md`) matching other artifacts.
+- Progress command routing delegates to next-phase-routing reference instead of inline logic.
+
 ## [4.2.1] - 2026-03-12
 
 ### Changed
@@ -657,7 +674,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.0...HEAD
+[4.3.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.1...v4.3.0
 [4.2.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.2...v4.2.0
 [4.1.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.1...v4.1.2
