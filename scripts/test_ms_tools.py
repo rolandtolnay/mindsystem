@@ -59,6 +59,7 @@ _detect_web_project = _mod._detect_web_project
 _check_skill_installed = _mod._check_skill_installed
 _get_claude_config_dir = _mod._get_claude_config_dir
 cmd_browser_check = _mod.cmd_browser_check
+cmd_doctor_scan = _mod.cmd_doctor_scan
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -2934,6 +2935,101 @@ class TestCmdBrowserCheck:
         with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
             cmd_browser_check(args)
         assert exc.value.code == 2  # defaults enabled, but not web → SKIP
+
+
+# ---------------------------------------------------------------------------
+# Doctor: Screenshot Optimization (CHECK 12)
+# ---------------------------------------------------------------------------
+
+
+class TestDoctorScreenshotOptimization:
+    """Doctor CHECK 12: Screenshot Optimization warns when cwebp is missing."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_planning(self, tmp_path, *, subsystems=None, bv_enabled=True):
+        """Create minimal .planning/ with config.json for doctor scan."""
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {
+            "subsystems": subsystems or ["app"],
+            "browser_verification": {"enabled": bv_enabled},
+        }
+        (planning / "config.json").write_text(json.dumps(config))
+        return planning
+
+    def _which_side_effect(self, cwebp_path=None):
+        """Return a side_effect for shutil.which that controls cwebp result."""
+        def _which(name):
+            if name == "cwebp":
+                return cwebp_path
+            # Return a plausible path for all other tool checks
+            return f"/usr/local/bin/{name}"
+        return _which
+
+    def _extract_section(self, out, header):
+        """Extract text between a === header === and the next === header ===."""
+        start = out.index(header) + len(header)
+        try:
+            end = out.index("\n===", start)
+        except ValueError:
+            end = len(out)
+        return out[start:end]
+
+    def test_cwebp_available_pass(self, tmp_path, capsys):
+        self._setup_planning(tmp_path)
+        (tmp_path / "package.json").write_text(
+            json.dumps({"dependencies": {"react": "^18"}})
+        )
+
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", side_effect=self._which_side_effect("/usr/local/bin/cwebp")), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")):
+            cmd_doctor_scan(argparse.Namespace())
+
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Screenshot Optimization ===")
+        assert "PASS" in section
+        assert "cwebp available" in section
+
+    def test_cwebp_missing_warn(self, tmp_path, capsys):
+        self._setup_planning(tmp_path)
+        (tmp_path / "package.json").write_text(
+            json.dumps({"dependencies": {"react": "^18"}})
+        )
+
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", side_effect=self._which_side_effect(None)), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")):
+            cmd_doctor_scan(argparse.Namespace())
+
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Screenshot Optimization ===")
+        assert "WARN" in section
+        assert "brew install webp" in section
+
+    def test_non_web_project_skip(self, tmp_path, capsys):
+        self._setup_planning(tmp_path)
+        # No package.json, no web indicators
+
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Screenshot Optimization ===")
+        assert "SKIP" in section
+
+    def test_browser_verification_disabled_skip(self, tmp_path, capsys):
+        self._setup_planning(tmp_path, bv_enabled=False)
+
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Screenshot Optimization ===")
+        assert "SKIP" in section
+        assert "Browser verification disabled" in section
 
 
 # ---------------------------------------------------------------------------

@@ -1198,6 +1198,7 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
 
     # ---- CHECK 11: Browser Verification ----
     print("=== Browser Verification ===")
+    is_web, web_signal = False, "not checked"
     bv_enabled = True
     bv_config = config.get("browser_verification", {})
     if isinstance(bv_config, dict):
@@ -1231,6 +1232,28 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
                 print("Status: PASS")
                 print(f"Web project ({web_signal}), CLI and skill installed")
                 record("PASS", "Browser Verification")
+    print()
+
+    # ---- CHECK 12: Screenshot Optimization ----
+    print("=== Screenshot Optimization ===")
+    if not bv_enabled:
+        print("Status: SKIP")
+        print("Browser verification disabled")
+        record("SKIP", "Screenshot Optimization")
+    elif not is_web:
+        print("Status: SKIP")
+        print(f"Not a web project ({web_signal})")
+        record("SKIP", "Screenshot Optimization")
+    else:
+        if shutil.which("cwebp"):
+            print("Status: PASS")
+            print("cwebp available — screenshots will be converted to WebP")
+            record("PASS", "Screenshot Optimization")
+        else:
+            print("Status: WARN")
+            print("cwebp not found — browser screenshots will remain as PNG (larger files)")
+            print("Install: brew install webp | apt install webp | choco install webp")
+            record("WARN", "Screenshot Optimization")
     print()
 
     # ---- SUMMARY ----

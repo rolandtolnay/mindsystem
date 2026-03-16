@@ -93,9 +93,9 @@ NO → Read diagnostics:
 ```
 
 **Per-item screenshots:**
-- `{NN}-{item-slug}.png` — initial state
-- `{NN}-{item-slug}-result.png` — after interaction (if applicable)
-- `{NN}-{item-slug}-fixed.png` — after fix (if applicable)
+- `{NN}-{item-slug}.webp` — initial state (`.png` if cwebp unavailable)
+- `{NN}-{item-slug}-result.webp` — after interaction (if applicable)
+- `{NN}-{item-slug}-fixed.webp` — after fix (if applicable)
 
 **Interactions:** If the checklist item includes an interaction (click, type, submit), perform it and screenshot the result.
 </step>
@@ -136,6 +136,10 @@ Close the browser. Return a structured report to the orchestrator:
 - Save all screenshots to `{screenshots_dir}` — never to temp or working directory
 - Re-snapshot after every DOM change (element refs go stale)
 - Wait for networkidle before evaluating
+- Convert screenshots to WebP after capture:
+  1. Check once during preflight: `which cwebp`
+  2. If available, after each screenshot: `cwebp -q 80 {file}.png -o {file}.webp && rm {file}.png`
+  3. If unavailable: keep PNGs as-is
 
 ## Investigation boundaries
 - Only read project source files — never node_modules, dist, build output, or generated directories
