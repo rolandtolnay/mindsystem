@@ -6,6 +6,7 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+  - AskUserQuestion
 ---
 
 <objective>
@@ -15,6 +16,8 @@ After implementing a significant change to Mindsystem (new command, workflow mod
 - README.md — Public-facing overview and command table
 - commands/ms/help.md — Detailed command reference
 - .claude/skills/ms-meta/SKILL.md — Claude's internal knowledge about Mindsystem
+
+Not every change touches all three files. Determine which files and sections are relevant based on the classification below, then propose changes and confirm with the user before applying.
 </objective>
 
 <context>
@@ -33,59 +36,90 @@ git log --oneline -5
 </context>
 
 <process>
-1. **Classify the change** — Determines which sections to update:
-   - **New command** → add entries in all three files
-   - **Modified workflow** → update existing entries in all three files
-   - **New agent** → update ms-meta `<agents_index>`, help.md if user-facing
+1. **Classify the change and determine scope** — Not all changes need all files updated. Use the routing table below to determine which files and sections to touch.
 
-2. **Update README.md** — Command table entry and playbooks section per guidelines below
+2. **Draft proposed changes** — For each affected file, prepare the specific edits.
 
-3. **Update commands/ms/help.md** — Full command documentation with usage examples per guidelines below
+3. **Present changes to user for approval** — Use AskUserQuestion to show a summary of all proposed edits across files. Include which files will be changed and what content will be added/modified in each. Do not apply any edits until the user approves.
 
-4. **Update .claude/skills/ms-meta/SKILL.md** — Relevant sections per guidelines below
+4. **Apply approved changes** — Make the edits the user approved.
 
-5. **Verify consistency** — Check that all three files tell the same story:
-   - Command names match exactly
+5. **Verify consistency** — Check that all updated files tell the same story:
+   - Command names match exactly across files
    - Descriptions are compatible (brief in README, detailed in help)
    - No contradictions between files
 </process>
 
+<routing>
+
+## Which files and sections to update
+
+Use this table to determine scope. A change may match multiple rows.
+
+| Change type | README.md | help.md | ms-meta SKILL.md |
+|---|---|---|---|
+| **New command** | Command reference table | Full command entry (Use when, Creates, Usage/Result) | `<deep_dive_paths>` table |
+| **New command in core lifecycle** | Command reference table + End-to-end walkthrough step | Full command entry + Quick Start sequence + Common Workflows if routing changes | `<deep_dive_paths>` + `<architecture>` Core Workflow section |
+| **Modified command behavior** | Command reference table (if description changed) | Update existing command entry | Only if it changes artifact flow, propagation, or routing |
+| **New agent** | Skip (agents are internal) | Skip (unless user-facing) | `<deep_dive_paths>` table, `<architecture>` Context Split table if relevant |
+| **New workflow** | Skip (workflows are internal) | Skip | `<deep_dive_paths>` table |
+| **New artifact type** | `.planning` directory tree if significant | Files & Structure tree | `<artifact_flow>` table |
+| **New feature/capability** | Features section (if user-facing and significant) | Skip (features are README-only) | Skip (unless it changes architecture) |
+| **Changed config options** | Configuration section | Relevant command entry | `<architecture>` if it changes component relationships |
+| **Changed deferred work routing** | Skip | Choosing the Right Command tables + Common Workflows | `<architecture>` Deferred Work Routing table |
+| **Changed propagation relationships** | Skip | Skip | `<change_propagation>` table |
+
+**Key distinctions:**
+- README "End-to-end walkthrough" is a narrative guide — only update for commands that join/leave the core lifecycle flow
+- README "Features" section describes capabilities, not commands — only add genuinely new capabilities
+- README "Quick start" rarely changes — only if the getting-started sequence itself changes
+- help.md "Common Workflows" shows composition recipes — update when routing between commands changes
+- ms-meta has no agents index or workflows index — use `<deep_dive_paths>` for discoverability
+</routing>
+
 <update_guidelines>
 
-## README.md Best Practices
+## README.md
 
-- User-focused descriptions, under 70 characters
-- Action-oriented verbs ("Create", "Verify", "Update")
-- No implementation details, no exhaustive options, no technical jargon
-- Playbooks section: only if the change affects common workflows
+**Sections and when to touch them:**
+- **Command reference table** — Every new/renamed command. Brief user-focused description, under 70 chars, action verbs.
+- **End-to-end walkthrough** — Only if a command joins or leaves the core milestone lifecycle (rare).
+- **Features** — Only genuinely new capabilities worth highlighting. Not every command is a feature.
+- **Quick start** — Only if the setup or getting-started sequence changes.
+- **Configuration** — Only if config.json schema changes.
+- **`.planning` directory tree** — Only if new artifact types or directory structure changes.
 
-## commands/ms/help.md Best Practices
+**Style:** No implementation details, no exhaustive options, no technical jargon.
 
-- All command options, flags, and variations
-- Multiple usage examples with `Usage:` and `Result:` lines
-- What files get created/modified
-- When to use vs. alternatives
-- No playbook-style content duplicated from README
+## commands/ms/help.md
 
-## .claude/skills/ms-meta/SKILL.md Best Practices
+**Sections and when to touch them:**
+- **Individual command entry** — Every new/modified command. Include: description, "Use when:", files created/modified, Usage/Result examples.
+- **Quick Start sequences** — Only if the recommended getting-started or per-milestone flow changes.
+- **Choosing the Right Command tables** — Only if routing decisions between commands change.
+- **Common Workflows recipes** — Only if command composition patterns change.
+- **Files & Structure tree** — Only if new artifact types or directory structure changes.
 
-**Keep sections updated:**
-- `<core_workflow>`: Numbered command sequence with notes
-- `<agents_index>`: Table with Agent | Purpose | Spawned by
-- `<workflows_index>`: Table with Workflow | Purpose
+**Style:** Complete reference — all options, variations, and examples with `Usage:` and `Result:` lines.
 
-**Style:**
-- Terse, structured for quick reference
-- Tables preferred over prose
-- Include "spawned by" relationships for agents
+## .claude/skills/ms-meta/SKILL.md
+
+**Sections and when to touch them:**
+- `<architecture>` → Core Workflow section: only if lifecycle order changes. Context Split table: if new main-context vs subagent distinction. Component Model: if new component type.
+- `<artifact_flow>` table: if new artifacts are produced or consumed.
+- `<change_propagation>` table: if new propagation relationships between file types.
+- `<deep_dive_paths>` table: any new command, workflow, agent, or reference file.
+- `<where_things_belong>` table: only if a new component category is introduced (rare).
+- `<anti_patterns>` / `<philosophy>`: only if new design principles are established.
+
+**Style:** Terse, structured for quick reference. Tables preferred over prose.
 
 </update_guidelines>
 
 <success_criteria>
+- User approved all changes before they were applied
 - Changes are minimal and targeted (don't rewrite unrelated content)
 - Each file serves its purpose (overview vs. reference vs. knowledge) — no cross-duplication
-- All three files are consistent with each other
-- README.md command table updated with brief, user-focused description
-- commands/ms/help.md has complete command documentation with usage examples
-- .claude/skills/ms-meta/SKILL.md has updated workflow/agents/features sections
+- All updated files are consistent with each other
+- Only relevant sections were touched per the routing table
 </success_criteria>

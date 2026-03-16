@@ -187,11 +187,13 @@ You approve the plan structure and can adjust granularity.
 
 Runs without intervention. Each plan runs in a fresh subagent with the full context window available. Goal-backward verification checks that the phase achieved its intended outcome, not just that tasks got marked complete.
 
+For web projects, browser verification launches a real browser against your dev server, derives a checklist from execution summaries, and verifies each route visually and programmatically. Clear mismatches get fixed inline; issues beyond visual fixes are reported with screenshot evidence for verify-work.
+
 Configurable code review produces separate commits for review changes. Patch files are generated for manual inspection.
 
 After execution, knowledge consolidation updates subsystem-scoped knowledge files. Future phases touching the same subsystems start with accumulated context: decisions made, patterns established, pitfalls encountered.
 
-**Creates:** `SUMMARY.md`, `VERIFICATION.md`, `.patch` files, knowledge file updates.
+**Creates:** `SUMMARY.md`, `VERIFICATION.md`, `.patch` files, screenshots, knowledge file updates.
 
 ### 9. Verify work
 
@@ -251,6 +253,10 @@ Orchestration metadata (wave grouping, dependencies) lives in `EXECUTION-ORDER.m
 
 Unnecessary instructions aren't wasted space — they interfere with the ones that matter. Each instruction passes a reliability test: does removing this degrade output in the actual runtime context? Every command, workflow, and agent definition gets audited to cut that interference. Audited agents show 35-39% context reduction with no behavioral regression.
 
+### Browser verification
+
+During execute-phase, web projects get automatic visual QA via [agent-browser](https://github.com/anthropics/agent-browser). A checklist is derived from execution summaries, then each route is verified with screenshots and programmatic diagnostics (console logs, JS errors, network failures). Clear mismatches get fixed inline; anything deeper is reported with screenshot evidence for verify-work. Enabled by default — disable per-project via `/ms:config`.
+
 ### Built-in code review
 
 Configurable per tier: adhoc, phase, or milestone. Runs after execution and produces separate commits for inspection. Ships with structural analysis (`ms-code-reviewer`) and clarity-focused simplification (`ms-code-simplifier`), but you can point any tier at your own custom reviewer agent via `.planning/config.json`.
@@ -295,6 +301,11 @@ Requirements you want but haven't shipped yet are tracked in `PROJECT.md` with o
 - [Node.js](https://nodejs.org/) (for `npx`)
 - [uv](https://docs.astral.sh/uv/) — Python package runner used by CLI scripts (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - Python 3.10+ (used by uv for scripts)
+
+**Optional (for web projects):**
+
+- [agent-browser](https://github.com/anthropics/agent-browser) — enables browser verification during execute-phase (`npm install -g agent-browser`)
+- `cwebp` — optimizes verification screenshots to WebP (`brew install webp`)
 
 ---
 
@@ -451,6 +462,13 @@ Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to
   // How /ms:design-phase opens the mockup comparison page.
   //   "auto" (default) | "ask" | "off"
   "open_mockups": "auto",
+
+  // Browser verification during execute-phase (web projects only).
+  //   Launches a real browser, derives checklist from summaries,
+  //   screenshots + console/network diagnostics.
+  "browser_verification": {
+    "enabled": true   // default: true for web projects
+  },
 
   // External task tracker integration (Linear only for now).
   //   null → disabled (default)
