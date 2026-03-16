@@ -17,7 +17,7 @@ After implementing a significant change to Mindsystem (new command, workflow mod
 - commands/ms/help.md — Detailed command reference
 - .claude/skills/ms-meta/SKILL.md — Claude's internal knowledge about Mindsystem
 
-Not every change touches all three files. Determine which files and sections are relevant based on the classification below, then propose changes and confirm with the user before applying.
+Not every change touches all three files. Determine which files and sections are relevant based on the routing table below, then propose changes and confirm with the user before applying.
 </objective>
 
 <context>
@@ -67,6 +67,7 @@ Use this table to determine scope. A change may match multiple rows.
 | **New feature/capability** | Features section (if user-facing and significant) | Skip (features are README-only) | Skip (unless it changes architecture) |
 | **Changed config options** | Configuration section | Relevant command entry | `<architecture>` if it changes component relationships |
 | **Changed deferred work routing** | Skip | Choosing the Right Command tables + Common Workflows | `<architecture>` Deferred Work Routing table |
+| **Changed setup/getting-started flow** | Quick start section | Quick Start sequences | Skip |
 | **Changed propagation relationships** | Skip | Skip | `<change_propagation>` table |
 
 **Key distinctions:**
@@ -81,36 +82,33 @@ Use this table to determine scope. A change may match multiple rows.
 
 ## README.md
 
-**Sections and when to touch them:**
-- **Command reference table** — Every new/renamed command. Brief user-focused description, under 70 chars, action verbs.
-- **End-to-end walkthrough** — Only if a command joins or leaves the core milestone lifecycle (rare).
-- **Features** — Only genuinely new capabilities worth highlighting. Not every command is a feature.
-- **Quick start** — Only if the setup or getting-started sequence changes.
-- **Configuration** — Only if config.json schema changes.
-- **`.planning` directory tree** — Only if new artifact types or directory structure changes.
+- **Command reference table** — Brief user-focused description, under 70 chars, action verbs.
+- **End-to-end walkthrough** — Narrative style matching existing steps.
+- **Features** — Capability descriptions, not command documentation.
+- **Quick start** — Minimal setup sequences.
+- **Configuration** — Mirror config.json schema.
+- **`.planning` directory tree** — Match existing tree format.
 
 **Style:** No implementation details, no exhaustive options, no technical jargon.
 
 ## commands/ms/help.md
 
-**Sections and when to touch them:**
-- **Individual command entry** — Every new/modified command. Include: description, "Use when:", files created/modified, Usage/Result examples.
-- **Quick Start sequences** — Only if the recommended getting-started or per-milestone flow changes.
-- **Choosing the Right Command tables** — Only if routing decisions between commands change.
-- **Common Workflows recipes** — Only if command composition patterns change.
-- **Files & Structure tree** — Only if new artifact types or directory structure changes.
+- **Individual command entry** — Description, "Use when:", files created/modified, Usage/Result examples.
+- **Quick Start sequences** — Ordered command lists with brief annotations.
+- **Choosing the Right Command tables** — Decision tables with "What you know | Best command | Why" format.
+- **Common Workflows recipes** — Copy-paste command sequences with comments.
+- **Files & Structure tree** — Match existing tree format.
 
 **Style:** Complete reference — all options, variations, and examples with `Usage:` and `Result:` lines.
 
 ## .claude/skills/ms-meta/SKILL.md
 
-**Sections and when to touch them:**
-- `<architecture>` → Core Workflow section: only if lifecycle order changes. Context Split table: if new main-context vs subagent distinction. Component Model: if new component type.
-- `<artifact_flow>` table: if new artifacts are produced or consumed.
-- `<change_propagation>` table: if new propagation relationships between file types.
-- `<deep_dive_paths>` table: any new command, workflow, agent, or reference file.
-- `<where_things_belong>` table: only if a new component category is introduced (rare).
-- `<anti_patterns>` / `<philosophy>`: only if new design principles are established.
+- `<architecture>` — Core Workflow: numbered command sequence. Context Split: main vs subagent table. Component Model: component type list.
+- `<artifact_flow>` — "Artifact | Produced by | Consumed by" table format.
+- `<change_propagation>` — "When you change... | Also update..." table format.
+- `<deep_dive_paths>` — "Topic | Read" table format.
+- `<where_things_belong>` — "Question | Location" table format.
+- `<anti_patterns>` / `<philosophy>` — Terse principle statements.
 
 **Style:** Terse, structured for quick reference. Tables preferred over prose.
 
