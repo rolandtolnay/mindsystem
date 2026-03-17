@@ -365,24 +365,21 @@ This knowledge informs investigation (where to look, known pitfalls) and any sub
 3. Check git log for recent changes to relevant files
 ```
 
-**2. Determine if cause is found:**
+**2. Report finding and act:**
 
-**If cause found AND fix is simple (single file, straightforward change):**
-- Propose fix in plain language:
-  ```
-  Found the issue. In `ErrorBanner.tsx` line 42, the error message is
-  hardcoded to "Something went wrong" instead of using the actual error
-  from the API response.
+State the root cause and the fix in plain language before applying. This lets the user capture the lesson in persistent instructions or catch a wrong direction before reviewing the diff. No confirmation needed — go straight to fixing.
 
-  I'll change it to use `error.message` from props.
+Format:
+```
+{Root cause — what the code does wrong and why, 1-2 sentences}
 
-  Apply this fix?
-  ```
-- Present options: [Yes / Let me see the code first / Different approach]
-- If approved: Go to `apply_fix`
+Fix: {what the fix changes, 1-2 sentences}
+```
 
-**If cause found BUT fix is complex (multiple files, architectural):**
-- Report finding
+**If fix is simple (single file, straightforward change):**
+- Go to `apply_fix` immediately
+
+**If fix is complex (multiple files, architectural):**
 - Spawn ms-verify-fixer subagent (go to `escalate_to_fixer`)
 
 **If cause NOT found after 2-3 checks:**
