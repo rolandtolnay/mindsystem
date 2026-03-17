@@ -18,3 +18,5 @@ references/humanlayer/
 references/migrations/
 references/samples/
 references/.workflow/
+
+etc/audit/**

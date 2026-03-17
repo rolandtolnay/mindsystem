@@ -145,14 +145,14 @@ Then route based on status:
 | Status | Route |
 |--------|-------|
 | `gaps_found` | Route C (gap closure) |
-| `passed` + more phases | Route A (verify + next phase) |
+| `passed` + more phases | Route A (verify) |
 | `passed` + last phase | Route B (verify + milestone complete) |
 
 Thoroughness by default: verify-work is the primary "Next Up" in both routes. Assess skip context per workflow `offer_next` step.
 
 ---
 
-**Route A: Phase verified, more phases remain**
+**Shared steps (Routes A and B):**
 
 1. Show phase completion summary:
 ```
@@ -174,26 +174,33 @@ All {Y} plans finished. Phase goal verified.
 {If skip context: "Phase involved only {description} with no user-facing changes — skip if structural verification is sufficient."}
 ```
 
-4. Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` to determine the most appropriate command for Phase {Z+1}. Present next phase context and options:
-```
-**Phase {Z+1}: {Name}** — {Goal}
-{If pre-work flagged: brief note about recommendations}
+**Then branch by route:**
 
-**Also available:**
-- `/ms:{suggested} {Z+1}` — {reason}
-- `/ms:plan-phase {Z+1}` — skip pre-work, plan directly
-```
+**Route A: More phases remain**
 
+4. **If skip context applies:** Determine next phase's primary suggestion:
+   - From ROADMAP.md (already in context), get Phase {Z+1} pre-work flags
+   - Check: CONTEXT.md exists? DESIGN.md? RESEARCH.md? in next phase dir
+   - Priority: discuss (if Likely + no CONTEXT.md) > design (if Likely + no DESIGN.md) > research (if Likely + no RESEARCH.md) > plan-phase
+   - Present ONE "Also available" entry:
+   ```
+   ---
+   **Also available:**
+   - `/ms:{suggested} {Z+1}` — skip verify, start Phase {Z+1}: {Name}
+   ---
+   ```
+   **If skip context does NOT apply:** No "Also available" — verify-work is the sole suggestion.
+
+**Route B: Milestone complete**
+
+4. Present milestone options:
+```
 ---
-
-**Route B: Phase verified, milestone complete**
-
-Follow Route A steps 1-3, then present milestone options:
-```
 **Also available:**
 - `/ms:audit-milestone` — verify requirements, cross-phase integration, E2E flows
 - `/ms:complete-milestone` — skip audit, archive directly
 - `/ms:add-phase <description>` — add another phase first
+---
 ```
 
 ---

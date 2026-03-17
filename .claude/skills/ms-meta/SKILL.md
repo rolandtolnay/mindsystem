@@ -52,6 +52,8 @@ The critical judgment when evaluating any Mindsystem feature: **does this step's
 
 **Phase linearity.** Phase execution order is immutable: discuss → design → research → plan → execute → verify. Once a phase is executed, it is complete — never re-plan or re-execute the same phase. If gaps emerge after execution, route through the appropriate primitive based on scope (see Deferred Work Routing in architecture). Protecting the linear flow prevents edge-case handling from degrading core command prompts.
 
+**Intra-phase routing first.** Phase-specific commands route to the next step within the same phase. Cross-phase routing (next phase's pre-work, suggested command) only appears in verify-work and progress. When execute-phase has skip context, it includes a single-line cross-phase hint — not a full routing block. This prevents competing "Next Up" suggestions and keeps each session focused on completing one phase.
+
 **Main context for collaboration.** Planning, discussion, and back-and-forth happen with the user in the main conversation. Subagents are for autonomous execution, not for hiding key decisions or reasoning. This preserves:
 - Conversational iteration during planning
 - User ability to question, redirect, and contribute

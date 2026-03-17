@@ -1,6 +1,6 @@
 # Next Phase Routing
 
-Reference for presenting "Next Up" guidance for a phase. Used by progress (current phase), execute-phase (next phase), and verify-work (next phase).
+Reference for presenting "Next Up" guidance for a phase. Used by progress (current phase) and verify-work (next phase).
 
 ## Purpose
 

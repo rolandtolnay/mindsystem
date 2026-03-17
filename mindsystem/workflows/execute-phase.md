@@ -539,24 +539,24 @@ All {Y} plans finished. Phase goal verified.
 
 **Then present "Also available" based on milestone status:**
 
-**If more phases remain:**
+**If more phases remain AND skip context applies:**
 
-Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` to determine the most appropriate command for the next phase (discuss/design/research/plan based on pre-work flags). Present concisely under "Also available":
+Determine the next phase's primary suggestion inline — do NOT read next-phase-routing.md:
+- From ROADMAP.md (already in context), get Phase {Z+1} pre-work flags
+- Check: CONTEXT.md exists? DESIGN.md? RESEARCH.md? in next phase dir
+- Priority: discuss (if Likely + no CONTEXT.md) > design (if Likely + no DESIGN.md) > research (if Likely + no RESEARCH.md) > plan-phase
+- Present ONE "Also available" entry:
 
 ```markdown
 ---
-
-**Phase {Z+1}: {Name}** — {Goal}
-{If pre-work flagged: brief note about recommendations}
-
 **Also available:**
-- `/ms:{suggested} {Z+1}` — {reason from routing}
-- `/ms:plan-phase {Z+1}` — skip pre-work, plan directly
-
+- `/ms:{suggested} {Z+1}` — skip verify, start Phase {Z+1}: {Name}
 ---
 ```
 
-Include the pre-work recommendations table from the routing reference if any pre-work is flagged as "Likely".
+**If more phases remain but skip context does NOT apply:** No "Also available" — verify-work is the sole suggestion.
+
+Do NOT present pre-work recommendation tables or multiple cross-phase alternatives. Cross-phase routing belongs to verify-work and progress.
 
 **If milestone complete:**
 
