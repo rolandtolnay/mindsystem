@@ -315,7 +315,7 @@ Spawn a `general-purpose` subagent (Task tool) with the following structured pro
 > - Preserve rationale when visible in code comments or config. Do not fabricate reasons.
 > - Do not fabricate specific numbers (limits, thresholds, counts) — read from source or omit.
 > - Omit empty sections. No Design section if subsystem has no UI.
-> - Rewrite semantics — if existing knowledge files exist, merge by producing current state.
+> - Edit to reflect current state — use `Edit` for existing knowledge files (targeted changes), `Write` only for new files.
 > - Cross-reference between subsystems where relevant: "(see api subsystem)".
 > - Decisions table: 5-10 words per cell. Source column: `"existing"` for source code mode, artifact reference for artifact mode.
 > - Key files must reference actual paths verified to exist.

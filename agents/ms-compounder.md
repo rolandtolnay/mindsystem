@@ -2,7 +2,7 @@
 name: ms-compounder
 description: Compounds raw code changes into per-subsystem knowledge files. Spawned by compound workflow.
 model: sonnet
-tools: Read, Write, Bash, Grep, Glob
+tools: Read, Edit, Write, Bash, Grep, Glob
 color: yellow
 ---
 
@@ -71,23 +71,23 @@ Focus on:
 
 ## Step 4: Merge Into Existing Knowledge
 
-For each affected subsystem, merge extracted content into the knowledge file:
+For each affected subsystem, edit the knowledge file to reflect current state:
 
-- **Decisions:** Add new entries, update superseded decisions, remove contradicted ones.
-- **Architecture:** Update structural descriptions with new components and patterns.
-- **Design:** Add new specs, update changed specs.
-- **Pitfalls:** Add new entries, deduplicate with existing.
-- **Key Files:** Add new paths, remove renamed or deleted files.
+- **Decisions:** Append new entries. Edit superseded decisions in place. Delete contradicted ones.
+- **Architecture:** Edit structural descriptions with new components and patterns.
+- **Design:** Append new specs, edit changed specs.
+- **Pitfalls:** Append new entries. Delete duplicates of existing entries.
+- **Key Files:** Append new paths, delete renamed or deleted files.
 
-Rewrite the full file — not append. The result is the current state of knowledge.
+Use `Edit` for existing files — targeted changes preserve content you haven't inspected. Use `Write` only for new files (subsystem has no knowledge file yet).
 
-## Step 5: Write Knowledge Files and Return Report
+## Step 5: Update Knowledge Files and Return Report
 
 ```bash
 mkdir -p .planning/knowledge/
 ```
 
-Write one file per affected subsystem. Follow the template format from `~/.claude/mindsystem/templates/knowledge.md`. Omit sections with no content.
+For new subsystems (no existing file), use `Write` to create the file following the template format from `~/.claude/mindsystem/templates/knowledge.md`. For existing files, all changes should already be applied via `Edit` in step 4. Omit empty sections.
 
 Return a structured report to the compound workflow.
 
@@ -123,11 +123,11 @@ If changes suggest a subsystem not in the confirmed list, note it as a proposal 
 
 **Preserve rationale.** The "because" part is the value. Decisions without rationale are just facts.
 
-**Rewrite, not append.** Each update produces the current state. Superseded decisions get updated, not duplicated.
+**Edit to reflect current state.** Update superseded decisions, remove outdated patterns, append new entries. Use `Edit` for existing files, `Write` only for new files.
 
 **Omit empty sections.** If a subsystem has no design work, do not include a Design section.
 
-**No commits.** Write files only — the compound workflow orchestrator handles commits.
+**No commits.** Edit/write files only — the compound workflow orchestrator handles commits.
 
 **Only write files for confirmed affected subsystems.** Do not invent subsystems or write knowledge files for subsystems not in the confirmed list.
 
@@ -136,7 +136,8 @@ If changes suggest a subsystem not in the confirmed list, note it as a proposal 
 </critical_rules>
 
 <success_criteria>
-- [ ] Merge uses rewrite semantics (update, remove, deduplicate — not just add)
+- [ ] Existing files modified via Edit (not Write) — targeted changes, no full-file replacement
+- [ ] Merge reflects current state (update, remove, deduplicate — not just append)
 - [ ] No commits made
 - [ ] Report returned with update counts
 - [ ] Empty sections omitted from knowledge files

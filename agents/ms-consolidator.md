@@ -2,7 +2,7 @@
 name: ms-consolidator
 description: Consolidates phase artifacts into per-subsystem knowledge files. Spawned by execute-phase after plan execution.
 model: sonnet
-tools: Read, Write, Bash, Grep, Glob
+tools: Read, Edit, Write, Bash, Grep, Glob
 color: yellow
 ---
 
@@ -137,25 +137,25 @@ Extract knowledge, not descriptions. "Using React" is not knowledge. "Using Reac
 
 ## Step 6: Merge Into Knowledge Files
 
-For each affected subsystem, merge extracted content into the knowledge file:
+For each affected subsystem, edit the knowledge file to reflect current state:
 
-- **Decisions:** Add new entries, update superseded decisions, remove contradicted ones.
-- **Architecture:** Update structural descriptions with new components and patterns.
-- **Design:** Add new specs, update changed specs.
-- **Pitfalls:** Add new entries, deduplicate with existing.
-- **Key Files:** Add new paths, remove renamed or deleted files.
+- **Decisions:** Append new entries. Edit superseded decisions in place. Delete contradicted ones.
+- **Architecture:** Edit structural descriptions with new components and patterns.
+- **Design:** Append new specs, edit changed specs.
+- **Pitfalls:** Append new entries. Delete duplicates of existing entries.
+- **Key Files:** Append new paths, delete renamed or deleted files.
 
-Rewrite the full file — not append. The result is the current state of knowledge.
+Use `Edit` for existing files — targeted changes preserve content you haven't inspected. Use `Write` only for new files (subsystem has no knowledge file yet).
 
-## Step 7: Write Knowledge Files
+## Step 7: Update Knowledge Files
 
 ```bash
 mkdir -p .planning/knowledge/
 ```
 
-Write one file per affected subsystem. Follow the template format from `~/.claude/mindsystem/templates/knowledge.md`. Omit sections with no content.
+For new subsystems (no existing file), use `Write` to create the file following the template format from `~/.claude/mindsystem/templates/knowledge.md`. For existing files, all changes should already be applied via `Edit` in step 6. Omit empty sections.
 
-Only write files for subsystems found in SUMMARY.md frontmatter.
+Only update files for subsystems found in SUMMARY.md frontmatter.
 
 ## Step 8: Delete PLAN.md Files
 
@@ -203,7 +203,7 @@ Use `+N` for new entries added, `updated` for sections rewritten with changes, `
 
 **Preserve rationale.** The "because" part is the value. Decisions without rationale are just facts.
 
-**Rewrite, not append.** Each consolidation produces the current state. Superseded decisions get updated, not duplicated.
+**Edit to reflect current state.** Update superseded decisions, remove outdated patterns, append new entries. Use `Edit` for existing files, `Write` only for new files.
 
 **Handle missing files gracefully.** Not all phases have CONTEXT, DESIGN, or RESEARCH files. This is normal.
 
@@ -220,7 +220,8 @@ Use `+N` for new entries added, `updated` for sections rewritten with changes, `
 <success_criteria>
 - [ ] Subsystem alignment validated against config.json
 - [ ] Content extracted and distributed per extraction guide
-- [ ] Knowledge files written to `.planning/knowledge/`
+- [ ] Existing knowledge files modified via Edit (not Write) — targeted changes, no full-file replacement
+- [ ] New knowledge files created with Write in `.planning/knowledge/`
 - [ ] Empty sections omitted from knowledge files
 - [ ] PLAN.md files deleted from phase directory
 - [ ] CONTEXT.md, DESIGN.md, RESEARCH.md, SUMMARY.md preserved

@@ -66,7 +66,7 @@ Template for `.planning/knowledge/{subsystem}.md` — per-subsystem knowledge fi
 - **Architecture and Design use prose bullets.** Describe how things work, not tables.
 - **Pitfalls use bold titles** for scannability.
 - **Key Files is a flat list.** No nesting, no grouping.
-- **Rewrite semantics, not append.** Each consolidation produces the current state. Superseded decisions get updated. Outdated patterns get removed. The file is always current.
+- **Edit to reflect current state.** Each update produces the current state through targeted edits — update superseded decisions, remove outdated patterns, append new entries. Use `Edit` for existing files, `Write` only for new files. Never replace an entire knowledge file via `Write`.
 
 ## Cross-Reference Pattern
 
