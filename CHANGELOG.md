@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.3.1] - 2026-03-19
+
+### Fixed
+- Knowledge agents (compounder, consolidator) now use targeted Edit instead of full-file Write for knowledge file updates. The previous approach caused silent data loss when Claude Code's persisted-output truncation gave the agent only a partial file preview — Edit operates on the actual file on disk and preserves uninspected content.
+- Verify-work inline fixes now apply immediately with a root cause + fix explanation, removing the manual confirmation gate. Users still see what's being fixed and why.
+- Execute-phase no longer shows competing "Next Up" suggestions for both the current phase and the next phase. Phase-specific commands route intra-phase only; cross-phase routing lives exclusively in verify-work and progress.
+
+### Changed
+- Roadmap templates no longer generate plan suggestions (count, checklist items, "Plans Complete" column) at creation time. Plan-phase derives its own task breakdown with richer context from discuss/design/research phases — the premature suggestions were dead weight that could mislead users.
+
 ## [4.3.0] - 2026-03-16
 
 ### Added
@@ -674,7 +684,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.1...HEAD
+[4.3.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.1...v4.3.0
 [4.2.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.1.2...v4.2.0
