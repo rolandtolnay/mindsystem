@@ -130,7 +130,7 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 6. **Adaptive depth based on response clarity:**
 
-   - **Clear, detailed response** → brief confirmation ("Sounds like you want X, Y, Z — let me confirm a few things"), then move toward Phase 3 quickly
+   - **Clear, detailed response** → brief confirmation ("Sounds like you want X, Y, Z — let me confirm a few things"), then build on what they shared rather than re-asking
    - **Vague response** → probe with AskUserQuestion, explore features, challenge vagueness
    - **External context shared** → integrate it, clarify implications, ask follow-ups
 

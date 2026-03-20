@@ -208,9 +208,9 @@ Present brief product analysis, then use AskUserQuestion:
 - question: "How do you imagine this working?"
 - options: 2-3 interpretations based on phase description, requirements, and industry context + "Let me describe it"
 
-**2. Follow the thread (2-4 rounds typical):**
+**2. Follow the thread:**
 
-Follow the user's thread. Each round: apply product lens to the topic they raised, then AskUserQuestion with 2-3 interpretations + escape hatch. Use multiSelect for priority/essential questions. Stop when vision is clear — don't over-question.
+Follow the user's thread. Each round: apply product lens to the topic they raised, then AskUserQuestion with 2-3 interpretations + escape hatch. Use multiSelect for priority/essential questions. Continue until you could write a CONTEXT.md that plan-phase can act on without clarifying questions — that's the downstream test. Don't ask about edge cases when core behaviors are still undefined; depth over breadth.
 
 **3. Decision gate:**
 

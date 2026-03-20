@@ -87,7 +87,7 @@ Governing principle: each question must save more context than it costs. A quest
   - Looks right
   - Some corrections (let me clarify)
   - Let me reframe the task
-- Additional questions (conditional): Only when exploration surfaced genuine behavioral ambiguity the user must resolve. Frame with implementation context discovered during exploration. Typically 1-2 for focused work, 3-4 for multi-area work.
+- Additional questions (conditional): Only when exploration surfaced genuine behavioral ambiguity the user must resolve. Frame with implementation context discovered during exploration. Continue until scope is unambiguous — focused work may need one question; multi-area work may need several.
 
 **What NOT to ask** (Claude determines these from exploration):
 - Technical approach or patterns
