@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindsystem Bento Grid</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #F2F2F7;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 160px 160px 160px 132px;
+    gap: 10px;
+    max-width: 1340px;
+    width: 100%;
+  }
+
+  /* ── Base tile ── */
+  .tile {
+    background: #FFFFFF;
+    border-radius: 22px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .tile:hover {
+    transform: scale(1.018);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  }
+
+  .tile h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1D1D1F;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .tile p {
+    font-size: 12px;
+    font-weight: 400;
+    color: #86868B;
+    line-height: 1.4;
+  }
+
+  .tile .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ══════════════════════════════════════════
+     KNOWLEDGE COMPOUNDING — dark anchor, tall
+     ══════════════════════════════════════════ */
+  .tile-knowledge {
+    grid-column: 1 / 4;
+    grid-row: 1 / 3;
+    background: linear-gradient(160deg, #0C0824 0%, #1E1B4B 50%, #312E81 100%);
+    padding: 28px;
+    justify-content: space-between;
+  }
+
+  .tile-knowledge h3 {
+    font-size: 25px;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .tile-knowledge p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.42);
+    line-height: 1.45;
+  }
+
+  .stacked-docs {
+    position: relative;
+    width: 100px;
+    height: 88px;
+    align-self: center;
+    margin: auto 0;
+  }
+
+  .stacked-docs .doc {
+    position: absolute;
+    width: 72px;
+    height: 48px;
+    border-radius: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .stacked-docs .doc:nth-child(1) {
+    background: rgba(139, 132, 255, 0.1);
+    border: 1px solid rgba(139, 132, 255, 0.06);
+    bottom: 0;
+  }
+
+  .stacked-docs .doc:nth-child(2) {
+    background: rgba(139, 132, 255, 0.2);
+    border: 1px solid rgba(139, 132, 255, 0.1);
+    bottom: 16px;
+  }
+
+  .stacked-docs .doc:nth-child(3) {
+    background: rgba(139, 132, 255, 0.38);
+    border: 1px solid rgba(139, 132, 255, 0.18);
+    bottom: 32px;
+    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.25);
+  }
+
+  /* ══════════════════════════
+     FULL LIFECYCLE — wide top
+     ══════════════════════════ */
+  .tile-lifecycle {
+    grid-column: 4 / 9;
+    grid-row: 1;
+    padding: 18px 24px;
+  }
+
+  .tile-lifecycle h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .pipeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pipeline-step .dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #EEF2FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pipeline-step .dot svg {
+    width: 15px;
+    height: 15px;
+    color: #4F46E5;
+  }
+
+  .pipeline-step span {
+    font-size: 8.5px;
+    color: #86868B;
+    font-weight: 500;
+  }
+
+  .pipeline-line {
+    width: 14px;
+    height: 2px;
+    background: #E5E7EB;
+    margin-bottom: 16px;
+  }
+
+  /* ══════════════════════════════════
+     PARALLEL RESEARCH — indigo tinted
+     ══════════════════════════════════ */
+  .tile-research {
+    grid-column: 9 / 11;
+    grid-row: 1;
+    background: #EEF2FF;
+    padding: 18px;
+    justify-content: center;
+  }
+
+  .tile-research h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1E1B4B;
+    margin-bottom: 8px;
+  }
+
+  .tile-research p {
+    font-size: 10.5px;
+    color: #4338CA;
+    opacity: 0.65;
+  }
+
+  .converge {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 76px;
+    margin-bottom: 8px;
+  }
+
+  .converge-line {
+    height: 3.5px;
+    border-radius: 2px;
+  }
+
+  .converge-line:nth-child(1) { background: #6366F1; width: 76px; }
+  .converge-line:nth-child(2) { background: #818CF8; width: 56px; margin-left: 10px; }
+  .converge-line:nth-child(3) { background: #A5B4FC; width: 36px; margin-left: 20px; }
+
+  /* ════════════════════════════════════════
+     CONTEXT ENGINEERING — typography forward
+     ════════════════════════════════════════ */
+  .tile-context {
+    grid-column: 11 / 13;
+    grid-row: 1;
+    padding: 18px;
+    justify-content: center;
+  }
+
+  .tile-context h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #86868B;
+    letter-spacing: 0;
+  }
+
+  .big-number {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #3B82F6 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin: 2px 0 4px;
+  }
+
+  .tile-context p { font-size: 10.5px; }
+
+  /* ════════════════════
+     HERO — center block
+     ════════════════════ */
+  .tile-hero {
+    grid-column: 4 / 10;
+    grid-row: 2 / 4;
+    background: linear-gradient(135deg, #1E1B4B 0%, #312E81 20%, #3B82F6 50%, #0EA5E9 75%, #06B6D4 100%);
+    justify-content: center;
+    padding: 48px;
+  }
+
+  .tile-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 25% 40%, rgba(99,102,241,0.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 60%, rgba(6,182,212,0.25) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .tile-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .tile-hero h2 {
+    font-size: 80px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.95);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tile-hero p {
+    font-size: 17px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.01em;
+  }
+
+  /* ══════════════════════════════════
+     DESIGN MOCKUPS — violet tint, tall
+     ══════════════════════════════════ */
+  .tile-mockups {
+    grid-column: 10 / 13;
+    grid-row: 2 / 4;
+    background: #F5F3FF;
+    padding: 24px;
+    justify-content: center;
+  }
+
+  .tile-mockups h3 {
+    font-size: 21px;
+    font-weight: 700;
+    color: #1E1B4B;
+    margin-bottom: 14px;
+  }
+
+  .tile-mockups p {
+    font-size: 12px;
+    margin-top: 14px;
+    color: #4338CA;
+    opacity: 0.6;
+  }
+
+  .browser-windows {
+    position: relative;
+    width: 96px;
+    height: 64px;
+  }
+
+  .browser-win {
+    position: absolute;
+    border: 2px solid #A78BFA;
+    border-radius: 8px;
+    width: 60px;
+    height: 44px;
+    background: #FFFFFF;
+  }
+
+  .browser-win::before {
+    content: '';
+    display: block;
+    height: 10px;
+    border-bottom: 1px solid #C4B5FD;
+  }
+
+  .browser-win::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #A78BFA;
+    position: absolute;
+    top: 3px;
+    left: 5px;
+  }
+
+  .browser-win:nth-child(1) { top: 12px; left: 0; }
+  .browser-win:nth-child(2) {
+    top: 0; left: 28px;
+    box-shadow: 0 4px 16px rgba(139,92,246,0.12);
+  }
+
+  /* ════════════════════════════════════════
+     BROWSER VERIFICATION — mint/green tinted
+     ════════════════════════════════════════ */
+  .tile-browser {
+    grid-column: 1 / 4;
+    grid-row: 3;
+    background: #ECFDF5;
+    padding: 20px;
+    justify-content: center;
+  }
+
+  .tile-browser h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #064E3B;
+    margin-bottom: 6px;
+    line-height: 1.15;
+  }
+
+  .tile-browser p {
+    font-size: 11.5px;
+    color: #059669;
+    opacity: 0.7;
+  }
+
+  .tile-browser .icon svg { width: 40px; height: 40px; }
+
+  /* ══════════════════════════
+     BOTTOM ROW
+     ══════════════════════════ */
+
+  /* Dream Extraction — warm amber tint */
+  .tile-dream {
+    grid-column: 1 / 3;
+    grid-row: 4;
+    background: #FFFBEB;
+    padding: 16px;
+    justify-content: center;
+  }
+
+  .tile-dream h3 { font-size: 14px; margin-bottom: 4px; color: #78350F; }
+  .tile-dream p { font-size: 10.5px; color: #92400E; opacity: 0.65; }
+
+  /* Code Review — white */
+  .tile-review {
+    grid-column: 3 / 5;
+    grid-row: 4;
+    padding: 16px;
+    justify-content: center;
+  }
+
+  .tile-review h3 { font-size: 14px; margin-bottom: 4px; }
+  .tile-review p { font-size: 10.5px; }
+
+  /* Codebase Mapping — typography forward */
+  .tile-mapping {
+    grid-column: 5 / 8;
+    grid-row: 4;
+    padding: 16px;
+    justify-content: center;
+  }
+
+  .tile-mapping h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #86868B;
+    margin-bottom: 0;
+  }
+
+  .flow-text {
+    font-size: 40px;
+    font-weight: 900;
+    color: #3B82F6;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 2px 0;
+  }
+
+  .flow-text .arrow {
+    font-weight: 300;
+    opacity: 0.4;
+    margin: 0 2px;
+  }
+
+  .tile-mapping p { font-size: 10.5px; }
+
+  /* Verify Work — white */
+  .tile-verify {
+    grid-column: 8 / 10;
+    grid-row: 4;
+    padding: 16px;
+    justify-content: center;
+  }
+
+  .tile-verify h3 { font-size: 14px; margin-bottom: 4px; }
+  .tile-verify p { font-size: 10.5px; }
+
+  /* Adhoc — dark anchor */
+  .tile-adhoc {
+    grid-column: 10 / 11;
+    grid-row: 4;
+    background: linear-gradient(160deg, #1E1B4B 0%, #312E81 100%);
+    padding: 12px 10px;
+    justify-content: center;
+  }
+
+  .tile-adhoc h3 { font-size: 12px; margin-bottom: 2px; color: #FFFFFF; }
+  .tile-adhoc p { font-size: 9.5px; color: rgba(255,255,255,0.38); }
+
+  /* Debugging — white */
+  .tile-debug {
+    grid-column: 11 / 13;
+    grid-row: 4;
+    padding: 16px;
+    justify-content: center;
+  }
+
+  .tile-debug h3 { font-size: 14px; margin-bottom: 4px; }
+  .tile-debug p { font-size: 10.5px; }
+
+  /* Bottom row icons */
+  .tile-dream .icon svg,
+  .tile-review .icon svg,
+  .tile-verify .icon svg { width: 28px; height: 28px; }
+
+  .tile-adhoc .icon svg { width: 22px; height: 22px; }
+  .tile-debug .icon svg { width: 24px; height: 24px; }
+
+  /* ══════════════════
+     ENTRANCE ANIMATION
+     ══════════════════ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tile {
+    animation: fadeUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+
+  .tile-knowledge { animation-delay: 0.04s; }
+  .tile-lifecycle { animation-delay: 0.08s; }
+  .tile-research  { animation-delay: 0.11s; }
+  .tile-context   { animation-delay: 0.13s; }
+  .tile-hero      { animation-delay: 0.18s; }
+  .tile-mockups   { animation-delay: 0.16s; }
+  .tile-browser   { animation-delay: 0.22s; }
+  .tile-dream     { animation-delay: 0.28s; }
+  .tile-review    { animation-delay: 0.30s; }
+  .tile-mapping   { animation-delay: 0.32s; }
+  .tile-verify    { animation-delay: 0.34s; }
+  .tile-adhoc     { animation-delay: 0.36s; }
+  .tile-debug     { animation-delay: 0.38s; }
+</style>
+</head>
+<body>
+<div class="bento">
+
+  <!-- ── Knowledge Compounding — dark, tall left ── -->
+  <div class="tile tile-knowledge">
+    <h3>Knowledge<br>Compounding</h3>
+    <div class="stacked-docs">
+      <div class="doc"></div>
+      <div class="doc"></div>
+      <div class="doc"></div>
+    </div>
+    <p>Phase 1 starts from scratch.<br>Phase 10 starts with everything.</p>
+  </div>
+
+  <!-- ── Full Lifecycle — wide top ── -->
+  <div class="tile tile-lifecycle">
+    <h3>Full Lifecycle</h3>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><circle cx="12" cy="14" r="8" fill="none"/><path d="M12 10v4l2 2"/></svg>
+        </div>
+        <span>discover</span>
+      </div>
+      <div class="pipeline-line"></div>
+      <div class="pipeline-step">
+        <div class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <span>research</span>
+      </div>
+      <div class="pipeline-line"></div>
+      <div class="pipeline-step">
+        <div class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <span>design</span>
+      </div>
+      <div class="pipeline-line"></div>
+      <div class="pipeline-step">
+        <div class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <span>plan</span>
+      </div>
+      <div class="pipeline-line"></div>
+      <div class="pipeline-step">
+        <div class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <span>execute</span>
+      </div>
+      <div class="pipeline-line"></div>
+      <div class="pipeline-step">
+        <div class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span>verify</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Parallel Research — indigo tinted ── -->
+  <div class="tile tile-research">
+    <h3>Parallel Research</h3>
+    <div class="converge">
+      <div class="converge-line"></div>
+      <div class="converge-line"></div>
+      <div class="converge-line"></div>
+    </div>
+    <p>3 agents. Docs, codebase,<br>community — simultaneously.</p>
+  </div>
+
+  <!-- ── Context Engineering — typography forward ── -->
+  <div class="tile tile-context">
+    <h3>Context Engineering</h3>
+    <div class="big-number">200k</div>
+    <p>Fresh context per plan.</p>
+  </div>
+
+  <!-- ── Hero — center ── -->
+  <div class="tile tile-hero">
+    <h2>Mindsystem</h2>
+    <p>Full-cycle development system for Claude Code.</p>
+  </div>
+
+  <!-- ── Design Mockups — violet tinted, tall right ── -->
+  <div class="tile tile-mockups">
+    <h3>Design Mockups</h3>
+    <div class="browser-windows">
+      <div class="browser-win"></div>
+      <div class="browser-win"></div>
+    </div>
+    <p>Parallel variants.<br>Side-by-side comparison.</p>
+  </div>
+
+  <!-- ── Browser Verification — mint tinted ── -->
+  <div class="tile tile-browser">
+    <h3>Autonomous Browser<br>Verification</h3>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" stroke="#059669" stroke-width="1.5" fill="#D1FAE5"/>
+        <line x1="2" y1="7" x2="22" y2="7" stroke="#059669" stroke-width="1.5"/>
+        <circle cx="5" cy="5" r="0.8" fill="#059669"/>
+        <circle cx="7.5" cy="5" r="0.8" fill="#059669"/>
+        <circle cx="10" cy="5" r="0.8" fill="#059669"/>
+        <circle cx="17" cy="18" r="5" fill="#059669"/>
+        <path d="M15 18l1.5 1.5 3-3" stroke="#FFFFFF" stroke-width="1.8"/>
+      </svg>
+    </div>
+    <p>Agentic screenshots and console diagnostics.</p>
+  </div>
+
+  <!-- ══ Bottom row ══ -->
+
+  <!-- Dream Extraction — warm tinted -->
+  <div class="tile tile-dream">
+    <h3>Dream Extraction</h3>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1h-6a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z" fill="#FDE68A" stroke="#D97706"/>
+        <path d="M9 18h6" stroke="#D97706"/>
+        <path d="M10 22h4" stroke="#D97706"/>
+        <path d="M21 9h1M3 9H2M18.36 4.64l.7-.7M4.93 4.64l-.7-.7" stroke="#F59E0B" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <p>Your product owner<br>for requirements.</p>
+  </div>
+
+  <!-- Code Review — white -->
+  <div class="tile tile-review">
+    <h3>Code Review</h3>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="#EEF2FF" stroke="#6366F1" stroke-width="1.5"/>
+        <polyline points="14 2 14 8 20 8" stroke="#6366F1" stroke-width="1.5"/>
+        <line x1="8" y1="13" x2="16" y2="13" stroke="#6366F1" stroke-width="1.5"/>
+        <line x1="8" y1="17" x2="12" y2="17" stroke="#6366F1" stroke-width="1.5"/>
+        <circle cx="18" cy="18" r="4" fill="#6366F1"/>
+        <path d="M16.5 18l1 1 2-2" stroke="#FFFFFF" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <p>Structural and clarity passes.</p>
+  </div>
+
+  <!-- Codebase Mapping — typography forward -->
+  <div class="tile tile-mapping">
+    <h3>Codebase Mapping</h3>
+    <div class="flow-text">4 <span class="arrow">&rarr;</span> 7</div>
+    <p>agents to documents.</p>
+  </div>
+
+  <!-- Verify Work — white -->
+  <div class="tile tile-verify">
+    <h3>Verify Work</h3>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5"/>
+        <polyline points="9 12 11 14 15 10" stroke="#3B82F6" stroke-width="2"/>
+      </svg>
+    </div>
+    <p>Your QA pipeline.</p>
+  </div>
+
+  <!-- Adhoc — dark anchor -->
+  <div class="tile tile-adhoc">
+    <h3>Adhoc</h3>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#FBBF24" stroke="#F59E0B" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <p>Full pipeline,<br>one context.</p>
+  </div>
+
+  <!-- Debugging — white -->
+  <div class="tile tile-debug">
+    <h3>Debugging</h3>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 2l1.88 1.88M14.12 3.88L16 2M9 7.13v-1a3.003 3.003 0 116 0v1"/>
+        <path d="M12 20c-3.3 0-6-2.7-6-6v-3a6 6 0 0112 0v3c0 3.3-2.7 6-6 6z" fill="#CCFBF1"/>
+        <path d="M12 20v2M6 13H2M22 13h-4M6 17l-2 1M18 17l2 1" stroke="#14B8A6"/>
+      </svg>
+    </div>
+    <p>Persists across /clear.</p>
+  </div>
+
+</div>
+</body>
+</html>
