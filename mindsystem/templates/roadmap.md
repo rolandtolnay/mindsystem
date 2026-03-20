@@ -68,10 +68,16 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Research topics**: [What needs investigating]
 
 ### Phase 2.1: Critical Fix (INSERTED)
-**Goal**: [Urgent work inserted between phases]
+**Goal**: [Outcome-focused goal derived during insertion]
 **Depends on**: Phase 2
+**Requirements**: [REQ-05, REQ-06]
 **Success Criteria** (what must be TRUE):
-  1. [What the fix achieves]
+  1. [Observable behavior from user perspective]
+  2. [Observable behavior from user perspective]
+**Discuss**: Likely (assumes X, unclear if Y)
+**Discuss topics**: [What to clarify]
+**Design**: Unlikely (backend fix)
+**Research**: Unlikely (known patterns)
 
 ### Phase 3: [Name]
 **Goal**: [What this phase delivers]

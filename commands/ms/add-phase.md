@@ -6,19 +6,21 @@ allowed-tools:
   - Read
   - Write
   - Bash
+  - AskUserQuestion
 ---
 
 <objective>
-Add a new integer phase to the end of the current milestone in the roadmap.
+Add a new integer phase to the end of the current milestone, fully specified with goal, success criteria, and requirements.
 
-This command appends sequential phases to the current milestone's phase list, automatically calculating the next phase number based on existing phases.
+The phase is set up identically to phases created by the roadmapper — same ROADMAP.md entry format, same requirements in REQUIREMENTS.md with traceability mapping. Downstream commands (discuss-phase, plan-phase, execute-phase, verify-work) work without degradation.
 
-Purpose: Add planned work discovered during execution that belongs at the end of current milestone.
+Purpose: Add discovered work at the end of current milestone with full pipeline support.
 </objective>
 
 <execution_context>
 @.planning/ROADMAP.md
 @.planning/STATE.md
+@.planning/REQUIREMENTS.md
 </execution_context>
 
 <process>
@@ -40,8 +42,8 @@ Example: /ms:add-phase Add authentication system
 Exit.
 </step>
 
-<step name="load_roadmap">
-Load the roadmap file:
+<step name="load_context">
+Load project context:
 
 ```bash
 if [ -f .planning/ROADMAP.md ]; then
@@ -50,9 +52,33 @@ else
   echo "ERROR: No roadmap found (.planning/ROADMAP.md)"
   exit 1
 fi
+
+if [ ! -f .planning/REQUIREMENTS.md ]; then
+  echo "ERROR: No REQUIREMENTS.md found"
+  exit 1
+fi
 ```
 
-Read roadmap content for parsing.
+If REQUIREMENTS.md is missing, display:
+
+```
+Phase addition requires an active milestone with requirements tracking.
+No .planning/REQUIREMENTS.md found.
+
+Instead, consider:
+- `/ms:new-milestone` — start a new milestone with requirements
+- `/ms:create-roadmap` — if milestone context exists but roadmap wasn't created yet
+- `/ms:adhoc "<description>"` — for work that doesn't need milestone tracking
+```
+
+Exit command.
+
+Read ROADMAP.md and REQUIREMENTS.md.
+
+From REQUIREMENTS.md, extract:
+- Existing REQ-ID categories and their prefixes (e.g., AUTH, SUB, CONTENT)
+- Highest REQ-ID number per category (e.g., AUTH-04 → next is AUTH-05)
+- Traceability table structure
 </step>
 
 <step name="find_current_milestone">
@@ -88,6 +114,14 @@ Example: If phases are 4, 5, 5.1, 6 → next is 7
 Format as two-digit: `printf "%02d" $next_phase`
 </step>
 
+<step name="derive_phase_specification">
+Read `~/.claude/mindsystem/references/derive-phase-specification.md` and follow its algorithm.
+
+Variables: `{PHASE_ID}` = `{N}`, `{PHASE_MARKER}` = (empty).
+
+Input: user's description + project context (PROJECT.md, ROADMAP.md phases, REQUIREMENTS.md categories).
+</step>
+
 <step name="generate_slug">
 Convert the phase description to a kebab-case slug:
 
@@ -114,46 +148,51 @@ mkdir -p "$phase_dir"
 Confirm: "Created directory: $phase_dir"
 </step>
 
+<step name="update_requirements">
+Follow the requirements update procedure in `~/.claude/mindsystem/references/derive-phase-specification.md`.
+
+Use Phase `{N}` for traceability table references and footer dating.
+</step>
+
 <step name="update_roadmap">
 Add the new phase entry to the roadmap:
 
-1. Find the insertion point (after last phase in current milestone, before "---" separator)
+**1. Update phase checklist** (under `## Phases`):
 
-2. Before writing the phase entry, analyze the description to determine pre-work flags:
+Find the last `- [ ]` or `- [x]` phase line in the current milestone and append:
+```
+- [ ] **Phase {N}: {Name}** - {One-line description}
+```
 
-   **Discuss**: Default Likely — enumerate 2-4 assumptions or open questions specific
-   to the phase. Unlikely only for fully mechanical zero-decision work (version bump,
-   rename-only refactor, config-only change, pure deletion/cleanup).
+**2. Add phase details** (under `## Phase Details`):
 
-   **Design**: Likely when description involves UI work, visual elements, forms,
-   dashboards, or multi-screen flows. Unlikely for backend-only, API, infrastructure,
-   or established UI patterns.
+Find the insertion point (after last phase in current milestone, before "---" separator or `## Progress`).
 
-   **Research**: Likely when description mentions external APIs/services, new
-   libraries/frameworks, or unclear technical approach. Unlikely for established
-   internal patterns or well-documented conventions.
+Insert full phase entry matching roadmapper format:
 
-   Use binary Likely/Unlikely with parenthetical reason. Include topics/focus only when Likely.
+```
+### Phase {N}: {Name}
+**Goal**: {approved goal}
+**Depends on**: Phase {N-1}
+**Requirements**: {REQ-IDs comma-separated}
+**Success Criteria** (what must be TRUE):
+  1. {criterion}
+  2. {criterion}
+  3. {criterion}
+**Discuss**: {Likely (reason) | Unlikely (reason)}
+**Discuss topics**: {topics} ← only if Likely
+**Design**: {Likely (reason) | Unlikely (reason)}
+**Design focus**: {focus} ← only if Likely
+**Research**: {Likely (reason) | Unlikely (reason)}
+**Research topics**: {topics} ← only if Likely
+```
 
-3. Insert new phase heading with pre-work flags:
+**3. Update progress table** — append row:
+```
+| {N}. {Name} | Not started | - |
+```
 
-   ```
-   ### Phase {N}: {Description}
-
-   **Goal:** [To be planned]
-   **Depends on:** Phase {N-1}
-   **Discuss**: {Likely (reason) | Unlikely (reason)}
-   **Discuss topics**: {topics} ← only if Likely
-   **Design**: {Likely (reason) | Unlikely (reason)}
-   **Design focus**: {focus} ← only if Likely
-   **Research**: {Likely (reason) | Unlikely (reason)}
-   **Research topics**: {topics} ← only if Likely
-
-   **Details:**
-   [To be added during planning]
-   ```
-
-4. Write updated roadmap back to file
+Write updated roadmap back to file.
 
 Preserve all other content exactly (formatting, spacing, other phases).
 </step>
@@ -176,13 +215,16 @@ Present completion summary:
 
 ```
 Phase {N} added to current milestone:
-- Description: {description}
+- Goal: {goal}
+- Requirements: {REQ-IDs}
+- Success criteria: {count}
 - Directory: .planning/phases/{phase-num}-{slug}/
 - Status: Not planned yet
 
-Roadmap updated: {roadmap-path}
-Project state updated: .planning/STATE.md
-
+Files updated:
+- .planning/ROADMAP.md
+- .planning/REQUIREMENTS.md
+- .planning/STATE.md
 ```
 
 Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions
@@ -207,15 +249,21 @@ ms-tools set-last-command "ms:add-phase $ARGUMENTS"
 - Don't use decimal numbering (that's /ms:insert-phase)
 - Don't create plans yet (that's /ms:plan-phase)
 - Don't commit changes (user decides when to commit)
-  </anti_patterns>
+- Don't write skeletal "[To be planned]" entries — derive a real goal and success criteria
+</anti_patterns>
 
 <success_criteria>
 Phase addition is complete when:
 
 - [ ] Phase directory created: `.planning/phases/{NN}-{slug}/`
-- [ ] Roadmap updated with new phase entry
+- [ ] Goal derived as outcome (not task description)
+- [ ] Success criteria derived (2-5 observable user behaviors)
+- [ ] Requirements derived with REQ-IDs following existing patterns
+- [ ] REQUIREMENTS.md updated with new requirements and traceability mapping
+- [ ] Roadmap updated with full phase entry (matching roadmapper format)
 - [ ] STATE.md updated with roadmap evolution note
 - [ ] New phase appears at end of current milestone
 - [ ] Next phase number calculated correctly (ignoring decimals)
+- [ ] User approved specification before writing
 - [ ] User informed of next steps
-      </success_criteria>
+</success_criteria>

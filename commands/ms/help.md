@@ -254,22 +254,22 @@ Usage: `/ms:audit-milestone`
 ### Roadmap Management
 
 **`/ms:add-phase <description>`**
-Add new phase to end of current milestone.
+Add new phase to end of current milestone with full specification.
 
 - Use when: you discovered additional work that belongs after the currently planned phases (not an urgent insertion).
-- Appends to ROADMAP.md
-- Uses next sequential number
-- Updates phase directory structure
+- Derives goal, success criteria, and requirements (with REQ-IDs) from description
+- Updates ROADMAP.md, REQUIREMENTS.md (with traceability), and STATE.md
+- Phase is set up identically to roadmapper-created phases — full pipeline support
 
 Usage: `/ms:add-phase "Add admin dashboard"`
 
 **`/ms:insert-phase <after> <description>`**
-Insert urgent work as decimal phase between existing phases.
+Insert urgent work as decimal phase between existing phases with full specification.
 
 - Use when: you discovered work that must happen before the next integer phase, but you don’t want to renumber the roadmap.
 - Creates intermediate phase (e.g., 7.1 between 7 and 8)
-- Useful for discovered work that must happen mid-milestone
-- Maintains phase ordering
+- Derives goal, success criteria, and requirements (with REQ-IDs) from description
+- Updates ROADMAP.md, REQUIREMENTS.md (with traceability), and STATE.md
 
 Usage: `/ms:insert-phase 7 "Fix critical auth bug"`
 Result: Creates Phase 7.1

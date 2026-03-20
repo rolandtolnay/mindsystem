@@ -6,19 +6,21 @@ allowed-tools:
   - Read
   - Write
   - Bash
+  - AskUserQuestion
 ---
 
 <objective>
-Insert a decimal phase for urgent work discovered mid-milestone that must be completed between existing integer phases.
+Insert a decimal phase for urgent work discovered mid-milestone that must be completed between existing integer phases, fully specified with goal, success criteria, and requirements.
 
-Uses decimal numbering (72.1, 72.2, etc.) to preserve the logical sequence of planned phases while accommodating urgent insertions.
+Uses decimal numbering (72.1, 72.2, etc.) to preserve the logical sequence of planned phases while accommodating urgent insertions. The phase is set up identically to phases created by the roadmapper — downstream commands work without degradation.
 
-Purpose: Handle urgent work discovered during execution without renumbering entire roadmap.
+Purpose: Handle urgent work discovered during execution without renumbering entire roadmap, with full pipeline support.
 </objective>
 
 <execution_context>
 @.planning/ROADMAP.md
 @.planning/STATE.md
+@.planning/REQUIREMENTS.md
 </execution_context>
 
 <process>
@@ -59,8 +61,8 @@ fi
 
 </step>
 
-<step name="load_roadmap">
-Load the roadmap file:
+<step name="load_context">
+Load project context:
 
 ```bash
 if [ -f .planning/ROADMAP.md ]; then
@@ -69,9 +71,33 @@ else
   echo "ERROR: No roadmap found (.planning/ROADMAP.md)"
   exit 1
 fi
+
+if [ ! -f .planning/REQUIREMENTS.md ]; then
+  echo "ERROR: No REQUIREMENTS.md found"
+  exit 1
+fi
 ```
 
-Read roadmap content for parsing.
+If REQUIREMENTS.md is missing, display:
+
+```
+Phase insertion requires an active milestone with requirements tracking.
+No .planning/REQUIREMENTS.md found.
+
+Instead, consider:
+- `/ms:new-milestone` — start a new milestone with requirements
+- `/ms:create-roadmap` — if milestone context exists but roadmap wasn't created yet
+- `/ms:adhoc "<description>"` — for work that doesn't need milestone tracking
+```
+
+Exit command.
+
+Read ROADMAP.md and REQUIREMENTS.md.
+
+From REQUIREMENTS.md, extract:
+- Existing REQ-ID categories and their prefixes (e.g., AUTH, SUB, CONTENT)
+- Highest REQ-ID number per category (e.g., AUTH-04 → next is AUTH-05)
+- Traceability table structure
 </step>
 
 <step name="verify_target_phase">
@@ -88,7 +114,7 @@ Verify that the target phase exists in the roadmap:
    Exit.
 
 3. Verify phase is in current milestone (not completed/archived)
-   </step>
+</step>
 
 <step name="find_existing_decimals">
 Find existing decimal phases after the target phase:
@@ -105,6 +131,14 @@ Examples:
 - Phase 72 with 72.1, 72.2 → next is 72.3
 
 Store as: `decimal_phase="$(printf "%02d" $after_phase).${next_decimal}"`
+</step>
+
+<step name="derive_phase_specification">
+Read `~/.claude/mindsystem/references/derive-phase-specification.md` and follow its algorithm.
+
+Variables: `{PHASE_ID}` = `{decimal_phase}`, `{PHASE_MARKER}` = `(INSERTED)`.
+
+Input: user's description + project context (PROJECT.md, ROADMAP.md phases, REQUIREMENTS.md categories).
 </step>
 
 <step name="generate_slug">
@@ -129,46 +163,44 @@ mkdir -p "$phase_dir"
 Confirm: "Created directory: $phase_dir"
 </step>
 
+<step name="update_requirements">
+Follow the requirements update procedure in `~/.claude/mindsystem/references/derive-phase-specification.md`.
+
+Use Phase `{decimal_phase}` for traceability table references and footer dating.
+</step>
+
 <step name="update_roadmap">
 Insert the new phase entry into the roadmap:
 
-1. Find insertion point: immediately after Phase {after_phase}'s content (before next phase heading or "---")
+**1. Find insertion point:** immediately after Phase {after_phase}'s content (and any existing decimals), before next integer phase heading or "---".
 
-2. Before writing the phase entry, analyze the description to determine pre-work flags:
+**2. Add phase details:**
 
-   **Discuss**: Default Likely — enumerate 2-4 assumptions or open questions specific
-   to the phase. Unlikely only for fully mechanical zero-decision work (version bump,
-   rename-only refactor, config-only change, pure deletion/cleanup).
+Insert full phase entry matching roadmapper format with (INSERTED) marker:
 
-   **Design**: Likely when description involves UI work, visual elements, forms,
-   dashboards, or multi-screen flows. Unlikely for backend-only, API, infrastructure,
-   or established UI patterns.
+```
+### Phase {decimal_phase}: {Name} (INSERTED)
+**Goal**: {approved goal}
+**Depends on**: Phase {after_phase}
+**Requirements**: {REQ-IDs comma-separated}
+**Success Criteria** (what must be TRUE):
+  1. {criterion}
+  2. {criterion}
+  3. {criterion}
+**Discuss**: {Likely (reason) | Unlikely (reason)}
+**Discuss topics**: {topics} ← only if Likely
+**Design**: {Likely (reason) | Unlikely (reason)}
+**Design focus**: {focus} ← only if Likely
+**Research**: {Likely (reason) | Unlikely (reason)}
+**Research topics**: {topics} ← only if Likely
+```
 
-   **Research**: Likely when description mentions external APIs/services, new
-   libraries/frameworks, or unclear technical approach. Unlikely for established
-   internal patterns or well-documented conventions.
+**3. Update progress table** — insert row in correct position:
+```
+| {decimal_phase}. {Name} (INSERTED) | Not started | - |
+```
 
-   Use binary Likely/Unlikely with parenthetical reason. Include topics/focus only when Likely.
-
-3. Insert new phase heading with (INSERTED) marker and pre-work flags:
-
-   ```
-   ### Phase {decimal_phase}: {Description} (INSERTED)
-
-   **Goal:** [Urgent work - to be planned]
-   **Depends on:** Phase {after_phase}
-   **Discuss**: {Likely (reason) | Unlikely (reason)}
-   **Discuss topics**: {topics} ← only if Likely
-   **Design**: {Likely (reason) | Unlikely (reason)}
-   **Design focus**: {focus} ← only if Likely
-   **Research**: {Likely (reason) | Unlikely (reason)}
-   **Research topics**: {topics} ← only if Likely
-
-   **Details:**
-   [To be added during planning]
-   ```
-
-4. Write updated roadmap back to file
+Write updated roadmap back to file.
 
 The "(INSERTED)" marker helps identify decimal phases as urgent insertions.
 
@@ -194,14 +226,17 @@ Present completion summary:
 
 ```
 Phase {decimal_phase} inserted after Phase {after_phase}:
-- Description: {description}
+- Goal: {goal}
+- Requirements: {REQ-IDs}
+- Success criteria: {count}
 - Directory: .planning/phases/{decimal-phase}-{slug}/
 - Status: Not planned yet
 - Marker: (INSERTED) - indicates urgent work
 
-Roadmap updated: {roadmap-path}
-Project state updated: .planning/STATE.md
-
+Files updated:
+- .planning/ROADMAP.md
+- .planning/REQUIREMENTS.md
+- .planning/STATE.md
 ```
 
 Read `~/.claude/mindsystem/references/routing/next-phase-routing.md` and follow its instructions
@@ -227,15 +262,21 @@ ms-tools set-last-command "ms:insert-phase $ARGUMENTS"
 - Don't modify the target phase content
 - Don't create plans yet (that's /ms:plan-phase)
 - Don't commit changes (user decides when to commit)
-  </anti_patterns>
+- Don't write skeletal "[To be planned]" entries — derive a real goal and success criteria
+</anti_patterns>
 
 <success_criteria>
 Phase insertion is complete when:
 
 - [ ] Phase directory created: `.planning/phases/{N.M}-{slug}/`
-- [ ] Roadmap updated with new phase entry (includes "(INSERTED)" marker)
+- [ ] Goal derived as outcome (not task description)
+- [ ] Success criteria derived (2-5 observable user behaviors)
+- [ ] Requirements derived with REQ-IDs following existing patterns
+- [ ] REQUIREMENTS.md updated with new requirements and traceability mapping
+- [ ] Roadmap updated with full phase entry with (INSERTED) marker (matching roadmapper format)
 - [ ] Phase inserted in correct position (after target phase, before next integer phase)
 - [ ] STATE.md updated with roadmap evolution note
 - [ ] Decimal number calculated correctly (based on existing decimals)
+- [ ] User approved specification before writing
 - [ ] User informed of next steps and dependency implications
-      </success_criteria>
+</success_criteria>
