@@ -1,8 +1,6 @@
 <div align="center">
 
-# MINDSYSTEM
-
-**The full-cycle development system for Claude Code.**
+![Mindsystem Bento Grid](assets/bento-image.webp)
 
 Amplifies every step of the development workflow you already follow — discovery, research, design, planning, execution, verification. Each one refined, parallelized, and compounded into persistent knowledge. Built for lean teams and solo builders who want to multiply their output without giving up control.
 
@@ -12,12 +10,6 @@ npx mindsystem-cc
 
 [![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-
-<br>
-
-![Mindsystem Bento Grid](assets/bento-image.webp)
-
-<br>
 
 [Why Mindsystem](#why-mindsystem) · [How it works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick start](#quick-start) · [.planning](#the-planning-directory) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
 
