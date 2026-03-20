@@ -4,7 +4,7 @@
 
 **The full-cycle development system for Claude Code.**
 
-In lean teams and solo ventures, the person writing the code is also the person deciding what to build, researching the domain, picking the layout, and verifying the result. Mindsystem amplifies each of those steps, making them deeper and faster — discovery, research, design, planning, execution, verification — so one person can cover the full cycle without cutting corners. What it learns carries forward, so phase 10 knows everything phase 1 figured out.
+Amplifies every step of the development workflow you already follow — discovery, research, design, planning, execution, verification. Each one refined, parallelized, and compounded into persistent knowledge. Built for lean teams and solo builders who want to multiply their output without giving up control.
 
 ```bash
 npx mindsystem-cc
@@ -27,17 +27,15 @@ npx mindsystem-cc
 
 ## Why Mindsystem
 
-Larger organizations split product delivery across specialists — product owners, designers, researchers, QA engineers. Autonomous coding tools try to replace that entire chain with a single prompt. Both approaches lose something: the first requires headcount, the second loses your judgment.
+Fully autonomous coding tools take a spec and run until a product emerges. That works for prototypes. Mindsystem takes the opposite approach — it follows the workflow a thorough engineer already uses, and amplifies each step:
 
-Mindsystem is the middle ground. Each specialist role maps to a phase you control:
-
-| The role | What you'd do | What Mindsystem does |
-|---|---|---|
-| **Product owner** | Talk through requirements, catch misalignment early | **Discuss phase** surfaces assumptions with confidence levels, forces tradeoff decisions before any code gets written |
-| **Technical researcher** | Google libraries, read a few docs | **Research phase** runs 3 parallel agents across documentation, your codebase, and community practices — 10x more sources, synthesized in minutes |
-| **Designer** | Try design directions, pick the best one | **Design phase** generates parallel HTML/CSS mockups with side-by-side comparison and exact design tokens |
-| **Tech lead** | Plan from what you remember about the codebase | **Plan phase** loads knowledge files capturing every decision, pattern, and pitfall from prior phases |
-| **QA engineer** | Figure out what states to test, mock them manually | **Verify work** determines mock states automatically — you validate visually or programmatically |
+| What you'd do manually | What Mindsystem does |
+|---|---|
+| Talk through requirements, catch misalignment early | **Discuss phase** surfaces assumptions with confidence levels, forces tradeoff decisions before any code gets written |
+| Google libraries, read a few docs | **Research phase** runs 3 parallel agents across documentation, your codebase, and community practices — 10x more sources, synthesized in minutes |
+| Try design directions, pick the best one | **Design phase** generates parallel HTML/CSS mockups with side-by-side comparison and exact design tokens |
+| Plan from what you remember about the codebase | **Plan phase** loads knowledge files capturing every decision, pattern, and pitfall from prior phases |
+| Figure out what states to test, mock them manually | **Verify work** determines mock states automatically — you validate visually or programmatically |
 
 The workflow stays yours. Each step finishes in minutes instead of hours. Everything learned compounds into knowledge that survives context resets — phase 10 starts with everything the project learned from phases 1–9.
 
