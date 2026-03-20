@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-03-21
+
+### Added
+- **User journey browser verification.** Browser verifier now completes end-to-end user journeys (click, fill, submit, verify) instead of screenshot-based observation. Catches unreachable pages that render correctly at their URL but have no navigation path from the UI. Adds UNREACHABLE status for pages that can't be reached through normal interaction.
+- **Full phase specification for add-phase and insert-phase.** Both commands now derive goal, success criteria, requirements mapping, and pre-work flags — matching the quality of phases created by create-roadmap. Includes early exit when no roadmap exists, redirecting to the appropriate starting command.
+- **Single-plan mode (default).** Plan-phase now produces one plan per phase by default, eliminating multi-agent orchestration overhead. With 1M context windows, the multi-plan breakdown is unnecessary for most projects. Enable `multi_plan: true` in config to restore wave-based parallel execution when needed.
+
+### Fixed
+- Discussion and discovery sessions no longer have artificial round caps. Session length now emerges from complexity — conversations continue until the downstream artifact has enough clarity, not after an arbitrary number of exchanges.
+
 ## [4.3.1] - 2026-03-19
 
 ### Fixed
@@ -684,7 +694,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.0...HEAD
+[4.4.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.1...v4.4.0
 [4.3.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.1...v4.3.0
 [4.2.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.0...v4.2.1
