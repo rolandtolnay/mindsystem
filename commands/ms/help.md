@@ -108,7 +108,7 @@ Initialize new project with brief and configuration.
 Usage: `/ms:new-project`
 
 **`/ms:config`**
-Configure Mindsystem preferences — code reviewers, mockup preferences, gitignore patterns, git remote.
+Configure Mindsystem preferences — code reviewers, mockup preferences, browser verification, plan mode, gitignore patterns, git remote.
 
 - Use when: you want to set up code review agents, mockup open behavior, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
 - Edits `.planning/config.json` and `.gitignore`
@@ -205,12 +205,12 @@ Create detailed execution plan for a specific phase.
 - Generates `.planning/phases/XX-phase-name/XX-YY-PLAN.md`
 - Breaks phase into concrete, actionable tasks
 - Includes verification criteria and success measures
-- Multiple plans per phase supported (XX-01, XX-02, etc.)
+- Single plan per phase by default. Enable `multi_plan` in config for multiple plans (XX-01, XX-02, etc.)
 - After planning: calculates risk score (0-100) and offers optional plan verification
   - Skip tier (0-39): Low complexity, verification optional
   - Optional tier (40-69): Moderate complexity, verification recommended
   - Verify tier (70-100): Higher complexity, verification strongly recommended
-- Risk factors: task count, plan count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains
+- Risk factors: task count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains
 
 Usage: `/ms:plan-phase 1`
 Usage: `/ms:plan-phase` (auto-detect next unplanned phase)
@@ -501,7 +501,7 @@ Optional: `/ms:config` — configure code reviewers, gitignore, and other prefer
 **Plan → execute loop (with optional quality gates):**
 
 ```
-/ms:plan-phase 5                 # Create one or more PLAN.md files
+/ms:plan-phase 5                 # Create PLAN.md file(s)
 /ms:execute-phase 5              # Execute; produces SUMMARY + VERIFICATION
 # If gaps found during verification, follow triage recommendation:
 # Small gaps:    /ms:adhoc "Close phase 5 gaps: ..."

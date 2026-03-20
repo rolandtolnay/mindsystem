@@ -8,5 +8,6 @@
   "open_mockups": "auto",
   "browser_verification": {
     "enabled": true
-  }
+  },
+  "multi_plan": false
 }

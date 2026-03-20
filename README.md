@@ -171,11 +171,9 @@ You resolve library conflicts if any come up. Otherwise, this runs with minimal 
 /ms:plan-phase 1
 ```
 
-Claude breaks the phase into tasks, groups them into plans targeting 25-45% of the context budget. Plans are pure markdown, no YAML frontmatter, no XML containers. The plan is the executable prompt, roughly 90% actionable content and 10% structure.
+Claude breaks the phase into tasks and writes a single PLAN.md — pure markdown, no YAML frontmatter, no XML containers. The plan is the executable prompt, roughly 90% actionable content and 10% structure.
 
-Independent plans get grouped into waves for parallel execution. A risk score (0-100) flags complex plans so you can verify them before committing.
-
-You approve the plan structure and can adjust granularity.
+A risk score (0-100) flags complex plans so you can verify them before committing. For phases with genuinely independent work streams, enable `multi_plan` in config to restore multi-plan breakdown with wave-based parallel execution.
 
 **Creates:** `PLAN.md` files, `EXECUTION-ORDER.md`.
 
@@ -470,6 +468,11 @@ Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to
     "enabled": true   // default: true for web projects
   },
 
+  // Plan mode for plan-phase.
+  //   false (default) → single plan per phase, optimal for 1M context
+  //   true            → multi-plan with wave-based parallel execution
+  "multi_plan": false,
+
   // External task tracker integration (Linear only for now).
   //   null → disabled (default)
   "task_tracker": {
@@ -492,7 +495,7 @@ Full docs live in `/ms:help`.
 | `/ms:help` | Show the full command reference |
 | `/ms:progress` | Show where you are and what to run next |
 | `/ms:new-project` | Initialize `.planning/` and capture project intent |
-| `/ms:config` | Configure code reviewers, mockups, gitignore, git remote |
+| `/ms:config` | Configure code reviewers, mockups, plan mode, gitignore, git remote |
 | `/ms:map-codebase` | Document existing repo's stack, structure, and conventions |
 | `/ms:research-milestone` | Milestone-scoped research saved to `.planning/MILESTONE-RESEARCH.md` |
 | `/ms:create-roadmap` | Define requirements and create phases mapped to them |

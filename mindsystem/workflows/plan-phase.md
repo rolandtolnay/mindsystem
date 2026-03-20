@@ -22,13 +22,15 @@ Decimal phases enable urgent work insertion without renumbering:
 </required_reading>
 
 <purpose>
-Create executable phase prompts (PLAN.md files) optimized for parallel execution.
+Create executable phase prompts (PLAN.md files) from task breakdown.
 
 **Two-stage workflow:**
-1. **Main context:** Task identification + grouping proposal (steps 1-9) - collaborative, keeps user in loop
+1. **Main context:** Task identification + grouping (steps 1-9) - collaborative, keeps user in loop
 2. **Subagent (ms-plan-writer):** Plan writing (structural validation, PLAN.md files, risk scoring) - autonomous, heavy lifting
 
-PLAN.md IS the prompt that Claude executes. Plans are grouped into execution waves based on dependencies - independent plans run in parallel, dependent plans wait for predecessors.
+**Default: single plan per phase.** All tasks go into Plan 01, Wave 1. No dependency analysis or user confirmation needed. This is optimal for 1M context windows where phases already scope work tightly.
+
+**Multi-plan mode** (`multi_plan: true` in config): Restores full multi-plan breakdown with dependency analysis, wave grouping, budget estimation, and user confirmation. Enable for phases with genuinely independent work streams that benefit from parallel subagent execution.
 </purpose>
 
 <planning_principles>
@@ -298,7 +300,17 @@ Format: numbered list with task name, key files, dependency hint, and `[TDD]` fl
 </step>
 
 <step name="propose_grouping">
-**Propose plan boundaries before handing off to the plan-writer.**
+**Determine plan boundaries before handing off to the plan-writer.**
+
+```bash
+MULTI_PLAN=$(ms-tools config-get multi_plan --default "false")
+```
+
+**If `false` (default) — single plan mode:**
+
+All tasks go into Plan 01, Wave 1. No dependency analysis, clustering, or budget estimation. No AskUserQuestion. Proceed directly to discover_skills.
+
+**If `true` — multi-plan mode:**
 
 After presenting the task list, analyze dependencies and propose how tasks should group into plans. This is a collaborative planning decision — the user sees it and can adjust.
 
@@ -337,7 +349,7 @@ Tasks: {task_ids} — {brief rationale}
 <step name="discover_skills">
 **Identify relevant project skills for this phase.**
 
-After the user confirms the plan structure, check if project skills could improve plan quality.
+After plan structure is determined, check if project skills could improve plan quality.
 
 **Scan:** Review the skill list in your system-reminder. Match skills against:
 - The phase's technology stack (Flutter, React, Node.js, etc.)
@@ -541,6 +553,33 @@ Show plan paths, wait for user response:
 </step>
 
 <step name="offer_next">
+
+**Single plan mode** (default):
+
+```
+Phase {X} planned: 1 plan
+
+---
+
+## Next Up
+
+**Phase {X}: [Phase Name]**
+
+`/ms:execute-phase {X}`
+
+<sub>`/clear` first - fresh context window</sub>
+
+---
+
+**Also available:**
+- Review/adjust plan before executing
+- View plan: `cat .planning/phases/XX-name/XX-01-PLAN.md`
+
+---
+```
+
+**Multi-plan mode:**
+
 ```
 Phase {X} planned: {N} plan(s) in {M} wave(s)
 
@@ -604,7 +643,7 @@ Phase planning complete when:
 - [ ] Mandatory discovery completed (Level 0-3)
 - [ ] Prior decisions, issues, concerns synthesized
 - [ ] Tasks identified with needs/creates dependencies
-- [ ] Plan grouping proposed and presented to user
+- [ ] Plan grouping determined (auto-grouped or user-confirmed)
 - [ ] Task list + proposed grouping + confirmed skills handed off to ms-plan-writer
 - [ ] PLAN files + EXECUTION-ORDER.md created (pure markdown, Must-Haves, follows proposed grouping)
 - [ ] Plans committed with maximized wave parallelism

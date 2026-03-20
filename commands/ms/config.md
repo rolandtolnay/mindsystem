@@ -1,6 +1,6 @@
 ---
 name: ms:config
-description: Configure Mindsystem preferences — code reviewers, mockups, browser verification, gitignore, git remote, task tracker
+description: Configure Mindsystem preferences — code reviewers, mockups, browser verification, plan mode, gitignore, git remote, task tracker
 allowed-tools:
   - Read
   - Write
@@ -12,7 +12,7 @@ allowed-tools:
 
 Configure Mindsystem preferences for the current project.
 
-Manages code reviewer agents, mockup preferences, browser verification, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
+Manages code reviewer agents, mockup preferences, browser verification, plan mode, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
 
 </objective>
 
@@ -42,7 +42,7 @@ git remote -v 2>/dev/null || echo "NO_REMOTE"
 
 <step name="route">
 
-**Setup mode:** Proceed through all setting steps sequentially (git_remote → code_reviewers → gitignore_patterns → mockup_preferences → browser_verification → task_tracker). Then go to `validation_summary`.
+**Setup mode:** Proceed through all setting steps sequentially (git_remote → code_reviewers → gitignore_patterns → mockup_preferences → browser_verification → multi_plan → task_tracker). Then go to `validation_summary`.
 
 **Edit mode:** Display all current settings with values from config.json, git remote, and .gitignore:
 
@@ -54,7 +54,8 @@ git remote -v 2>/dev/null || echo "NO_REMOTE"
 3. **Gitignore** — {current .planning/ patterns or "no .planning/ patterns"}
 4. **Mockups** — open: {auto / ask / off}
 5. **Browser verification** — {enabled / disabled}
-6. **Task tracker** — {type + cli path, or "none"}
+6. **Plan mode** — {single plan (default) / multi-plan}
+7. **Task tracker** — {type + cli path, or "none"}
 ```
 
 Ask: "Which settings would you like to change? Enter the numbers (e.g. 1, 3, 5), 'all' to reconfigure everything, or 'done' if everything looks good."
@@ -202,6 +203,34 @@ ms-tools config-set browser_verification --json '{"enabled": true}'   # or false
 
 </step>
 
+<step name="multi_plan">
+
+Read current value:
+
+```bash
+CURRENT=$(ms-tools config-get multi_plan --default "false")
+echo "Current multi_plan: $CURRENT"
+```
+
+Use AskUserQuestion:
+- header: "Plan mode"
+- question: "How should plan-phase group tasks into plans?"
+- options:
+  - "Single plan (Recommended)" — All tasks in one plan. Optimal for 1M context windows where phases already scope work tightly
+  - "Multi-plan" — Split into multiple plans with wave-based parallel execution. Use when phases have genuinely independent work streams
+
+Map selection:
+- "Single plan" → `false`
+- "Multi-plan" → `true`
+
+Update config.json:
+
+```bash
+ms-tools config-set multi_plan $VALUE   # true or false (unquoted — boolean)
+```
+
+</step>
+
 <step name="task_tracker">
 
 Read current value:
@@ -254,6 +283,7 @@ Configuration updated:
 - Code reviewers: [adhoc / phase / milestone values]
 - Mockup open: [auto / ask / off]
 - Browser verification: [enabled / disabled]
+- Plan mode: [single plan / multi-plan]
 - Gitignore: [patterns added, or "no changes"]
 - Git remote: [remote URL, or "none configured"]
 - Task tracker: [type + cli path, or "none"]

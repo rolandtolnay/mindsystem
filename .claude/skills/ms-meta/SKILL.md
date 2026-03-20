@@ -33,7 +33,7 @@ Mindsystem is a meta-prompting and context engineering system for Claude Code th
 
 **The 50% rule:** Plans should complete within ~50% context usage. Stop BEFORE quality degrades, not at context limit.
 
-**Solution:** Budget-aware consolidation. The orchestrator proposes plan boundaries using weight heuristics (target 25-45%) with user collaboration. The plan-writer validates structurally (file conflicts, circular deps) but follows proposed grouping. Each plan executes in a fresh subagent with 200k tokens purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
+**Solution:** Single plan per phase by default — optimal for 1M context windows where phases already scope work tightly. All tasks go into one plan, one wave, no dependency analysis overhead. When `multi_plan: true` is set in config, the orchestrator proposes plan boundaries using weight heuristics (target 25-45%) with user collaboration. The plan-writer validates structurally (file conflicts, circular deps) but follows proposed grouping. Each plan executes in a fresh subagent with full context purely for implementation. Plans use pure markdown — no XML containers, no YAML frontmatter — to maximize the ratio of actionable content to structural overhead.
 </what_mindsystem_is>
 
 <philosophy>

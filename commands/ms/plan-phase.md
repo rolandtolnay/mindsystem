@@ -19,7 +19,7 @@ allowed-tools:
 Create executable phase prompt with discovery, context injection, and task breakdown.
 
 Purpose: Break down roadmap phases into concrete, executable PLAN.md files that Claude can execute.
-Output: One or more PLAN.md files in the phase directory (.planning/phases/XX-name/{phase}-{plan}-PLAN.md)
+Output: PLAN.md file(s) in the phase directory (single plan by default; multiple when multi_plan enabled)
 
 </objective>
 
@@ -86,7 +86,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
    - Perform mandatory discovery (Level 0-3 as appropriate)
    - Scan project history via context scanner script (prior decisions, issues, debug resolutions, adhoc learnings, cross-milestone patterns)
    - Break phase into tasks
-   - Propose plan grouping (plan boundaries, wave structure, budget estimates) for user review
+   - Determine plan grouping (single plan by default; multi-plan with user confirmation when enabled)
    - Discover relevant project skills, confirm with user
    - Hand off tasks + proposed grouping + confirmed skills to plan-writer subagent
    - Create PLAN.md file(s) with executable structure
@@ -94,7 +94,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 6. **Update last command:** `ms-tools set-last-command "ms:plan-phase $ARGUMENTS"`
 
 7. **Risk assessment**
-   - Calculate risk score from context already loaded (task count, plan count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains)
+   - Calculate risk score from context already loaded (task count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains)
    - Present score + top factors via AskUserQuestion
    - Tier-based recommendation: Skip (0-39), Optional (40-69), Verify (70+)
    - If user chooses verify: spawn ms-plan-checker, surface results
@@ -103,7 +103,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 
 <success_criteria>
 
-- One or more PLAN.md files created in .planning/phases/XX-name/
+- PLAN.md file(s) created in .planning/phases/XX-name/
 - Each plan has: Context, Changes, Verification, Must-Haves (pure markdown format)
 - Must-Haves derived as markdown checklist of user-observable truths
 - Changes are specific enough for Claude to execute
