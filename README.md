@@ -15,7 +15,7 @@ npx mindsystem-cc
 
 <br>
 
-![Mindsystem Install](assets/terminal.svg)
+![Mindsystem Bento Grid](assets/bento-image.webp)
 
 <br>
 
