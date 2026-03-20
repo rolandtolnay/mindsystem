@@ -126,7 +126,7 @@ Requirements define what must be TRUE when you ship, not what to build. This goa
 ### 4. Discuss phase (optional, recommended)
 
 ```
-/ms:discuss-phase 1
+/ms:discuss-phase <phase>
 ```
 
 This is where you catch misalignment before writing any code. Claude loads milestone context, feature knowledge files, and competitor research, then surfaces its assumptions with confidence levels. You validate intent, make tradeoff decisions, correct misunderstandings.
@@ -138,7 +138,7 @@ Worth taking seriously. Decisions here propagate through everything that follows
 ### 5. Design phase (optional)
 
 ```
-/ms:design-phase 1
+/ms:design-phase <phase>
 ```
 
 Claude generates parallel HTML/CSS mockup variants and a side-by-side comparison page that opens in your browser. You pick a direction, iterate with feedback.
@@ -148,7 +148,7 @@ The output is a `DESIGN.md` with exact design tokens (hex colors, px spacing, fo
 ### 6. Research phase (optional)
 
 ```
-/ms:research-phase 1
+/ms:research-phase <phase>
 ```
 
 Three parallel agents investigate at once: one queries external documentation through Perplexity and Context7, one analyzes your codebase for existing patterns, one surveys community best practices. Claude synthesizes findings into `RESEARCH.md` with confidence levels and source attribution.
@@ -158,7 +158,7 @@ You resolve library conflicts if any come up. Otherwise, this runs with minimal 
 ### 7. Plan phase
 
 ```
-/ms:plan-phase 1
+/ms:plan-phase <phase>
 ```
 
 Claude breaks the phase into tasks and writes a single PLAN.md — pure markdown, no YAML frontmatter, no XML containers. The plan is the executable prompt, roughly 90% actionable content and 10% structure.
@@ -170,7 +170,7 @@ A risk score (0-100) flags complex plans so you can verify them before committin
 ### 8. Execute phase
 
 ```
-/ms:execute-phase 1
+/ms:execute-phase <phase>
 ```
 
 Runs without intervention. Each plan runs in a fresh subagent with the full context window available. Goal-backward verification checks that the phase achieved its intended outcome, not just that tasks got marked complete.
@@ -186,7 +186,7 @@ After execution, knowledge consolidation updates subsystem-scoped knowledge file
 ### 9. Verify work
 
 ```
-/ms:verify-work 1
+/ms:verify-work <phase>
 ```
 
 You run manual acceptance tests presented in batches of 4. Claude fixes issues inline or via subagent, then asks you to re-test until passing.
