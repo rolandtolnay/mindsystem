@@ -268,15 +268,12 @@ ms-tools set-last-command "ms:insert-phase $ARGUMENTS"
 <success_criteria>
 Phase insertion is complete when:
 
-- [ ] Phase directory created: `.planning/phases/{N.M}-{slug}/`
-- [ ] Goal derived as outcome (not task description)
-- [ ] Success criteria derived (2-5 observable user behaviors)
-- [ ] Requirements derived with REQ-IDs following existing patterns
-- [ ] REQUIREMENTS.md updated with new requirements and traceability mapping
-- [ ] Roadmap updated with full phase entry with (INSERTED) marker (matching roadmapper format)
-- [ ] Phase inserted in correct position (after target phase, before next integer phase)
+- [ ] Specification derived with outcome-focused goal and 2-5 observable success criteria
+- [ ] Requirements derived with REQ-IDs and REQUIREMENTS.md updated with traceability mapping
+- [ ] Phase directory and roadmap entry created with (INSERTED) marker and correct decimal number
+- [ ] Phase inserted after target phase, before next integer phase
+- [ ] Roadmap entry matches roadmapper format (Goal, Requirements, Success Criteria, pre-work flags)
 - [ ] STATE.md updated with roadmap evolution note
-- [ ] Decimal number calculated correctly (based on existing decimals)
 - [ ] User approved specification before writing
 - [ ] User informed of next steps and dependency implications
 </success_criteria>

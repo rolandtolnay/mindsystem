@@ -255,15 +255,11 @@ ms-tools set-last-command "ms:add-phase $ARGUMENTS"
 <success_criteria>
 Phase addition is complete when:
 
-- [ ] Phase directory created: `.planning/phases/{NN}-{slug}/`
-- [ ] Goal derived as outcome (not task description)
-- [ ] Success criteria derived (2-5 observable user behaviors)
-- [ ] Requirements derived with REQ-IDs following existing patterns
-- [ ] REQUIREMENTS.md updated with new requirements and traceability mapping
-- [ ] Roadmap updated with full phase entry (matching roadmapper format)
+- [ ] Specification derived with outcome-focused goal and 2-5 observable success criteria
+- [ ] Requirements derived with REQ-IDs and REQUIREMENTS.md updated with traceability mapping
+- [ ] Phase directory and roadmap entry created at end of current milestone with correct sequential number
+- [ ] Roadmap entry matches roadmapper format (Goal, Requirements, Success Criteria, pre-work flags)
 - [ ] STATE.md updated with roadmap evolution note
-- [ ] New phase appears at end of current milestone
-- [ ] Next phase number calculated correctly (ignoring decimals)
 - [ ] User approved specification before writing
 - [ ] User informed of next steps
 </success_criteria>

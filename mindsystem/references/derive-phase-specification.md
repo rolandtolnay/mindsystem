@@ -11,9 +11,11 @@ Set by calling command before loading this reference:
 
 ## Input Assessment
 
+Read `.planning/PROJECT.md` for vision and domain context (target audience, project scope).
+
 Proceed directly when the user's description provides enough context to derive a confident specification — clear domain, identifiable user outcomes, enough scope to define 2-5 success criteria.
 
-When scope is ambiguous or domain is unclear, ask targeted clarifying questions before deriving. Keep asking until confident — session length scales with input completeness.
+When scope is ambiguous or domain is unclear, ask targeted clarifying questions before deriving. Keep asking until confident.
 
 Use AskUserQuestion with concrete options derived from PROJECT.md/ROADMAP.md context:
 - header: "Phase Clarification"
