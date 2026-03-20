@@ -298,12 +298,12 @@ ms-tools browser-check
 
 **If exit 0 (READY):**
 
-Ensure `$PHASE_DIR/*-SUMMARY.md` files are available (needed for checklist derivation — may already be in context from wave reports).
+Ensure `$PHASE_DIR/*-SUMMARY.md` files are available (needed for journey derivation — may already be in context from wave reports).
 
 Read `~/.claude/mindsystem/references/browser-verification.md` and follow its sections in order:
 1. **Auth Flow** — establish browser authentication
-2. **Derive Browser Checklist** — transform SUMMARYs into visual checklist items
-3. **Spawn** — launch verifier with derived checklist
+2. **Derive User Journeys** — transform SUMMARYs into user journeys
+3. **Spawn** — launch verifier with derived journeys
 4. **Post-Verifier Handling** — route by report status
 
 **If exit 1 (MISSING_DEPS):**
