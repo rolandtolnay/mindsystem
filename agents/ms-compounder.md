@@ -75,7 +75,7 @@ Classify each change signal before extraction:
 | Code-derivable detail (schema fields, component props, config values) | Skip |
 | Implementation description without alternative considered | Skip |
 
-Apply the extraction guide to change content that passes classification. Then apply the knowledge-quality.md filtering test: "Would an LLM implement this incorrectly without this entry?" Drop entries that fail. For entries that pass, check existing knowledge files for cross-subsystem duplication — use `(see {subsystem})` cross-references instead of duplicating.
+Apply the extraction guide to change content that passes classification. Then apply the knowledge-quality.md filtering test — drop entries that fail. For entries that pass, check existing knowledge files for cross-subsystem duplication — use `(see {subsystem})` cross-references instead of duplicating.
 
 ## Step 4: Merge Into Existing Knowledge
 

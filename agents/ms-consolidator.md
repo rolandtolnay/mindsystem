@@ -139,7 +139,7 @@ Apply the extraction guide to each artifact:
 
 Extract knowledge, not descriptions. "Using React" is not knowledge. "Using React over Vue because of ecosystem maturity and team familiarity" is knowledge.
 
-Apply the knowledge-quality.md filtering test to each extracted entry before assigning it to a subsystem. Drop entries that fail — design tokens, component API descriptions, schema listings, version pins without rationale, decisions without alternatives, implementation descriptions. For entries that pass, check existing knowledge files for cross-subsystem duplication. Use `(see {subsystem})` cross-references instead of duplicating.
+Apply the knowledge-quality.md filtering test to each extracted entry before assigning it to a subsystem. Drop entries that fail. For entries that pass, check existing knowledge files for cross-subsystem duplication — use `(see {subsystem})` cross-references instead of duplicating.
 
 ## Step 6: Merge Into Knowledge Files
 
