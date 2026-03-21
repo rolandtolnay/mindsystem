@@ -3220,6 +3220,127 @@ class TestDoctorScreenshotOptimization:
 
 
 # ---------------------------------------------------------------------------
+# Doctor: Research API Keys (CHECK 9)
+# ---------------------------------------------------------------------------
+
+
+class TestDoctorResearchApiKeys:
+    """Doctor CHECK 9: Research API Keys with settings.json fallback and platform guidance."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_planning(self, tmp_path, *, subsystems=None):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {
+            "subsystems": subsystems or ["app"],
+            "browser_verification": {"enabled": False},
+        }
+        (planning / "config.json").write_text(json.dumps(config))
+        return planning
+
+    def _which_side_effect(self):
+        def _which(name):
+            return f"/usr/local/bin/{name}"
+        return _which
+
+    def _extract_section(self, out, header):
+        start = out.index(header) + len(header)
+        try:
+            end = out.index("\n===", start)
+        except ValueError:
+            end = len(out)
+        return out[start:end]
+
+    def _run_doctor(self, tmp_path, *, env_vars=None, settings_json=None, platform="darwin"):
+        """Run doctor scan with controlled env and settings.json."""
+        self._setup_planning(tmp_path)
+        env_patch = env_vars or {}
+
+        # Write settings.json if provided
+        claude_dir = tmp_path / ".claude-config"
+        claude_dir.mkdir(exist_ok=True)
+        if settings_json is not None:
+            (claude_dir / "settings.json").write_text(json.dumps(settings_json))
+
+        def fake_get_settings_env_var(key):
+            settings_path = claude_dir / "settings.json"
+            if not settings_path.is_file():
+                return ""
+            try:
+                settings = json.loads(settings_path.read_text(encoding="utf-8"))
+                return settings.get("env", {}).get(key, "")
+            except (json.JSONDecodeError, OSError):
+                return ""
+
+        def fake_environ_get(key, default=""):
+            return env_patch.get(key, default)
+
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", side_effect=self._which_side_effect()), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")), \
+             mock.patch.object(_mod, "_get_settings_env_var", side_effect=fake_get_settings_env_var), \
+             mock.patch.object(_mod.os.environ, "get", side_effect=fake_environ_get), \
+             mock.patch.object(_mod.sys, "platform", platform):
+            cmd_doctor_scan(argparse.Namespace())
+
+    def test_keys_in_env_pass(self, tmp_path, capsys):
+        """Both keys in environment → PASS."""
+        self._run_doctor(tmp_path, env_vars={
+            "CONTEXT7_API_KEY": "c7-key-123",
+            "PERPLEXITY_API_KEY": "pplx-key-456",
+        })
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Research API Keys ===")
+        assert "PASS" in section
+        assert "All research API keys configured" in section
+        assert "restart" not in section.lower()
+
+    def test_keys_in_settings_json_pass(self, tmp_path, capsys):
+        """Keys not in env but in settings.json → PASS with restart note."""
+        self._run_doctor(tmp_path, env_vars={}, settings_json={
+            "env": {
+                "CONTEXT7_API_KEY": "c7-key-123",
+                "PERPLEXITY_API_KEY": "pplx-key-456",
+            }
+        })
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Research API Keys ===")
+        assert "PASS" in section
+        assert "restart" in section.lower()
+
+    def test_keys_missing_warn_unix(self, tmp_path, capsys):
+        """No keys anywhere, darwin platform → WARN with shell export guidance."""
+        self._run_doctor(tmp_path, env_vars={}, platform="darwin")
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Research API Keys ===")
+        assert "WARN" in section
+        assert "export CONTEXT7_API_KEY" in section
+        assert "~/.zshrc" in section
+
+    def test_keys_missing_warn_windows(self, tmp_path, capsys):
+        """No keys anywhere, win32 platform → WARN with settings.json guidance."""
+        self._run_doctor(tmp_path, env_vars={}, platform="win32")
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Research API Keys ===")
+        assert "WARN" in section
+        assert "settings.json" in section
+        assert "Windows System Environment Variables" in section
+
+    def test_partial_keys(self, tmp_path, capsys):
+        """One key present, one missing → WARN."""
+        self._run_doctor(tmp_path, env_vars={
+            "CONTEXT7_API_KEY": "c7-key-123",
+        })
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Research API Keys ===")
+        assert "WARN" in section
+        assert "PERPLEXITY_API_KEY: not set" in section
+        assert "CONTEXT7_API_KEY: not set" not in section
+
+
+# ---------------------------------------------------------------------------
 # Prompt lint: commit pattern invariants
 # ---------------------------------------------------------------------------
 

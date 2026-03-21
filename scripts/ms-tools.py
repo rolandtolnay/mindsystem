@@ -614,6 +614,18 @@ def _get_claude_config_dir() -> Path:
     return Path.home() / ".claude"
 
 
+def _get_settings_env_var(key: str) -> str:
+    """Read an env var from ~/.claude/settings.json env section."""
+    settings_path = _get_claude_config_dir() / "settings.json"
+    if not settings_path.is_file():
+        return ""
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        return settings.get("env", {}).get(key, "")
+    except (json.JSONDecodeError, OSError):
+        return ""
+
+
 WEB_FRAMEWORK_DEPS = {
     "react", "react-dom", "vue", "next", "nuxt", "@angular/core",
     "svelte", "@sveltejs/kit", "solid-js", "astro", "@remix-run/react",
@@ -1235,28 +1247,50 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
 
     # ---- CHECK 9: Research API Keys ----
     print("=== Research API Keys ===")
-    c7_key = os.environ.get("CONTEXT7_API_KEY", "")
-    pplx_key = os.environ.get("PERPLEXITY_API_KEY", "")
-    if c7_key and pplx_key:
-        print("Status: PASS")
-        print("All research API keys configured")
-        record("PASS", "Research API Keys")
-    else:
+    api_keys = {
+        "CONTEXT7_API_KEY": {
+            "enables": "library documentation lookup via Context7",
+            "without": "falls back to WebSearch/WebFetch (less authoritative)",
+            "url": "https://context7.com → copy API key",
+        },
+        "PERPLEXITY_API_KEY": {
+            "enables": "deep research via Perplexity AI",
+            "without": "falls back to WebSearch/WebFetch (less comprehensive)",
+            "url": "https://perplexity.ai/settings/api → copy API key",
+        },
+    }
+    missing_keys: list[str] = []
+    settings_only_keys: list[str] = []
+    for key_name, info in api_keys.items():
+        env_val = os.environ.get(key_name, "")
+        settings_val = _get_settings_env_var(key_name)
+        if env_val:
+            pass  # configured via environment
+        elif settings_val:
+            settings_only_keys.append(key_name)
+        else:
+            missing_keys.append(key_name)
+            print(f"{key_name}: not set")
+            print(f"  Enables: {info['enables']}")
+            print(f"  Without: {info['without']}")
+            if sys.platform == "win32":
+                print(f"  Set up:  {info['url']} → add to ~/.claude/settings.json env section")
+                print(f"           Or set via Windows System Environment Variables")
+            else:
+                shell_rc = "~/.zshrc" if sys.platform == "darwin" else "~/.bashrc"
+                print(f"  Set up:  {info['url']} → export {key_name}=<key> in {shell_rc}")
+                print(f"           Or add to ~/.claude/settings.json env section")
+    if missing_keys:
         print("Status: WARN")
-        missing_keys: list[str] = []
-        if not c7_key:
-            missing_keys.append("CONTEXT7_API_KEY")
-            print("CONTEXT7_API_KEY: not set")
-            print("  Enables: library documentation lookup via Context7")
-            print("  Without: falls back to WebSearch/WebFetch (less authoritative)")
-            print("  Set up:  https://context7.com → copy API key → export CONTEXT7_API_KEY=<key>")
-        if not pplx_key:
-            missing_keys.append("PERPLEXITY_API_KEY")
-            print("PERPLEXITY_API_KEY: not set")
-            print("  Enables: deep research via Perplexity AI")
-            print("  Without: falls back to WebSearch/WebFetch (less comprehensive)")
-            print("  Set up:  https://perplexity.ai/settings/api → copy API key → export PERPLEXITY_API_KEY=<key>")
         record("WARN", "Research API Keys")
+    else:
+        print("Status: PASS")
+        if settings_only_keys:
+            print("All research API keys configured")
+            print(f"  Note: {', '.join(settings_only_keys)} found in settings.json — restart Claude Code session to activate")
+        else:
+            print("All research API keys configured")
+        record("PASS", "Research API Keys")
     print()
 
     # ---- CHECK 10: Phase Directory Naming ----

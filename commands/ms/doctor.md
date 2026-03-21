@@ -145,7 +145,7 @@ If "Review each" → use AskUserQuestion for each failed check with its details 
 
 Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_milestone_naming → fix_phase_archival → fix_plan_cleanup → fix_phase_dirs → fix_knowledge. Skip any fix whose check passed or was skipped by user.
 
-Phase summaries are resolved by fix_phase_archival. CLI wrapper failures have specific fixes: bin dir not in PATH → restart Claude Code session; missing wrappers or bin dir → re-run `npx mindsystem-cc`; uv not found → `curl -LsSf https://astral.sh/uv/install.sh | sh`. WARN checks (Research API Keys, missing uv) are informational — no automated fix, only displayed in the report.
+Phase summaries are resolved by fix_phase_archival. CLI wrapper failures have specific fixes: bin dir not in PATH → restart Claude Code session; missing wrappers or bin dir → re-run `npx mindsystem-cc`; uv not found → `curl -LsSf https://astral.sh/uv/install.sh | sh`. WARN checks (Research API Keys, missing uv) are informational — no automated fix, only displayed in the report. Research API Keys check provides platform-aware setup guidance (shell export on macOS/Linux, settings.json on Windows) and checks both environment variables and `~/.claude/settings.json` env section as fallback.
 </step>
 
 <step name="apply_fixes">
