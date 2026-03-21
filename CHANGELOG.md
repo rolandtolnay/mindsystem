@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.4.1] - 2026-03-21
+
+### Added
+- Web project detection now covers PHP (Laravel, Yii, Symfony, CakePHP, CodeIgniter, WordPress), Ruby (Rails, Sinatra), and Python (Django, Flask, FastAPI) frameworks. Doctor and browser verification automatically recognize these server-side stacks without manual configuration.
+
+### Fixed
+- Research API Keys health check now works on Windows (Git Bash) by reading `settings.json` env section as fallback when shell env vars are unavailable. Platform-specific setup guidance is shown when keys are missing.
+- New-milestone routing no longer allows the LLM to hallucinate invalid command names — valid options are now constrained to literal values.
+
 ## [4.4.0] - 2026-03-21
 
 ### Added
@@ -694,7 +703,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.1...HEAD
+[4.4.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.1...v4.4.0
 [4.3.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.2.1...v4.3.0
