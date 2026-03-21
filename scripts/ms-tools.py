@@ -640,7 +640,7 @@ SERVERSIDE_COMPOSER_DEPS = {
 
 SERVERSIDE_GEMFILE_KEYWORDS = ["rails", "sinatra"]
 
-SERVERSIDE_PYTHON_KEYWORDS = ["django"]
+SERVERSIDE_PYTHON_KEYWORDS = ["django", "flask", "fastapi"]
 
 SERVERSIDE_PYTHON_FILES = ["requirements.txt", "pyproject.toml", "Pipfile"]
 
@@ -727,7 +727,7 @@ def _detect_web_project(git_root: Path) -> tuple[bool, str]:
                 "react", "vue", "next.js", "nextjs", "nuxt", "angular", "svelte", "sveltekit", "astro", "remix",
                 # Server-side web frameworks
                 "yii", "laravel", "symfony", "codeigniter", "cakephp",
-                "django", "rails", "ruby on rails",
+                "django", "flask", "fastapi", "rails", "ruby on rails",
                 "spring boot", "spring mvc",
                 "asp.net", "blazor",
                 "wordpress",
