@@ -625,6 +625,25 @@ WEB_CONFIG_FILES = [
     "svelte.config.*", "astro.config.*", "remix.config.*",
 ]
 
+SERVERSIDE_FRAMEWORK_FILES = [
+    "artisan",               # Laravel
+    "config.ru",             # Ruby Rack (Rails, Sinatra)
+    "wp-config.php",         # WordPress
+    "wp-config-sample.php",  # WordPress (fresh install)
+]
+
+SERVERSIDE_COMPOSER_DEPS = {
+    "yiisoft/yii2", "yiisoft/yii", "laravel/framework",
+    "symfony/framework-bundle", "symfony/symfony",
+    "cakephp/cakephp", "codeigniter4/framework",
+}
+
+SERVERSIDE_GEMFILE_KEYWORDS = ["rails", "sinatra"]
+
+SERVERSIDE_PYTHON_KEYWORDS = ["django"]
+
+SERVERSIDE_PYTHON_FILES = ["requirements.txt", "pyproject.toml", "Pipfile"]
+
 
 def _detect_web_project(git_root: Path) -> tuple[bool, str]:
     """Detect if project is a web project. Returns (is_web, signal_description)."""
@@ -645,6 +664,46 @@ def _detect_web_project(git_root: Path) -> tuple[bool, str]:
         if list(git_root.glob(pattern)):
             return True, f"{pattern} found"
 
+    # Signal 2b: Server-side framework marker files
+    for marker in SERVERSIDE_FRAMEWORK_FILES:
+        if (git_root / marker).is_file():
+            return True, f"{marker} found"
+
+    # Signal 2c: composer.json deps
+    composer = git_root / "composer.json"
+    if composer.is_file():
+        try:
+            data = json.loads(composer.read_text(encoding="utf-8"))
+            all_deps = {**data.get("require", {}), **data.get("require-dev", {})}
+            found = SERVERSIDE_COMPOSER_DEPS & set(all_deps.keys())
+            if found:
+                return True, f"{', '.join(sorted(found))} in composer.json"
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Signal 2d: Gemfile keywords
+    gemfile = git_root / "Gemfile"
+    if gemfile.is_file():
+        try:
+            content = gemfile.read_text(encoding="utf-8").lower()
+            for kw in SERVERSIDE_GEMFILE_KEYWORDS:
+                if kw in content:
+                    return True, f"'{kw}' in Gemfile"
+        except OSError:
+            pass
+
+    # Signal 2e: Python dependency files
+    for pyfile in SERVERSIDE_PYTHON_FILES:
+        pypath = git_root / pyfile
+        if pypath.is_file():
+            try:
+                content = pypath.read_text(encoding="utf-8").lower()
+                for kw in SERVERSIDE_PYTHON_KEYWORDS:
+                    if kw in content:
+                        return True, f"'{kw}' in {pyfile}"
+            except OSError:
+                pass
+
     # Signal 3: One level deep package.json (monorepo)
     for child_pkg in git_root.glob("*/package.json"):
         if "node_modules" in str(child_pkg):
@@ -663,7 +722,16 @@ def _detect_web_project(git_root: Path) -> tuple[bool, str]:
     if project_md.is_file():
         try:
             content = project_md.read_text(encoding="utf-8").lower()
-            web_keywords = ["react", "vue", "next.js", "nextjs", "nuxt", "angular", "svelte", "sveltekit", "astro", "remix"]
+            web_keywords = [
+                # JS frameworks
+                "react", "vue", "next.js", "nextjs", "nuxt", "angular", "svelte", "sveltekit", "astro", "remix",
+                # Server-side web frameworks
+                "yii", "laravel", "symfony", "codeigniter", "cakephp",
+                "django", "rails", "ruby on rails",
+                "spring boot", "spring mvc",
+                "asp.net", "blazor",
+                "wordpress",
+            ]
             for kw in web_keywords:
                 if kw in content:
                     return True, f"'{kw}' mentioned in PROJECT.md"
@@ -718,9 +786,25 @@ def cmd_browser_check(args: argparse.Namespace) -> None:
 
     # 2. Web project check
     print("\n=== Web Project Detection ===")
-    is_web, signal = _detect_web_project(git_root)
-    print(f"Web project: {is_web}")
-    print(f"Signal: {signal}")
+    web_project_override = None
+    if config_path and config_path.is_file():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            bv = config.get("browser_verification", {})
+            if isinstance(bv, dict) and "web_project" in bv:
+                web_project_override = bv["web_project"]
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    if web_project_override is not None:
+        is_web = bool(web_project_override)
+        signal = "config override"
+        print(f"Web project: {is_web} (config override)")
+        print(f"Signal: {signal}")
+    else:
+        is_web, signal = _detect_web_project(git_root)
+        print(f"Web project: {is_web}")
+        print(f"Signal: {signal}")
 
     if not is_web:
         print("\nResult: SKIP (not a web project)")
@@ -757,6 +841,26 @@ def cmd_browser_check(args: argparse.Namespace) -> None:
 
     print("\nResult: READY")
     sys.exit(0)
+
+
+# ===================================================================
+# Subcommand: detect-web
+# ===================================================================
+
+
+def cmd_detect_web(args: argparse.Namespace) -> None:
+    """Expose _detect_web_project() for use by config command.
+
+    Contract:
+        Output: text — detected + signal
+        Exit codes: 0 = web project, 1 = not web project
+        Side effects: read-only
+    """
+    git_root = find_git_root()
+    is_web, signal = _detect_web_project(git_root)
+    print(f"detected: {is_web}")
+    print(f"signal: {signal}")
+    sys.exit(0 if is_web else 1)
 
 
 # ===================================================================
@@ -1204,15 +1308,32 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
     if isinstance(bv_config, dict):
         bv_enabled = bv_config.get("enabled", True)
 
+    bv_web_override = None
+    if isinstance(bv_config, dict) and "web_project" in bv_config:
+        bv_web_override = bv_config["web_project"]
+
+    bv_hint = ""
+
     if not bv_enabled:
         print("Status: SKIP")
         print("Disabled in config.json")
         record("SKIP", "Browser Verification")
+    elif bv_web_override is False:
+        is_web = False
+        print("Status: SKIP")
+        print("web_project: false in config.json")
+        record("SKIP", "Browser Verification")
     else:
-        is_web, web_signal = _detect_web_project(git_root)
+        if bv_web_override is True:
+            is_web, web_signal = True, "config override"
+        else:
+            is_web, web_signal = _detect_web_project(git_root)
+
         if not is_web:
+            bv_hint = "Tip: If this is a web project, run /ms:config to enable browser verification."
             print("Status: SKIP")
             print(f"Not a web project ({web_signal})")
+            print(bv_hint)
             record("SKIP", "Browser Verification")
         else:
             bv_missing: list[str] = []
@@ -1243,6 +1364,8 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
     elif not is_web:
         print("Status: SKIP")
         print(f"Not a web project ({web_signal})")
+        if bv_hint:
+            print(bv_hint)
         record("SKIP", "Screenshot Optimization")
     else:
         if shutil.which("cwebp"):
@@ -3642,6 +3765,10 @@ def build_parser() -> argparse.ArgumentParser:
     # --- browser-check ---
     p = subparsers.add_parser("browser-check", help="Check browser verification prerequisites")
     p.set_defaults(func=cmd_browser_check)
+
+    # --- detect-web ---
+    p = subparsers.add_parser("detect-web", help="Detect if project is a web project")
+    p.set_defaults(func=cmd_detect_web)
 
     # --- doctor-scan ---
     p = subparsers.add_parser("doctor-scan", help="Diagnostic scan of .planning/ tree")

@@ -60,6 +60,7 @@ _check_skill_installed = _mod._check_skill_installed
 _get_claude_config_dir = _mod._get_claude_config_dir
 cmd_browser_check = _mod.cmd_browser_check
 cmd_doctor_scan = _mod.cmd_doctor_scan
+cmd_detect_web = _mod.cmd_detect_web
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -2794,6 +2795,59 @@ class TestDetectWebProject:
         is_web, signal = _detect_web_project(tmp_path)
         assert is_web is False
 
+    def test_composer_json_with_laravel(self, tmp_path):
+        composer = tmp_path / "composer.json"
+        composer.write_text(json.dumps({"require": {"laravel/framework": "^10.0"}}))
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "laravel/framework" in signal
+
+    def test_composer_json_no_web_deps(self, tmp_path):
+        composer = tmp_path / "composer.json"
+        composer.write_text(json.dumps({"require": {"monolog/monolog": "^3.0"}}))
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is False
+
+    def test_artisan_marker_file(self, tmp_path):
+        (tmp_path / "artisan").write_text("#!/usr/bin/env php\n")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "artisan" in signal
+
+    def test_config_ru_marker_file(self, tmp_path):
+        (tmp_path / "config.ru").write_text("run MyApp")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "config.ru" in signal
+
+    def test_gemfile_with_rails(self, tmp_path):
+        (tmp_path / "Gemfile").write_text("source 'https://rubygems.org'\ngem 'rails', '~> 7.0'\n")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "'rails' in Gemfile" == signal
+
+    def test_requirements_txt_with_django(self, tmp_path):
+        (tmp_path / "requirements.txt").write_text("Django==4.2\ncelery==5.3\n")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "django" in signal
+        assert "requirements.txt" in signal
+
+    def test_pyproject_toml_with_django(self, tmp_path):
+        (tmp_path / "pyproject.toml").write_text('[project]\ndependencies = ["django>=4.2"]\n')
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "django" in signal
+        assert "pyproject.toml" in signal
+
+    def test_project_md_mentions_laravel(self, tmp_path):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "PROJECT.md").write_text("# My App\n\nBuilt with Laravel and MySQL.")
+        is_web, signal = _detect_web_project(tmp_path)
+        assert is_web is True
+        assert "laravel" in signal.lower()
+
 
 class TestCheckSkillInstalled:
     """Tests for _check_skill_installed helper."""
@@ -2935,6 +2989,139 @@ class TestCmdBrowserCheck:
         with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
             cmd_browser_check(args)
         assert exc.value.code == 2  # defaults enabled, but not web → SKIP
+
+    def test_browser_check_web_project_config_override_true(self, tmp_path, capsys):
+        """Config web_project=true overrides auto-detection (no framework files needed)."""
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": True, "web_project": True}}
+        (planning / "config.json").write_text(json.dumps(config))
+        # No framework files at all
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", return_value="/usr/local/bin/agent-browser"), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")), \
+             pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 0
+        captured = capsys.readouterr()
+        assert "READY" in captured.out
+        assert "config override" in captured.out
+
+    def test_browser_check_web_project_config_override_false(self, tmp_path, capsys):
+        """Config web_project=false skips even with react in package.json."""
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"browser_verification": {"enabled": True, "web_project": False}}
+        (planning / "config.json").write_text(json.dumps(config))
+        (tmp_path / "package.json").write_text(json.dumps({"dependencies": {"react": "^18"}}))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_browser_check(args)
+        assert exc.value.code == 2
+        captured = capsys.readouterr()
+        assert "SKIP" in captured.out
+
+
+class TestCmdDetectWeb:
+    """Tests for detect-web subcommand."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def test_detect_web_command(self, tmp_path, capsys):
+        (tmp_path / "package.json").write_text(json.dumps({"dependencies": {"react": "^18"}}))
+
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_detect_web(args)
+        assert exc.value.code == 0
+        captured = capsys.readouterr()
+        assert "detected: True" in captured.out
+
+    def test_detect_web_not_found(self, tmp_path, capsys):
+        args = argparse.Namespace()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_detect_web(args)
+        assert exc.value.code == 1
+        captured = capsys.readouterr()
+        assert "detected: False" in captured.out
+
+
+# ---------------------------------------------------------------------------
+# Doctor: Browser Verification with config override (CHECK 11)
+# ---------------------------------------------------------------------------
+
+
+class TestDoctorBrowserVerification:
+    """Doctor CHECK 11: Browser Verification with web_project config override and hint."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_planning(self, tmp_path, *, subsystems=None, bv_enabled=True, web_project=None):
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        bv_config = {"enabled": bv_enabled}
+        if web_project is not None:
+            bv_config["web_project"] = web_project
+        config = {
+            "subsystems": subsystems or ["app"],
+            "browser_verification": bv_config,
+        }
+        (planning / "config.json").write_text(json.dumps(config))
+        return planning
+
+    def _which_side_effect(self):
+        def _which(name):
+            return f"/usr/local/bin/{name}"
+        return _which
+
+    def _extract_section(self, out, header):
+        start = out.index(header) + len(header)
+        try:
+            end = out.index("\n===", start)
+        except ValueError:
+            end = len(out)
+        return out[start:end]
+
+    def test_doctor_scan_skip_with_hint(self, tmp_path, capsys):
+        """No web detection, no config override → SKIP with Tip."""
+        self._setup_planning(tmp_path)
+        # No framework files
+
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", side_effect=self._which_side_effect()), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")):
+            cmd_doctor_scan(argparse.Namespace())
+
+        out = capsys.readouterr().out
+        bv_section = self._extract_section(out, "=== Browser Verification ===")
+        assert "SKIP" in bv_section
+        assert "Tip:" in bv_section
+        assert "/ms:config" in bv_section
+
+        # CHECK 12 should also have hint
+        ss_section = self._extract_section(out, "=== Screenshot Optimization ===")
+        assert "SKIP" in ss_section
+        assert "Tip:" in ss_section
+
+    def test_doctor_scan_config_override_true(self, tmp_path, capsys):
+        """web_project=true in config, no framework files → proceeds to dep checks."""
+        self._setup_planning(tmp_path, web_project=True)
+        # No framework files at all
+
+        with self._patch_git_root(tmp_path), \
+             mock.patch.object(_mod.shutil, "which", side_effect=self._which_side_effect()), \
+             mock.patch.object(_mod, "_check_skill_installed", return_value=(True, "user: /path")):
+            cmd_doctor_scan(argparse.Namespace())
+
+        out = capsys.readouterr().out
+        bv_section = self._extract_section(out, "=== Browser Verification ===")
+        assert "PASS" in bv_section
+        assert "config override" in bv_section
 
 
 # ---------------------------------------------------------------------------

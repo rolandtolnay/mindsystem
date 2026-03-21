@@ -53,7 +53,7 @@ git remote -v 2>/dev/null || echo "NO_REMOTE"
 2. **Code reviewers** — adhoc: {value or "not set"}, phase: {value or "not set"}, milestone: {value or "not set"}
 3. **Gitignore** — {current .planning/ patterns or "no .planning/ patterns"}
 4. **Mockups** — open: {auto / ask / off}
-5. **Browser verification** — {enabled / disabled}
+5. **Browser verification** — {enabled / disabled}, web project: {yes / no / auto-detect}
 6. **Plan mode** — {single plan (default) / multi-plan}
 7. **Task tracker** — {type + cli path, or "none"}
 ```
@@ -198,8 +198,29 @@ Map selection:
 Update config.json:
 
 ```bash
-ms-tools config-set browser_verification --json '{"enabled": true}'   # or false
+ms-tools config-set browser_verification.enabled --json 'true'   # or false
 ```
+
+**If enabled**, detect and confirm web project status:
+
+```bash
+ms-tools detect-web
+```
+
+Present the auto-detection result via AskUserQuestion:
+- header: "Web project detection"
+- question: "Is this a web project with a browser-renderable UI? Auto-detection returned: {detected result}"
+- options:
+  - "Yes — this is a web project" (recommended if detected)
+  - "No — this is not a web project"
+  - "Auto-detect (don't persist)" — remove any existing override
+
+Map selection:
+- "Yes" → `ms-tools config-set browser_verification.web_project --json 'true'`
+- "No" → `ms-tools config-set browser_verification.web_project --json 'false'`
+- "Auto-detect" → `ms-tools config-delete browser_verification.web_project`
+
+**If disabled**, skip the web_project question.
 
 </step>
 
