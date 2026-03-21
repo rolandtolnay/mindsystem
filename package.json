@@ -1,6 +1,6 @@
 {
   "name": "mindsystem-cc",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "The engineer's meta-prompting system for Claude Code.",
   "bin": {
     "mindsystem-cc": "bin/install.js"
