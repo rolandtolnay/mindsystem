@@ -190,11 +190,26 @@ Example link format:
 ```
 </step>
 
+<step name="update_readme_whats_new">
+Update the "What's new" section in README.md — but only if this release has changes worth featuring.
+
+**Skip this step** if the approved changelog contains only `### Fixed` entries or minor internal `### Changed` items (polish, refactors, wording tweaks). Bug fixes and housekeeping don't belong on the README hero.
+
+**Update when** the changelog has `### Added` entries or `### Changed` entries that introduce new capabilities or meaningfully alter how users interact with the system.
+
+**When updating:**
+1. Replace the version in the heading with the new major.minor (e.g., `## What's new in v4.5`)
+2. Replace the bullet points with the 2-5 highest-impact entries from the approved changelog
+3. Use the existing format: `- **Feature name** — one-line description of the benefit`
+4. Keep the `See [CHANGELOG.md](CHANGELOG.md) for the complete history.` line unchanged
+</step>
+
 <step name="commit_changelog">
-Commit the changelog update:
+Commit the changelog update (and README if updated):
 
 ```bash
 git add CHANGELOG.md
+git diff --quiet README.md 2>/dev/null || git add README.md
 git commit -m "docs: update changelog for v$VERSION"
 ```
 </step>

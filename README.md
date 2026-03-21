@@ -299,6 +299,10 @@ Requirements you want but haven't shipped yet are tracked in `PROJECT.md` with o
 
 `/ms:add-todo` with Linear-inspired metadata: priority (1-4), estimate (XS-XL), inferred subsystem. Todos live as flat files in `.planning/todos/`. Address them later via `/ms:adhoc`, which reads the problem description, executes the work, and moves the todo to `done/`.
 
+### Task tracker integration
+
+Configure a Linear connection via `/ms:config` and pass ticket IDs directly to `/ms:adhoc` (e.g., `/ms:adhoc MIN-123`). The system auto-fetches the ticket's title and description as work context, tags commits with the ticket ID, and on completion posts a solution summary, attaches the commit, and marks the ticket done. Zero overhead when unconfigured — the integration is lazy-loaded only when a ticket ID is detected.
+
 ### Codebase mapping
 
 `/ms:map-codebase` spawns 4 parallel agents producing 7 structured documents: stack, architecture, conventions, testing, integrations, directory structure, and concerns. Use on brownfield projects so Mindsystem respects your existing patterns.
@@ -346,6 +350,7 @@ Once the project is set up, the workflow is the same for new and existing codeba
 ```
 /ms:new-milestone               # Discover what to build next
 /ms:create-roadmap              # Define requirements, map to phases
+/ms:discuss-phase 1             # Gather context before planning
 /ms:plan-phase 1                # Create detailed plan
 /ms:execute-phase 1             # Run in fresh subagents
 /ms:verify-work 1               # Manual acceptance testing
@@ -520,7 +525,7 @@ Full docs live in `/ms:help`.
 | `/ms:execute-phase <number>` | Run all unexecuted plans in fresh subagents |
 | `/ms:verify-work [number]` | Batched manual UAT with inline fixes |
 | `/ms:debug [description]` | Structured debugging that survives `/clear` |
-| `/ms:adhoc <description>` | Knowledge-aware execution for discovered work |
+| `/ms:adhoc <description>` | Knowledge-aware execution for discovered work or Linear ticket IDs |
 | `/ms:compound [input]` | Compound out-of-pipeline changes into knowledge files |
 | `/ms:add-phase <description>` | Append a new phase to the roadmap |
 | `/ms:insert-phase <after> <description>` | Insert urgent work between phases |

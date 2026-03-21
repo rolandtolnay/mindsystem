@@ -108,7 +108,7 @@ Initialize new project with brief and configuration.
 Usage: `/ms:new-project`
 
 **`/ms:config`**
-Configure Mindsystem preferences — code reviewers, mockup preferences, browser verification, plan mode, gitignore patterns, git remote.
+Configure Mindsystem preferences — code reviewers, mockup preferences, browser verification, plan mode, gitignore patterns, git remote, task tracker.
 
 - Use when: you want to set up code review agents, mockup open behavior, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
 - Edits `.planning/config.json` and `.gitignore`
@@ -366,11 +366,13 @@ Execute discovered work with knowledge-aware planning and execution.
 - Use when: you discover work mid-session that can be completed in a single context window without multi-phase orchestration.
 - Bridges the gap between `/ms:add-todo` (capture for later) and `/ms:insert-phase` (multi-plan coordination)
 - Knowledge-aware: loads relevant knowledge files before planning, consolidates learnings after execution
+- Accepts Linear ticket IDs when task tracker is configured via `/ms:config` — auto-fetches context, tags commits, and finalizes the ticket on completion
 - Spawns Explore agents for codebase understanding, ms-adhoc-planner for plan creation, ms-executor for execution
 - Creates per-execution artifacts in `.planning/adhoc/{timestamp}-{slug}/`
 - Updates knowledge files via ms-consolidator after execution
 
 Usage: `/ms:adhoc Fix auth token not refreshing on 401`
+Usage: `/ms:adhoc MIN-123` (Linear ticket — auto-fetches context, finalizes on completion)
 Usage: `/ms:adhoc Refactor API error handling to use consistent format`
 
 ### Utility Commands
