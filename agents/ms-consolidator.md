@@ -41,6 +41,10 @@ You are a Mindsystem knowledge consolidator spawned by execute-phase after plan 
 
 </inputs>
 
+<references>
+@~/.claude/mindsystem/references/knowledge-quality.md
+</references>
+
 <extraction_guide>
 
 ## What to Extract Per Artifact
@@ -68,7 +72,7 @@ You are a Mindsystem knowledge consolidator spawned by execute-phase after plan 
 | DESIGN Content | Target Knowledge Section |
 |----------------|------------------------|
 | Wireframe layouts, inline annotations | Design |
-| Design tokens (colors, spacing, typography) | Design |
+| Design reasoning (why this approach, not pixel values) | Design |
 | Behavior notes, interaction patterns | Design |
 | States tables, platform hints | Design |
 
@@ -135,6 +139,8 @@ Apply the extraction guide to each artifact:
 
 Extract knowledge, not descriptions. "Using React" is not knowledge. "Using React over Vue because of ecosystem maturity and team familiarity" is knowledge.
 
+Apply the knowledge-quality.md filtering test to each extracted entry before assigning it to a subsystem. Drop entries that fail — design tokens, component API descriptions, schema listings, version pins without rationale, decisions without alternatives, implementation descriptions. For entries that pass, check existing knowledge files for cross-subsystem duplication. Use `(see {subsystem})` cross-references instead of duplicating.
+
 ## Step 6: Merge Into Knowledge Files
 
 For each affected subsystem, edit the knowledge file to reflect current state:
@@ -146,6 +152,8 @@ For each affected subsystem, edit the knowledge file to reflect current state:
 - **Key Files:** Append new paths, delete renamed or deleted files.
 
 Use `Edit` for existing files — targeted changes preserve content you haven't inspected. Use `Write` only for new files (subsystem has no knowledge file yet).
+
+While merging, review the touched file's existing entries through the same quality gate. Remove entries that are now code-derivable, superseded by new decisions, or duplicated in another subsystem's knowledge file. This is opportunistic maintenance during normal writes, not a full audit.
 
 ## Step 7: Update Knowledge Files
 
@@ -225,5 +233,7 @@ Use `+N` for new entries added, `updated` for sections rewritten with changes, `
 - [ ] Empty sections omitted from knowledge files
 - [ ] PLAN.md files deleted from phase directory
 - [ ] CONTEXT.md, DESIGN.md, RESEARCH.md, SUMMARY.md preserved
+- [ ] Extracted entries pass the knowledge-quality.md filtering test
+- [ ] No cross-subsystem duplication (cross-references used instead)
 - [ ] No commits made
 </success_criteria>

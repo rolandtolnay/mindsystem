@@ -30,8 +30,8 @@ Template for `.planning/knowledge/{subsystem}.md` — per-subsystem knowledge fi
 
 ## Design
 
-- {Visual/UX spec, interaction pattern, or design token}
-- {Component state, layout choice, or color value}
+- {Design reasoning — why this approach, not alternatives}
+- {Interaction pattern that differs from LLM defaults}
 
 ## Pitfalls
 
@@ -54,7 +54,7 @@ Template for `.planning/knowledge/{subsystem}.md` — per-subsystem knowledge fi
 |---------|----------|-----------------|
 | **Decisions** | Choices with rationale (the "because" part) | CONTEXT.md locked decisions, RESEARCH.md recommendations, PLAN.md approach rationale, SUMMARY.md key-decisions |
 | **Architecture** | How the subsystem works, structural patterns | RESEARCH.md architecture patterns, PLAN.md implementation details, SUMMARY.md accomplishments |
-| **Design** | Visual/UX specs, interaction patterns, design tokens | DESIGN.md wireframe layouts, states tables, behavior notes, design tokens |
+| **Design** | Design reasoning, non-obvious interaction patterns (reasoning only — not tokens or values readable from code) | DESIGN.md wireframe layouts, states tables, behavior notes |
 | **Pitfalls** | What to watch out for, operational patterns | RESEARCH.md common pitfalls, SUMMARY.md issues/deviations, debug resolutions, adhoc learnings |
 | **Key Files** | Important file paths for this subsystem | SUMMARY.md key-files, PLAN.md file targets |
 
@@ -95,5 +95,20 @@ The cross-reference is navigational, not essential. Each file is self-contained 
 **Bad pitfall entries:**
 - Fixed a bug in auth (description, not a reusable pattern)
 - Missing import in login.ts (trivial, not worth persisting)
+
+## What Doesn't Belong
+
+Apply this test to every entry: **"Would an LLM implement this incorrectly without this entry?"** If the answer is no, the entry is noise.
+
+Categories that consistently fail the test:
+
+- **Design tokens** (colors, spacing, typography) — readable from code/config files
+- **Component API descriptions** — readable from component source
+- **Schema/model field listings** — readable from schema files
+- **Version pins without rationale** — readable from package.json/lockfile
+- **Decisions without alternatives** — no "because" = no reusable knowledge ("Using Tailwind" vs. what?)
+- **Implementation descriptions** — restates what the code does
+
+**Decision quality test:** "Could a reasonable agent have chosen differently?" If no, it's a default, not a decision. "Using TypeScript for type safety" fails. "jose over jsonwebtoken for better TypeScript types" passes — jsonwebtoken is the more common choice.
 
 </guidelines>
