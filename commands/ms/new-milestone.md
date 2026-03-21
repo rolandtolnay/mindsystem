@@ -276,7 +276,9 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
 19. **Route to next step:**
 
-    Default to `/ms:research-milestone` — domain research improves roadmap quality for most milestones. Only recommend `/ms:create-roadmap` directly when the domain is clearly familiar, no open questions surfaced, and there are no external APIs, new libraries, or unfamiliar patterns involved.
+    Determine primary suggestion:
+    - Default: `/ms:research-milestone` — domain research improves roadmap quality for most milestones
+    - Only `/ms:create-roadmap` when domain is clearly familiar, no open questions surfaced, and no external APIs, new libraries, or unfamiliar patterns
 
     ```
     Milestone [Name] initialized.
@@ -289,16 +291,19 @@ Milestone name: $ARGUMENTS (optional — will emerge during discovery if not pro
 
     ## ▶ Next Up
 
-    `/ms:[recommended-command]` — [one-line reason from conversation]
+    `/ms:{suggested}` — [one-line reason from conversation]
 
     <sub>`/clear` first → fresh context window</sub>
 
     ---
 
-    **Also available:** `/ms:[alternative-command]` — [brief reason]
+    **Also available:**
+    - `/ms:{alternative}` — [brief reason]
 
     ---
     ```
+
+    `{suggested}` and `{alternative}` are always one of: `research-milestone`, `create-roadmap`.
 
 </process>
 
