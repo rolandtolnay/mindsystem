@@ -31,6 +31,7 @@ Then `/ms:new-project` to initialize. See the [full walkthrough](#end-to-end-wal
 
 ## What's new in v4.4
 
+- **Knowledge quality gate** — consolidator and compounder filter extracted knowledge through signal density enforcement, eliminating noise entries that wouldn't change how an LLM implements code.
 - **User journey browser verification** — end-to-end click/fill/submit testing instead of screenshot-only observation. Catches unreachable pages with no navigation path from the UI.
 - **Single-plan mode (default)** — one plan per phase, eliminating multi-agent orchestration overhead with 1M context windows.
 - **Full phase specification** for add-phase and insert-phase — both commands now derive goal, success criteria, and requirements mapping.

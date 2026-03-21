@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.4.2] - 2026-03-21
+
+### Added
+- Knowledge quality gate for consolidator and compounder — both agents now filter extracted knowledge through a signal density test ("Would an LLM implement this incorrectly without this entry?"), with noise categories, pass/fail examples, cross-subsystem dedup rules, and an existing content review gate. Knowledge template updated to focus Design sections on reasoning-only and include a "What Doesn't Belong" guide.
+
+### Removed
+- Orphaned transition workflow — superseded by complete-milestone (milestone-level review) and knowledge compounding (per-phase decisions).
+
 ## [4.4.1] - 2026-03-21
 
 ### Added
@@ -703,7 +711,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.2...HEAD
+[4.4.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.1...v4.4.2
 [4.4.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.1...v4.4.0
 [4.3.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.0...v4.3.1
