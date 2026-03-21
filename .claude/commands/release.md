@@ -103,10 +103,10 @@ Extract ticket references (e.g., `[MIN-123]`, `MIN-123`) from commit messages an
 git log --format="%s%n%b" $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD
 ```
 
-For each unique ticket ID found, fetch it via the Linear skill CLI:
+For each unique ticket ID found, use the `linear` skill to fetch ticket details:
 
-```bash
-uv run ~/.claude/skills/linear/scripts/linear.py get <ID>
+```
+linear get <ID>
 ```
 
 Use each ticket's title and description (especially Problem/Solution sections) to understand the user-facing intent behind each change.
@@ -204,6 +204,21 @@ Update the "What's new" section in README.md — but only if this release has ch
 4. Keep the `See [CHANGELOG.md](CHANGELOG.md) for the complete history.` line unchanged
 </step>
 
+<step name="confirm_readme">
+Present the proposed README "What's new" section as regular text output, then confirm with the user.
+
+**If skipping:** Output "Skipping README update — changelog contains only fixes/minor changes." and move on.
+
+**If updating:** Show the proposed "What's new" section as text, then use AskUserQuestion:
+
+> "Update README 'What's new' section for v{VERSION}?"
+> 1. **Approve** — Apply changes to README.md
+> 2. **Edit** — Provide corrections first
+> 3. **Skip** — Leave README unchanged
+
+Do NOT write to README.md until the user approves.
+</step>
+
 <step name="commit_changelog">
 Commit the changelog update (and README if updated):
 
@@ -274,4 +289,5 @@ To publish: `npm publish`
 - [ ] Changelog entries written from user perspective (benefit, not implementation detail)
 - [ ] No ticket identifiers in changelog lines
 - [ ] CHANGELOG.md not written until user approves
+- [ ] README.md not written until user approves (when applicable)
 </success_criteria>
