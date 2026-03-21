@@ -2,18 +2,40 @@
 
 ![Mindsystem Bento Grid](assets/bento-image.webp)
 
-Amplifies every step of the development workflow you already follow — discovery, research, design, planning, execution, verification. Each one refined, parallelized, and compounded into persistent knowledge. Built for lean teams and solo builders who want to multiply their output without giving up control.
+# Mindsystem
+
+Amplifies every step of the development workflow you already follow.
+
+[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
+[![npm downloads](https://img.shields.io/npm/dm/mindsystem-cc?style=flat-square)](https://www.npmjs.com/package/mindsystem-cc)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Built for Claude Code](https://img.shields.io/badge/built_for-Claude_Code-D97706?style=flat-square)](https://docs.anthropic.com/en/docs/claude-code)
+
+Discovery, research, design, planning, execution, verification — each one refined, parallelized, and compounded into persistent knowledge. Built for lean teams and solo builders who want to multiply their output without giving up control.
+
+[Quick start](#quick-start) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Commands](#command-reference)
+
+</div>
+
+---
+
+## Quick start
 
 ```bash
 npx mindsystem-cc
 ```
 
-[![npm version](https://img.shields.io/npm/v/mindsystem-cc?style=flat-square&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/mindsystem-cc)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+Then `/ms:new-project` to initialize. See the [full walkthrough](#end-to-end-walkthrough) for the complete feature-building loop, or `/ms:progress` to pick up where you left off.
 
-[Why Mindsystem](#why-mindsystem) · [How it works](#how-it-works) · [Walkthrough](#end-to-end-walkthrough) · [Features](#features) · [Quick start](#quick-start) · [.planning](#the-planning-directory) · [Config](#configuration) · [Commands](#command-reference) · [Troubleshooting](#troubleshooting)
+---
 
-</div>
+## What's new in v4.4
+
+- **User journey browser verification** — end-to-end click/fill/submit testing instead of screenshot-only observation. Catches unreachable pages with no navigation path from the UI.
+- **Single-plan mode (default)** — one plan per phase, eliminating multi-agent orchestration overhead with 1M context windows.
+- **Full phase specification** for add-phase and insert-phase — both commands now derive goal, success criteria, and requirements mapping.
+
+See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 
 ---
 
@@ -87,7 +109,7 @@ Execution happens in fresh subagent contexts, so each plan gets up to 200k token
 
 ### Project setup
 
-Before building features, initialize the project once with `/ms:new-project`. For existing codebases, also run `/ms:map-codebase` (analyzes your stack, conventions, and architecture into 7 structured documents) and `/ms:doctor` (validates config and generates per-subsystem knowledge files from source code). See [Quick start](#quick-start) for the exact sequences.
+Before building features, initialize the project once with `/ms:new-project`. For existing codebases, also run `/ms:map-codebase` (analyzes your stack, conventions, and architecture into 7 structured documents) and `/ms:doctor` (validates config and generates per-subsystem knowledge files from source code). See [Getting started](#getting-started) for the exact sequences.
 
 Everything below is the feature-building loop, identical for new and existing projects.
 
@@ -297,7 +319,7 @@ Requirements you want but haven't shipped yet are tracked in `PROJECT.md` with o
 
 ---
 
-## Quick start
+## Getting started
 
 ### Project setup (one-time)
 
