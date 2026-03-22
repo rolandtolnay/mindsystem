@@ -376,14 +376,13 @@ Format:
 Fix: {what the fix changes, 1-2 sentences}
 ```
 
-**If fix is simple (single file, straightforward change):**
-- Go to `apply_fix` immediately
-
-**If fix is complex (multiple files, architectural):**
-- Spawn ms-verify-fixer subagent (go to `escalate_to_fixer`)
+Go to `apply_fix`.
 
 **If cause NOT found after 2-3 checks:**
-- Escalate to fixer subagent (go to `escalate_to_fixer`)
+- Present options via AskUserQuestion:
+  1. Try different approach — Investigate from another angle
+  2. Skip as assumption — Log and move on
+  3. Manual investigation — You'll look into this yourself
 </step>
 
 <step name="apply_fix">
@@ -423,74 +422,6 @@ Fix applied. Please re-test: {specific instruction}
 Go to `handle_retest`.
 </step>
 
-<step name="escalate_to_fixer">
-**Spawn fixer subagent for complex issue:**
-
-**1. Stash mocks (if active):**
-`ms-tools uat-stash-mocks $PHASE_NUMBER`
-
-**2. Spawn ms-verify-fixer:**
-```
-Task(
-  prompt="""
-You are a Mindsystem verify-fixer. Investigate this issue, find the root cause, implement a fix, and commit it.
-
-## Issue
-
-**Test:** {test_name}
-**Expected:** {expected_behavior}
-**Actual:** {user_reported_behavior}
-**Severity:** {inferred_severity}
-
-## Context
-
-**Phase:** {phase_name}
-**Mock state active:** {mock_type or "none"}
-**Relevant files (suspected):** {file_list}
-
-## What was already checked
-
-{lightweight_investigation_results}
-
-## Knowledge Context
-
-{loaded_knowledge_content or "No knowledge files loaded for this session."}
-
-## Your task
-
-1. Investigate to find root cause
-2. Implement minimal fix
-3. Commit with message: fix({phase}-uat): {description}
-4. Return FIX COMPLETE or INVESTIGATION INCONCLUSIVE
-
-Mocks are stashed — working tree is clean.
-""",
-  subagent_type="ms-verify-fixer",
-  description="Fix: {test_name}"
-)
-```
-
-**3. Handle fixer return:**
-
-**If FIX COMPLETE:**
-- Record fix via ms-tools (same as `apply_fix` step 4: `uat-update --test N` + `--append-fix`)
-- Restore mocks: `ms-tools uat-pop-mocks $PHASE_NUMBER`
-- Request re-test
-
-**If INVESTIGATION INCONCLUSIVE:**
-- Restore mocks: `ms-tools uat-pop-mocks $PHASE_NUMBER`
-- Present options:
-  ```
-  Investigation didn't find root cause.
-
-  Options:
-  1. Try different approach — I'll investigate from another angle
-  2. Skip as assumption — Log and move on
-  3. Manual investigation — You'll look into this yourself
-  ```
-- Handle response accordingly
-</step>
-
 <step name="handle_retest">
 **Handle re-test result:**
 
@@ -515,12 +446,12 @@ ms-tools uat-update $PHASE_NUMBER --test N retry_count=1
 
   Options:
   1. Try different approach — Investigate from scratch
-  2. Escalate to subagent — Fresh context might help
-  3. Skip as assumption — Log and move on
+  2. Skip as assumption — Log and move on
+  3. Manual investigation — You'll look into this yourself
   ```
 - "Try different" → Reset investigation, try again
-- "Escalate" → Go to `escalate_to_fixer`
 - "Skip" → Mark as skipped assumption
+- "Manual" → Mark as skipped, user will investigate
 
 **If New issue:**
 - Mark original as pass

@@ -56,8 +56,7 @@ ms-tools find-phase "$ARGUMENTS"
    - **For each issue found:**
      - On first issue: load knowledge files (match phase subsystem against `.planning/knowledge/*.md`)
      - Lightweight investigation (2-3 tool calls, informed by knowledge)
-     - If simple: Fix inline, commit (amend previous fix commit on retry when HEAD matches fix_commit), ask for re-test
-     - If complex: Spawn ms-verify-fixer subagent (with knowledge context in prompt)
+     - Fix inline, commit (amend previous fix commit on retry when HEAD matches fix_commit), ask for re-test
      - 2 retries on failed re-test, then offer options
 8. **On batch transition:**
    - If new mock_type: Revert old mocks (`git checkout -- <mocked_files>`), apply new ones
@@ -79,7 +78,6 @@ ms-tools find-phase "$ARGUMENTS"
 - Don't present more than 4 tests at a time
 - Don't run automated tests — this is manual user validation
 - Don't skip investigation — always try 2-3 tool calls before escalating
-- Don't fix complex issues inline — spawn fixer subagent for multi-file or architectural changes
 - Don't commit mock code — stash mocked files before fixing, restore after
 - Don't re-present skipped tests — assumptions stand
 - Don't Read/Edit UAT.md for field updates — use `ms-tools uat-update`
