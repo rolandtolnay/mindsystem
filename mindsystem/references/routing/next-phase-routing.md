@@ -6,53 +6,19 @@ Reference for presenting "Next Up" guidance for a phase. Used by progress (curre
 
 Help user decide between Discuss/Research/Design/Plan for a target phase using ROADMAP.md pre-work flags.
 
-## Information to Extract
+## Data
 
-From ROADMAP.md, get the target phase details:
-
-```bash
-grep -A 25 "### Phase ${TARGET_PHASE}:" .planning/ROADMAP.md
-```
-
-Extract:
-- Phase name and goal
-- `**Research**: Likely/Unlikely (reason)`
-- `**Research topics**: ...` (if Likely)
-- `**Discuss**: Likely/Unlikely (reason)`
-- `**Discuss topics**: ...` (if Likely)
-- `**Design**: Likely/Unlikely (reason)`
-- `**Design focus**: ...` (if Likely)
-
-Check for existing context files:
+Run `ms-tools prework-status` to get phase info, pre-work status, and routing suggestion:
 
 ```bash
-ms-tools find-phase "${TARGET_PHASE}"
-# Extract PHASE_DIR from the `dir` field of the JSON output
-[ -f "$PHASE_DIR"/*-CONTEXT.md ] && echo "CONTEXT_EXISTS"
-[ -f "$PHASE_DIR"/*-DESIGN.md ] && echo "DESIGN_EXISTS"
-[ -f "$PHASE_DIR"/*-RESEARCH.md ] && echo "RESEARCH_EXISTS"
+ms-tools prework-status "${TARGET_PHASE}"
 ```
 
-## Routing Logic
-
-Determine primary suggestion (priority order):
-
-```
-IF Discuss: Likely AND no CONTEXT.md:
-  PRIMARY = discuss-phase
-  REASON = from Discuss parenthetical
-ELSE IF Design: Likely AND no DESIGN.md:
-  PRIMARY = design-phase
-  REASON = from Design parenthetical
-ELSE IF Research: Likely AND no RESEARCH.md:
-  PRIMARY = research-phase
-  REASON = from Research parenthetical
-ELSE:
-  PRIMARY = plan-phase
-  REASON = "ready to plan"
-```
+Output includes phase name, goal, pre-work flags with status (done/not started), existing artifacts, and the suggested next command with reason.
 
 ## Output Format
+
+Use the `prework-status` output to populate this template:
 
 ```markdown
 ---
@@ -77,7 +43,7 @@ ELSE:
 
 ### Suggested
 
-`/ms:{primary} {N}` — {reason}
+`/ms:{suggested command} {N}` — {reason}
 
 <sub>`/clear` first → fresh context window</sub>
 

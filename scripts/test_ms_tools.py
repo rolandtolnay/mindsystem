@@ -61,6 +61,9 @@ _get_claude_config_dir = _mod._get_claude_config_dir
 cmd_browser_check = _mod.cmd_browser_check
 cmd_doctor_scan = _mod.cmd_doctor_scan
 cmd_detect_web = _mod.cmd_detect_web
+_parse_phase_section = _mod._parse_phase_section
+_determine_prework_suggestion = _mod._determine_prework_suggestion
+cmd_prework_status = _mod.cmd_prework_status
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -3338,6 +3341,213 @@ class TestDoctorResearchApiKeys:
         assert "WARN" in section
         assert "PERPLEXITY_API_KEY: not set" in section
         assert "CONTEXT7_API_KEY: not set" not in section
+
+
+# ---------------------------------------------------------------------------
+# Prework Status
+# ---------------------------------------------------------------------------
+
+
+SAMPLE_ROADMAP = """\
+# Roadmap
+
+## Phase Details
+
+### Phase 01: Project Setup
+**Goal**: Initialize the project scaffold
+**Depends on**: Nothing
+**Requirements**: REQ-01
+**Success Criteria** (what must be TRUE):
+  1. Project builds successfully
+**Discuss**: Unlikely (mechanical setup)
+**Design**: Unlikely (backend only)
+**Research**: Unlikely (established patterns)
+
+### Phase 02: Authentication
+**Goal**: Users can securely access accounts
+**Depends on**: Phase 1
+**Requirements**: REQ-02, REQ-03
+**Success Criteria** (what must be TRUE):
+  1. Users can log in
+  2. Sessions persist
+**Discuss**: Likely (assumes email/password only, unclear if social login needed)
+**Discuss topics**: authentication methods, session management
+**Design**: Likely (significant new UI)
+**Design focus**: login form, registration flow
+**Research**: Likely (new integration)
+**Research topics**: JWT patterns, OAuth providers
+
+### Phase 03: Dashboard
+**Goal**: Users can view their content
+**Depends on**: Phase 2
+**Requirements**: REQ-04
+**Success Criteria** (what must be TRUE):
+  1. Dashboard renders
+**Discuss**: Likely (assumes grid layout)
+**Discuss topics**: layout preferences
+**Design**: Unlikely (reusing components)
+**Research**: Unlikely (known patterns)
+"""
+
+
+class TestParsePhaseSection:
+    """Tests for _parse_phase_section ROADMAP parser."""
+
+    def test_parses_all_likely(self):
+        result = _parse_phase_section(SAMPLE_ROADMAP, "02")
+        assert result is not None
+        assert result["name"] == "Authentication"
+        assert result["goal"] == "Users can securely access accounts"
+        assert result["prework"]["discuss"]["recommended"] == "Likely"
+        assert "email/password" in result["prework"]["discuss"]["reason"]
+        assert result["prework"]["discuss"]["detail"] == "authentication methods, session management"
+        assert result["prework"]["design"]["recommended"] == "Likely"
+        assert result["prework"]["design"]["detail"] == "login form, registration flow"
+        assert result["prework"]["research"]["recommended"] == "Likely"
+        assert result["prework"]["research"]["detail"] == "JWT patterns, OAuth providers"
+
+    def test_parses_all_unlikely(self):
+        result = _parse_phase_section(SAMPLE_ROADMAP, "01")
+        assert result is not None
+        assert result["name"] == "Project Setup"
+        assert result["prework"]["discuss"]["recommended"] == "Unlikely"
+        assert result["prework"]["design"]["recommended"] == "Unlikely"
+        assert result["prework"]["research"]["recommended"] == "Unlikely"
+        # Unlikely flags have no detail
+        assert result["prework"]["discuss"]["detail"] == ""
+
+    def test_mixed_flags(self):
+        result = _parse_phase_section(SAMPLE_ROADMAP, "03")
+        assert result["prework"]["discuss"]["recommended"] == "Likely"
+        assert result["prework"]["design"]["recommended"] == "Unlikely"
+        assert result["prework"]["research"]["recommended"] == "Unlikely"
+
+    def test_phase_not_found(self):
+        result = _parse_phase_section(SAMPLE_ROADMAP, "99")
+        assert result is None
+
+    def test_unpadded_phase_in_roadmap(self):
+        """Roadmaps use unpadded numbers (Phase 3:), but phase arg is normalized (03)."""
+        roadmap = "### Phase 8: Week Nav\n**Goal**: Navigate weeks\n**Discuss**: Unlikely\n**Design**: Unlikely\n**Research**: Likely (carryover)\n**Research topics**: week transition\n"
+        result = _parse_phase_section(roadmap, "08")
+        assert result is not None
+        assert result["name"] == "Week Nav"
+        assert result["prework"]["research"]["recommended"] == "Likely"
+
+
+class TestDeterminePreworkSuggestion:
+    """Tests for _determine_prework_suggestion routing logic."""
+
+    def _likely(self, reason="some reason"):
+        return {"recommended": "Likely", "reason": reason, "detail": ""}
+
+    def _unlikely(self):
+        return {"recommended": "Unlikely", "reason": "", "detail": ""}
+
+    def test_discuss_first_when_no_context(self):
+        prework = {"discuss": self._likely("unclear scope"), "design": self._likely(), "research": self._likely()}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "discuss-phase"
+        assert reason == "unclear scope"
+
+    def test_skips_discuss_when_context_exists(self):
+        prework = {"discuss": self._likely(), "design": self._likely("new UI"), "research": self._unlikely()}
+        cmd, reason = _determine_prework_suggestion(prework, True, False, False)
+        assert cmd == "design-phase"
+        assert reason == "new UI"
+
+    def test_skips_to_research(self):
+        prework = {"discuss": self._likely(), "design": self._unlikely(), "research": self._likely("external API")}
+        cmd, reason = _determine_prework_suggestion(prework, True, False, False)
+        assert cmd == "research-phase"
+        assert reason == "external API"
+
+    def test_plan_when_all_done(self):
+        prework = {"discuss": self._likely(), "design": self._likely(), "research": self._likely()}
+        cmd, reason = _determine_prework_suggestion(prework, True, True, True)
+        assert cmd == "plan-phase"
+        assert reason == "ready to plan"
+
+    def test_plan_when_all_unlikely(self):
+        prework = {"discuss": self._unlikely(), "design": self._unlikely(), "research": self._unlikely()}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "plan-phase"
+
+    def test_fallback_reason_when_empty(self):
+        prework = {"discuss": {"recommended": "Likely", "reason": "", "detail": ""}, "design": self._unlikely(), "research": self._unlikely()}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "discuss-phase"
+        assert reason == "clarify vision"
+
+
+class TestCmdPreworkStatus:
+    """CLI contract tests for cmd_prework_status."""
+
+    def _setup_project(self, tmp_path, roadmap_text, phase_num, context_files=None):
+        """Create a minimal project with roadmap and optional context files."""
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        (planning / "ROADMAP.md").write_text(roadmap_text)
+
+        if context_files:
+            phase_dir = planning / "phases" / f"{phase_num:02d}-test"
+            phase_dir.mkdir(parents=True)
+            for f in context_files:
+                (phase_dir / f"{phase_num:02d}-{f}").touch()
+
+        return tmp_path
+
+    def test_all_likely_not_started(self, tmp_path, capsys, monkeypatch):
+        self._setup_project(tmp_path, SAMPLE_ROADMAP, 2)
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="2")
+        cmd_prework_status(args)
+        out = capsys.readouterr().out
+        assert "Phase 02: Authentication" in out
+        assert "Discuss: Likely (not started)" in out
+        assert "Design: Likely (not started)" in out
+        assert "Research: Likely (not started)" in out
+        assert "Existing: (none)" in out
+        assert "/ms:discuss-phase 02" in out
+
+    def test_with_existing_context(self, tmp_path, capsys, monkeypatch):
+        self._setup_project(tmp_path, SAMPLE_ROADMAP, 2, ["CONTEXT.md"])
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="2")
+        cmd_prework_status(args)
+        out = capsys.readouterr().out
+        assert "Discuss: Likely (done)" in out
+        assert "Existing: CONTEXT.md" in out
+        # Should skip discuss and suggest design
+        assert "/ms:design-phase 02" in out
+
+    def test_all_unlikely(self, tmp_path, capsys, monkeypatch):
+        self._setup_project(tmp_path, SAMPLE_ROADMAP, 1)
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="1")
+        cmd_prework_status(args)
+        out = capsys.readouterr().out
+        assert "Discuss: Unlikely" in out
+        assert "Design: Unlikely" in out
+        assert "Research: Unlikely" in out
+        assert "/ms:plan-phase 01" in out
+
+    def test_phase_not_found_exits(self, tmp_path, monkeypatch):
+        self._setup_project(tmp_path, SAMPLE_ROADMAP, 99)
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="99")
+        with pytest.raises(SystemExit, match="1"):
+            cmd_prework_status(args)
+
+    def test_includes_topics(self, tmp_path, capsys, monkeypatch):
+        self._setup_project(tmp_path, SAMPLE_ROADMAP, 2)
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="2")
+        cmd_prework_status(args)
+        out = capsys.readouterr().out
+        assert "Topics: authentication methods, session management" in out
+        assert "Focus: login form, registration flow" in out
+        assert "Topics: JWT patterns, OAuth providers" in out
 
 
 # ---------------------------------------------------------------------------

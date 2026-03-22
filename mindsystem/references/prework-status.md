@@ -6,45 +6,19 @@ Reference for showing what pre-work is done vs still needed for the CURRENT phas
 
 After completing one pre-work command, show what else is recommended before planning.
 
-## Information to Extract
+## Data
 
-From ROADMAP.md, get the current phase details:
-
-```bash
-grep -A 25 "### Phase ${PHASE}:" .planning/ROADMAP.md
-```
-
-Extract:
-- `**Research**: Likely/Unlikely (reason)`
-- `**Discuss**: Likely/Unlikely (reason)`
-- `**Design**: Likely/Unlikely (reason)`
-
-Check what context files already exist:
+Run `ms-tools prework-status` to get pre-work flags, completion status, and routing suggestion:
 
 ```bash
-ms-tools find-phase "${PHASE}"
-# Extract PHASE_DIR from the `dir` field of the JSON output
-[ -f "$PHASE_DIR"/*-CONTEXT.md ] && echo "CONTEXT_EXISTS"
-[ -f "$PHASE_DIR"/*-DESIGN.md ] && echo "DESIGN_EXISTS"
-[ -f "$PHASE_DIR"/*-RESEARCH.md ] && echo "RESEARCH_EXISTS"
+ms-tools prework-status "${PHASE}"
 ```
 
-## Routing Logic
-
-Suggest the next incomplete Likely pre-work:
-
-```
-IF Discuss: Likely AND no CONTEXT.md:
-  SUGGEST = discuss-phase
-ELSE IF Design: Likely AND no DESIGN.md:
-  SUGGEST = design-phase
-ELSE IF Research: Likely AND no RESEARCH.md:
-  SUGGEST = research-phase
-ELSE:
-  SUGGEST = plan-phase (ready to plan)
-```
+Output includes phase name, goal, pre-work flags with status (done/not started), existing artifacts, and the suggested next command with reason.
 
 ## Output Format
+
+Use the `prework-status` output to populate this template:
 
 ```markdown
 ---

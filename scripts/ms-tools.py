@@ -2218,6 +2218,182 @@ def cmd_list_artifacts(args: argparse.Namespace) -> None:
 
 
 # ===================================================================
+# Subcommand: prework-status
+# ===================================================================
+
+
+def _parse_phase_section(roadmap_text: str, phase: str) -> dict[str, Any] | None:
+    """Parse a phase section from ROADMAP.md for pre-work flags.
+
+    Returns dict with name, goal, and prework flags, or None if phase not found.
+    """
+    # Try both padded ("08") and unpadded ("8") forms
+    raw_match = re.match(r"^0*(\d.*)", phase)
+    raw = raw_match.group(1) if raw_match else phase
+    candidates = [phase] if raw == phase else [phase, raw]
+
+    match = None
+    for candidate in candidates:
+        pattern = rf"### Phase\s+{re.escape(candidate)}:\s*(.+)"
+        match = re.search(pattern, roadmap_text)
+        if match:
+            break
+
+    if not match:
+        return None
+
+    phase_name = match.group(1).strip()
+
+    # Extract section text until next "### " or end
+    start = match.start()
+    next_section = re.search(r"\n### ", roadmap_text[start + 1:])
+    if next_section:
+        section = roadmap_text[start : start + 1 + next_section.start()]
+    else:
+        section = roadmap_text[start:]
+
+    # Extract goal
+    goal_match = re.search(r"\*\*Goal\*\*:\s*(.+)", section)
+    goal = goal_match.group(1).strip() if goal_match else ""
+
+    # Extract pre-work flags
+    detail_keys = {"Discuss": "topics", "Design": "focus", "Research": "topics"}
+    prework: dict[str, dict[str, str]] = {}
+
+    for flag_type, detail_key in detail_keys.items():
+        flag_match = re.search(
+            rf"\*\*{flag_type}\*\*:\s*(Likely|Unlikely)(?:\s*\(([^)]*)\))?",
+            section,
+        )
+        if flag_match:
+            recommended = flag_match.group(1)
+            reason = (flag_match.group(2) or "").strip()
+        else:
+            recommended = "Unlikely"
+            reason = ""
+
+        # Extract detail line (topics/focus)
+        detail = ""
+        if recommended == "Likely":
+            detail_match = re.search(
+                rf"\*\*{flag_type} {detail_key}\*\*:\s*(.+)", section
+            )
+            if detail_match:
+                detail = detail_match.group(1).strip()
+
+        prework[flag_type.lower()] = {
+            "recommended": recommended,
+            "reason": reason,
+            "detail": detail,
+        }
+
+    return {"name": phase_name, "goal": goal, "prework": prework}
+
+
+def _determine_prework_suggestion(
+    prework: dict[str, dict[str, str]],
+    has_context: bool,
+    has_design: bool,
+    has_research: bool,
+) -> tuple[str, str]:
+    """Apply routing logic to determine next suggested command.
+
+    Returns (command_name, reason) tuple.
+    """
+    if prework["discuss"]["recommended"] == "Likely" and not has_context:
+        return "discuss-phase", prework["discuss"]["reason"] or "clarify vision"
+    if prework["design"]["recommended"] == "Likely" and not has_design:
+        return "design-phase", prework["design"]["reason"] or "create UI/UX specs"
+    if prework["research"]["recommended"] == "Likely" and not has_research:
+        return "research-phase", prework["research"]["reason"] or "investigate approach"
+    return "plan-phase", "ready to plan"
+
+
+def cmd_prework_status(args: argparse.Namespace) -> None:
+    """Show pre-work status and routing suggestion for a phase.
+
+    Contract:
+        Args: phase (str) — phase number (e.g., 5, 05, 2.1)
+        Output: human-readable text — phase info, pre-work status, suggestion
+        Exit codes: 0 = success, 1 = ROADMAP.md missing or phase not found
+        Side effects: read-only
+    """
+    phase = normalize_phase(args.phase)
+    planning = find_planning_dir()
+
+    # Parse ROADMAP.md
+    roadmap = planning / "ROADMAP.md"
+    if not roadmap.is_file():
+        print("Error: No ROADMAP.md found", file=sys.stderr)
+        sys.exit(1)
+
+    roadmap_text = roadmap.read_text(encoding="utf-8")
+    phase_info = _parse_phase_section(roadmap_text, phase)
+    if not phase_info:
+        print(f"Error: Phase {phase} not found in ROADMAP.md", file=sys.stderr)
+        sys.exit(1)
+
+    # Check artifacts
+    phase_dir = find_phase_dir(planning, phase)
+    has_context = False
+    has_design = False
+    has_research = False
+    if phase_dir and phase_dir.is_dir():
+        has_context = any(phase_dir.glob("*-CONTEXT.md"))
+        has_design = any(phase_dir.glob("*-DESIGN.md"))
+        has_research = any(phase_dir.glob("*-RESEARCH.md"))
+
+    # Routing
+    suggested_cmd, reason = _determine_prework_suggestion(
+        phase_info["prework"], has_context, has_design, has_research
+    )
+
+    # Format output
+    print(f"Phase {phase}: {phase_info['name']}")
+    print(f"Goal: {phase_info['goal']}")
+    print()
+    print("Pre-work:")
+
+    artifact_done = {
+        "discuss": has_context,
+        "design": has_design,
+        "research": has_research,
+    }
+    detail_labels = {"discuss": "Topics", "design": "Focus", "research": "Topics"}
+
+    for flag in ("discuss", "design", "research"):
+        pw = phase_info["prework"][flag]
+        if pw["recommended"] == "Likely":
+            done = artifact_done[flag]
+            status = "done" if done else "not started"
+            line = f"  {flag.capitalize()}: Likely ({status})"
+            if pw["reason"]:
+                line += f" — {pw['reason']}"
+            print(line)
+            if pw["detail"]:
+                print(f"    {detail_labels[flag]}: {pw['detail']}")
+        else:
+            print(f"  {flag.capitalize()}: Unlikely")
+
+    # Existing artifacts
+    existing = []
+    if has_context:
+        existing.append("CONTEXT.md")
+    if has_design:
+        existing.append("DESIGN.md")
+    if has_research:
+        existing.append("RESEARCH.md")
+
+    print()
+    if existing:
+        print(f"Existing: {', '.join(existing)}")
+    else:
+        print("Existing: (none)")
+
+    print(f"Suggested: /ms:{suggested_cmd} {phase} — {reason}")
+
+
+# ===================================================================
 # Subcommand: check-artifact
 # ===================================================================
 
@@ -3876,6 +4052,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser("list-artifacts", help="Count artifacts per phase")
     p.add_argument("phase", help="Phase number")
     p.set_defaults(func=cmd_list_artifacts)
+
+    # --- prework-status ---
+    p = subparsers.add_parser("prework-status", help="Show pre-work status and routing suggestion")
+    p.add_argument("phase", help="Phase number (e.g., 5, 05, 2.1)")
+    p.set_defaults(func=cmd_prework_status)
 
     # --- check-artifact ---
     p = subparsers.add_parser("check-artifact", help="Check if specific artifact exists")
