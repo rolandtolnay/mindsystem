@@ -290,7 +290,15 @@ MULTI_PLAN=$(ms-tools config-get multi_plan --default "false")
 
 **If `false` (default) — single plan mode:**
 
-All tasks go into Plan 01, Wave 1. No dependency analysis, clustering, or budget estimation. No AskUserQuestion. Proceed directly to load_skills.
+All tasks go into Plan 01, Wave 1. No dependency analysis, clustering, or budget estimation.
+
+**Confirm task breakdown via AskUserQuestion:**
+- header: "Tasks Identified"
+- question: "Ready to write the plan with these tasks?"
+- Options: "Looks good, write the plan", "I want to adjust"
+
+**"Looks good, write the plan":** Proceed to load_skills.
+**"I want to adjust":** User describes changes in free-text. Apply adjustments, re-present tasks, and confirm again.
 
 **If `true` — multi-plan mode:**
 
@@ -483,7 +491,9 @@ Extract:
 </step>
 
 <step name="risk_decision">
-**Present risk score and handle user choice.**
+**MANDATORY gate — present risk score via AskUserQuestion. Do not skip or inline with other output.**
+
+After parsing the plan-writer results, present the risk assessment as a standalone AskUserQuestion before showing anything else. Do not combine this with the "Next Up" block or any other output.
 
 **Present via AskUserQuestion based on tier from subagent:**
 

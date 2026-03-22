@@ -86,7 +86,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
    - Perform mandatory discovery (Level 0-3 as appropriate)
    - Scan project history via context scanner script (prior decisions, issues, debug resolutions, adhoc learnings, cross-milestone patterns)
    - Break phase into tasks
-   - Determine plan grouping (single plan by default; multi-plan with user confirmation when enabled)
+   - Confirm task breakdown with user (single plan: confirm tasks; multi-plan: confirm tasks + grouping)
    - Discover relevant project skills, confirm with user
    - Hand off tasks + proposed grouping + confirmed skills to plan-writer subagent
    - Create PLAN.md file(s) with executable structure
