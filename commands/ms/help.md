@@ -38,7 +38,7 @@ Output ONLY the reference content below. Do NOT add:
 2. `/ms:map-codebase` — Analyze existing code for patterns and conventions
 3. `/ms:doctor` — Validate config and generate knowledge files from source code
 
-Optional: `/ms:config` — Configure code reviewers, gitignore, and other preferences
+Optional: `/ms:config` — Configure skills, code reviewers, gitignore, and other preferences
 
 ### Building features (repeat per milestone)
 
@@ -108,7 +108,7 @@ Initialize new project with brief and configuration.
 Usage: `/ms:new-project`
 
 **`/ms:config`**
-Configure Mindsystem preferences — code reviewers, mockup preferences, browser verification, plan mode, gitignore patterns, git remote, task tracker.
+Configure Mindsystem preferences — per-phase skills, code reviewers, mockup preferences, browser verification, plan mode, gitignore patterns, git remote, task tracker.
 
 - Use when: you want to set up code review agents, mockup open behavior, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
 - Edits `.planning/config.json` and `.gitignore`
@@ -480,7 +480,7 @@ Usage: `/ms:release-notes`
 /ms:doctor                      # Validate config, generate knowledge files
 ```
 
-Optional: `/ms:config` — configure code reviewers, gitignore, and other preferences
+Optional: `/ms:config` — configure skills, code reviewers, gitignore, and other preferences
 
 **Building features (repeat per milestone):**
 

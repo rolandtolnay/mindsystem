@@ -28,7 +28,7 @@ cat .planning/STATE.md 2>/dev/null
 <step name="load_plan">
 Read the plan file provided in your prompt context.
 
-Parse inline metadata from header: `**Subsystem:**`, `**Type:**`, and `**Skills:**` values.
+Parse inline metadata from header: `**Subsystem:**` and `**Type:**` values.
 
 Parse plan sections:
 - Context (files to read, @-references)
@@ -41,12 +41,6 @@ Parse plan sections:
 **If plan references DESIGN.md:** The DESIGN.md provides visual/UX specifications — Design Tokens table (hex colors, px spacing, font weights), inline wireframe annotations, per-screen States tables, Behavior notes, and Hints. Use exact token values, match wireframe layouts, implement all states. Derive verification criteria from token values, states, and behavior specs.
 
 **If `**Type:** tdd`:** Read `~/.claude/mindsystem/references/tdd-execution.md` for RED-GREEN-REFACTOR execution flow.
-</step>
-
-<step name="load_skills">
-**If `**Skills:**` is present in plan metadata:** Invoke each listed skill via the Skill tool before proceeding. These were confirmed by the user during planning — load them without further confirmation.
-
-**If `**Skills:**` is absent:** Proceed without loading skills. Skill discovery happens during `/ms:plan-phase` — absence means no skills were relevant.
 </step>
 
 <step name="execute">

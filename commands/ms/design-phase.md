@@ -70,27 +70,21 @@ Wait for response and act accordingly.
 
 **If doesn't exist:** Continue to gather context.
 
-## 3. Discover Relevant Skills
+## 3. Load Design Skills
 
-Before gathering context, check for skills that provide design-relevant conventions.
+```bash
+DESIGN_SKILLS=$(ms-tools config-get skills.design --default "[]")
+```
 
-**3a. Scan available skills:**
+**If skills configured:** Invoke each via the Skill tool. Extract aesthetic patterns (colors, components, spacing, typography) from loaded content for the `<existing_aesthetic>` block in step 6.
 
-Scan skills in your system-reminder for matches. Look for skills related to:
-- The platform or framework (Flutter, React, web, etc.)
-- UI conventions, design systems, or component patterns
-- The specific domain of this phase (from the ROADMAP.md phase description extracted in step 1)
+**If no skills configured:**
 
-**3b. Confirm with user:**
+```
+Tip: Configuring design skills in /ms:config can improve design and mockup quality. Run /ms:config to set them up.
+```
 
-Present via AskUserQuestion with `multiSelect: true`:
-- Each matching skill is one option (label: skill name, description: what it provides)
-- Always include a "None — skip skill loading" option
-- User selects which to load, skips, or types a skill name in the free-text field
-
-**3c. Load selected skills:**
-
-Invoke each confirmed skill via the Skill tool. Extract aesthetic patterns (colors, components, spacing, typography) from loaded content for the `<existing_aesthetic>` block in step 6.
+Non-blocking. Fall back to codebase analysis for aesthetic patterns in step 4c.
 
 ## 4. Gather Context Chain
 
@@ -439,7 +433,7 @@ Read `~/.claude/mindsystem/templates/design-iteration.md` and use the iteration 
 </process>
 
 <success_criteria>
-- [ ] Available skills scanned, surfaced via AskUserQuestion, and loaded via Skill tool
+- [ ] Design skills loaded from config (or tip shown if unconfigured)
 - [ ] Codebase analyzed for existing patterns (step 4c)
 - [ ] Adaptive Q&A completed if context gaps existed
 - [ ] Mockup generation offered if phase has significant new UI

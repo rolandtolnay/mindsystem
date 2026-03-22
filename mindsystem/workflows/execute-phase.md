@@ -120,6 +120,23 @@ Report wave structure with context:
 The "What it builds" column comes from skimming plan names/objectives. Keep it brief (3-8 words).
 </step>
 
+<step name="load_skill_reminders">
+**Load plan skills and distill reminders for executors.**
+
+```bash
+PLAN_SKILLS=$(ms-tools config-get skills.plan --default "[]")
+```
+
+**If skills configured:** Invoke each via the Skill tool. Distill to a concise `<skill_reminders>` block — 5-10 bullet points of key conventions that an executor should keep in mind while implementing. Focus on:
+- Patterns to follow (naming, structure, API usage)
+- Critical anti-patterns to avoid
+- Quality signals specific to this domain
+
+Plans were already written with skill context, so these reminders are a safety net for executor autonomous decisions (deviations, verification, edge cases).
+
+**If no skills configured:** Skip. No reminders to inject.
+</step>
+
 <step name="execute_waves">
 Execute each wave in sequence. Autonomous plans within a wave run in parallel.
 
@@ -158,7 +175,7 @@ Execute each wave in sequence. Autonomous plans within a wave run in parallel.
    ```
    Task(
      subagent_type="ms-executor",
-     prompt="Execute plan at {plan_path}\n\nPlan: @{plan_path}\nProject state: @.planning/STATE.md"
+     prompt="Execute plan at {plan_path}\n\nPlan: @{plan_path}\nProject state: @.planning/STATE.md\n\n<skill_reminders>\n{distilled bullet points, or omit block if none}\n</skill_reminders>"
    )
    ```
 

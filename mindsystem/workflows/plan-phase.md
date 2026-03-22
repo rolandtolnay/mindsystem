@@ -39,12 +39,6 @@ Create executable phase prompts (PLAN.md files) from task breakdown.
 **Vertical slices over horizontal layers:** Group by feature (User: model + API + UI) not by type (all models → all APIs → all UIs).
 
 **Explicit dependencies:** EXECUTION-ORDER.md centralizes dependency and parallelism tracking. Plans with no dependencies = parallel candidates.
-
-**Secure by design:** Assume hostile input on every boundary. Validate, parameterize, authenticate, fail closed.
-
-**Performance by design:** Assume production load, not demo conditions. Plan for efficient data access, appropriate caching, minimal round trips.
-
-**Observable by design:** Plan to debug your own work. Include meaningful error messages, appropriate logging, and clear failure states.
 </planning_principles>
 
 <process>
@@ -246,26 +240,9 @@ For each potential task, ask:
 - **Verify hint**: How to prove it worked
 - **Done hint**: Acceptance criteria
 
-**TDD detection:** For each potential task, evaluate TDD fit:
-
-TDD candidates (create dedicated TDD plans):
-- Business logic with defined inputs/outputs
-- API endpoints with request/response contracts
-- Data transformations, parsing, formatting
-- Validation rules and constraints
-- Algorithms with testable behavior
-- State machines and workflows
-
-Standard tasks (remain in standard plans):
-- UI layout, styling, visual components
-- Configuration changes
-- Glue code connecting existing components
-- One-off scripts and migrations
-- Simple CRUD with no business logic
-
-**Heuristic:** Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
-→ Yes: Mark as tdd_candidate=true
-→ No: Standard task
+**TDD detection:** Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
+→ Yes (business logic, validation, data transforms, algorithms): tdd_candidate=true
+→ No (UI layout, config, glue code, simple CRUD): standard task
 
 **If any tasks were marked tdd_candidate=true:** Read `~/.claude/mindsystem/references/tdd.md` for TDD plan structure guidance.
 
@@ -297,6 +274,11 @@ Format: numbered list with task name, key files, dependency hint, and `[TDD]` fl
 
 **Retain full task details internally.** For each task, maintain in your analysis: id, name, type, needs, creates, tdd_candidate, action_hint, verify_hint, done_hint. These are needed for the handoff step — they just don't need to be displayed.
 </output_format>
+
+**Task quality check:** If you can't specify Files + Action + Verify + Done, the task is too vague.
+
+**Good:** "Create POST /api/auth/login endpoint with bcrypt validation"
+**Bad:** "Set up authentication" / "Make it secure" / "Handle edge cases"
 </step>
 
 <step name="propose_grouping">
@@ -308,7 +290,7 @@ MULTI_PLAN=$(ms-tools config-get multi_plan --default "false")
 
 **If `false` (default) — single plan mode:**
 
-All tasks go into Plan 01, Wave 1. No dependency analysis, clustering, or budget estimation. No AskUserQuestion. Proceed directly to discover_skills.
+All tasks go into Plan 01, Wave 1. No dependency analysis, clustering, or budget estimation. No AskUserQuestion. Proceed directly to load_skills.
 
 **If `true` — multi-plan mode:**
 
@@ -342,28 +324,34 @@ Tasks: {task_ids} — {brief rationale}
 - question: "Does this plan structure look good?"
 - Options: "Looks good, proceed", "Adjust grouping"
 
-**"Looks good, proceed":** Continue to discover_skills.
+**"Looks good, proceed":** Continue to load_skills.
 **"Adjust grouping":** User describes changes in free-text. Apply adjustments, re-present, and confirm again.
 </step>
 
-<step name="discover_skills">
-**Identify relevant project skills for this phase.**
+<step name="load_skills">
+**Load configured skills for planning.**
 
-After plan structure is determined, check if project skills could improve plan quality.
+```bash
+PLAN_SKILLS=$(ms-tools config-get skills.plan --default "[]")
+```
 
-**Scan:** Review the skill list in your system-reminder. Match skills against:
-- The phase's technology stack (Flutter, React, Node.js, etc.)
-- The domain of the tasks identified (UI patterns, API design, state management, etc.)
-- Keywords from RESEARCH.md or CONTEXT.md if they exist
+**If skills configured (non-empty array):** Invoke each via the Skill tool. These provide implementation conventions, code patterns, and framework best practices that must influence the resulting plans.
 
-**If matches found:** Present via AskUserQuestion with `multiSelect: true`:
-- Each matching skill is one option (label: skill name, description: what it provides)
-- Always include a "None — skip skill loading" option
-- User selects which to load, skips, or types a skill name in the free-text field
+After loading, extract implementation-relevant content:
+- Code patterns and conventions (naming, structure, architecture rules)
+- Framework-specific best practices (routing patterns, state management, data fetching)
+- Anti-patterns to avoid
+- Quality criteria specific to the domain
 
-**If no matches:** Skip silently — no need to ask the user.
+Distill into a `<skill_context>` block (aim for high signal density — conventions that change what code looks like, not general advice). This block will be passed to the plan-writer.
 
-**Store result:** Keep the confirmed skill names (may be empty) for the handoff step.
+**If no skills configured:**
+
+```
+Tip: Configuring plan skills in /ms:config can improve plan quality — conventions get encoded directly into plans. Run /ms:config to set them up.
+```
+
+Non-blocking. Continue with empty `<skill_context>`.
 </step>
 
 <step name="handoff_to_writer">
@@ -389,6 +377,7 @@ Assemble handoff payload:
 </proposed_grouping>
 
 <phase_context>
+  <!-- Extract phase_goal from ROADMAP.md line after "Phase N:" and REQ-IDs from "Requirements:" field -->
   <phase_number>{PHASE}</phase_number>
   <phase_name>{PHASE_NAME}</phase_name>
   <phase_dir>.planning/phases/{PHASE}-{PHASE_NAME}</phase_dir>
@@ -416,9 +405,9 @@ Assemble handoff payload:
   {list of services detected in task breakdown}
 </external_services>
 
-<confirmed_skills>
-  {comma-separated skill names confirmed by user, or "none"}
-</confirmed_skills>
+<skill_context>
+{Distilled implementation conventions from loaded skills. Code patterns, framework best practices, anti-patterns, quality criteria. Omit if no skills loaded.}
+</skill_context>
 
 <learnings>
   <!-- Flat list from read_project_history step 6. Omit if no matches found. -->
@@ -498,20 +487,13 @@ Extract:
 
 **Present via AskUserQuestion based on tier from subagent:**
 
-**Skip tier (0-39):**
-- header: "Plan Verification"
-- question: "Risk Score: {score}/100 — Low risk\n\nPlans look straightforward. Verification optional."
-- Options: "Skip verification" (first), "Verify plans"
+| Tier | Score | Default option | Message |
+|------|-------|----------------|---------|
+| Skip | 0-39 | "Skip verification" | "Low risk. Verification optional." |
+| Optional | 40-69 | "Verify plans" | "Moderate complexity. Verification recommended." |
+| Verify | 70-100 | "Verify plans (Recommended)" | "Higher complexity. Verification strongly recommended." |
 
-**Optional tier (40-69):**
-- header: "Plan Verification"
-- question: "Risk Score: {score}/100 — Moderate complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n\nVerification recommended but optional."
-- Options: "Verify plans" (first), "Skip verification", "Review plans manually"
-
-**Verify tier (70-100):**
-- header: "Plan Verification Recommended"
-- question: "Risk Score: {score}/100 — Higher complexity\n\nTop factors:\n- {factor_1}\n- {factor_2}\n- {factor_3}\n\nVerification strongly recommended."
-- Options: "Verify plans (Recommended)" (first), "Skip verification", "Review plans manually"
+Include top risk factors for Optional/Verify tiers. Optional/Verify tiers also offer "Review plans manually".
 
 **Handle response:**
 
@@ -615,23 +597,8 @@ Wave 2: {plan-03}
 
 </process>
 
-<task_quality>
-**Good tasks:** Specific files, actions, verification
-- "Add User model to Prisma schema with email, passwordHash, createdAt"
-- "Create POST /api/auth/login endpoint with bcrypt validation"
-
-**Bad tasks:** Vague, not actionable
-- "Set up authentication" / "Make it secure" / "Handle edge cases"
-
-If you can't specify Files + Action + Verify + Done, the task is too vague.
-
-**TDD candidates get dedicated plans.** If "Create price calculator with discount rules" warrants TDD, mark as tdd_candidate=true. Refer to `~/.claude/mindsystem/references/tdd.md` (loaded during task breakdown) for TDD criteria.
-</task_quality>
-
 <anti_patterns>
 - No story points or hour estimates
-- No team assignments
-- No acceptance criteria committees
 - No sub-sub-sub tasks
 - **No reflexive sequential chaining** (Plan 02 depends on 01 "just because")
 Tasks are instructions for Claude, not Jira tickets.
@@ -639,15 +606,12 @@ Tasks are instructions for Claude, not Jira tickets.
 
 <success_criteria>
 Phase planning complete when:
-- [ ] STATE.md read, project history absorbed
-- [ ] Mandatory discovery completed (Level 0-3)
 - [ ] Prior decisions, issues, concerns synthesized
 - [ ] Tasks identified with needs/creates dependencies
 - [ ] Plan grouping determined (auto-grouped or user-confirmed)
-- [ ] Task list + proposed grouping + confirmed skills handed off to ms-plan-writer
+- [ ] Task list + proposed grouping + skill context handed off to ms-plan-writer
 - [ ] PLAN files + EXECUTION-ORDER.md created (pure markdown, Must-Haves, follows proposed grouping)
 - [ ] Plans committed with maximized wave parallelism
-- [ ] Risk assessment presented (score + top factors)
-- [ ] User chose verify/skip (or verified if chosen)
+- [ ] Risk assessment presented and user decision captured (verify/skip)
 - [ ] User knows next steps and wave structure
 </success_criteria>

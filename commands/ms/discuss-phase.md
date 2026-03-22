@@ -7,6 +7,7 @@ allowed-tools:
   - Write
   - Bash
   - Glob
+  - Skill
   - AskUserQuestion
   - Task
 ---

@@ -76,6 +76,18 @@ cat .planning/knowledge/{subsystem}.md 2>/dev/null
 **If no knowledge files exist:** Skip silently (normal for first phase).
 </step>
 
+<step name="load_skills">
+**Load configured skills for discussion context.**
+
+```bash
+DISCUSS_SKILLS=$(ms-tools config-get skills.discuss --default "[]")
+```
+
+**If skills configured:** Invoke each via the Skill tool. Skill content informs product analysis, assumption generation, and collaborative questioning throughout the discussion.
+
+**If no skills configured:** Continue silently. Discuss-phase works well without skills — they're an enhancement, not a requirement.
+</step>
+
 <step name="check_existing">
 Check if CONTEXT.md already exists for this phase:
 

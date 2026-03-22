@@ -16,7 +16,7 @@ Your job: Transform task lists into PLAN.md files following the orchestrator's p
 **What you receive:**
 - Task list with needs/creates/tdd_candidate flags
 - Proposed grouping from orchestrator (plan boundaries, wave assignments, budget estimates)
-- Confirmed skills from user (skill names to embed in plan metadata)
+- Skill context with implementation conventions to weave into plan content
 - Phase context (number, name, goal, directory, requirements)
 - Project references (paths to STATE, ROADMAP, CONTEXT, prior summaries)
 - Relevant learnings from past work (debug resolutions, adhoc insights, established patterns, prior decisions, curated cross-milestone learnings)
@@ -90,9 +90,9 @@ The orchestrator provides structured XML:
   </plan>
 </proposed_grouping>
 
-<confirmed_skills>
-  project-skill-a, project-skill-b
-</confirmed_skills>
+<skill_context>
+All API endpoints must use Zod validation on input. Use server actions for mutations, not API routes. Error boundaries wrap each page segment. CSS modules for styling, no Tailwind.
+</skill_context>
 
 <learnings>
   <learning type="debug" source=".planning/debug/resolved/n-plus-one-queries.md">Missing eager loading on association chains — fix: Added includes() for all relationship traversals</learning>
@@ -231,7 +231,7 @@ For each plan, create `.planning/phases/{phase_dir}/{phase}-{plan}-PLAN.md`:
 ```markdown
 # Plan {NN}: {Descriptive Title}
 
-**Subsystem:** {subsystem_hint} | **Type:** tdd | **Skills:** {skill_names}
+**Subsystem:** {subsystem_hint} | **Type:** tdd
 
 ## Context
 {Why this work exists. Approach chosen and WHY.}
@@ -259,8 +259,6 @@ For each plan, create `.planning/phases/{phase_dir}/{phase}-{plan}-PLAN.md`:
 
 **Format rules:**
 - Omit `| **Type:** tdd` when type is execute (type defaults to execute)
-- Omit `| **Skills:** ...` when no skills were confirmed (confirmed_skills is "none" or empty)
-- Include `| **Skills:** skill-a, skill-b` when skills were confirmed — apply to ALL plans in the phase
 - Plans carry no `<execution_context>`, `<context>`, or @-references — the executor loads its own workflow and project files via its agent definition
 - No `<tasks>`, `<verification>`, `<success_criteria>`, `<output>` XML containers
 
@@ -280,6 +278,13 @@ Rules:
 - Only include learnings that change what the executor would do
 - Phrase as imperative directives, not history
 - If no learnings match a change, add nothing
+
+**Skill context integration:** When expanding tasks to ## Changes subsections, apply conventions from `<skill_context>` as design constraints. Skill conventions should influence:
+- Code structure decisions (patterns to follow, anti-patterns to avoid)
+- Framework usage (correct APIs, idiomatic approaches)
+- Quality criteria (what "good" looks like in this domain)
+
+Do not cite skills explicitly — weave conventions naturally into implementation details. Skill context shapes HOW changes are described, not WHAT changes are made.
 
 **TDD plans:** When type is tdd, use RED/GREEN/REFACTOR structure in ## Changes:
 

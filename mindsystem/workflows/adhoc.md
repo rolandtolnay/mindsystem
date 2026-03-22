@@ -100,6 +100,35 @@ Governing principle: each question must save more context than it costs. A quest
 **On corrections:** Absorb user feedback and proceed to planning. Do not re-present the full briefing.
 </step>
 
+<step name="select_and_load_skills">
+**Select from all configured skills.**
+
+```bash
+DISCUSS_SKILLS=$(ms-tools config-get skills.discuss --default "[]")
+DESIGN_SKILLS=$(ms-tools config-get skills.design --default "[]")
+RESEARCH_SKILLS=$(ms-tools config-get skills.research --default "[]")
+PLAN_SKILLS=$(ms-tools config-get skills.plan --default "[]")
+```
+
+Combine all arrays and deduplicate into a single list.
+
+**If no skills configured across any phase:** Continue silently — adhoc is a fast path.
+
+**If skills exist:** Analyze the task description and exploration findings against each unique skill. For each skill, assess whether it's relevant to the work at hand based on:
+- Work description keywords and domain
+- Subsystem(s) involved
+- Types of files affected (from exploration step)
+
+Present via AskUserQuestion with `multiSelect: true`:
+- header: "Skills"
+- question: "Which skills should inform this work?"
+- Each unique skill as an option, append "(recommended)" to skills judged relevant
+- Include "None — skip skill loading" option
+- Free-text field for unlisted skills
+
+**After selection:** Invoke selected skills via the Skill tool. Extract relevant implementation conventions for the adhoc planner — include as `<skill_context>` in the prompt sent to ms-adhoc-planner.
+</step>
+
 <step name="spawn_plan_writer">
 Create per-execution subdirectory:
 

@@ -7,6 +7,7 @@ allowed-tools:
   - Bash
   - Task
   - Write
+  - Skill
   - AskUserQuestion
 ---
 
@@ -105,6 +106,18 @@ Spawning 3 parallel agents:
 
 Proceed? (yes / adjust scope / change mode)
 ```
+
+## 4b. Load Research Skills
+
+```bash
+RESEARCH_SKILLS=$(ms-tools config-get skills.research --default "[]")
+```
+
+**If skills configured:** Invoke each via the Skill tool. Use skill content to:
+- Add brief domain context to each research agent's prompt (alongside `<prior_knowledge>`)
+- Inform synthesis decisions when mapping agent findings to RESEARCH.md sections (step 6)
+
+**If no skills configured:** Continue silently. Research agents perform well with just project context.
 
 ## 5. Spawn 3 Agents in Parallel
 

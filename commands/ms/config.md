@@ -1,6 +1,6 @@
 ---
 name: ms:config
-description: Configure Mindsystem preferences — code reviewers, mockups, browser verification, plan mode, gitignore, git remote, task tracker
+description: Configure Mindsystem preferences — skills, code reviewers, mockups, browser verification, plan mode, gitignore, git remote, task tracker
 allowed-tools:
   - Read
   - Write
@@ -12,7 +12,7 @@ allowed-tools:
 
 Configure Mindsystem preferences for the current project.
 
-Manages code reviewer agents, mockup preferences, browser verification, plan mode, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
+Manages per-phase skills, code reviewer agents, mockup preferences, browser verification, plan mode, .gitignore patterns for `.planning/` artifacts, git remote setup, and task tracker integration. Run anytime to reconfigure — idempotent.
 
 </objective>
 
@@ -42,7 +42,7 @@ git remote -v 2>/dev/null || echo "NO_REMOTE"
 
 <step name="route">
 
-**Setup mode:** Proceed through all setting steps sequentially (git_remote → code_reviewers → gitignore_patterns → mockup_preferences → browser_verification → multi_plan → task_tracker). Then go to `validation_summary`.
+**Setup mode:** Proceed through all setting steps sequentially (git_remote → skills → code_reviewers → gitignore_patterns → mockup_preferences → browser_verification → multi_plan → task_tracker). Then go to `validation_summary`.
 
 **Edit mode:** Display all current settings with values from config.json, git remote, and .gitignore:
 
@@ -50,12 +50,13 @@ git remote -v 2>/dev/null || echo "NO_REMOTE"
 ## Current Settings
 
 1. **Git remote** — {remote URL or "none configured"}
-2. **Code reviewers** — adhoc: {value or "not set"}, phase: {value or "not set"}, milestone: {value or "not set"}
-3. **Gitignore** — {current .planning/ patterns or "no .planning/ patterns"}
-4. **Mockups** — open: {auto / ask / off}
-5. **Browser verification** — {enabled / disabled}, web project: {yes / no / auto-detect}
-6. **Plan mode** — {single plan (default) / multi-plan}
-7. **Task tracker** — {type + cli path, or "none"}
+2. **Skills** — discuss: {list}, design: {list}, research: {list}, plan: {list}
+3. **Code reviewers** — adhoc: {value or "not set"}, phase: {value or "not set"}, milestone: {value or "not set"}
+4. **Gitignore** — {current .planning/ patterns or "no .planning/ patterns"}
+5. **Mockups** — open: {auto / ask / off}
+6. **Browser verification** — {enabled / disabled}, web project: {yes / no / auto-detect}
+7. **Plan mode** — {single plan (default) / multi-plan}
+8. **Task tracker** — {type + cli path, or "none"}
 ```
 
 Ask: "Which settings would you like to change? Enter the numbers (e.g. 1, 3, 5), 'all' to reconfigure everything, or 'done' if everything looks good."
@@ -86,6 +87,42 @@ If "Create with gh CLI":
 - Show the command: `gh repo create [name] --source=. --push`
 - Confirm with user before executing
 - Execute via Bash tool
+
+</step>
+
+<step name="skills">
+
+Read current values:
+
+```bash
+DISCUSS=$(ms-tools config-get skills.discuss --default "[]")
+DESIGN=$(ms-tools config-get skills.design --default "[]")
+RESEARCH=$(ms-tools config-get skills.research --default "[]")
+PLAN=$(ms-tools config-get skills.plan --default "[]")
+```
+
+Explain: "Skills are loaded automatically during each phase to provide domain-specific context — UI conventions, code patterns, framework best practices. Configure skill names per phase."
+
+**Phase explanations (show all 4):**
+- **discuss** — Informs product analysis and collaborative questioning
+- **design** — Provides aesthetic patterns (colors, typography, spacing) for mockups and design specs. Also used by review-design
+- **research** — Adds domain context to research synthesis
+- **plan** — Highest impact: conventions get encoded directly into plans, which executors follow at ~95% fidelity
+
+For each phase, use AskUserQuestion:
+- header: "Skills: {phase}"
+- question: "Which skills should load during {phase}? (skill names, comma-separated)"
+- options:
+  - "None" — Skip skills for this phase
+  - "Enter skill names" — free-text field for comma-separated skill names
+
+If user enters skill names, parse comma-separated list and set:
+
+```bash
+ms-tools config-set skills.{phase} --json '["skill-a", "skill-b"]'
+```
+
+If "None": set empty array `[]`.
 
 </step>
 
@@ -301,6 +338,7 @@ Show final config state:
 ```
 Configuration updated:
 
+- Skills: discuss: {list}, design: {list}, research: {list}, plan: {list}
 - Code reviewers: [adhoc / phase / milestone values]
 - Mockup open: [auto / ask / off]
 - Browser verification: [enabled / disabled]

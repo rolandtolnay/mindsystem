@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - Skill
   - Task
   - AskUserQuestion
 ---
@@ -52,8 +53,12 @@ AskUserQuestion: always validate assumptions; add questions only for genuine beh
 Guardrail: never ask about technical approach, error handling, or implementation details — only user intent, expected behavior, scope boundaries.
 </step>
 
+<step name="select_and_load_skills">
+Smart skill selection from all configured skills — see adhoc workflow for full logic.
+</step>
+
 <step name="spawn_plan_writer">
-Create execution directory, assemble context, spawn ms-adhoc-planner.
+Create execution directory, assemble context (including skill_context if selected), spawn ms-adhoc-planner.
 </step>
 
 <step name="review_plan">

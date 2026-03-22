@@ -1,5 +1,11 @@
 {
   "subsystems": [],
+  "skills": {
+    "discuss": [],
+    "design": [],
+    "research": [],
+    "plan": []
+  },
   "code_review": {
     "adhoc": null,
     "phase": null,
