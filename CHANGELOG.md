@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.5.1] - 2026-03-22
+
+### Fixed
+- Plan phase now pauses for user confirmation before handing off to the plan writer, restoring the review gate that was accidentally removed. The risk-decision step also uses stronger stop-point language to ensure users always get a chance to intervene.
+
 ## [4.5.0] - 2026-03-22
 
 ### Added
@@ -727,7 +732,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.1...HEAD
+[4.5.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.2...v4.5.0
 [4.4.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.1...v4.4.2
 [4.4.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.0...v4.4.1
