@@ -65,6 +65,10 @@ AskUserQuestion: approve, request edits, or abort.
 Spawn ms-executor with plan path and SUMMARY output path.
 </step>
 
+<step name="browser_verification">
+Run `ms-tools browser-check`. If READY, load browser-verification reference, derive journeys from adhoc SUMMARY, spawn ms-browser-verifier. If MISSING_DEPS, ask user. If SKIP, proceed silently.
+</step>
+
 <step name="code_review">
 Per config.json `code_review.adhoc` setting — spawn code review agent or skip.
 </step>
@@ -86,6 +90,7 @@ Commit artifacts, update STATE.md, report completion. When ticket detected, fina
 <success_criteria>
 - [ ] Knowledge files updated via ms-consolidator
 - [ ] STATE.md "Recent Adhoc Work" section updated with new entry
+- [ ] Browser verification executed (or skipped per config/prerequisites)
 - [ ] Code review executed (or explicitly skipped per config)
 - [ ] Patch file generated if adhoc commits exist
 - [ ] `ms-tools set-last-command` called with adhoc command

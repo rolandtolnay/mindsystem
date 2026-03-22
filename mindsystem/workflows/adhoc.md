@@ -153,6 +153,40 @@ Provide in the prompt:
 The executor reads the plan, executes tasks with atomic commits, creates SUMMARY.md, and returns completion report.
 </step>
 
+<step name="browser_verification">
+Run browser verification prerequisites check:
+
+```bash
+ms-tools browser-check
+```
+
+**If exit 0 (READY):**
+
+Ensure `${exec_dir}/adhoc-01-SUMMARY.md` is available (needed for journey derivation — may already be in context from executor report).
+
+Read `~/.claude/mindsystem/references/browser-verification.md` and follow its sections in order:
+1. **Auth Flow** — establish browser authentication
+2. **Derive User Journeys** — transform SUMMARY into user journeys (single file: `${exec_dir}/adhoc-01-SUMMARY.md`)
+3. **Spawn** — launch ms-browser-verifier with derived journeys, screenshots directory: `${exec_dir}/screenshots`
+4. **Post-Verifier Handling** — route by report status
+
+**If exit 1 (MISSING_DEPS):**
+
+Parse output for missing items. Use AskUserQuestion:
+- header: "Browser verification"
+- question: "Browser verification prerequisites are missing. How to proceed?"
+- options:
+  - "Install missing dependencies" — follow install instructions from output
+  - "Skip browser verification" — proceed to code_review
+
+If user installs: re-run `ms-tools browser-check`.
+If user skips: proceed to code_review.
+
+**If exit 2 (SKIP):**
+
+Proceed silently to code_review.
+</step>
+
 <step name="code_review">
 Read code review agent from config:
 
