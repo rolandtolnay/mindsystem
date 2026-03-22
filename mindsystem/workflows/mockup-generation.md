@@ -91,7 +91,7 @@ Spawn 3 ms-mockup-designer agents IN PARALLEL, each receiving:
 - `<design_direction>` — one of the 3 directions from `derive_directions` (name, philosophy, concrete choices)
 - `<platform>` — `mobile` or `web` from `determine_platform`
 - `<feature_grounding>` — screen/feature identified in `identify_primary_screen`
-- `<existing_aesthetic>` — from project UI skill (`SKILL.md` with design tokens) if exists, else scan codebase theme/style files for colors and fonts. If greenfield, state "No existing aesthetic."
+- `<existing_aesthetic>` — pass through from orchestrator as-is
 - `<mockup_template>` — HTML scaffold from `read_template`
 - Output path: `.planning/phases/{phase}-{slug}/mockups/variant-a.html` (b, c for others)
 

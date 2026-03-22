@@ -39,14 +39,17 @@ The orchestrator provides these context blocks in your prompt:
 
 **`<feature_grounding>`** — The specific screen/feature being mocked up
 
-**`<existing_aesthetic>`** (if exists) — Colors, fonts, spacing from existing project
+**`<existing_aesthetic>`** — Project visual identity from orchestrator
 
 | Element | How You Use It |
 |---------|----------------|
-| Color palette | Use these exact colors — do NOT deviate |
+| Color palette | Use exact values — do NOT deviate |
 | Typography | Match font families and hierarchy |
-| Spacing system | Follow established scale |
-| Component shapes | Match border-radius, shadow patterns |
+| Spacing scale | Follow established scale |
+| Component inventory | Match border-radius, shadow patterns |
+| Layout conventions | Follow established patterns |
+
+If the block states "No existing aesthetic" → propose a fresh palette per design direction.
 
 **`<mockup_template>`** — The HTML scaffold to build on
 

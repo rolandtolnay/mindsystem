@@ -93,7 +93,7 @@ Rule: If you can only tell variants apart by squinting at colors, they are not d
 
 <existing_aesthetic_constraint>
 
-When the project has an existing visual aesthetic (project UI skill, established codebase patterns):
+When `<existing_aesthetic>` contains concrete values:
 
 **ALL variants use the same colors, fonts, and component shapes.** Directions differ ONLY in:
 - Layout and spatial organization
@@ -104,7 +104,7 @@ When the project has an existing visual aesthetic (project UI skill, established
 
 This constraint is non-negotiable. Mockup directions explore layout alternatives, not brand alternatives. An existing product stays visually cohesive across all variants.
 
-When the project is greenfield (no existing aesthetic):
+When `<existing_aesthetic>` states no existing aesthetic:
 - Each variant MAY propose a different color palette
 - Each variant MAY propose different typography
 - Structural differences remain the primary differentiator

@@ -13,7 +13,7 @@ Template for `.planning/phases/XX-name/{phase}-DESIGN.md` - captures visual/UX d
 
 **Designed:** [date]
 **Platform:** [web / mobile / both]
-**Aesthetic source:** [project UI skill / codebase analysis / fresh design]
+**Aesthetic source:** [project design skill / codebase extraction / fresh design]
 
 ## Design Direction
 

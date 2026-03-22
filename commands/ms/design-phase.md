@@ -13,7 +13,7 @@ allowed-tools:
 <objective>
 Create design specifications for a phase. Spawns ms-designer agent with phase context.
 
-**Orchestrator role:** Parse phase, validate against roadmap, check existing design, gather context chain (CONTEXT.md → project UI skill → codebase), adaptive Q&A if gaps, spawn designer agent, enable conversational refinement.
+**Orchestrator role:** Parse phase, validate against roadmap, check existing design, gather context chain (CONTEXT.md → design skill → codebase extraction), adaptive Q&A if gaps, spawn designer agent, enable conversational refinement.
 
 **When to use:**
 - UI-heavy phases with significant new interface work
@@ -76,7 +76,9 @@ Wait for response and act accordingly.
 DESIGN_SKILLS=$(ms-tools config-get skills.design --default "[]")
 ```
 
-**If skills configured:** Invoke each via the Skill tool. Extract aesthetic patterns (colors, components, spacing, typography) from loaded content for the `<existing_aesthetic>` block in step 6.
+**If skills configured:** Invoke each via the Skill tool.
+
+After loading, check if the skill content contains project-specific design tokens (hex colors in palette context, spacing scales with values, font family names). If it does, these are the authoritative aesthetic — skip step 4c. If it contains only design methodology or you're uncertain, proceed to codebase extraction in step 4c.
 
 **If no skills configured:**
 
@@ -84,7 +86,7 @@ DESIGN_SKILLS=$(ms-tools config-get skills.design --default "[]")
 Tip: Configuring design skills in /ms:config can improve design and mockup quality. Run /ms:config to set them up.
 ```
 
-Non-blocking. Fall back to codebase analysis for aesthetic patterns in step 4c.
+Non-blocking. Proceed to codebase extraction in step 4c.
 
 ## 4. Gather Context Chain
 
@@ -142,31 +144,57 @@ If knowledge files exist, extract:
 
 Pass the extracted knowledge to ms-designer in the design prompt (see step 6 `<prior_knowledge>` block).
 
-**4c. Optional context - codebase analysis:**
+**4c. Optional context - codebase aesthetic extraction:**
 
-```bash
-# Platform detection
-if [ -f "pubspec.yaml" ]; then
-  echo "Platform: Flutter (pubspec.yaml found)"
-  # Search Flutter project structure
-  find lib -name "*.dart" 2>/dev/null | head -20
-  grep -r "colors\|theme\|spacing" lib/ --include="*.dart" 2>/dev/null | head -10
-elif [ -f "package.json" ]; then
-  echo "Platform: Web (package.json found)"
-  grep -E "react|vue|angular|svelte" package.json 2>/dev/null | head -5
-  # Search web project structure
-  find src -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" 2>/dev/null | head -20
-  grep -r "colors\|theme\|spacing" src/ --include="*.ts" --include="*.tsx" 2>/dev/null | head -10
-fi
+If authoritative aesthetic already gathered from skill in step 3 → skip this step.
+
+Otherwise, spawn an Explore agent to extract the project's visual identity:
+
+```
+Task(
+  prompt="Read `.planning/PROJECT.md` (Technical Context section) for tech stack. If PROJECT.md doesn't exist, read root dependency files (`pubspec.yaml`, `package.json`, etc.) to identify the framework.
+
+Extract exact values for:
+- **Color palette:** background, text, accent, error — hex values with semantic roles
+- **Typography scale:** font families, size/weight combos
+- **Spacing system:** recurring padding/margin/gap values
+- **Reusable UI components:** names + visual characteristics (border-radius, shadows)
+- **Layout conventions:** navigation pattern, content layout
+
+Format findings as:
+
+Color palette:
+| Role | Value | Context |
+|------|-------|---------|
+| [role] | #hex | [where used] |
+
+Typography:
+| Element | Family | Size/Weight | Usage |
+|---------|--------|-------------|-------|
+| [element] | [family] | [size/weight] | [where used] |
+
+Spacing scale:
+[base unit and scale values]
+
+Component inventory:
+- [ComponentName] — [visual characteristics]
+
+Layout conventions:
+- [pattern description]
+
+Extract EXACT values (hex codes, pixel values, font names). Don't summarize or approximate. Return 'not found' for sections with no data. Look in theme files, style constants, design token files, and framework-specific configuration — you know where these live for the detected framework.",
+  subagent_type="Explore",
+  description="Extract codebase aesthetic"
+)
 ```
 
-Document discovered patterns for the designer.
+If the agent returns mostly empty results → greenfield. If substantive findings → use them for the `<existing_aesthetic>` block in step 6.
 
 ## 5. Adaptive Q&A (If Gaps Exist)
 
 Assess context coverage:
 - Can platform be inferred? (from codebase or PROJECT.md)
-- Can visual style be inferred? (from project UI skill or codebase)
+- Can visual style be inferred? (from existing aesthetic)
 - Can design priorities be inferred? (from CONTEXT.md or phase requirements)
 
 **If everything can be inferred:** Skip to step 6.
@@ -200,17 +228,7 @@ Use AskUserQuestion:
 
 **If user selects "Yes":**
 
-Read `~/.claude/mindsystem/workflows/mockup-generation.md` and follow the mockup-generation workflow.
-
-1. Determine platform from context chain (or ask user)
-2. Identify primary screen for the phase
-3. Derive 3 design directions from feature context
-4. Present directions to user for approval/tweaking
-5. Read platform template (mobile or web)
-6. Spawn 3 x ms-mockup-designer agents in parallel
-7. Run comparison script (`compare_mockups.py`), open in browser, and present to user
-8. Handle selection (single pick, combine, tweak, more variants, or skip)
-9. Extract CSS specs from chosen variant into `<mockup_direction>` block
+Read `~/.claude/mindsystem/workflows/mockup-generation.md` and follow the mockup-generation workflow. Generate 3 HTML mockup variants, present comparison to user, and handle selection.
 
 Pass gathered context (PROJECT.md, ROADMAP.md phase entry, existing aesthetic) to the workflow. The workflow returns either a `<mockup_direction>` block for step 6, or nothing if user skips.
 
@@ -269,7 +287,7 @@ Reference products:
 
 [If CONTEXT.md doesn't exist:]
 
-Vision inferred from phase requirements and PROJECT.md context.
+No explicit vision provided. Derive design direction from phase requirements and product context above.
 Reference products: [From Q&A if asked, or "None specified"]
 </user_vision>
 
@@ -291,24 +309,35 @@ No prior knowledge files. First phase or no prior execution.
 </prior_knowledge>
 
 <existing_aesthetic>
-[If project UI skill exists:]
+[Always present. Populated from skill content OR Explore agent findings OR greenfield.]
 
-Authoritative patterns from project UI skill:
-- Color palette: [exact values]
-- Typography: [font families, sizes]
-- Spacing system: [scale values]
-- Component library: [named components]
+Color palette:
+| Role | Value | Context |
+|------|-------|---------|
+| bg-primary | #hex | Main background |
+| text-primary | #hex | Body text |
+| accent | #hex | Interactive elements |
+| ... | | |
 
-[If no UI skill, from codebase analysis:]
+Typography:
+| Element | Family | Size/Weight | Usage |
+|---------|--------|-------------|-------|
+| heading | [family] | [size/weight] | Page titles |
+| body | [family] | [size/weight] | General content |
+| ... | | | |
 
-Discovered patterns from codebase:
-- Colors found: [hex values from theme/styles]
-- Components found: [existing component names]
-- Layout patterns: [grid systems, spacing used]
+Spacing scale:
+[base unit and scale values, e.g. 4/8/12/16/24/32px]
 
-[If greenfield:]
+Component inventory:
+- [ComponentName] — [visual characteristics]
 
-No existing aesthetic. Design fresh with platform conventions.
+Layout conventions:
+- [Navigation pattern, content layout, responsive breakpoints]
+
+Platform: [Flutter / React / etc.]
+
+[If greenfield: "No existing aesthetic. Design fresh with platform conventions."]
 </existing_aesthetic>
 
 <mockup_direction>
@@ -407,7 +436,6 @@ After initial generation, if user wants to refine:
 **Refinement principles:**
 - Direct edits — Edit DESIGN.md directly, don't regenerate
 - Preserve decisions — Changes are incremental, not wholesale replacement
-- User controls pace — User decides when design is "done"
 
 **For major redesigns (multiple aspects changing):**
 
@@ -433,11 +461,9 @@ Read `~/.claude/mindsystem/templates/design-iteration.md` and use the iteration 
 </process>
 
 <success_criteria>
-- [ ] Design skills loaded from config (or tip shown if unconfigured)
-- [ ] Codebase analyzed for existing patterns (step 4c)
+- [ ] Aesthetic context gathered: skills checked for design tokens, codebase extraction run if needed
 - [ ] Adaptive Q&A completed if context gaps existed
-- [ ] Mockup generation offered if phase has significant new UI
-- [ ] Mockup direction extracted and passed to ms-designer (if generated)
+- [ ] Mockup generation offered for significant UI; direction passed to ms-designer if generated
 - [ ] ms-designer spawned with quality-forcing patterns
 - [ ] DESIGN.md created with Design Direction, Design Tokens, and Screens sections and committed
 - [ ] User informed of refinement options and next steps
