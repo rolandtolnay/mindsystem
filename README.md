@@ -266,7 +266,7 @@ Unnecessary instructions aren't wasted space — they interfere with the ones th
 
 ### Browser verification
 
-During execute-phase, web projects get automatic visual QA via [agent-browser](https://github.com/anthropics/agent-browser). A checklist is derived from execution summaries, then each route is verified with screenshots and programmatic diagnostics (console logs, JS errors, network failures). Clear mismatches get fixed inline; anything deeper is reported with screenshot evidence for verify-work. Enabled by default — disable per-project via `/ms:config`.
+During execute-phase and `/ms:adhoc`, web projects get automatic visual QA via [agent-browser](https://github.com/anthropics/agent-browser). A checklist is derived from execution summaries, then each route is verified with screenshots and programmatic diagnostics (console logs, JS errors, network failures). Clear mismatches get fixed inline; anything deeper is reported with screenshot evidence for verify-work. Enabled by default — disable per-project via `/ms:config`.
 
 ### Built-in code review
 
@@ -286,7 +286,7 @@ For work that's too coherent for a todo but too small for a full phase. `/ms:adh
 
 ### Project health
 
-`/ms:doctor` runs 10 health checks: subsystem vocabulary, directory structure, milestone naming, knowledge files, CLI wrappers, API keys, version freshness. Fixes are applied in dependency order with atomic commits. Safe to run repeatedly.
+`/ms:doctor` runs 14 health checks: subsystem vocabulary, directory structure, milestone naming, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers, API keys, phase directory naming, browser verification prerequisites, roadmap format, phase skills, version freshness. Fixes are applied in dependency order with atomic commits. Safe to run repeatedly.
 
 ### Smart routing
 
@@ -463,6 +463,15 @@ Mindsystem stores project config in `.planning/config.json`. Run `/ms:config` to
   // Populated by /ms:new-project, refined by /ms:doctor.
   "subsystems": ["auth", "api", "database"],
 
+  // Skills loaded per phase. Names match installed skill directories.
+  // Configured via /ms:config. Loaded automatically during each phase.
+  "skills": {
+    "discuss": [],
+    "design": [],
+    "research": [],
+    "plan": []
+  },
+
   // Code review after execution. One reviewer per tier.
   //   null                  → falls back to "ms-code-simplifier" (default)
   //   "ms-code-reviewer"    → structural: architecture and design issues
@@ -513,7 +522,7 @@ Full docs live in `/ms:help`.
 | `/ms:help` | Show the full command reference |
 | `/ms:progress` | Show where you are and what to run next |
 | `/ms:new-project` | Initialize `.planning/` and capture project intent |
-| `/ms:config` | Configure code reviewers, mockups, plan mode, gitignore, git remote |
+| `/ms:config` | Configure skills, code reviewers, mockups, plan mode, gitignore, git remote |
 | `/ms:map-codebase` | Document existing repo's stack, structure, and conventions |
 | `/ms:research-milestone` | Milestone-scoped research saved to `.planning/MILESTONE-RESEARCH.md` |
 | `/ms:create-roadmap` | Define requirements and create phases mapped to them |

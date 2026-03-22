@@ -110,7 +110,7 @@ Usage: `/ms:new-project`
 **`/ms:config`**
 Configure Mindsystem preferences — per-phase skills, code reviewers, mockup preferences, browser verification, plan mode, gitignore patterns, git remote, task tracker.
 
-- Use when: you want to set up code review agents, mockup open behavior, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
+- Use when: you want to configure per-phase skills, set up code review agents, mockup open behavior, manage which .planning/ artifacts are git-ignored, or push your repo to GitHub.
 - Edits `.planning/config.json` and `.gitignore`
 - Suggests code reviewers based on tech stack (needs PROJECT.md)
 - Idempotent — run anytime to reconfigure
@@ -366,6 +366,7 @@ Execute discovered work with knowledge-aware planning and execution.
 - Use when: you discover work mid-session that can be completed in a single context window without multi-phase orchestration.
 - Bridges the gap between `/ms:add-todo` (capture for later) and `/ms:insert-phase` (multi-plan coordination)
 - Knowledge-aware: loads relevant knowledge files before planning, consolidates learnings after execution
+- Browser verification for web projects (same flow as execute-phase)
 - Accepts Linear ticket IDs when task tracker is configured via `/ms:config` — auto-fetches context, tags commits, and finalizes the ticket on completion
 - Spawns Explore agents for codebase understanding, ms-adhoc-planner for plan creation, ms-executor for execution
 - Creates per-execution artifacts in `.planning/adhoc/{timestamp}-{slug}/`
@@ -381,7 +382,7 @@ Usage: `/ms:adhoc Refactor API error handling to use consistent format`
 Health check and fix project configuration — subsystems, milestone structure, knowledge files.
 
 - Use when: project has structural drift, missing config, or periodic health check
-- Runs 6 checks: subsystem vocabulary, milestone directories, phase archival, knowledge files, phase summaries, PLAN cleanup
+- Runs 14 checks: subsystem vocabulary, milestone directories, milestone naming, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers, API keys, phase directory naming, browser verification prerequisites, roadmap format, phase skills, version freshness
 - Presents results table, then offers to fix all issues in dependency order
 - Each fix group gets its own atomic commit
 - Idempotent — safe to run repeatedly
