@@ -41,9 +41,13 @@ Why 50% not 80%?
 </task_rule>
 
 <tdd_plans>
-**TDD features get their own plans. Target ~40% context.**
+**In multi-plan mode, TDD features get their own plans. Target ~40% context.**
 
-TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than linear task execution. TDD features are inherently heavy-weight (~25-40% marginal) and are always isolated into dedicated plans.
+TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file reads, test runs, and potential debugging. This is fundamentally heavier than linear task execution.
+
+In **multi-plan mode** (`multi_plan: true`), TDD features are isolated into dedicated plans — the orchestrator proposes them as standalone plans during grouping.
+
+In **single-plan mode** (default), TDD tasks are included inline alongside other tasks. The orchestrator already determined that all tasks fit within one plan's context budget. Do not split TDD tasks into separate plans in single-plan mode.
 
 | TDD Feature Complexity | Context Usage |
 |------------------------|---------------|
@@ -51,9 +55,9 @@ TDD requires 2-3 execution cycles (RED → GREEN → REFACTOR), each with file r
 | Business logic with edge cases | ~35-40% |
 | Complex algorithm | ~40-50% |
 
-**One feature per TDD plan.** If features are trivial enough to batch, they're trivial enough to skip TDD.
+**One feature per TDD plan (multi-plan mode only).** If features are trivial enough to batch, they're trivial enough to skip TDD.
 
-**Why TDD plans are separate:**
+**Why TDD plans are separate in multi-plan mode:**
 - TDD consumes 40-50% context for a single feature
 - Dedicated plans ensure full quality throughout RED-GREEN-REFACTOR
 - Each TDD feature gets fresh context, peak quality

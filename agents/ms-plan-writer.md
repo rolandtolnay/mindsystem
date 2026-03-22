@@ -180,7 +180,6 @@ The orchestrator proposed plan boundaries collaboratively with the user. Start f
 - **File conflicts:** Two tasks in the same parallel wave that modify the same file
 - **Circular dependencies:** Plan A needs Plan B and Plan B needs Plan A
 - **Missing dependency chains:** A task needs an artifact from another plan but isn't sequenced after it
-- **TDD isolation:** Tasks marked `tdd_candidate` must be in dedicated plans
 
 **3. Apply grouping:**
 - If validation passes → use proposed boundaries as-is
