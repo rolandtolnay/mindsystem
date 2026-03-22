@@ -29,12 +29,12 @@ Then `/ms:new-project` to initialize. See the [full walkthrough](#end-to-end-wal
 
 ---
 
-## What's new in v4.4
+## What's new in v4.5
 
-- **Knowledge quality gate** — consolidator and compounder filter extracted knowledge through signal density enforcement, eliminating noise entries that wouldn't change how an LLM implements code.
-- **User journey browser verification** — end-to-end click/fill/submit testing instead of screenshot-only observation. Catches unreachable pages with no navigation path from the UI.
-- **Single-plan mode (default)** — one plan per phase, eliminating multi-agent orchestration overhead with 1M context windows.
-- **Full phase specification** for add-phase and insert-phase — both commands now derive goal, success criteria, and requirements mapping.
+- **Config-driven skill loading** — configure phase skills once via `/ms:config` instead of interactive prompts at every phase start. Loaded automatically across all workflows.
+- **Browser verification for adhoc work** — `/ms:adhoc` now includes automated browser verification, matching `/ms:execute-phase` visual QA.
+- **Design aesthetic exploration** — design-phase gathers actual design tokens from your codebase instead of shallow grep, producing richer context for mockups.
+- **Plan checker respects single-plan mode** — scope observations become informational, no more suggestions to split plans you intentionally kept together.
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 

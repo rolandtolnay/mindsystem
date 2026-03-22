@@ -6,6 +6,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-03-22
+
+### Added
+- **Config-driven skill loading** — Skills for each phase (discuss, design, research, plan) are now configured once via `/ms:config` instead of being prompted interactively at every phase start. Automatically loaded across all workflows including execute, adhoc, discuss, research, and design.
+- **Browser verification for adhoc work** — `/ms:adhoc` now includes an automated browser verification step, matching the visual QA available in `/ms:execute-phase`.
+- **Doctor checks for roadmap format and phase skills** — Doctor validates that incomplete phases have valid pre-work flags (Discuss/Design/Research) and warns when phase skills aren't configured, with setup guidance.
+
+### Changed
+- **Design aesthetic gathering uses intelligent exploration** — Instead of shallow grep for colors and fonts, design-phase sends an Explore agent that reads PROJECT.md for tech stack context and extracts actual design tokens from framework-specific locations, producing richer aesthetic context for mockups.
+- **Phase renumbering is automated** — Removing or renumbering phases handles all directory and file renames automatically, including decimal phase series and collision detection, replacing error-prone manual bash operations.
+- **Plan checker respects single-plan mode** — When `multi_plan: false` is configured, scope observations become informational rather than warnings, so it no longer suggests splitting plans you intentionally kept together.
+- **Verify-work always fixes inline** — The separate fixer subagent (which never triggered organically across 24+ sessions) has been removed. All verification issues are fixed inline, with user options when investigation stalls.
+
+### Fixed
+- **Single-plan mode no longer splits TDD tasks** — A structural rule in the plan writer was overriding single-plan configuration by isolating TDD tasks into separate plans. TDD isolation now only applies in multi-plan mode.
+
 ## [4.4.2] - 2026-03-21
 
 ### Added
@@ -711,7 +727,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.2...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.0...HEAD
+[4.5.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.2...v4.5.0
 [4.4.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.1...v4.4.2
 [4.4.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.3.1...v4.4.0
