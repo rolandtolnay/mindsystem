@@ -1413,6 +1413,121 @@ def cmd_doctor_scan(args: argparse.Namespace) -> None:
             record("WARN", "Screenshot Optimization")
     print()
 
+    # ---- CHECK 13: Roadmap Format ----
+    print("=== Roadmap Format ===")
+    roadmap_path = planning / "ROADMAP.md"
+    if not roadmap_path.is_file():
+        print("Status: SKIP")
+        print("No ROADMAP.md found")
+        record("SKIP", "Roadmap Format")
+    else:
+        roadmap_text = roadmap_path.read_text(encoding="utf-8")
+        all_phases = parse_roadmap_phases(roadmap_path)
+
+        if not all_phases:
+            print("Status: SKIP")
+            print("No phases found in ROADMAP.md")
+            record("SKIP", "Roadmap Format")
+        else:
+            # Find incomplete phases — check overview checklist
+            completed_phases: set[str] = set()
+            for line in roadmap_text.splitlines():
+                done_match = re.match(
+                    r"^-\s*\[x\]\s*\*\*Phase\s+(\d+(?:\.\d+)?)", line
+                )
+                if done_match:
+                    completed_phases.add(done_match.group(1))
+
+            phases_to_check = [
+                (num, name)
+                for num, name in all_phases
+                if num not in completed_phases
+            ]
+
+            if not phases_to_check:
+                print("Status: PASS")
+                print("All phases completed — no pre-work flags to validate")
+                record("PASS", "Roadmap Format")
+            else:
+                issues: list[str] = []
+                for num, name in phases_to_check:
+                    padded = normalize_phase(num)
+                    info = _parse_phase_section(roadmap_text, padded)
+                    if info is None:
+                        issues.append(f"Phase {num}: no detail section found")
+                        continue
+                    for flag in ("discuss", "design", "research"):
+                        pw = info["prework"][flag]
+                        if pw.get("status") == "parse_error":
+                            issues.append(
+                                f"Phase {num} ({name}): {flag.capitalize()} flag missing or malformed"
+                            )
+
+                if issues:
+                    print("Status: FAIL")
+                    print(f"{len(issues)} pre-work flag issue(s):")
+                    for issue in issues:
+                        print(f"  - {issue}")
+                    record("FAIL", "Roadmap Format")
+                else:
+                    print("Status: PASS")
+                    print(
+                        f"All {len(phases_to_check)} incomplete phase(s) have valid pre-work flags"
+                    )
+                    record("PASS", "Roadmap Format")
+    print()
+
+    # ---- CHECK 14: Phase Skills ----
+    print("=== Phase Skills ===")
+    skills_config = config.get("skills", {})
+    plan_skills = skills_config.get("plan", []) if isinstance(skills_config, dict) else []
+    design_skills = skills_config.get("design", []) if isinstance(skills_config, dict) else []
+    skill_warnings: list[str] = []
+
+    if not plan_skills:
+        skill_warnings.append("plan")
+        print("skills.plan: not configured")
+        print("  Impact: Plan-phase code quality — the highest-leverage skill slot")
+        print("  What to add: A code quality skill encoding your project's framework")
+        print("  best practices. Include rules for common pitfalls, idiomatic patterns,")
+        print("  performance gotchas, and structural conventions specific to your stack.")
+        print("  The executor runs a multi-pass review after implementation, catching")
+        print("  framework misuse and structural problems before they reach verification.")
+        print("  Ideal structure: A SKILL.md with categorized rules (reactivity, typing,")
+        print("  performance, composition) plus reference files with bad/good code examples")
+        print("  for each category. The agent selectively reads only rules relevant to the")
+        print("  changed code, keeping context usage efficient.")
+        print("  Set up: Create a skill with framework-specific rules and reference files,")
+        print("  then run /ms:config to add it to skills.plan")
+    else:
+        print(f"skills.plan: {', '.join(plan_skills)}")
+
+    if not design_skills:
+        skill_warnings.append("design")
+        print("skills.design: not configured")
+        print("  Impact: Design-phase quality — ensures generated designs match your")
+        print("  existing design system instead of generic AI output")
+        print("  What to add: A skill describing your project's design system — color")
+        print("  palette, typography, spacing scale, reusable components, and layout")
+        print("  conventions. The designer agent uses this to produce designs that feel")
+        print("  native to your product rather than starting from scratch.")
+        print("  Ideal structure: Document your design tokens (colors, fonts, sizes),")
+        print("  component inventory (buttons, cards, inputs with their variants), and")
+        print("  brand guidelines (visual tone, density preference, platform conventions).")
+        print("  Set up: Create a skill with your design tokens and component inventory,")
+        print("  then run /ms:config to add it to skills.design")
+    else:
+        print(f"skills.design: {', '.join(design_skills)}")
+
+    if skill_warnings:
+        print(f"Status: WARN")
+        record("WARN", "Phase Skills")
+    else:
+        print("Status: PASS")
+        print("Plan and design phase skills configured")
+        record("PASS", "Phase Skills")
+    print()
+
     # ---- SUMMARY ----
     total = pass_count + warn_count + fail_count + skip_count
     print("=== Summary ===")
@@ -2256,27 +2371,45 @@ def _parse_phase_section(roadmap_text: str, phase: str) -> dict[str, Any] | None
     goal_match = re.search(r"\*\*Goal\*\*:\s*(.+)", section)
     goal = goal_match.group(1).strip() if goal_match else ""
 
-    # Extract pre-work flags
+    # Extract pre-work flags with two-tier detection:
+    # 1. Keyword check: does **Flag** appear at all?
+    # 2. Full regex: does it match "Likely/Unlikely (reason)"?
     detail_keys = {"Discuss": "topics", "Design": "focus", "Research": "topics"}
     prework: dict[str, dict[str, str]] = {}
 
     for flag_type, detail_key in detail_keys.items():
-        flag_match = re.search(
-            rf"\*\*{flag_type}\*\*:\s*(Likely|Unlikely)(?:\s*\(([^)]*)\))?",
-            section,
+        # Tier 1: keyword presence check (case-insensitive)
+        keyword_present = bool(
+            re.search(rf"\*\*{flag_type}\*\*", section, re.IGNORECASE)
         )
+
+        # Tier 2: full regex match (case-insensitive, greedy reason capture)
+        flag_match = re.search(
+            rf"\*\*{flag_type}\*\*:\s*(Likely|Unlikely)(?:\s*\((.+)\))?",
+            section,
+            re.IGNORECASE,
+        )
+
         if flag_match:
-            recommended = flag_match.group(1)
+            recommended = flag_match.group(1).capitalize()
             reason = (flag_match.group(2) or "").strip()
-        else:
-            recommended = "Unlikely"
+            status = "ok"
+        elif keyword_present:
+            # Keyword found but format doesn't match — non-standard
+            recommended = ""
             reason = ""
+            status = "parse_error"
+        else:
+            # Keyword absent — older roadmap format
+            recommended = ""
+            reason = ""
+            status = "parse_error"
 
         # Extract detail line (topics/focus)
         detail = ""
         if recommended == "Likely":
             detail_match = re.search(
-                rf"\*\*{flag_type} {detail_key}\*\*:\s*(.+)", section
+                rf"\*\*{flag_type} {detail_key}\*\*:\s*(.+)", section, re.IGNORECASE
             )
             if detail_match:
                 detail = detail_match.group(1).strip()
@@ -2285,6 +2418,7 @@ def _parse_phase_section(roadmap_text: str, phase: str) -> dict[str, Any] | None
             "recommended": recommended,
             "reason": reason,
             "detail": detail,
+            "status": status,
         }
 
     return {"name": phase_name, "goal": goal, "prework": prework}
@@ -2298,14 +2432,25 @@ def _determine_prework_suggestion(
 ) -> tuple[str, str]:
     """Apply routing logic to determine next suggested command.
 
-    Returns (command_name, reason) tuple.
+    Returns (command_name, reason) tuple. Flags with parse errors are skipped
+    in the routing waterfall (never treated as Likely or Unlikely).
     """
-    if prework["discuss"]["recommended"] == "Likely" and not has_context:
-        return "discuss-phase", prework["discuss"]["reason"] or "clarify vision"
-    if prework["design"]["recommended"] == "Likely" and not has_design:
-        return "design-phase", prework["design"]["reason"] or "create UI/UX specs"
-    if prework["research"]["recommended"] == "Likely" and not has_research:
-        return "research-phase", prework["research"]["reason"] or "investigate approach"
+    if prework["discuss"].get("status") != "parse_error":
+        if prework["discuss"]["recommended"] == "Likely" and not has_context:
+            return "discuss-phase", prework["discuss"]["reason"] or "clarify vision"
+    if prework["design"].get("status") != "parse_error":
+        if prework["design"]["recommended"] == "Likely" and not has_design:
+            return "design-phase", prework["design"]["reason"] or "create UI/UX specs"
+    if prework["research"].get("status") != "parse_error":
+        if prework["research"]["recommended"] == "Likely" and not has_research:
+            return "research-phase", prework["research"]["reason"] or "investigate approach"
+
+    # Check if any flags had parse errors with no other Likely flag triggering
+    has_parse_error = any(
+        prework[f].get("status") == "parse_error" for f in ("discuss", "design", "research")
+    )
+    if has_parse_error:
+        return "plan-phase", "ready to plan (some flags unreadable — verify ROADMAP.md)"
     return "plan-phase", "ready to plan"
 
 
@@ -2361,9 +2506,13 @@ def cmd_prework_status(args: argparse.Namespace) -> None:
     }
     detail_labels = {"discuss": "Topics", "design": "Focus", "research": "Topics"}
 
+    has_any_parse_error = False
     for flag in ("discuss", "design", "research"):
         pw = phase_info["prework"][flag]
-        if pw["recommended"] == "Likely":
+        if pw.get("status") == "parse_error":
+            has_any_parse_error = True
+            print(f"  {flag.capitalize()}: [parse error] — read ROADMAP.md phase section for this flag")
+        elif pw["recommended"] == "Likely":
             done = artifact_done[flag]
             status = "done" if done else "not started"
             line = f"  {flag.capitalize()}: Likely ({status})"
@@ -2391,6 +2540,9 @@ def cmd_prework_status(args: argparse.Namespace) -> None:
         print("Existing: (none)")
 
     print(f"Suggested: /ms:{suggested_cmd} {phase} — {reason}")
+
+    if has_any_parse_error:
+        print(f"\nNote: Some pre-work flags could not be parsed. Read ROADMAP.md phase section for Phase {phase} to determine accurate routing.")
 
 
 # ===================================================================

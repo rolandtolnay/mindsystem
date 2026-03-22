@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Run health checks on project configuration. Detect and fix structural drift across 12 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers and environment diagnostics, research API keys, phase directory naming, browser verification prerequisites, and Mindsystem version.
+Run health checks on project configuration. Detect and fix structural drift across 14 categories: subsystem vocabulary, milestone directory structure, milestone naming convention, phase archival, knowledge files, phase summaries, PLAN cleanup, CLI wrappers and environment diagnostics, research API keys, phase directory naming, browser verification prerequisites, roadmap format, phase skills, and Mindsystem version.
 
 Idempotent.
 </objective>
@@ -121,6 +121,8 @@ Display results as a markdown table:
 | Research API Keys        | WARN   | PERPLEXITY_API_KEY not set        |
 | Phase directory naming   | FAIL   | 1 non-canonical directory         |
 | Browser Verification     | WARN   | Web project, missing agent-browser CLI |
+| Roadmap Format           | FAIL   | 4 pre-work flag issues               |
+| Phase Skills             | WARN   | skills.plan, skills.design not configured |
 | Mindsystem version       | WARN   | v3.21.0 → v3.22.1 available       |
 ```
 
@@ -143,7 +145,7 @@ If "Skip" → go to `report`.
 
 If "Review each" → use AskUserQuestion for each failed check with its details and options: "Fix" / "Skip". Only run fixes for accepted checks.
 
-Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_milestone_naming → fix_phase_archival → fix_plan_cleanup → fix_phase_dirs → fix_knowledge. Skip any fix whose check passed or was skipped by user.
+Apply fixes in dependency order: fix_subsystems → fix_milestone_dirs → fix_milestone_naming → fix_phase_archival → fix_plan_cleanup → fix_phase_dirs → fix_knowledge → fix_roadmap_format. Skip any fix whose check passed or was skipped by user.
 
 Phase summaries are resolved by fix_phase_archival. CLI wrapper failures have specific fixes: bin dir not in PATH → restart Claude Code session; missing wrappers or bin dir → re-run `npx mindsystem-cc`; uv not found → `curl -LsSf https://astral.sh/uv/install.sh | sh`. WARN checks (Research API Keys, missing uv) are informational — no automated fix, only displayed in the report. Research API Keys check provides platform-aware setup guidance (shell export on macOS/Linux, settings.json on Windows) and checks both environment variables and `~/.claude/settings.json` env section as fallback.
 </step>
@@ -183,6 +185,8 @@ Final summary table:
 | Research API Keys        | PASS   | ...                              |
 | Phase directory naming   | PASS   | ...                              |
 | Browser Verification     | PASS   | ...                              |
+| Roadmap Format           | PASS   | ...                              |
+| Phase Skills             | PASS   | ...                              |
 | Mindsystem version       | PASS   | ...                              |
 
 All checks passed.
@@ -199,6 +203,6 @@ Include counts: checks total, passed, warned, fixed during this run.
 - [ ] Re-scan verifies all checks pass after fixes
 - [ ] Each fix group committed atomically
 - [ ] Fixes applied in dependency order: subsystems → dirs → milestone naming → archival → cleanup → knowledge
-- [ ] All 12 categories reported with PASS/FAIL/WARN/SKIP
+- [ ] All 14 categories reported with PASS/FAIL/WARN/SKIP
 - [ ] Clean project reports all PASS with no fix prompts
 </success_criteria>

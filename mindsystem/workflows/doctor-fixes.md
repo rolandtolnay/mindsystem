@@ -350,4 +350,75 @@ EOF
 Replace `{phase summaries|source code analysis}` with the appropriate phrase based on detected mode.
 </step>
 
+<step name="fix_roadmap_format">
+**Only if Roadmap Format failed.**
+
+Fix missing or malformed pre-work flags (Discuss/Design/Research) in incomplete phases.
+
+1. Read `.planning/ROADMAP.md` and `.planning/PROJECT.md`.
+
+2. For each incomplete phase with flag issues (from doctor-scan output), determine the correct pre-work flags by applying roadmapper principles:
+
+   **Discussion** — Default Likely. Unlikely only when ALL of: fully mechanical (zero design decisions), zero ambiguity in scope or approach (version bump, rename-only refactor, config-only change, pure deletion/cleanup). When Likely, enumerate 2-4 phase-specific assumptions or open questions in the parenthetical reason.
+
+   **Design** — Likely when ANY of: significant new UI work, novel interactions, visual success criteria, cross-platform UI. Unlikely when ALL of: no UI work, backend/API only, infrastructure/testing/deployment, exclusively established UI patterns.
+
+   **Research** — Likely when ANY of: external APIs/services, new libraries/frameworks, unresolved architectural decisions, unclear technical approach. Unlikely when ALL of: established internal patterns, CRUD with known stack, well-documented conventions.
+
+   Use the phase's Goal, Success Criteria, Requirements, and project context from PROJECT.md to make these assessments.
+
+3. Present proposed flags per phase:
+
+   ```
+   ## Roadmap Format Fixes
+
+   ### Phase 8: Week Navigation
+   Current: Only **Research** flag present
+   Proposed:
+     **Discuss**: Likely (assumes carryover model unclear, week boundary behavior unspecified)
+     **Discuss topics**: carryover rules, week start day preference
+     **Design**: Likely (new navigation UI, week transition flow)
+     **Design focus**: week picker, carryover modal
+     **Research**: Likely (carryover) ← already present, keeping as-is
+
+   ### Phase 9: Visual Polish
+   Current: Only **Research** flag present
+   Proposed:
+     **Discuss**: Likely (JARVIS aesthetic interpretation ambiguous, typography priorities unclear)
+     **Discuss topics**: aesthetic reference points, typography hierarchy
+     **Design**: Likely (significant visual redesign)
+     **Design focus**: color palette, component styling, typography system
+     **Research**: Unlikely (established patterns) ← updating from current
+   ```
+
+4. Use AskUserQuestion:
+   - header: "Roadmap format fixes"
+   - question: "These pre-work flags were derived from phase goals and project context. Apply?"
+   - options:
+     - "Apply all" — update ROADMAP.md with all proposed flags
+     - "Review each" — iterate per phase
+     - "Skip" — leave as-is
+
+5. Apply accepted changes using Edit tool. Insert flags in the standard order within each phase section:
+   - After `**Success Criteria**` block (and any existing plan lines)
+   - Before `Plans:` or next phase header
+   - Standard format: `**Flag**: Likely/Unlikely (reason)` with detail lines for Likely flags
+   - Preserve any existing valid flags — only add missing or fix malformed ones
+
+6. Commit:
+
+```bash
+git add .planning/ROADMAP.md
+```
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(doctor): fix roadmap pre-work flags
+
+Added missing Discuss/Design/Research flags to incomplete phases.
+EOF
+)"
+```
+</step>
+
 </process>

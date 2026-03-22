@@ -558,11 +558,7 @@ All {Y} plans finished. Phase goal verified.
 
 **If more phases remain AND skip context applies:**
 
-Determine the next phase's primary suggestion inline — do NOT read next-phase-routing.md:
-- From ROADMAP.md (already in context), get Phase {Z+1} pre-work flags
-- Check via Glob (not bash) whether CONTEXT.md, DESIGN.md, RESEARCH.md exist in next phase dir
-- Priority: discuss (if Likely + no CONTEXT.md) > design (if Likely + no DESIGN.md) > research (if Likely + no RESEARCH.md) > plan-phase
-- Present ONE "Also available" entry:
+Run `ms-tools prework-status {Z+1}` and use the Suggested line for the "Also available" entry:
 
 ```markdown
 ---

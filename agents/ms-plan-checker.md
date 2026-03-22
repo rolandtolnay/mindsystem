@@ -185,6 +185,10 @@ issue:
 
 **Question:** Will plans complete within context budget?
 
+**Single-plan mode** (`MULTI_PLAN=false`): The orchestrator already determined all tasks fit in one plan. Do NOT suggest splitting into multiple plans — that contradicts the user's configuration. Assess budget for informational purposes only. Use severity "info" instead of "warning". Fix hints should suggest reordering complex work earlier (while attention is highest) or simplifying scope, never splitting.
+
+**Multi-plan mode** (`MULTI_PLAN=true`): Full scope assessment with split suggestions.
+
 **Process:**
 1. For each `### ` subsection (change), classify its weight:
    - **Light (5%):** Config changes, localization keys, renaming, simple field additions, pattern-copying with parameter substitution
@@ -193,21 +197,25 @@ issue:
 2. Sum estimated budget per plan (target: 25-45%)
 3. Check structural signals
 
-**Thresholds (warning-level only — scope never produces blockers):**
-| Metric | Target | Warning |
-|--------|--------|---------|
-| Estimated budget/plan | 25-45% | >50% |
-| Files per single change | 1-3 | 8+ |
+**Thresholds (multi-plan mode only — in single-plan mode, scope issues are informational):**
+| Metric | Target | Warning (multi-plan) | Info (single-plan) |
+|--------|--------|----------------------|---------------------|
+| Estimated budget/plan | 25-45% | >50% | >50% |
+| Files per single change | 1-3 | 8+ | 8+ |
 
 **Raw change count is NOT a threshold.** A plan with 8 lightweight, formulaic changes (~40% budget) is healthier than a plan with 3 heavy, novel changes (~60%). Assess complexity and budget, not count.
 
-**Red flags:**
+**Red flags (multi-plan mode):**
 - Estimated plan budget >50% (quality will degrade)
 - Single change with 10+ file modifications
 - Multiple unrelated subsystems crammed into one plan
 - Novel/complex work appearing late in a long change sequence (context fatigue risks lower attention)
 
-**Example issue:**
+**Observations (single-plan mode):**
+- Novel/complex work appearing late in the change sequence (suggest reordering earlier)
+- Single change with 10+ file modifications (suggest simplifying scope)
+
+**Example issue (multi-plan):**
 ```yaml
 issue:
   dimension: scope_sanity
@@ -218,6 +226,19 @@ issue:
     estimated_budget: "55%"
     heavy_changes: 3
   fix_hint: "Move change 3 (complex state machine) to a separate plan"
+```
+
+**Example issue (single-plan):**
+```yaml
+issue:
+  dimension: scope_sanity
+  severity: info
+  description: "Plan 01 estimated at ~55% budget - 3 heavy changes with novel state management"
+  plan: "01"
+  metrics:
+    estimated_budget: "55%"
+    heavy_changes: 3
+  fix_hint: "Consider moving complex changes earlier in the sequence for peak attention, or simplifying scope"
 ```
 
 ## Dimension 6: Verification Derivation
@@ -309,9 +330,12 @@ grep -A 10 "Phase ${PADDED_PHASE}" .planning/ROADMAP.md | head -15
 
 # Get phase brief if exists
 ls "$PHASE_DIR"/*-BRIEF.md 2>/dev/null
+
+# Check plan mode
+MULTI_PLAN=$(ms-tools config-get multi_plan --default "false")
 ```
 
-Extract phase goal, decompose into requirements, note phase context from BRIEF.md if present.
+Extract phase goal, decompose into requirements, note phase context from BRIEF.md if present. Note the `MULTI_PLAN` value for Dimension 5 (Scope Sanity).
 
 ## Step 2: Load All Plans
 
@@ -348,7 +372,7 @@ Run Dimensions 1-7 from `<verification_dimensions>` against the loaded plans. Bu
 - Circular dependencies or file conflicts in same wave
 
 **warning** - Should fix, execution may work
-- Estimated plan budget >50%
+- Estimated plan budget >50% (multi-plan mode only)
 - Implementation-focused truths
 - Minor wiring missing
 - Novel/complex changes appearing late in change sequence

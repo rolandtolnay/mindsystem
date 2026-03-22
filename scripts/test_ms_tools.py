@@ -3223,6 +3223,140 @@ class TestDoctorScreenshotOptimization:
 
 
 # ---------------------------------------------------------------------------
+# Doctor: Roadmap Format (CHECK 13)
+# ---------------------------------------------------------------------------
+
+
+class TestDoctorRoadmapFormat:
+    """Doctor CHECK 13: Roadmap Format detects missing/malformed pre-work flags."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _setup_planning(self, tmp_path, roadmap_text=None, *, subsystems=None):
+        """Create minimal .planning/ with config.json and optional ROADMAP.md."""
+        planning = tmp_path / ".planning"
+        planning.mkdir()
+        config = {"subsystems": subsystems or ["app"]}
+        (planning / "config.json").write_text(json.dumps(config))
+        if roadmap_text:
+            (planning / "ROADMAP.md").write_text(roadmap_text)
+        return planning
+
+    def _extract_section(self, out, header):
+        start = out.index(header) + len(header)
+        try:
+            end = out.index("\n===", start)
+        except ValueError:
+            end = len(out)
+        return out[start:end]
+
+    def test_all_flags_valid_pass(self, tmp_path, capsys):
+        """All incomplete phases have valid flags → PASS."""
+        roadmap = (
+            "- [ ] **Phase 1: Setup** - Init\n\n"
+            "## Phase Details\n\n"
+            "### Phase 1: Setup\n"
+            "**Goal**: Init\n"
+            "**Discuss**: Unlikely (mechanical)\n"
+            "**Design**: Unlikely (backend)\n"
+            "**Research**: Unlikely (known)\n"
+        )
+        self._setup_planning(tmp_path, roadmap)
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Roadmap Format ===")
+        assert "PASS" in section
+
+    def test_missing_flags_fail(self, tmp_path, capsys):
+        """Older roadmap with only Research → FAIL for missing Discuss/Design."""
+        roadmap = (
+            "- [ ] **Phase 8: Week Nav** - Navigate\n\n"
+            "## Phase Details\n\n"
+            "### Phase 8: Week Nav\n"
+            "**Goal**: Navigate weeks\n"
+            "**Research**: Likely (carryover)\n"
+        )
+        self._setup_planning(tmp_path, roadmap)
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Roadmap Format ===")
+        assert "FAIL" in section
+        assert "Discuss flag missing" in section
+        assert "Design flag missing" in section
+
+    def test_completed_phases_skipped(self, tmp_path, capsys):
+        """Completed phases (checked off) are not validated."""
+        roadmap = (
+            "- [x] **Phase 1: Setup** - Init\n"
+            "- [ ] **Phase 2: Auth** - Auth\n\n"
+            "## Phase Details\n\n"
+            "### Phase 1: Setup\n"
+            "**Goal**: Init\n"
+            "**Research**: Unlikely\n\n"
+            "### Phase 2: Auth\n"
+            "**Goal**: Auth\n"
+            "**Discuss**: Likely (scope unclear)\n"
+            "**Design**: Likely (new UI)\n"
+            "**Research**: Unlikely (known)\n"
+        )
+        self._setup_planning(tmp_path, roadmap)
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Roadmap Format ===")
+        # Phase 1 is completed so its missing flags don't matter
+        assert "PASS" in section
+
+    def test_malformed_flag_fail(self, tmp_path, capsys):
+        """Flag keyword present but non-standard value → FAIL."""
+        roadmap = (
+            "- [ ] **Phase 1: Setup** - Init\n\n"
+            "## Phase Details\n\n"
+            "### Phase 1: Setup\n"
+            "**Goal**: Init\n"
+            "**Discuss**: Yes please\n"
+            "**Design**: Unlikely\n"
+            "**Research**: Unlikely\n"
+        )
+        self._setup_planning(tmp_path, roadmap)
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Roadmap Format ===")
+        assert "FAIL" in section
+        assert "Discuss flag missing or malformed" in section
+
+    def test_no_roadmap_skip(self, tmp_path, capsys):
+        """No ROADMAP.md → SKIP."""
+        self._setup_planning(tmp_path)
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Roadmap Format ===")
+        assert "SKIP" in section
+
+    def test_all_completed_pass(self, tmp_path, capsys):
+        """All phases completed → PASS with appropriate message."""
+        roadmap = (
+            "- [x] **Phase 1: Setup** - Init\n\n"
+            "## Phase Details\n\n"
+            "### Phase 1: Setup\n"
+            "**Goal**: Init\n"
+            "**Research**: Unlikely\n"
+        )
+        self._setup_planning(tmp_path, roadmap)
+        with self._patch_git_root(tmp_path):
+            cmd_doctor_scan(argparse.Namespace())
+        out = capsys.readouterr().out
+        section = self._extract_section(out, "=== Roadmap Format ===")
+        assert "PASS" in section
+        assert "All phases completed" in section
+
+
+# ---------------------------------------------------------------------------
 # Doctor: Research API Keys (CHECK 9)
 # ---------------------------------------------------------------------------
 
@@ -3399,11 +3533,14 @@ class TestParsePhaseSection:
         assert result["name"] == "Authentication"
         assert result["goal"] == "Users can securely access accounts"
         assert result["prework"]["discuss"]["recommended"] == "Likely"
+        assert result["prework"]["discuss"]["status"] == "ok"
         assert "email/password" in result["prework"]["discuss"]["reason"]
         assert result["prework"]["discuss"]["detail"] == "authentication methods, session management"
         assert result["prework"]["design"]["recommended"] == "Likely"
+        assert result["prework"]["design"]["status"] == "ok"
         assert result["prework"]["design"]["detail"] == "login form, registration flow"
         assert result["prework"]["research"]["recommended"] == "Likely"
+        assert result["prework"]["research"]["status"] == "ok"
         assert result["prework"]["research"]["detail"] == "JWT patterns, OAuth providers"
 
     def test_parses_all_unlikely(self):
@@ -3411,16 +3548,22 @@ class TestParsePhaseSection:
         assert result is not None
         assert result["name"] == "Project Setup"
         assert result["prework"]["discuss"]["recommended"] == "Unlikely"
+        assert result["prework"]["discuss"]["status"] == "ok"
         assert result["prework"]["design"]["recommended"] == "Unlikely"
+        assert result["prework"]["design"]["status"] == "ok"
         assert result["prework"]["research"]["recommended"] == "Unlikely"
+        assert result["prework"]["research"]["status"] == "ok"
         # Unlikely flags have no detail
         assert result["prework"]["discuss"]["detail"] == ""
 
     def test_mixed_flags(self):
         result = _parse_phase_section(SAMPLE_ROADMAP, "03")
         assert result["prework"]["discuss"]["recommended"] == "Likely"
+        assert result["prework"]["discuss"]["status"] == "ok"
         assert result["prework"]["design"]["recommended"] == "Unlikely"
+        assert result["prework"]["design"]["status"] == "ok"
         assert result["prework"]["research"]["recommended"] == "Unlikely"
+        assert result["prework"]["research"]["status"] == "ok"
 
     def test_phase_not_found(self):
         result = _parse_phase_section(SAMPLE_ROADMAP, "99")
@@ -3433,16 +3576,20 @@ class TestParsePhaseSection:
         assert result is not None
         assert result["name"] == "Week Nav"
         assert result["prework"]["research"]["recommended"] == "Likely"
+        assert result["prework"]["research"]["status"] == "ok"
 
 
 class TestDeterminePreworkSuggestion:
     """Tests for _determine_prework_suggestion routing logic."""
 
     def _likely(self, reason="some reason"):
-        return {"recommended": "Likely", "reason": reason, "detail": ""}
+        return {"recommended": "Likely", "reason": reason, "detail": "", "status": "ok"}
 
     def _unlikely(self):
-        return {"recommended": "Unlikely", "reason": "", "detail": ""}
+        return {"recommended": "Unlikely", "reason": "", "detail": "", "status": "ok"}
+
+    def _parse_error(self):
+        return {"recommended": "", "reason": "", "detail": "", "status": "parse_error"}
 
     def test_discuss_first_when_no_context(self):
         prework = {"discuss": self._likely("unclear scope"), "design": self._likely(), "research": self._likely()}
@@ -3474,7 +3621,7 @@ class TestDeterminePreworkSuggestion:
         assert cmd == "plan-phase"
 
     def test_fallback_reason_when_empty(self):
-        prework = {"discuss": {"recommended": "Likely", "reason": "", "detail": ""}, "design": self._unlikely(), "research": self._unlikely()}
+        prework = {"discuss": {"recommended": "Likely", "reason": "", "detail": "", "status": "ok"}, "design": self._unlikely(), "research": self._unlikely()}
         cmd, reason = _determine_prework_suggestion(prework, False, False, False)
         assert cmd == "discuss-phase"
         assert reason == "clarify vision"
@@ -3548,6 +3695,124 @@ class TestCmdPreworkStatus:
         assert "Topics: authentication methods, session management" in out
         assert "Focus: login form, registration flow" in out
         assert "Topics: JWT patterns, OAuth providers" in out
+
+    def test_parse_error_output(self, tmp_path, capsys, monkeypatch):
+        """Older roadmap with only Research flag shows parse errors for discuss/design."""
+        roadmap = "### Phase 8: Week Nav\n**Goal**: Navigate weeks\n**Research**: Likely (carryover)\n**Research topics**: week transition\n"
+        self._setup_project(tmp_path, roadmap, 8)
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="8")
+        cmd_prework_status(args)
+        out = capsys.readouterr().out
+        assert "Discuss: [parse error]" in out
+        assert "Design: [parse error]" in out
+        assert "Research: Likely" in out
+        assert "Note: Some pre-work flags could not be parsed" in out
+
+    def test_malformed_flag_parse_error(self, tmp_path, capsys, monkeypatch):
+        """Flag keyword present but non-standard format shows parse error."""
+        roadmap = "### Phase 1: Setup\n**Goal**: Init\n**Discuss**: Yes please\n**Design**: Unlikely\n**Research**: Unlikely\n"
+        self._setup_project(tmp_path, roadmap, 1)
+        monkeypatch.setattr(_mod, "find_git_root", lambda: tmp_path)
+        args = argparse.Namespace(phase="1")
+        cmd_prework_status(args)
+        out = capsys.readouterr().out
+        assert "Discuss: [parse error]" in out
+        assert "Design: Unlikely" in out
+        assert "Note: Some pre-work flags could not be parsed" in out
+
+
+class TestParsePhaseDefensive:
+    """Defensive parsing: nested parens, case-insensitive, parse errors."""
+
+    def test_nested_parens_full_capture(self):
+        """Nested parens like (assumes X (mobile vs web), unclear if Y) capture full reason."""
+        roadmap = "### Phase 1: Setup\n**Goal**: Init\n**Discuss**: Likely (assumes X (mobile vs web), unclear if Y)\n**Design**: Unlikely\n**Research**: Unlikely\n"
+        result = _parse_phase_section(roadmap, "01")
+        assert result["prework"]["discuss"]["recommended"] == "Likely"
+        assert result["prework"]["discuss"]["status"] == "ok"
+        assert "mobile vs web" in result["prework"]["discuss"]["reason"]
+        assert "unclear if Y" in result["prework"]["discuss"]["reason"]
+
+    def test_parse_error_keyword_present_malformed(self):
+        """Keyword **Discuss** present but value is non-standard → parse_error."""
+        roadmap = "### Phase 1: Setup\n**Goal**: Init\n**Discuss**: Yes please\n**Design**: Unlikely\n**Research**: Unlikely\n"
+        result = _parse_phase_section(roadmap, "01")
+        assert result["prework"]["discuss"]["status"] == "parse_error"
+        assert result["prework"]["discuss"]["recommended"] == ""
+        assert result["prework"]["design"]["status"] == "ok"
+        assert result["prework"]["research"]["status"] == "ok"
+
+    def test_parse_error_keyword_absent(self):
+        """Only **Research** present → discuss and design get parse_error."""
+        roadmap = "### Phase 1: Setup\n**Goal**: Init\n**Research**: Likely (carryover)\n"
+        result = _parse_phase_section(roadmap, "01")
+        assert result["prework"]["discuss"]["status"] == "parse_error"
+        assert result["prework"]["design"]["status"] == "parse_error"
+        assert result["prework"]["research"]["status"] == "ok"
+        assert result["prework"]["research"]["recommended"] == "Likely"
+
+    def test_case_insensitive_parsing(self):
+        """Lowercase **discuss**: likely (reason) parses correctly."""
+        roadmap = "### Phase 1: Setup\n**Goal**: Init\n**discuss**: likely (some reason)\n**design**: unlikely\n**research**: unlikely\n"
+        result = _parse_phase_section(roadmap, "01")
+        assert result["prework"]["discuss"]["recommended"] == "Likely"
+        assert result["prework"]["discuss"]["status"] == "ok"
+        assert result["prework"]["discuss"]["reason"] == "some reason"
+        assert result["prework"]["design"]["recommended"] == "Unlikely"
+        assert result["prework"]["design"]["status"] == "ok"
+
+    def test_older_roadmap_ftf_style(self):
+        """FTF-style roadmap: only Research flag, no Discuss/Design."""
+        roadmap = "### Phase 8: Week Navigation\n**Goal**: Navigate between weeks\n**Research**: Likely (week data model)\n**Research topics**: week transitions, date handling\n"
+        result = _parse_phase_section(roadmap, "08")
+        assert result["prework"]["research"]["recommended"] == "Likely"
+        assert result["prework"]["research"]["status"] == "ok"
+        assert result["prework"]["research"]["detail"] == "week transitions, date handling"
+        assert result["prework"]["discuss"]["status"] == "parse_error"
+        assert result["prework"]["design"]["status"] == "parse_error"
+
+
+class TestPreworkSuggestionWithParseErrors:
+    """Routing logic with parse-error flags."""
+
+    def _likely(self, reason="some reason"):
+        return {"recommended": "Likely", "reason": reason, "detail": "", "status": "ok"}
+
+    def _unlikely(self):
+        return {"recommended": "Unlikely", "reason": "", "detail": "", "status": "ok"}
+
+    def _parse_error(self):
+        return {"recommended": "", "reason": "", "detail": "", "status": "parse_error"}
+
+    def test_routing_skips_parse_error_flags(self):
+        """Parse-error flags are skipped, falling through to next valid flag."""
+        prework = {"discuss": self._parse_error(), "design": self._likely("new UI"), "research": self._unlikely()}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "design-phase"
+        assert reason == "new UI"
+
+    def test_all_parse_errors_plan_with_caveat(self):
+        """All flags parse-error → plan-phase with caveat."""
+        prework = {"discuss": self._parse_error(), "design": self._parse_error(), "research": self._parse_error()}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "plan-phase"
+        assert "unreadable" in reason
+        assert "ROADMAP.md" in reason
+
+    def test_some_parse_errors_no_likely_plan_with_caveat(self):
+        """Mix of parse-error and Unlikely → plan-phase with caveat."""
+        prework = {"discuss": self._parse_error(), "design": self._unlikely(), "research": self._parse_error()}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "plan-phase"
+        assert "unreadable" in reason
+
+    def test_parse_error_with_valid_likely_routes_normally(self):
+        """One parse-error + one valid Likely → routes to the Likely flag."""
+        prework = {"discuss": self._parse_error(), "design": self._parse_error(), "research": self._likely("external API")}
+        cmd, reason = _determine_prework_suggestion(prework, False, False, False)
+        assert cmd == "research-phase"
+        assert reason == "external API"
 
 
 # ---------------------------------------------------------------------------
