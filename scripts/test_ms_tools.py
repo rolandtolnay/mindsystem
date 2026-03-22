@@ -64,6 +64,7 @@ cmd_detect_web = _mod.cmd_detect_web
 _parse_phase_section = _mod._parse_phase_section
 _determine_prework_suggestion = _mod._determine_prework_suggestion
 cmd_prework_status = _mod.cmd_prework_status
+cmd_phase_renumber = _mod.cmd_phase_renumber
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -3849,3 +3850,149 @@ class TestCommitPatternLint:
             f"Files with set-last-command + git commit but missing STATE.md staging: "
             f"{', '.join(failures)}"
         )
+
+
+class TestCmdPhaseRenumber:
+    """Tests for phase-renumber command."""
+
+    def _patch_git_root(self, tmp_path):
+        return mock.patch.object(_mod, "find_git_root", return_value=tmp_path)
+
+    def _make_args(self, phase, dry_run=False):
+        return argparse.Namespace(phase=phase, dry_run=dry_run)
+
+    def _setup_phases(self, tmp_path, dir_names, files=None):
+        """Create .planning/phases/ with given directory names and optional files."""
+        phases_dir = tmp_path / ".planning" / "phases"
+        phases_dir.mkdir(parents=True, exist_ok=True)
+        for d in dir_names:
+            (phases_dir / d).mkdir()
+        if files:
+            for dir_name, file_list in files.items():
+                for f in file_list:
+                    (phases_dir / dir_name / f).write_text("content")
+        return phases_dir
+
+    def test_integer_removal_basic(self, tmp_path, capsys):
+        """Remove 17, dirs 18-dashboard, 19-api, 20-final → 17, 18, 19."""
+        self._setup_phases(tmp_path, ["18-dashboard", "19-api", "20-final"])
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("17"))
+        report = json.loads(capsys.readouterr().out)
+        assert report["directory_renames"] == [
+            {"old": "18-dashboard", "new": "17-dashboard"},
+            {"old": "19-api", "new": "18-api"},
+            {"old": "20-final", "new": "19-final"},
+        ]
+        phases_dir = tmp_path / ".planning" / "phases"
+        assert (phases_dir / "17-dashboard").is_dir()
+        assert (phases_dir / "18-api").is_dir()
+        assert (phases_dir / "19-final").is_dir()
+        assert not (phases_dir / "20-final").exists()
+
+    def test_integer_removal_with_decimals(self, tmp_path, capsys):
+        """Remove 17, dirs 17.1-hotfix, 18-dashboard, 18.1-fix → decremented."""
+        self._setup_phases(tmp_path, ["17.1-hotfix", "18-dashboard", "18.1-fix"])
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("17"))
+        report = json.loads(capsys.readouterr().out)
+        renames = {r["old"]: r["new"] for r in report["directory_renames"]}
+        assert renames["17.1-hotfix"] == "16.1-hotfix"
+        assert renames["18-dashboard"] == "17-dashboard"
+        assert renames["18.1-fix"] == "17.1-fix"
+
+    def test_decimal_removal(self, tmp_path, capsys):
+        """Remove 17.1, dirs 17.2-hotfix, 17.3-patch, 18-dashboard → only decimals shift."""
+        self._setup_phases(tmp_path, ["17.2-hotfix", "17.3-patch", "18-dashboard"])
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("17.1"))
+        report = json.loads(capsys.readouterr().out)
+        renames = {r["old"]: r["new"] for r in report["directory_renames"]}
+        assert renames["17.2-hotfix"] == "17.1-hotfix"
+        assert renames["17.3-patch"] == "17.2-patch"
+        assert "18-dashboard" not in renames
+        # 18-dashboard untouched
+        assert (tmp_path / ".planning" / "phases" / "18-dashboard").is_dir()
+
+    def test_file_rename_pattern_based(self, tmp_path, capsys):
+        """Files matching {old_phase}-* are renamed; others untouched."""
+        self._setup_phases(
+            tmp_path,
+            ["18-dash"],
+            files={"18-dash": ["18-01-PLAN.md", "18-CONTEXT.md", "README.md"]},
+        )
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("17"))
+        report = json.loads(capsys.readouterr().out)
+        file_renames = {r["old"]: r["new"] for r in report["file_renames"]}
+        assert file_renames["18-01-PLAN.md"] == "17-01-PLAN.md"
+        assert file_renames["18-CONTEXT.md"] == "17-CONTEXT.md"
+        assert "README.md" not in file_renames
+        new_dir = tmp_path / ".planning" / "phases" / "17-dash"
+        assert (new_dir / "17-01-PLAN.md").is_file()
+        assert (new_dir / "17-CONTEXT.md").is_file()
+        assert (new_dir / "README.md").is_file()
+
+    def test_collision_detection(self, tmp_path, capsys):
+        """16.1-hotfix blocks 17.1-hotfix from renaming to 16.1-hotfix when removing 17."""
+        self._setup_phases(tmp_path, ["16.1-hotfix", "17.1-hotfix"])
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_phase_renumber(self._make_args("17"))
+        assert exc.value.code == 1
+        assert "Collision" in capsys.readouterr().err
+
+    def test_precondition_dir_exists(self, tmp_path, capsys):
+        """Error if removed phase directory still exists."""
+        self._setup_phases(tmp_path, ["17-auth", "18-dashboard"])
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_phase_renumber(self._make_args("17"))
+        assert exc.value.code == 1
+        assert "still exists" in capsys.readouterr().err
+
+    def test_dry_run(self, tmp_path, capsys):
+        """Dry run reports renames but filesystem unchanged."""
+        self._setup_phases(
+            tmp_path,
+            ["18-dashboard", "19-api"],
+            files={"18-dashboard": ["18-01-PLAN.md"]},
+        )
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("17", dry_run=True))
+        report = json.loads(capsys.readouterr().out)
+        assert report["dry_run"] is True
+        assert len(report["directory_renames"]) == 2
+        assert len(report["file_renames"]) == 1
+        # Filesystem unchanged
+        phases_dir = tmp_path / ".planning" / "phases"
+        assert (phases_dir / "18-dashboard").is_dir()
+        assert (phases_dir / "19-api").is_dir()
+        assert not (phases_dir / "17-dashboard").exists()
+
+    def test_empty_no_subsequent(self, tmp_path, capsys):
+        """Removing last phase with nothing after it → empty arrays, exit 0."""
+        self._setup_phases(tmp_path, ["15-core"])
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("20"))
+        report = json.loads(capsys.readouterr().out)
+        assert report["directory_renames"] == []
+        assert report["file_renames"] == []
+
+    def test_no_phases_dir(self, tmp_path, capsys):
+        """.planning/ exists but no phases/ → exit 1."""
+        (tmp_path / ".planning").mkdir()
+        with self._patch_git_root(tmp_path), pytest.raises(SystemExit) as exc:
+            cmd_phase_renumber(self._make_args("17"))
+        assert exc.value.code == 1
+        assert "not found" in capsys.readouterr().err
+
+    def test_unpadded_input(self, tmp_path, capsys):
+        """Pass '5', dir 06-something → renumbered to 05-something."""
+        self._setup_phases(tmp_path, ["06-something"])
+        with self._patch_git_root(tmp_path):
+            cmd_phase_renumber(self._make_args("5"))
+        report = json.loads(capsys.readouterr().out)
+        assert report["removed_phase"] == "05"
+        assert report["directory_renames"] == [
+            {"old": "06-something", "new": "05-something"}
+        ]
+        assert (tmp_path / ".planning" / "phases" / "05-something").is_dir()

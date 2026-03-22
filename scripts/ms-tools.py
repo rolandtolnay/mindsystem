@@ -168,6 +168,14 @@ def parse_roadmap_phases(roadmap_path: Path) -> list[tuple[str, str]]:
     return results
 
 
+def _phase_sort_key(phase_str: str) -> float:
+    """Convert phase string to sortable float: '17' -> 17.0, '17.1' -> 17.1."""
+    try:
+        return float(phase_str)
+    except ValueError:
+        return float("inf")
+
+
 def run_git(*args: str) -> str:
     """Run a git command and return stdout. Raise on failure."""
     result = subprocess.run(
@@ -1577,6 +1585,140 @@ def cmd_create_phase_dirs(args: argparse.Namespace) -> None:
         created += 1
 
     print(f"\n{created} created, {skipped} skipped (already exist)")
+
+
+# ===================================================================
+# Subcommand: phase-renumber
+# ===================================================================
+
+
+def cmd_phase_renumber(args: argparse.Namespace) -> None:
+    """Renumber phase directories and files after phase removal.
+
+    Contract:
+        Args: phase (str, the removed phase number), --dry-run (bool)
+        Output: JSON report of all renames
+        Exit codes: 0 = success, 1 = error
+        Side effects: renames directories and files (unless --dry-run)
+    """
+    removed = normalize_phase(args.phase)
+    is_decimal = "." in removed
+    dry_run = args.dry_run
+
+    git_root = find_git_root()
+    planning = git_root / ".planning"
+    phases_dir = planning / "phases"
+
+    if not phases_dir.is_dir():
+        print("Error: .planning/phases/ directory not found", file=sys.stderr)
+        sys.exit(1)
+
+    # Precondition: removed phase dir must not exist
+    if find_phase_dir(planning, removed) is not None:
+        print(
+            f"Error: Directory for phase {removed} still exists. "
+            "Delete it before renumbering.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Parse removed phase components
+    removed_float = _phase_sort_key(removed)
+    if is_decimal:
+        removed_parent = int(removed_float)  # e.g., 17.1 -> 17
+    else:
+        removed_int = int(removed_float)  # e.g., 17
+
+    # Scan all phase dirs and compute renames
+    renames: list[tuple[str, str, Path]] = []  # (old_phase, new_phase, dir_path)
+    for d in sorted(phases_dir.iterdir()):
+        if not d.is_dir():
+            continue
+        parts = d.name.split("-", 1)
+        phase_prefix = parts[0]
+        phase_float = _phase_sort_key(phase_prefix)
+        if phase_float == float("inf"):
+            continue  # not a phase dir
+
+        is_phase_decimal = "." in phase_prefix
+
+        if is_decimal:
+            # Decimal removal: only subsequent decimals in same series
+            if not is_phase_decimal:
+                continue
+            phase_parent = int(phase_float)
+            if phase_parent != removed_parent:
+                continue
+            if phase_float <= removed_float:
+                continue
+            # Decrement decimal: 17.2 -> 17.1, 17.3 -> 17.2
+            old_decimal = int(phase_prefix.split(".")[1])
+            new_decimal = old_decimal - 1
+            new_phase = normalize_phase(f"{phase_parent}.{new_decimal}")
+            renames.append((phase_prefix, new_phase, d))
+        else:
+            # Integer removal: all dirs with phase > removed decrement by 1
+            if phase_float <= removed_float:
+                continue
+            if is_phase_decimal:
+                # Decimal under higher integer: 18.1 -> 17.1
+                parent = int(phase_float)
+                dec = phase_prefix.split(".")[1]
+                new_parent = parent - 1
+                new_phase = normalize_phase(f"{new_parent}.{dec}")
+            else:
+                # Integer: 18 -> 17
+                new_phase = normalize_phase(str(int(phase_float) - 1))
+            renames.append((phase_prefix, new_phase, d))
+
+    # Sort ascending by phase key — ascending is correct because the removed
+    # phase slot is free, so each rename fills the slot vacated by the previous
+    renames.sort(key=lambda r: _phase_sort_key(r[0]))
+
+    # Collision detection: check every target path before renaming
+    source_paths = {r[2] for r in renames}
+    for old_phase, new_phase, dir_path in renames:
+        suffix = dir_path.name.split("-", 1)[1] if "-" in dir_path.name else ""
+        target_name = f"{new_phase}-{suffix}" if suffix else new_phase
+        target_path = phases_dir / target_name
+        if target_path.exists() and target_path not in source_paths:
+            print(
+                f"Error: Collision — renaming {dir_path.name} to {target_name} "
+                f"would overwrite existing directory",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    # Execute renames
+    dir_renames = []
+    file_renames = []
+
+    for old_phase, new_phase, dir_path in renames:
+        suffix = dir_path.name.split("-", 1)[1] if "-" in dir_path.name else ""
+        new_dir_name = f"{new_phase}-{suffix}" if suffix else new_phase
+        new_dir_path = phases_dir / new_dir_name
+
+        dir_renames.append({"old": dir_path.name, "new": new_dir_name})
+
+        if not dry_run:
+            dir_path.rename(new_dir_path)
+
+        # Rename files matching {old_phase}-* inside the directory
+        scan_dir = new_dir_path if not dry_run else dir_path
+        for f in sorted(scan_dir.iterdir()):
+            if f.is_file() and f.name.startswith(f"{old_phase}-"):
+                new_file_name = f"{new_phase}-{f.name[len(old_phase) + 1:]}"
+                file_renames.append({"directory": new_dir_name, "old": f.name, "new": new_file_name})
+                if not dry_run:
+                    f.rename(scan_dir / new_file_name)
+
+    report = {
+        "removed_phase": removed,
+        "dry_run": dry_run,
+        "directory_renames": dir_renames,
+        "file_renames": file_renames,
+    }
+    print(json.dumps(report, indent=2))
 
 
 # ===================================================================
@@ -4139,6 +4281,12 @@ def build_parser() -> argparse.ArgumentParser:
     # --- create-phase-dirs ---
     p = subparsers.add_parser("create-phase-dirs", help="Create phase directories from ROADMAP.md")
     p.set_defaults(func=cmd_create_phase_dirs)
+
+    # --- phase-renumber ---
+    p = subparsers.add_parser("phase-renumber", help="Renumber phase dirs and files after phase removal")
+    p.add_argument("phase", help="The removed phase number (e.g., 17 or 17.1)")
+    p.add_argument("--dry-run", action="store_true", help="Preview renames without executing")
+    p.set_defaults(func=cmd_phase_renumber)
 
     # --- gather-milestone-stats ---
     p = subparsers.add_parser("gather-milestone-stats", help="Gather milestone readiness and git statistics")

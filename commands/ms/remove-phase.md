@@ -168,37 +168,19 @@ fi
 If directory doesn't exist, note: "No directory to delete (phase not yet created)"
 </step>
 
-<step name="renumber_directories">
-Rename all subsequent phase directories:
-
-For each phase directory that needs renumbering (in reverse order to avoid conflicts):
+<step name="renumber_phases">
+Renumber all subsequent phase directories and their files:
 
 ```bash
-# Example: renaming 18-dashboard to 17-dashboard
-mv ".planning/phases/18-dashboard" ".planning/phases/17-dashboard"
+ms-tools phase-renumber "$PHASE"
 ```
 
-Process in descending order (20→19, then 19→18, then 18→17) to avoid overwriting.
+Renames all phase directories with numbers greater than the removed phase (decrementing by 1), and renames phase-prefixed files inside those directories.
 
-Also rename decimal phase directories:
-- `17.1-fix-bug` → `16.1-fix-bug` (if removing integer 17)
-- `17.2-hotfix` → `17.1-hotfix` (if removing decimal 17.1)
-</step>
+For integer removal: subsequent integers and their decimals are decremented. Decimals under the removed integer fold into the prior integer (17.1 → 16.1).
+For decimal removal: only subsequent decimals in the same series are decremented. Integer phases unchanged.
 
-<step name="rename_files_in_directories">
-Rename plan files inside renumbered directories:
-
-For each renumbered directory, rename files that contain the phase number:
-
-```bash
-# Inside 17-dashboard (was 18-dashboard):
-mv "18-01-PLAN.md" "17-01-PLAN.md"
-mv "18-02-PLAN.md" "17-02-PLAN.md"
-mv "18-01-SUMMARY.md" "17-01-SUMMARY.md"  # if exists
-# etc.
-```
-
-Also handle CONTEXT.md and DISCOVERY.md (these don't have phase prefixes, so no rename needed).
+Review the JSON output to confirm expected renames before proceeding.
 </step>
 
 <step name="update_roadmap">
