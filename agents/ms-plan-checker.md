@@ -80,16 +80,6 @@ Layer 1 catches plan-writer omissions. Layer 2 catches requirement-level gaps th
 - Requirement partially covered (login exists but logout doesn't)
 - Goal implies a capability that no documented requirement or plan change addresses (Layer 2 — warning)
 
-**Example issue:**
-```yaml
-issue:
-  dimension: requirement_coverage
-  severity: blocker
-  description: "AUTH-02 (logout) has no covering task"
-  plan: "16-01"
-  fix_hint: "Add task for logout endpoint in plan 01 or new plan"
-```
-
 ## Dimension 2: Change Completeness
 
 **Question:** Does every change subsection have Files + implementation details + corresponding verification and must-have entries?
@@ -113,17 +103,6 @@ issue:
 - No corresponding entry in `## Verification`
 - No corresponding entry in `## Must-Haves`
 
-**Example issue:**
-```yaml
-issue:
-  dimension: change_completeness
-  severity: blocker
-  description: "Change 2 has no corresponding verification entry"
-  plan: "16-01"
-  change: 2
-  fix_hint: "Add verification command for build output"
-```
-
 ## Dimension 3: Dependency Correctness
 
 **Question:** Are plan dependencies valid and acyclic?
@@ -144,16 +123,6 @@ issue:
 - Wave 1 plans have no dependencies (can run parallel)
 - Later wave plans depend on earlier waves completing
 - Plans in same wave must not modify the same files
-
-**Example issue:**
-```yaml
-issue:
-  dimension: dependency_correctness
-  severity: blocker
-  description: "Plans 02 and 03 in Wave 1 both modify src/lib/auth.ts"
-  plans: ["02", "03"]
-  fix_hint: "Move plan 03 to Wave 2 or split shared file into separate modules"
-```
 
 ## Dimension 4: Key Links Planned
 
@@ -176,17 +145,6 @@ Component -> API: Does action mention fetch/axios call?
 API -> Database: Does action mention Prisma/query?
 Form -> Handler: Does action mention onSubmit implementation?
 State -> Render: Does action mention displaying state?
-```
-
-**Example issue:**
-```yaml
-issue:
-  dimension: key_links_planned
-  severity: warning
-  description: "Chat.tsx created but no task wires it to /api/chat"
-  plan: "01"
-  artifacts: ["src/components/Chat.tsx", "src/app/api/chat/route.ts"]
-  fix_hint: "Add fetch call in Chat.tsx action or create wiring task"
 ```
 
 ## Dimension 5: Scope Sanity
@@ -258,19 +216,6 @@ issue:
 - Checklist items are implementation-focused ("bcrypt installed") not user-observable ("passwords are secure")
 - `## Changes` doesn't create artifacts needed for Must-Haves truths
 - No wiring described between artifacts that must work together
-
-**Example issue:**
-```yaml
-issue:
-  dimension: verification_derivation
-  severity: warning
-  description: "Plan 02 Must-Haves are implementation-focused"
-  plan: "02"
-  problematic_items:
-    - "JWT library installed"
-    - "Prisma schema updated"
-  fix_hint: "Reframe as user-observable: 'User can log in', 'Session persists'"
-```
 
 ## Dimension 7: Context Compliance (if CONTEXT.md exists)
 
@@ -393,15 +338,7 @@ grep -c "^### " "$PHASE_DIR"/*-PLAN.md
 grep "^\*\*Files:\*\*" "$PHASE_DIR"/*-PLAN.md
 ```
 
-## Step 3: Run All Dimension Checks
-
-Run Dimensions 1-8 from `<verification_dimensions>` against the loaded plans. Build a coverage matrix mapping requirements to changes. Read EXECUTION-ORDER.md and validate against plan files.
-
-## Step 4: Determine Overall Status
-
-**passed** — All dimensions clear. No blockers or warnings.
-
-**issues_found** — One or more blockers or warnings. Return structured issues to orchestrator.
+Build a coverage matrix mapping requirements to changes across all plans before running dimension checks.
 
 </verification_process>
 
@@ -427,7 +364,7 @@ Run Dimensions 1-8 from `<verification_dimensions>` against the loaded plans. Bu
 
 ## Aggregated Output
 
-Return issues as structured list:
+Return issues as structured list. Include dimension-specific fields where applicable: `change` (number), `plans` (list), `artifacts` (list), `problematic_items` (list), `task`, `decision`, `deferred_item`, `metrics` (object).
 
 ```yaml
 issues:
@@ -534,12 +471,12 @@ When issues need fixing:
 
 Plan verification complete when:
 
-- [ ] Context compliance checked (if CONTEXT.md: locked decisions implemented, deferred ideas excluded)
 - [ ] Must-Haves are user-observable truths, not implementation details
 - [ ] Key links checked (wiring planned between artifacts, not just creation)
+- [ ] Context compliance checked (if CONTEXT.md: locked decisions implemented, deferred ideas excluded)
+- [ ] Contract references checked (if CONTEXT.md has contract-based decisions: plan assumptions align)
 - [ ] EXECUTION-ORDER.md validated (no missing plans, no file conflicts in same wave)
 - [ ] Scope assessed per plan (estimated budget within thresholds)
-- [ ] Contract references checked (if CONTEXT.md has contract-based decisions: plan assumptions align)
 - [ ] Structured issues returned to orchestrator
 
 </success_criteria>
