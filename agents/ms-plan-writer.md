@@ -377,6 +377,14 @@ if context_md was provided:
   score += 10
   factors.append("CONTEXT.md with locked decisions")
 
+# API contract constraints in CONTEXT.md decisions
+if context_md was provided:
+  context_text = CONTEXT.md content (already loaded)
+  contract_indicators = [".proto:", "openapi", "swagger", "contract source", "api constraint"]
+  if any(indicator in context_text.lower() for indicator in contract_indicators):
+    score += 15
+    factors.append("API contract constraints in decisions")
+
 # Cross-cutting concerns (shared files)
 shared_files = files appearing in 2+ plans
 if shared_files:

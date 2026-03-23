@@ -523,7 +523,7 @@ Phase directory: ${PHASE_DIR}
 
 1. Read .planning/ROADMAP.md for phase goal
 2. Read all *-PLAN.md files in ${PHASE_DIR}
-3. Read ${PHASE}-CONTEXT.md if exists (for dimension 7)
+3. Read ${PHASE}-CONTEXT.md if exists (for dimensions 7 and 8)
 4. Run all verification dimensions
 5. Return PASSED or ISSUES FOUND
 """

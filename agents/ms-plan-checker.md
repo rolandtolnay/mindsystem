@@ -34,7 +34,7 @@ You are NOT the executor (implements code from plans) or the verifier (checks go
 | `### Claude's Discretion` | Freedom areas — planner can choose approach, don't flag. |
 | `## Deferred Ideas` | Out of scope — plans must NOT include these. Flag if present. |
 
-If CONTEXT.md exists, add verification dimension: **Context Compliance**
+If CONTEXT.md exists, add verification dimensions: **Context Compliance** and **Contract References** (if API constraint decisions present)
 </upstream_input>
 
 <core_principle>
@@ -303,6 +303,44 @@ issue:
   fix_hint: "Remove task 3 - PDF export is out of scope for this phase"
 ```
 
+## Dimension 8: Contract References (if CONTEXT.md has API constraint decisions)
+
+**Question:** Do plans that describe API integration honor documented contract constraints?
+
+**Only check this dimension if CONTEXT.md contains decisions grounded in API contract sources (identifiable by contract file references like proto:line or OpenAPI citations in decision reasoning).**
+
+**Process:**
+1. Parse CONTEXT.md decisions for contract-grounded entries (reasoning references proto files, OpenAPI specs, or API constraint findings)
+2. For each plan Change that describes API integration (endpoint calls, request/response handling, form submissions), check if it aligns with documented constraints
+3. Flag contradictions between plan assumptions and documented constraints
+
+**Red flags:**
+- Plan assumes a field is optional when a decision documents it as required
+- Plan omits a required field documented in contract-based decisions
+- Plan uses values not in the documented enum/allowed set
+
+**Example issues:**
+
+```yaml
+issue:
+  dimension: contract_references
+  severity: blocker
+  description: "Plan assumes payment_method is optional, but decision documents it as REQUIRED (payments.proto:42)"
+  plan: "01"
+  change: 3
+  fix_hint: "Add payment_method as required field in form; update UI to require selection before submit"
+```
+
+```yaml
+issue:
+  dimension: contract_references
+  severity: warning
+  description: "Change 2 calls POST /api/orders but no contract source is cited for request body shape"
+  plan: "01"
+  change: 2
+  fix_hint: "Reference the contract source that defines the order creation request shape"
+```
+
 </verification_dimensions>
 
 <verification_process>
@@ -344,7 +382,7 @@ grep "^\*\*Files:\*\*" "$PHASE_DIR"/*-PLAN.md
 
 ## Step 3: Run All Dimension Checks
 
-Run Dimensions 1-7 from `<verification_dimensions>` against the loaded plans. Build a coverage matrix mapping requirements to changes. Read EXECUTION-ORDER.md and validate against plan files.
+Run Dimensions 1-8 from `<verification_dimensions>` against the loaded plans. Build a coverage matrix mapping requirements to changes. Read EXECUTION-ORDER.md and validate against plan files.
 
 ## Step 4: Determine Overall Status
 
@@ -488,6 +526,7 @@ Plan verification complete when:
 - [ ] Key links checked (wiring planned between artifacts, not just creation)
 - [ ] EXECUTION-ORDER.md validated (no missing plans, no file conflicts in same wave)
 - [ ] Scope assessed per plan (estimated budget within thresholds)
+- [ ] Contract references checked (if CONTEXT.md has contract-based decisions: plan assumptions align)
 - [ ] Structured issues returned to orchestrator
 
 </success_criteria>

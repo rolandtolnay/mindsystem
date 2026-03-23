@@ -125,11 +125,34 @@ Parse the requirements mapped to this phase from REQUIREMENTS.md and the phase d
 
 **Assess whether product research would add value:**
 
-Research is valuable when the phase involves user-facing product decisions where competitor context, UX patterns, or audience expectations would inform better choices. Examples: UI layouts, user flows, feature scope, interaction patterns.
+Product research is valuable when the phase involves user-facing product decisions where competitor context, UX patterns, or audience expectations would inform better choices. Examples: UI layouts, user flows, feature scope, interaction patterns.
 
-Research is NOT valuable for: backend infrastructure, data migrations, build tooling, refactoring, developer-facing work with no UX decisions.
+Product research is NOT valuable for: backend infrastructure, data migrations, build tooling, refactoring, developer-facing work with no UX decisions.
 
-**If research would add value:**
+**Assess whether constraint research would add value:**
+
+Constraint research is valuable when the phase integrates with an API the project doesn't fully control. Indicators (check PROJECT.md tech stack, ROADMAP.md phase description, REQUIREMENTS.md):
+- Tech stack includes proto/gRPC stubs, REST API client, third-party SDKs
+- Phase description mentions integration, API calls, backend sync, endpoints, webhooks
+- Requirements reference specific endpoints, data shapes, or backend operations
+- Project is frontend/client consuming a separate backend
+
+Constraint research is NOT valuable for: greenfield full-stack projects where you own the API, pure refactoring, internal tooling, backend-only work with no external API consumption.
+
+**Route based on assessment:**
+
+**Both product + constraint research valuable:**
+
+Use AskUserQuestion:
+- header: "Pre-discussion Research"
+- question: "This phase involves product decisions and API integration. Which research would help before we discuss?"
+- options:
+  - "Research both" — Investigate competitors/UX and API constraints (~45s)
+  - "Product research only" — Competitor and UX patterns (~30s)
+  - "Constraint research only" — API contract constraints (~20s)
+  - "Skip research" — Discuss based on what we know
+
+**Only product research valuable:**
 
 Use AskUserQuestion:
 - header: "Research"
@@ -138,9 +161,20 @@ Use AskUserQuestion:
   - "Research first" — Investigate competitors and UX patterns (~30s)
   - "Skip research" — Discuss based on what we know
 
-**If user selects "Research first":**
+**Only constraint research valuable:**
 
-Spawn ms-product-researcher subagent via Task tool:
+Use AskUserQuestion:
+- header: "Research"
+- question: "This phase integrates with an external API. Want me to research the contract constraints before we discuss?"
+- options:
+  - "Research contracts" — Investigate API constraints (~20s)
+  - "Skip research" — Discuss based on what we know
+
+**Neither valuable:** Continue silently.
+
+**Spawn research agents based on selection:**
+
+When product research selected, spawn ms-product-researcher via Task tool:
 
 ```
 <current_date>
@@ -160,9 +194,31 @@ Spawn ms-product-researcher subagent via Task tool:
 </research_focus>
 ```
 
+When constraint research selected, spawn ms-contract-researcher via Task tool:
+
+```
+<current_date>
+[Output of: date +%Y-%m]
+</current_date>
+
+<project_tech_stack>
+[Language, frameworks, API communication from PROJECT.md]
+</project_tech_stack>
+
+<phase_requirements>
+[Phase goal, description, mapped requirements from ROADMAP.md/REQUIREMENTS.md]
+</phase_requirements>
+
+<research_focus>
+[Specific integration questions for this phase — which endpoints, data shapes, operations?]
+</research_focus>
+```
+
+When both selected, spawn both agents via two Task calls in a single message (parallel).
+
 Store research findings for use in present_briefing and questioning steps.
 
-**If user selects "Skip research" or research not valuable:**
+**If user selects "Skip research" or neither research valuable:**
 Continue without research findings.
 </step>
 
@@ -183,6 +239,10 @@ Present a consolidated briefing that weaves together all loaded context.
 [If research findings available:]
 ### Industry Context
 [Key findings from product research — competitor patterns, UX conventions, audience expectations. Dense, prescriptive summary.]
+
+[If contract research findings available:]
+### API Constraints
+[Required fields, supported operations, value restrictions from contract research. Assumptions that could NOT be verified locally flagged for discussion.]
 ```
 
 Then use AskUserQuestion:
@@ -271,7 +331,7 @@ Populate template sections:
 - `<notes>`: Any other context gathered
 
 **Decision context (for downstream agents):**
-- `<decisions>`: Concrete choices made during discussion (locked). Include inline reasoning grounded in vision, audience, competitor patterns, or tradeoff analysis: `- [Decision] — [Why: reasoning]`
+- `<decisions>`: Concrete choices made during discussion (locked). Include inline reasoning grounded in vision, audience, competitor patterns, or tradeoff analysis: `- [Decision] — [Why: reasoning]`. When contract research produced findings, incorporate verified constraints as locked decisions with contract-based reasoning: `- [Decision] — Why: [contract source] marks [field] as REQUIRED at [file:line]`. Items from "Assumptions to Verify" go into `<notes>` as flagged open questions, not locked decisions.
 - `### Claude's Discretion`: Areas where user said "you decide" or didn't express preference
 - `<deferred>`: Ideas mentioned but explicitly out of scope
 

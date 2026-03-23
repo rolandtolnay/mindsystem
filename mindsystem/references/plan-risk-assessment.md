@@ -22,11 +22,12 @@ Skip risk assessment entirely when:
 | Total plan count (5+) | 15 | Plans just created |
 | External services | 20 | user_setup in frontmatter |
 | CONTEXT.md exists | 10 | gather_phase_context step |
+| API contract constraints | 15 | CONTEXT.md decision reasoning |
 | Cross-cutting concerns | 15 | Dependency graph analysis |
 | New dependencies | 15 | Task actions |
 | Complex domain keywords | 10 | Phase name/description |
 
-**Maximum score:** 100 points
+**Maximum score:** 100 points (capped — theoretical max 115)
 
 ## Detection Logic
 
@@ -60,6 +61,17 @@ if services:
 if CONTEXT.md was loaded in gather_phase_context:
   score += 10
   factors.append("CONTEXT.md with locked decisions")
+```
+
+**API contract constraints:**
+```
+# Detects contract-grounded decisions in CONTEXT.md (triggers Dimension 8 in plan-checker)
+if CONTEXT.md was loaded:
+  context_text = CONTEXT.md content (already loaded)
+  contract_indicators = [".proto:", "openapi", "swagger", "contract source", "api constraint"]
+  if any(indicator in context_text.lower() for indicator in contract_indicators):
+    score += 15
+    factors.append("API contract constraints in decisions")
 ```
 
 **Cross-cutting concerns:**
@@ -184,7 +196,7 @@ Phase directory: {PHASE_DIR}
 
 1. Read .planning/ROADMAP.md for phase goal
 2. Read all *-PLAN.md files in {PHASE_DIR}
-3. Read {PHASE}-CONTEXT.md if exists (for dimension 7)
+3. Read {PHASE}-CONTEXT.md if exists (for dimensions 7 and 8)
 4. Run all verification dimensions
 5. Return PASSED or ISSUES FOUND
 """
