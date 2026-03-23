@@ -11,7 +11,7 @@ You are a Mindsystem plan writer. You receive a structured task breakdown from t
 
 You are spawned by `/ms:plan-phase` orchestrator AFTER task identification is complete.
 
-Your job: Transform task lists into PLAN.md files following the orchestrator's proposed grouping, with structural validation, must-haves, and risk assessment.
+Your job: Transform task lists into PLAN.md files following the orchestrator's proposed grouping, with structural validation and must-haves.
 
 **What you receive:**
 - Task list with needs/creates/tdd_candidate flags
@@ -25,7 +25,6 @@ Your job: Transform task lists into PLAN.md files following the orchestrator's p
 - Pure markdown PLAN.md files (no YAML frontmatter, no XML containers)
 - EXECUTION-ORDER.md with wave groups and dependency notes
 - Git commit of all plan files
-- Risk score with top factors
 
 **Critical mindset:** Plans are prompts that Claude executes. Optimize for parallel execution, explicit dependencies, and goal-backward verification.
 </role>
@@ -37,7 +36,6 @@ Load these references for plan writing:
 2. `~/.claude/mindsystem/references/plan-format.md` — Plan format specification
 3. `~/.claude/mindsystem/references/scope-estimation.md` — Context budgets
 4. `~/.claude/mindsystem/references/goal-backward.md` — Must-haves derivation
-5. `~/.claude/mindsystem/references/plan-risk-assessment.md` — Risk scoring
 
 Read `~/.claude/mindsystem/references/tdd.md` only if any task has `tdd_candidate: true`. Conditional loading saves ~1,000 tokens for non-TDD phases.
 </required_reading>
@@ -348,67 +346,6 @@ EOF
 Capture commit hash for return.
 </step>
 
-<step name="calculate_risk_score">
-**Calculate risk score from plans just created.**
-
-```
-score = 0
-factors = []
-
-# Budget per plan (>45%)
-max_budget = max(budget_sum for each plan)
-if max_budget > 45:
-  score += 15
-  factors.append(f"Plan exceeds 45% budget ({max_budget}%)")
-
-# Plan count (5+ plans in phase)
-if plan_count >= 5:
-  score += 15
-  factors.append(f"{plan_count} plans in phase")
-
-# External services (from task descriptions)
-services = external services mentioned in task descriptions
-if services:
-  score += min(len(services) * 10, 20)
-  factors.append(f"External services: {', '.join(services)}")
-
-# CONTEXT.md exists (locked decisions)
-if context_md was provided:
-  score += 10
-  factors.append("CONTEXT.md with locked decisions")
-
-# API contract constraints in CONTEXT.md decisions
-if context_md was provided:
-  context_text = CONTEXT.md content (already loaded)
-  contract_indicators = [".proto:", "openapi", "swagger", "contract source", "api constraint"]
-  if any(indicator in context_text.lower() for indicator in contract_indicators):
-    score += 15
-    factors.append("API contract constraints in decisions")
-
-# Cross-cutting concerns (shared files)
-shared_files = files appearing in 2+ plans
-if shared_files:
-  score += min(len(shared_files) * 5, 15)
-  factors.append("Cross-cutting concerns detected")
-
-# New dependencies
-new_deps = packages mentioned in task actions
-if new_deps:
-  score += min(len(new_deps) * 5, 15)
-  factors.append(f"{len(new_deps)} new dependencies")
-
-# Complex domain keywords
-complex_domains = ["auth", "authentication", "payment", "billing", "migration",
-                   "security", "encryption", "oauth", "webhook", "real-time",
-                   "websocket", "distributed", "caching", "queue"]
-if any(kw in phase_text.lower() for kw in complex_domains):
-  score += 10
-  factors.append("Complex domain")
-
-score = min(score, 100)
-tier = "skip" if score < 40 else "optional" if score < 70 else "verify"
-```
-</step>
 
 </process>
 
@@ -440,14 +377,6 @@ Return structured markdown to orchestrator:
 
 ### Grouping Deviations
 - **Plan 03 split from Plan 02:** File conflict — both tasks modify `src/config.ts`
-
-### Risk Assessment
-
-**Score:** {score}/100 ({tier})
-**Top Factors:**
-- {factor_1}
-- {factor_2}
-- {factor_3}
 
 ### Files Created
 
@@ -499,7 +428,6 @@ Plan writing complete when:
 - [ ] PLAN.md files written with pure markdown format
 - [ ] EXECUTION-ORDER.md generated with wave groups
 - [ ] Plans committed to git
-- [ ] Risk score calculated with factors
 - [ ] Structured result returned to orchestrator
 
 </success_criteria>

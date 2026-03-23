@@ -93,12 +93,7 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 
 6. **Update last command:** `ms-tools set-last-command "ms:plan-phase $ARGUMENTS"`
 
-7. **Risk assessment**
-   - Calculate risk score from context already loaded (task count, external services, CONTEXT.md, cross-cutting concerns, new deps, complex domains)
-   - Present score + top factors via AskUserQuestion
-   - Tier-based recommendation: Skip (0-39), Optional (40-69), Verify (70+)
-   - If user chooses verify: spawn ms-plan-checker, surface results
-   - If user chooses skip: proceed to next steps
+7. **Verify plans** — spawn ms-plan-checker to verify plans achieve phase goal. If issues found, present them and offer fix/execute-anyway/re-verify. Always runs — no skip option.
 </process>
 
 <success_criteria>
@@ -108,5 +103,6 @@ Check for `.planning/codebase/` and load relevant documents based on phase type.
 - Must-Haves derived as markdown checklist of user-observable truths
 - Changes are specific enough for Claude to execute
 - EXECUTION-ORDER.md created with wave groups and dependencies
+- Plans verified by plan-checker (issues surfaced if any)
 - User knows next steps (execute plan or review/adjust)
   </success_criteria>

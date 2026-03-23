@@ -59,16 +59,26 @@ Then verify each level against the actual plan files.
 
 **Question:** Does every phase requirement have task(s) addressing it?
 
-**Process:**
+**Two-layer check:**
+
+**Layer 1 — Documented requirements (precise):**
+1. Read REQUIREMENTS.md, find requirements explicitly mapped to this phase (match phase number against requirement tags/mapping)
+2. For each documented requirement, find covering change(s) in the plans
+3. Flag documented requirements with no coverage — these are blockers
+
+**Layer 2 — Goal-backward derivation (generative):**
 1. Extract phase goal from ROADMAP.md
-2. Decompose goal into requirements (what must be true)
-3. For each requirement, find covering task(s)
-4. Flag requirements with no coverage
+2. Decompose goal into what must be TRUE for it to be achieved
+3. Check if the plans collectively achieve each derived truth
+4. Flag gaps — requirements that exist upstream of the plans (things nobody documented but the goal demands)
+
+Layer 1 catches plan-writer omissions. Layer 2 catches requirement-level gaps that survived the entire pipeline.
 
 **Red flags:**
-- Requirement has zero tasks addressing it
-- Multiple requirements share one vague task ("implement auth" for login, logout, session)
+- Documented requirement has zero changes addressing it (Layer 1 — blocker)
+- Multiple requirements share one vague change ("implement auth" for login, logout, session)
 - Requirement partially covered (login exists but logout doesn't)
+- Goal implies a capability that no documented requirement or plan change addresses (Layer 2 — warning)
 
 **Example issue:**
 ```yaml
@@ -358,6 +368,9 @@ ls "$PHASE_DIR"/*-PLAN.md 2>/dev/null
 # Get phase goal from ROADMAP
 grep -A 10 "Phase ${PADDED_PHASE}" .planning/ROADMAP.md | head -15
 
+# Get documented requirements for this phase
+cat .planning/REQUIREMENTS.md 2>/dev/null
+
 # Get phase brief if exists
 ls "$PHASE_DIR"/*-BRIEF.md 2>/dev/null
 
@@ -365,7 +378,7 @@ ls "$PHASE_DIR"/*-BRIEF.md 2>/dev/null
 MULTI_PLAN=$(ms-tools config-get multi_plan --default "false")
 ```
 
-Extract phase goal, decompose into requirements, note phase context from BRIEF.md if present. Note the `MULTI_PLAN` value for Dimension 5 (Scope Sanity).
+Extract phase goal and documented requirements mapped to this phase from REQUIREMENTS.md (match phase number against requirement tags). Note phase context from BRIEF.md if present. Note the `MULTI_PLAN` value for Dimension 5 (Scope Sanity).
 
 ## Step 2: Load All Plans
 

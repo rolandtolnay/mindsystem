@@ -18,7 +18,7 @@ Decimal phases enable urgent work insertion without renumbering:
 1. .planning/ROADMAP.md
 2. .planning/PROJECT.md
 
-**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, goal-backward.md, plan-risk-assessment.md) are loaded by the ms-plan-writer subagent, not main context. Lighter references (tdd.md) are loaded on demand during task breakdown.
+**Note:** Heavy references (phase-prompt.md, plan-format.md, scope-estimation.md, goal-backward.md) are loaded by the ms-plan-writer subagent, not main context. Lighter references (tdd.md) are loaded on demand during task breakdown.
 </required_reading>
 
 <purpose>
@@ -445,7 +445,6 @@ The subagent handles:
 - Estimating scope (informational, for grouping rationale)
 - Writing PLAN.md files + EXECUTION-ORDER.md
 - Git commit
-- Calculating risk score
 </step>
 
 <step name="receive_results">
@@ -466,12 +465,6 @@ The ms-plan-writer returns structured markdown:
 | 1 | 01, 02 | None (parallel) |
 | 2 | 03 | Waits for 01, 02 |
 
-### Risk Assessment
-**Score:** 45/100 (optional)
-**Top Factors:**
-- CONTEXT.md with locked decisions
-- Complex domain (auth)
-
 ### Files Created
 - `.planning/phases/03-authentication/03-01-PLAN.md`
 - `.planning/phases/03-authentication/03-02-PLAN.md`
@@ -483,35 +476,14 @@ Extract:
 - `wave_count`: Number of waves
 - `wave_structure`: Wave-to-plan mapping
 - `grouping_rationale`: Optional table showing task weights and consolidation notes
-- `risk_score`: 0-100
-- `risk_tier`: "skip" | "optional" | "verify"
-- `risk_factors`: Top contributing factors
 - `plan_paths`: List of created PLAN.md files
 - `commit_hash`: Git commit reference
 </step>
 
-<step name="risk_decision">
-**MANDATORY gate — present risk score via AskUserQuestion. Do not skip or inline with other output.**
+<step name="verify_plans">
+**Always verify plans before offering next steps.**
 
-After parsing the plan-writer results, present the risk assessment as a standalone AskUserQuestion before showing anything else. Do not combine this with the "Next Up" block or any other output.
-
-**Present via AskUserQuestion based on tier from subagent:**
-
-| Tier | Score | Default option | Message |
-|------|-------|----------------|---------|
-| Skip | 0-39 | "Skip verification" | "Low risk. Verification optional." |
-| Optional | 40-69 | "Verify plans" | "Moderate complexity. Verification recommended." |
-| Verify | 70-100 | "Verify plans (Recommended)" | "Higher complexity. Verification strongly recommended." |
-
-Include top risk factors for Optional/Verify tiers. Optional/Verify tiers also offer "Review plans manually".
-
-**Handle response:**
-
-**"Skip verification":**
-Continue to offer_next.
-
-**"Verify plans":**
-Spawn ms-plan-checker:
+Spawn ms-plan-checker immediately after receiving plan-writer results:
 
 ```
 Task(
@@ -522,26 +494,25 @@ Verify plans for phase ${PHASE}.
 Phase directory: ${PHASE_DIR}
 
 1. Read .planning/ROADMAP.md for phase goal
-2. Read all *-PLAN.md files in ${PHASE_DIR}
-3. Read ${PHASE}-CONTEXT.md if exists (for dimensions 7 and 8)
-4. Run all verification dimensions
-5. Return PASSED or ISSUES FOUND
+2. Read .planning/REQUIREMENTS.md for documented requirements mapped to this phase
+3. Read all *-PLAN.md files in ${PHASE_DIR}
+4. Read ${PHASE}-CONTEXT.md if exists (for dimensions 7 and 8)
+5. Run all verification dimensions
+6. Return PASSED or ISSUES FOUND
 """
 )
 ```
 
-If **PASSED:** Continue to offer_next with "Plans verified ✓"
+**If PASSED:** Continue to offer_next with "Plans verified" inline.
 
-If **ISSUES FOUND:** Present issues, then AskUserQuestion:
+**If ISSUES FOUND:** Present issues, then AskUserQuestion:
 - "Fix issues — I'll edit the plans"
 - "Execute anyway — proceed despite issues"
 - "Re-verify — check again after fixes"
 
-**"Review plans manually":**
-Show plan paths, wait for user response:
-- "looks good" / "proceed" → continue to offer_next
-- "run verification" → spawn ms-plan-checker
-- Describes changes → help edit plans
+**"Fix issues":** Help user edit plans, then re-spawn checker when user indicates fixes are complete.
+**"Execute anyway":** Continue to offer_next with warning note.
+**"Re-verify":** Re-spawn ms-plan-checker.
 </step>
 
 <step name="offer_next">
@@ -622,6 +593,6 @@ Phase planning complete when:
 - [ ] Task list + proposed grouping + skill context handed off to ms-plan-writer
 - [ ] PLAN files + EXECUTION-ORDER.md created (pure markdown, Must-Haves, follows proposed grouping)
 - [ ] Plans committed with maximized wave parallelism
-- [ ] Risk assessment presented and user decision captured (verify/skip)
+- [ ] Plans verified by plan-checker (issues surfaced if any)
 - [ ] User knows next steps and wave structure
 </success_criteria>
