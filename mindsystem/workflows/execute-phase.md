@@ -320,7 +320,7 @@ Ensure `$PHASE_DIR/*-SUMMARY.md` files are available (needed for journey derivat
 Read `~/.claude/mindsystem/references/browser-verification.md` and follow its sections in order:
 1. **Auth Flow** — establish browser authentication
 2. **Derive User Journeys** — transform SUMMARYs into user journeys
-3. **Spawn** — launch verifier with derived journeys
+3. **Spawn** — launch verifier with derived journeys, screenshots directory: `$PHASE_DIR/screenshots`
 4. **Post-Verifier Handling** — route by report status
 
 **If exit 1 (MISSING_DEPS):**

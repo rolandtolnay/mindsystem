@@ -102,16 +102,17 @@ Group journeys by starting area for efficient navigation. Format as a numbered l
 
 ## Spawn
 
-Spawn the browser verifier agent after auth is established and journeys are derived:
+Spawn the browser verifier agent after auth is established and journeys are derived.
+
+The orchestrator must pass `{screenshots_dir}` as a fully resolved path (e.g., `.planning/phases/04-comments/screenshots` or `.planning/adhoc/2026-03-24-fix-auth/screenshots`). The browser verifier does not resolve paths — it uses whatever directory is provided.
 
 ```
 Task(
-  prompt="Run browser verification for phase {phase_number}.
+  prompt="Run browser verification.
 
-Phase directory: {phase_dir}
 Dev URL: {dev_url}
 Auth state: .agent-browser-state.json
-Screenshots directory: {phase_dir}/screenshots
+Screenshots directory: {screenshots_dir}
 
 ## User Journeys
 
@@ -122,7 +123,7 @@ Screenshots directory: {phase_dir}/screenshots
 {summary of which journeys need real backend data — from mock_hints external_data entries.
 Journeys needing backend data may show empty states or errors — mark as ENVIRONMENT_BLOCKED, not ISSUE.}
 
-Complete each user journey end-to-end. Save all screenshots to {phase_dir}/screenshots/.
+Complete each user journey end-to-end. Save all screenshots to {screenshots_dir}/.
 Fix trivial issues inline. Return structured report.",
   subagent_type="ms-browser-verifier"
 )
@@ -143,7 +144,7 @@ Report: "Browser verification: {N} fixes applied, {M} issues found"
 Include the Fixes Applied section in the consolidator prompt (step `consolidate_knowledge`) so browser-discovered patterns are captured in knowledge files.
 
 **`has_issues`:**
-Report: "Browser verification: {N} issues found (see screenshots in {phase_dir}/screenshots/)"
+Report: "Browser verification: {N} issues found (see screenshots in {screenshots_dir}/)"
 Note issues for verify-work — these are candidates for manual UAT.
 
 **`all_passed`:**
