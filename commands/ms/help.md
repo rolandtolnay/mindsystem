@@ -369,7 +369,7 @@ Execute discovered work with knowledge-aware planning and execution.
 - Browser verification for web projects (same flow as execute-phase)
 - Accepts Linear ticket IDs when task tracker is configured via `/ms:config` — auto-fetches context, tags commits, and finalizes the ticket on completion
 - Spawns Explore agents for codebase understanding, ms-adhoc-planner for plan creation, ms-executor for execution
-- Creates per-execution artifacts in `.planning/adhoc/{timestamp}-{slug}/`
+- Creates per-execution artifacts in `.planning/adhoc/{slug}/`
 - Updates knowledge files via ms-consolidator after execution
 
 Usage: `/ms:adhoc Fix auth token not refreshing on 401`
@@ -440,9 +440,9 @@ Usage: `/ms:release-notes`
 │   ├── *.md              # Pending todos (flat files)
 │   └── done/             # Completed todos
 ├── adhoc/                # Work executed via /ms:adhoc
-│   └── {date}-{slug}/    # Per-execution subdirectory
-│       ├── adhoc-01-PLAN.md    # Execution plan (deleted after consolidation)
-│       └── adhoc-01-SUMMARY.md # Completion summary
+│   └── {slug}/           # Per-execution subdirectory
+│       ├── {slug}-PLAN.md      # Execution plan (deleted after consolidation)
+│       └── {slug}-SUMMARY.md   # Completion summary
 ├── debug/                # Active debug sessions
 │   └── resolved/         # Archived resolved issues
 ├── codebase/             # Codebase map (brownfield projects)

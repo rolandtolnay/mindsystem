@@ -104,7 +104,7 @@ Group journeys by starting area for efficient navigation. Format as a numbered l
 
 Spawn the browser verifier agent after auth is established and journeys are derived.
 
-The orchestrator must pass `{screenshots_dir}` as a fully resolved path (e.g., `.planning/phases/04-comments/screenshots` or `.planning/adhoc/2026-03-24-fix-auth/screenshots`). The browser verifier does not resolve paths — it uses whatever directory is provided.
+The orchestrator must pass `{screenshots_dir}` as a fully resolved path (e.g., `.planning/phases/04-comments/screenshots` or `.planning/adhoc/fix-auth/screenshots`). The browser verifier does not resolve paths — it uses whatever directory is provided.
 
 ```
 Task(

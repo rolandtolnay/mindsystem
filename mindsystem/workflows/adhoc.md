@@ -133,9 +133,13 @@ Present via AskUserQuestion with `multiSelect: true`:
 Create per-execution subdirectory:
 
 ```bash
-timestamp=$(date "+%Y-%m-%d")
 slug=$(echo "$description" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | cut -c1-50)
-exec_dir=".planning/adhoc/${timestamp}-${slug}"
+exec_dir=".planning/adhoc/${slug}"
+if [ -d "$exec_dir" ]; then
+  echo "COLLISION: $exec_dir already exists from a previous adhoc execution"
+  echo "Choose a more specific description or remove the existing directory"
+  exit 1
+fi
 mkdir -p "$exec_dir"
 ```
 
@@ -146,7 +150,7 @@ Assemble context payload for ms-adhoc-planner:
 - User decisions (from clarification step)
 - STATE.md context (current phase, accumulated decisions)
 - Subsystem list from config.json
-- Output path: `${exec_dir}/adhoc-01-PLAN.md`
+- Output path: `${exec_dir}/${slug}-PLAN.md`
 - Ticket context when detected (per loaded ticket reference)
 - Todo context when detected (per loaded todo reference)
 
@@ -154,7 +158,7 @@ Spawn ms-adhoc-planner via Task tool. Receive completion report with plan path.
 </step>
 
 <step name="review_plan">
-Read the generated plan at `${exec_dir}/adhoc-01-PLAN.md`.
+Read the generated plan at `${exec_dir}/${slug}-PLAN.md`.
 
 Present a summary to the user:
 - Number of Changes sections
@@ -170,12 +174,19 @@ If edits requested, apply them directly to the plan file, then re-present and as
 </step>
 
 <step name="spawn_executor">
+Record pre-execution HEAD for accurate diff scoping:
+
+```bash
+PRE_EXEC_HEAD=$(git rev-parse HEAD)
+```
+
 Spawn ms-executor via Task tool.
 
 Provide in the prompt:
-- Plan path: `${exec_dir}/adhoc-01-PLAN.md`
-- SUMMARY output path: `${exec_dir}/adhoc-01-SUMMARY.md`
+- Plan path: `${exec_dir}/${slug}-PLAN.md`
+- SUMMARY output path: `${exec_dir}/${slug}-SUMMARY.md`
 - Instruction to use phase-style SUMMARY format (with key-decisions, patterns-established, key-files, mock_hints frontmatter fields) for consolidator compatibility
+- Commit scope: `"Use (${slug}) as commit scope for all task commits: {type}(${slug}): description"`
 - Ticket commit instructions when detected (per loaded ticket reference)
 - Todo commit instructions when detected (per loaded todo reference)
 
@@ -191,11 +202,11 @@ ms-tools browser-check
 
 **If exit 0 (READY):**
 
-Ensure `${exec_dir}/adhoc-01-SUMMARY.md` is available (needed for journey derivation — may already be in context from executor report).
+Ensure `${exec_dir}/${slug}-SUMMARY.md` is available (needed for journey derivation — may already be in context from executor report).
 
 Read `~/.claude/mindsystem/references/browser-verification.md` and follow its sections in order:
 1. **Auth Flow** — establish browser authentication
-2. **Derive User Journeys** — transform SUMMARY into user journeys (single file: `${exec_dir}/adhoc-01-SUMMARY.md`)
+2. **Derive User Journeys** — transform SUMMARY into user journeys (single file: `${exec_dir}/${slug}-SUMMARY.md`)
 3. **Spawn** — launch ms-browser-verifier with derived journeys, screenshots directory: `${exec_dir}/screenshots`
 4. **Post-Verifier Handling** — route by report status
 
@@ -232,8 +243,7 @@ CODE_REVIEW=$(ms-tools config-get code_review.adhoc)
 
 1. Get modified files from executor's commits:
    ```bash
-   ADHOC_COMMITS=$(git log --oneline --grep="(adhoc-" --format="%H")
-   CHANGED_FILES=$(git diff --name-only $(echo "$ADHOC_COMMITS" | tail -1)^..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
+   CHANGED_FILES=$(git diff --name-only ${PRE_EXEC_HEAD}..HEAD | grep -E '\.(dart|ts|tsx|js|jsx|swift|kt|py|go|rs)$')
    ```
 
 2. Spawn code review agent with adhoc scope.
@@ -245,11 +255,13 @@ CODE_REVIEW=$(ms-tools config-get code_review.adhoc)
 Generate a patch file capturing all adhoc changes:
 
 ```bash
-ADHOC_COMMITS=$(git log --oneline --grep="(adhoc-" --format="%H")
-FIRST_COMMIT=$(echo "$ADHOC_COMMITS" | tail -1)
-LAST_COMMIT=$(echo "$ADHOC_COMMITS" | head -1)
-patch_file="${exec_dir}/adhoc-01-changes.patch"
-ms-tools generate-adhoc-patch "$FIRST_COMMIT" "$patch_file" --end "$LAST_COMMIT"
+ADHOC_COMMITS=$(git log --reverse --grep="(${slug})" --format="%H" ${PRE_EXEC_HEAD}..HEAD)
+FIRST_COMMIT=$(echo "$ADHOC_COMMITS" | head -1)
+LAST_COMMIT=$(echo "$ADHOC_COMMITS" | tail -1)
+patch_file="${exec_dir}/${slug}-changes.patch"
+if [ -n "$FIRST_COMMIT" ]; then
+  ms-tools generate-adhoc-patch "$FIRST_COMMIT" "$patch_file" --end "$LAST_COMMIT"
+fi
 ```
 
 If no adhoc commits found or patch generation reports no changes, skip silently.
@@ -262,7 +274,7 @@ Provide:
 - Phase directory: `${exec_dir}` (the per-execution subdirectory)
 - Phase identifier: "adhoc"
 
-The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions, patterns-established, key-files), updates `.planning/knowledge/*.md` files, and deletes `adhoc-01-PLAN.md`.
+The consolidator reads `${slug}-SUMMARY.md`, extracts knowledge (key-decisions, patterns-established, key-files), updates `.planning/knowledge/*.md` files, and deletes `${slug}-PLAN.md`.
 </step>
 
 <step name="cleanup_and_report">
@@ -272,15 +284,16 @@ The consolidator reads `adhoc-01-SUMMARY.md`, extracts knowledge (key-decisions,
 
 **Update STATE.md** "Recent Adhoc Work" section:
 - Find or create "### Recent Adhoc Work" under "## Accumulated Context"
-- Add entry at top: `- [YYYY-MM-DD]: [description] ({exec_dir}/adhoc-01-SUMMARY.md)`
+- Add entry at top: `- [YYYY-MM-DD]: [description] ({exec_dir}/${slug}-SUMMARY.md)`
 - Keep last 5 entries (remove older ones from list)
 
 **Update state and commit:**
 ```bash
+# Use the slug (sanitized directory name), not the raw description or ticket IDs
 ms-tools set-last-command "ms:adhoc ${slug}"
-git add .planning/knowledge/*.md "${exec_dir}/adhoc-01-SUMMARY.md" .planning/STATE.md
+git add .planning/knowledge/*.md "${exec_dir}/${slug}-SUMMARY.md" .planning/STATE.md
 # Only include patch if it was generated
-[ -f "${exec_dir}/adhoc-01-changes.patch" ] && git add "${exec_dir}/adhoc-01-changes.patch"
+[ -f "${exec_dir}/${slug}-changes.patch" ] && git add "${exec_dir}/${slug}-changes.patch"
 git commit -m "$(cat <<EOF
 docs(adhoc): consolidate knowledge from $description
 
@@ -298,8 +311,8 @@ Adhoc work complete: [description]
 **Knowledge updated:** [list of knowledge files]
 
 Artifacts:
-- Summary: {exec_dir}/adhoc-01-SUMMARY.md
-- Patch: {exec_dir}/adhoc-01-changes.patch
+- Summary: {exec_dir}/${slug}-SUMMARY.md
+- Patch: {exec_dir}/${slug}-changes.patch
 - Knowledge: .planning/knowledge/[subsystem].md
 ```
 

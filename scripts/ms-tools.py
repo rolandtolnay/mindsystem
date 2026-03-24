@@ -2199,7 +2199,7 @@ def _scan_artifact_subsystem_values(planning: Path) -> list[str]:
     values: list[str] = []
     scan_globs = [
         ("phases", "*/*-SUMMARY.md"),
-        ("adhoc", "*-SUMMARY.md"),
+        ("adhoc", "**/*-SUMMARY.md"),
         ("debug", "*.md"),
         ("debug/resolved", "*.md"),
         ("todos", "*.md"),
@@ -2321,7 +2321,7 @@ def cmd_scan_artifact_subsystems(args: argparse.Namespace) -> None:
 
     sections = [
         ("Phase SUMMARYs", "phases", "*/*-SUMMARY.md"),
-        ("Adhoc SUMMARYs", "adhoc", "*-SUMMARY.md"),
+        ("Adhoc SUMMARYs", "adhoc", "**/*-SUMMARY.md"),
         ("Debug docs", "debug", "*.md"),
         ("Debug resolved", "debug/resolved", "*.md"),
         ("Pending Todos", "todos", "*.md"),

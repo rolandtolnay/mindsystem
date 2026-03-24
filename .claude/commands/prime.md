@@ -1,8 +1,5 @@
 ---
-description: Load linear and ms-meta skills into context
-argument-hint: "[meta]"
+description: Load ms-meta skill into context
 ---
 
-Invoke these skills in parallel using the Skill tool:
-- `ms-meta`
-- `linear` — skip if `$ARGUMENTS` contains "meta"
+Invoke the `ms-meta` skill using the Skill tool.

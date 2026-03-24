@@ -420,9 +420,9 @@ Every artifact Mindsystem generates lives in `.planning/` — a markdown knowled
 │       └── 02-01-PLAN.md             #   planned, not yet executed
 │
 ├── adhoc/                            # /ms:adhoc → out-of-pipeline work
-│   └── 2026-01-15-fix-token/
-│       ├── adhoc-01-SUMMARY.md       # Execution results and learnings
-│       └── adhoc-01-changes.patch    # Code diff
+│   └── fix-token/
+│       ├── fix-token-SUMMARY.md      # Execution results and learnings
+│       └── fix-token-changes.patch   # Code diff
 │
 ├── debug/                            # /ms:debug → structured investigations
 │   ├── websocket-reconnect.md        # Active investigation — survives /clear

@@ -188,7 +188,7 @@
   ],
   "adhoc_learnings": [
     {
-      "path": "<FIXTURE>/.planning/adhoc/20260220-fix-token-SUMMARY.md",
+      "path": "<FIXTURE>/.planning/adhoc/fix-token/fix-token-SUMMARY.md",
       "subsystem": "auth",
       "learnings": [
         "Token expiry must account for clock skew",
@@ -201,7 +201,7 @@
       ]
     },
     {
-      "path": "<FIXTURE>/.planning/adhoc/20260225-refactor-api/adhoc-01-SUMMARY.md",
+      "path": "<FIXTURE>/.planning/adhoc/refactor-api/refactor-api-SUMMARY.md",
       "subsystem": "api",
       "learnings": [
         "Consolidated duplicate route handlers into shared utility",

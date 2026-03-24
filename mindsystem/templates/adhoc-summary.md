@@ -1,6 +1,6 @@
 # Adhoc Summary Template
 
-Template for `.planning/adhoc/{timestamp}-{slug}-SUMMARY.md` — documentation for work items executed via `/ms:adhoc`.
+Template for `.planning/adhoc/{slug}/{slug}-SUMMARY.md` — documentation for work items executed via `/ms:adhoc`.
 
 ---
 
@@ -111,7 +111,7 @@ files_modified:
   - src/lib/api-client.ts
   - src/hooks/useAuth.ts
 commit: abc123f
-patch_file: .planning/adhoc/2026-01-20-fix-auth-token-not-refreshing-on-401.patch
+patch_file: .planning/adhoc/fix-auth-token-not-refreshing-on-401/fix-auth-token-not-refreshing-on-401-changes.patch
 learnings:
   - "401 interceptors must queue concurrent requests during token refresh to avoid race conditions"
 ---
