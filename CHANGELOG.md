@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.6.0] - 2026-03-24
+
+### Added
+- **Contract research in discuss-phase** — discuss-phase can now discover API contract constraints (protobuf, OpenAPI, Swagger) relevant to a phase before planning begins. Findings flow into CONTEXT.md with source references, and plan-checker validates plans against discovered constraints. When both product and contract research are needed, they run in parallel.
+
+### Changed
+- **Plan verification is now mandatory** — plan-checker runs after every plan, removing the risk-scoring gate that previously allowed some plans to skip verification. Requirement coverage uses a two-layer check: documented requirements are validated first, then requirements are re-derived from the phase goal to catch upstream gaps.
+
 ## [4.5.1] - 2026-03-22
 
 ### Fixed
@@ -732,7 +740,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.1...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.6.0...HEAD
+[4.6.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.2...v4.5.0
 [4.4.2]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.1...v4.4.2

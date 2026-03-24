@@ -29,12 +29,12 @@ Then `/ms:new-project` to initialize. See the [full walkthrough](#end-to-end-wal
 
 ---
 
-## What's new in v4.5
+## What's new in v4.6
 
+- **Contract research in discuss-phase** — discover API contract constraints (protobuf, OpenAPI, Swagger) before planning, with findings flowing into CONTEXT.md and validated by plan-checker.
+- **Mandatory plan verification** — plan-checker runs after every plan with two-layer requirement coverage: documented requirements first, then re-derived from the phase goal to catch upstream gaps.
 - **Config-driven skill loading** — configure phase skills once via `/ms:config` instead of interactive prompts at every phase start. Loaded automatically across all workflows.
 - **Browser verification for adhoc work** — `/ms:adhoc` now includes automated browser verification, matching `/ms:execute-phase` visual QA.
-- **Design aesthetic exploration** — design-phase gathers actual design tokens from your codebase instead of shallow grep, producing richer context for mockups.
-- **Plan checker respects single-plan mode** — scope observations become informational, no more suggestions to split plans you intentionally kept together.
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 
