@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [4.6.1] - 2026-03-30
+
+### Changed
+- Adhoc execution now uses the task slug for directory and file naming instead of a static `adhoc-01` prefix, making patch generation and git history scoping more accurate when running multiple adhoc tasks.
+
+### Fixed
+- Browser verification screenshots now save to the correct directory during adhoc runs instead of landing at the project root.
+
 ## [4.6.0] - 2026-03-24
 
 ### Added
@@ -740,7 +748,8 @@ The detailed per-release entries have been collapsed here to keep this changelog
 - Added issue triage and TDD guidance, plus iterative workflow refinements
 - Expanded the agent library and tooling (e.g. researcher/debugger/codebase mapping, `/gsd:update`)
 
-[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.6.0...HEAD
+[Unreleased]: https://github.com/rolandtolnay/mindsystem/compare/v4.6.1...HEAD
+[4.6.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.6.0...v4.6.1
 [4.6.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/rolandtolnay/mindsystem/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/rolandtolnay/mindsystem/compare/v4.4.2...v4.5.0
